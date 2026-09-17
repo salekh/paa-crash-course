@@ -1,0 +1,729 @@
+[
+  {
+    "id": "d4-dep-001",
+    "domain": 4,
+    "topic": "Agent Runtime vs Cloud Run vs GKE Trade-offs",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A financial advisory firm has built a multi-agent portfolio analysis workflow in Python using the Google Agent Development Kit (ADK). The team consists entirely of ML engineers and data scientists who want a fully managed, zero-infrastructure serverless deployment target on Google Cloud that provides built-in session state persistence (`VertexAiSessionService`), automatic Python dependency packaging, native OpenTelemetry tracing integration, and IAM-secured query endpoints without writing Dockerfiles, managing Kubernetes manifests, or configuring load balancers. Which deployment target should you choose?",
+    "options": [
+      "Deploy the ADK agent directly to Vertex AI Agent Engine (`ReasoningEngine`) using `adk deploy agent_engine` or `reasoning_engines.ReasoningEngine.create()`.",
+      "Provision a self-managed 12-node Google Kubernetes Engine (GKE) Standard cluster with custom Calico network policies and manual Horizontal Pod Autoscalers.",
+      "Deploy bare-metal Compute Engine sole-tenant nodes and configure systemd unit files to restart Python scripts manually.",
+      "Export the Python code into a static HTML file hosted on Firebase Hosting."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Vertex AI Agent Engine (formerly Reasoning Engine) is Google Cloud's purpose-built, fully managed runtime for deploying ADK, LangChain, and custom Python agents. Using `adk deploy agent_engine` or `ReasoningEngine.create()`, developers pass their Python agent object, `requirements` list, and `extra_packages`; Vertex AI automatically builds the container, provisions managed compute, integrates `VertexAiSessionService` for durable state, and exposes an authenticated REST/gRPC API without requiring Kubernetes or Docker management.",
+    "whyWrong": {
+      "1": "GKE Standard requires significant DevOps and Kubernetes operational overhead (managing clusters, ingress, manifests) that conflicts with the team's zero-infrastructure requirement.",
+      "2": "Bare-metal Compute Engine sole-tenant nodes require manual OS patching, load balancing, and autoscaling configuration.",
+      "3": "Firebase Hosting serves static frontend assets (HTML/JS/CSS) and cannot execute stateful Python backend ADK agents."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/deploy/agent-engine/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d4-dep-002",
+    "domain": 4,
+    "topic": "Cloud Run CPU Allocation for Background Agent Tasks",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You deployed a containerized ADK research agent to Cloud Run using default CPU allocation settings (CPU allocated only during request processing). When a user submits a research request via Slack webhook, your FastAPI endpoint immediately returns an `HTTP 200 OK` acknowledgement within 2 seconds (to satisfy Slack's 3-second webhook timeout) and spawns an asynchronous Python background task (`asyncio.create_task`) to execute a 45-second multi-step agent workflow that posts the final answer back to Slack. In production, the background agent task freezes immediately after the `HTTP 200 OK` response is sent and never completes. What is the root cause and how should you fix it?",
+    "options": [
+      "Cloud Run automatically deletes all Python files inside the container whenever status code 200 is returned; return HTTP 500 instead.",
+      "With default request-based CPU allocation, Cloud Run throttles container CPU to nearly zero immediately after the HTTP response is returned; reconfigure the Cloud Run service to use 'CPU always allocated' (`--no-cpu-throttling`) or decouple background execution via Cloud Tasks / Cloud Pub/Sub.",
+      "Slack webhooks block outbound HTTPS traffic from Google Cloud; migrate the agent to an on-premises desktop computer.",
+      "The Python Global Interpreter Lock (GIL) prevents FastAPI from running on Linux kernels; rewrite the agent in Assembly."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "By default, Cloud Run uses request-based CPU allocation (`--cpu-throttling`), meaning CPU is strictly allocated only while an active HTTP request is open. Once your FastAPI handler returns `HTTP 200 OK` to Slack, Cloud Run throttles CPU to ~0%, freezing any `asyncio.create_task` or background thread. Setting `--no-cpu-throttling` (CPU always allocated) ensures background agent reasoning continues executing after the HTTP response returns (or alternatively, enqueuing the job via Cloud Tasks / Pub/Sub to a worker service keeps the request open during processing).",
+    "whyWrong": {
+      "0": "Cloud Run does not delete container files on HTTP 200, and returning HTTP 500 causes Slack to mark the webhook delivery as failed and retry repeatedly.",
+      "2": "Slack does not block Google Cloud egress traffic; the freeze is caused by local container CPU throttling.",
+      "3": "FastAPI and asyncio run natively on Linux containers; CPU throttling at the hypervisor level is the cause."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/configuring/cpu-allocation",
+      "https://google.github.io/adk-docs/deploy/cloud-run/"
+    ]
+  },
+  {
+    "id": "d4-dep-003",
+    "domain": 4,
+    "topic": "Session State Persistence in Horizontally Scaled Deployments",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A retail banking chatbot built with ADK is deployed as a containerized FastAPI application on Cloud Run configured to autoscale between 2 and 50 container instances behind a global external Application Load Balancer. During load testing, users report that on Turn 3 of a conversation, the agent abruptly forgets everything discussed in Turns 1 and 2 and asks the user to state their name again. Inspection of `agent.py` reveals the service is initialized with `InMemorySessionService()`. Why is this failing under load, and how should you architecturally resolve it?",
+    "options": [
+      "Cloud Run containers have zero bytes of RAM; upgrade the container CPU to 64 cores.",
+      "`InMemorySessionService` automatically encrypts RAM using a random key that expires every 10 seconds; disable TLS on the load balancer to fix it.",
+      "`InMemorySessionService` stores session state inside local container RAM, so when subsequent HTTP turns are routed by the load balancer to a different Cloud Run instance (or when instances scale down), state is lost; replace `InMemorySessionService` with a distributed persistent session store such as `VertexAiSessionService`, Cloud Firestore, or Cloud SQL.",
+      "The Gemini model weights are resetting after every API call; fine-tune the model weights on every user turn."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "ADK's `InMemorySessionService` stores conversation history and `session.state` inside the local Python process memory of a single container instance. In a horizontally scaled serverless environment (2–50 Cloud Run instances), stateless load balancing routes Turn 1 to Instance A and Turn 2 to Instance B, which has an empty in-memory dictionary for that `session_id`. Furthermore, container recycling erases RAM. Production multi-instance deployments require externalized, durable session storage (`VertexAiSessionService`, Firestore, Spanner, or Cloud SQL).",
+    "whyWrong": {
+      "0": "Adding more CPU cores or RAM to individual instances does not synchronize local process memory across 50 separate container instances.",
+      "1": "`InMemorySessionService` does not self-destruct keys every 10 seconds, and disabling TLS compromises security without fixing multi-instance state sharing.",
+      "3": "Foundation model API calls are stateless by design; conversational state must be passed via session history from a shared persistence layer."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/",
+      "https://google.github.io/adk-docs/deploy/cloud-run/"
+    ]
+  },
+  {
+    "id": "d4-dep-004",
+    "domain": 4,
+    "topic": "When to Choose GKE Over Cloud Run or Agent Engine",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A defense logistics contractor is deploying a multi-agent tactical planning system with strict regulatory and technical requirements: (1) The orchestrator agent must invoke a fine-tuned open-weight Gemma 3 27B model hosted locally within the same cluster using vLLM on NVIDIA L4 GPUs with sub-5ms inter-pod network latency; (2) User sessions maintain continuous stateful bi-directional gRPC/WebSocket streams that remain open continuously for 8 hours during shift operations; and (3) Custom Linux kernel eBPF security monitoring daemonsets must run on every compute node. Which Google Cloud compute platform should you select?",
+    "options": [
+      "Cloud Functions (1st Gen) with 540-second execution limits.",
+      "Vertex AI Agent Engine (`ReasoningEngine`) with default serverless settings.",
+      "Cloud Run fully managed serverless functions with default 60-minute request timeout ceilings.",
+      "Google Kubernetes Engine (GKE) with GPU node pools, stateful workload scheduling, no 60-minute request timeout limits, and support for privileged eBPF DaemonSets."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "While Vertex AI Agent Engine and Cloud Run are ideal for serverless stateless/short-lived HTTP agent workloads calling managed APIs, GKE is required when workloads demand: (1) Co-located self-hosted GPU inference (vLLM on L4/A100/H100 node pools) with ultra-low pod-to-pod latency, (2) Persistent connections exceeding Cloud Run's absolute 60-minute (3600s) request timeout (such as 8-hour WebSockets/gRPC streams), or (3) Node-level kernel customization and privileged DaemonSets (eBPF security agents).",
+    "whyWrong": {
+      "0": "Cloud Functions (1st Gen) has a 9-minute timeout and no GPU or DaemonSet support.",
+      "1": "Vertex AI Agent Engine is a fully managed sandboxed serverless runtime that does not support custom node-level eBPF DaemonSets, self-hosted vLLM GPU pods, or 8-hour open streaming sockets.",
+      "2": "Cloud Run enforces a hard maximum request timeout of 60 minutes (3,600 seconds) and does not allow privileged kernel DaemonSets."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/gpus",
+      "https://cloud.google.com/run/quotas"
+    ]
+  },
+  {
+    "id": "d4-dep-005",
+    "domain": 4,
+    "topic": "Eliminating Cold Starts for Interactive Voice Agents on Cloud Run",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare provider deployed a real-time patient appointment scheduling voice agent on Cloud Run. During off-peak overnight hours, traffic drops to zero for 20-minute intervals. When a patient calls at 3:15 AM, the first conversational turn takes 9.5 seconds to respond because Cloud Run must provision a new container instance, start the Python runtime, import `google-adk` and `vertexai` libraries, and initialize database connection pools. Subsequent turns take only 800 milliseconds. How should you eliminate this 9.5-second cold-start penalty while controlling infrastructure costs?",
+    "options": [
+      "Configure the Cloud Run service with minimum instances (`--min-instances=1` or `2`) and enable Startup CPU Boost (`--cpu-boost`) so that pre-warmed container instances with initialized Python imports are always ready to serve instant requests.",
+      "Migrate the voice agent to a batch BigQuery scheduled query that runs once every 24 hours.",
+      "Set `--max-instances=0` so that no containers ever start.",
+      "Add a `time.sleep(10)` call to the beginning of every turn so that all turns take 10.3 seconds consistently."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In serverless environments like Cloud Run, scaling to zero instances during idle periods causes cold starts when the next request arrives (container image pull + Python heavy library imports + connection pool initialization). Setting `--min-instances` (e.g., 1 or 2) keeps warm, fully initialized instances resident in memory 24/7, while Startup CPU Boost (`--cpu-boost`) temporarily provides extra CPU during instance scale-up events to accelerate initialization.",
+    "whyWrong": {
+      "1": "BigQuery scheduled queries are for offline batch analytics, not real-time interactive voice conversations.",
+      "2": "Setting `--max-instances=0` disables the service entirely.",
+      "3": "Artificially slowing down warm turns to match cold starts degrades user experience across 100% of calls."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/configuring/min-instances",
+      "https://cloud.google.com/run/docs/configuring/cpu-allocation#startup-boost"
+    ]
+  },
+  {
+    "id": "d4-dep-006",
+    "domain": 4,
+    "topic": "Packaging Custom Local Modules in Vertex AI Agent Engine",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are deploying an ADK supply chain agent to Vertex AI Agent Engine using `reasoning_engines.ReasoningEngine.create()`. Your agent script imports several custom helper modules located in a local directory `./common_utils/erp_connectors.py` as well as external PyPI packages (`pydantic>=2.0`, `httpx`). When you invoke `ReasoningEngine.create(agent_obj, requirements=['google-cloud-aiplatform', 'pydantic>=2.0', 'httpx'])`, the remote container build succeeds, but runtime invocation fails with `ModuleNotFoundError: No module named 'common_utils'`. How should you fix the deployment call?",
+    "options": [
+      "Publish your proprietary `erp_connectors.py` containing internal API endpoints to the public PyPI repository for anyone on the internet to download.",
+      "Pass `extra_packages=['./common_utils']` in the `ReasoningEngine.create()` call so that Vertex AI archives and uploads your local directory into the remote runtime's Python path.",
+      "Copy and paste all 15,000 lines of `common_utils` directly into the user's chat prompt on every turn.",
+      "Remove all import statements from your Python code so that `ModuleNotFoundError` is not raised."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "When deploying to Vertex AI Agent Engine (`ReasoningEngine.create()`), the `requirements` parameter installs public or Artifact Registry PyPI packages via `pip`, whereas local custom Python files and packages not published to a package index must be explicitly bundled using the `extra_packages=['./path/to/module']` parameter. Vertex AI packages these local directories into the deployment artifact and places them in the container working directory.",
+    "whyWrong": {
+      "0": "Publishing proprietary enterprise ERP connector code to public PyPI is a severe intellectual property and security breach.",
+      "2": "Passing Python source code in user chat prompts does not load modules into the Python runtime interpreter.",
+      "3": "Removing import statements causes `NameError` exceptions whenever the agent attempts to call functions defined in those modules."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy",
+      "https://google.github.io/adk-docs/deploy/agent-engine/"
+    ]
+  },
+  {
+    "id": "d4-dep-007",
+    "domain": 4,
+    "topic": "Cloud Run Concurrency Tuning for Async I/O Bound Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An ADK customer service agent deployed on Cloud Run uses asynchronous Python (`async def` tools with `httpx.AsyncClient` and ADK's `Runner.run_async`). For a typical 5-second agent turn, the container spends 4.8 seconds awaiting network I/O responses from Vertex AI Gemini endpoints and external REST APIs, and only 0.2 seconds performing local CPU JSON parsing. Currently, your Cloud Run service is configured with `--concurrency=1`, causing Cloud Run to spin up 200 separate container instances when 200 users chat simultaneously, leading to high memory billing. How should you optimize the deployment configuration?",
+    "options": [
+      "Rewrite all `async def` functions as blocking synchronous `time.sleep()` loops.",
+      "Keep `--concurrency=1` and upgrade each container instance to 32 vCPUs and 128 GB RAM.",
+      "Increase the Cloud Run instance concurrency setting (e.g., `--concurrency=20` to `80`) so a single async event loop instance can efficiently multiplex dozens of I/O-bound waiting agent sessions concurrently.",
+      "Limit the load balancer to accept only 1 user per hour."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "LLM agent workloads are overwhelmingly network I/O-bound (waiting on remote Gemini token generation and external API tool calls) rather than CPU-bound. When using an asynchronous Python server (FastAPI / Uvicorn + `async def` tools + `Runner.run_async`), a single Python event loop can effortlessly handle 20–80 concurrent in-flight requests while awaiting network I/O. Increasing `--concurrency` drastically reduces the number of active container instances required, lowering cost and cold-start frequency.",
+    "whyWrong": {
+      "0": "Blocking synchronous code prevents event-loop multiplexing and degrades throughput.",
+      "1": "With `--concurrency=1`, 31.9 of the 32 vCPUs sit completely idle during the 4.8-second network wait, wasting massive compute spend.",
+      "3": "Rate-limiting legitimate customers to 1 per hour destroys application availability."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/configuring/concurrency",
+      "https://google.github.io/adk-docs/deploy/cloud-run/"
+    ]
+  },
+  {
+    "id": "d4-dep-008",
+    "domain": 4,
+    "topic": "Deploying ADK Agents with System Binary Dependencies",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A media localization agent built with ADK accepts uploaded video files, uses a custom Python tool that invokes the Linux command-line binary `ffmpeg` via `subprocess.run()` to extract audio tracks, and then calls `libreoffice --headless` to convert subtitle documents into PDF format. You need to deploy this agent to Google Cloud with minimal operational overhead while ensuring `ffmpeg` and `libreoffice` system packages are installed in the execution environment. Which deployment architecture should you choose?",
+    "options": [
+      "Run `apt-get install` inside the user's web browser via JavaScript.",
+      "Use `ReasoningEngine.create()` with `requirements=['ffmpeg', 'libreoffice']` in `pip` without a custom container.",
+      "Deploy the Python script directly to Cloud Storage static website hosting.",
+      "Package the ADK agent into a custom Dockerfile that runs `apt-get update && apt-get install -y ffmpeg libreoffice`, push the image to Artifact Registry, and deploy it as a serverless Cloud Run service."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "OS-level system binaries (`ffmpeg`, `libreoffice`, `poppler-utils`, `tesseract-ocr`) are installed via OS package managers (`apt-get` / `apk`), not Python `pip`. Cloud Run allows deploying custom Docker containers built from any base image where you have full control over OS-level `apt-get install` layers, while still providing serverless autoscaling, HTTPS endpoints, and zero cluster management.",
+    "whyWrong": {
+      "0": "Web browsers cannot execute Linux `apt-get` system package installations.",
+      "1": "PyPI packages named `ffmpeg` or `libreoffice` are merely Python wrapper bindings that fail at runtime if the underlying native C/C++ OS binaries are not installed in `/usr/bin`.",
+      "2": "Cloud Storage static hosting cannot execute Python backend containers or Linux binaries."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/deploying",
+      "https://google.github.io/adk-docs/deploy/cloud-run/"
+    ]
+  },
+  {
+    "id": "d4-dep-009",
+    "domain": 4,
+    "topic": "VertexAiSessionService Architecture & State Durability",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When deploying an ADK agent to Vertex AI Agent Engine or Cloud Run, you configure the runner with `VertexAiSessionService(project='my-prod-project', location='us-central1')`. What architectural benefit does `VertexAiSessionService` provide compared to managing a custom Redis cluster on Compute Engine for session management?",
+    "options": [
+      "`VertexAiSessionService` provides a fully managed, serverless Google Cloud persistence layer specifically structured for ADK `Session` objects, multi-turn event histories, and `session.state` dictionaries with automatic IAM security, eliminating Redis cluster sizing, patching, and VPC peering management.",
+      "`VertexAiSessionService` stores all session data inside the end user's browser `localStorage` without encryption.",
+      "`VertexAiSessionService` reduces the parameter count of Gemini 2.5 Pro from billions to zero.",
+      "`VertexAiSessionService` automatically writes SQL queries against competitor cloud providers."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "`VertexAiSessionService` natively persists ADK `Session` objects, turn-by-turn `Event` logs (including tool calls, thoughts, and state deltas), and key-value `session.state` dictionaries directly within managed Vertex AI infrastructure. This eliminates the DevOps burden of provisioning, scaling, backing up, and securing self-managed Redis/database clusters while integrating seamlessly with Vertex AI Agent Engine and IAM.",
+    "whyWrong": {
+      "1": "`VertexAiSessionService` stores state server-side in Google Cloud under project IAM controls, not unencrypted in browser `localStorage`.",
+      "2": "Session storage services manage conversation state and do not alter foundation model neural network weights.",
+      "3": "`VertexAiSessionService` is a Google Cloud native service and does not query external cloud providers."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d4-dep-010",
+    "domain": 4,
+    "topic": "GKE Autopilot vs GKE Standard for Agent Workloads",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise platform team has decided to deploy a fleet of 15 microservices-based ADK subagents on Google Kubernetes Engine (GKE) to integrate with their existing Istio / Cloud Service Mesh architecture. However, the team wants Google Cloud to automatically manage node provisioning, node scaling, security hardening, and bin-packing so engineers only pay per pod resource request (`CPU`/`Memory`/`GPU`) without managing underlying Compute Engine VM node pools. Which GKE mode of operation should they select?",
+    "options": [
+      "GKE Standard mode with manual unmanaged instance groups.",
+      "GKE Autopilot mode.",
+      "Compute Engine unmanaged VMs running `docker run` via cron jobs.",
+      "Cloud Functions 1st Generation."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "GKE Autopilot is a fully managed Kubernetes mode where Google Cloud provisions, scales, patches, and hardens the underlying compute nodes automatically based on pod manifests, billing strictly per pod resource requests (`vCPU`, `GiB memory`, and `GPU`). It retains full Kubernetes API and Service Mesh compatibility while removing node-pool operational overhead.",
+    "whyWrong": {
+      "0": "GKE Standard with unmanaged instance groups requires manual node pool capacity planning, VM patching, and cluster autoscaler tuning.",
+      "2": "Unmanaged VMs with cron jobs lack Kubernetes orchestration, service discovery, and pod health checks.",
+      "3": "Cloud Functions 1st Gen does not run Kubernetes pods or integrate natively into Kubernetes Service Mesh topologies."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview",
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/gpus-autopilot"
+    ]
+  },
+  {
+    "id": "d4-dep-011",
+    "domain": 4,
+    "topic": "Deploying ADK Agents via CLI (`adk deploy cloud_run`)",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A developer has built and tested an ADK agent locally inside the directory `./customer_concierge` and wants to deploy it directly to Cloud Run with the built-in FastAPI web UI enabled for stakeholder testing in project `acme-genai-dev` and region `us-central1` using a single ADK CLI command. Which command accomplishes this?",
+    "options": [
+      "`adk eval --delete-all ./customer_concierge`",
+      "`gcloud sql instances delete customer_concierge`",
+      "`adk deploy cloud_run --project=acme-genai-dev --region=us-central1 --with_ui ./customer_concierge`",
+      "`kubectl delete namespace default`"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The ADK CLI includes native deployment subcommands (`adk deploy cloud_run` and `adk deploy agent_engine`). Passing `--project`, `--region`, `--with_ui` (to bundle the interactive ADK web interface alongside the API server), and the agent directory path automatically containerizes the agent via Cloud Build and deploys it to Cloud Run.",
+    "whyWrong": {
+      "0": "`adk eval` runs offline evaluations and does not deploy infrastructure to Cloud Run.",
+      "1": "`gcloud sql instances delete` deletes Cloud SQL databases.",
+      "3": "`kubectl delete namespace` destroys Kubernetes workloads."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/deploy/cloud-run/",
+      "https://google.github.io/adk-docs/get-started/quickstart/"
+    ]
+  },
+  {
+    "id": "d4-dep-012",
+    "domain": 4,
+    "topic": "Handling Long-Running Asynchronous Agent Workflows",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise patent prior-art discovery agent executes a deep research workflow that queries 12 international patent offices, downloads 300 PDF specifications, runs OCR, and synthesizes a 40-page legal brief. The end-to-end execution duration ranges from 75 minutes to 3 hours per request. A synchronous HTTP call from a web browser times out, and standard Cloud Run HTTP services have a maximum request timeout of 60 minutes. How should you architect the execution runtime for this long-running agent workflow?",
+    "options": [
+      "Truncate the agent's execution after 5 seconds so it only reads the title of 1 patent.",
+      "Keep the user's browser HTTP connection open synchronously for 3 hours and instruct users never to close their laptop lids.",
+      "Set the Cloud Run service HTTP timeout to 999,999 seconds using an undocumented flag.",
+      "Decouple request ingestion from execution: have the frontend submit the job to Cloud Pub/Sub or Cloud Tasks, immediately return a `job_id` to the client, and execute the 3-hour agent workflow inside a Cloud Run Job (which supports up to 24-hour execution) or a GKE worker pod that updates progress in Firestore/BigQuery."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Cloud Run *Services* (HTTP request-driven) enforce a hard maximum request timeout of 60 minutes (3,600 seconds), and keeping client HTTP connections open for hours is brittle. For batch or long-running asynchronous agent workflows lasting 1–24 hours, **Cloud Run Jobs** (which do not serve HTTP traffic and support task timeouts up to 24 hours) or **GKE worker pods** triggered asynchronously via Pub/Sub / Cloud Workflows provide reliable, non-HTTP-bound execution.",
+    "whyWrong": {
+      "0": "Truncating research after 5 seconds destroys the core business value of comprehensive prior-art discovery.",
+      "1": "Synchronous multi-hour browser HTTP connections inevitably fail due to proxy timeouts, Wi-Fi drops, or browser sleep timers.",
+      "2": "Cloud Run HTTP services strictly cap request timeouts at 3,600 seconds; values above 3,600 are rejected by the API."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/create-jobs",
+      "https://cloud.google.com/run/quotas"
+    ]
+  },
+  {
+    "id": "d4-dep-013",
+    "domain": 4,
+    "topic": "Session Affinity (Sticky Sessions) in Cloud Run Streaming",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You deployed a stateful real-time collaborative coding agent on Cloud Run that maintains an active in-memory Python AST syntax tree cache per active user session to accelerate incremental code edits across rapid back-and-forth turns. While final state is checkpointed to Cloud Firestore, routing consecutive turns from the same user to the same warm Cloud Run container instance reduces turn latency by 350 milliseconds by hitting the local AST cache. Which Cloud Run feature should you enable to maximize cache locality without sacrificing horizontal scalability?",
+    "options": [
+      "Enable Session Affinity (`--session-affinity`) on the Cloud Run service so that requests from the same client (via the `GAESA` cookie) are preferentially routed to the same container instance.",
+      "Hardcode `--max-instances=1` so that the entire global enterprise is served by a single container instance.",
+      "Disable load balancing and force users to type container internal IP addresses into their browsers.",
+      "Clear the AST cache after every character typed."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Cloud Run Session Affinity (`--session-affinity`) uses a load-balancer cookie (`GAESA`) to route subsequent requests from a given client to the same container instance on a best-effort basis (as long as the instance is healthy and has capacity). When paired with a durable backing store (Firestore/VertexAiSessionService) to handle failovers or scale events, Session Affinity provides optimal local cache hit rates for stateful agents.",
+    "whyWrong": {
+      "1": "Setting `--max-instances=1` creates a single point of failure and bottlenecks throughput under concurrent user load.",
+      "2": "Container internal IPs are private RFC 1918 addresses unreachable from external user browsers.",
+      "3": "Clearing the cache on every keystroke defeats the purpose of local AST caching."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/configuring/session-affinity",
+      "https://google.github.io/adk-docs/deploy/cloud-run/"
+    ]
+  },
+  {
+    "id": "d4-dep-014",
+    "domain": 4,
+    "topic": "Multi-Region High Availability for Mission-Critical Agents",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global airline requires 99.99% availability for its flight rebooking ADK agent during severe weather disruptions. If an entire Google Cloud region (`us-central1`) experiences an outage, user traffic must automatically fail over to `us-east4` with zero manual intervention and without losing active conversation state. How should you architect the compute, routing, and session persistence layers?",
+    "options": [
+      "Deploy a single Cloud Run service in `us-central1-a` using `InMemorySessionService` and write a runbook instructing engineers to manually rebuild the project in `us-east4` if an outage occurs.",
+      "Deploy identical Cloud Run services (or GKE clusters) in both `us-central1` and `us-east4` behind a Global External Application Load Balancer with multi-region serverless NEGs, configure a multi-region database (Cloud Spanner or multi-region Firestore nam5) for shared ADK session persistence, and configure fallback routing to regional Vertex AI Gemini endpoints (`us-east4` / global endpoint).",
+      "Use DNS round-robin pointing directly to two developer laptops connected via residential Wi-Fi.",
+      "Store all session state on a single zonal Persistent Disk in `us-central1-a`."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Achieving 99.99% multi-region high availability for stateful agents requires three synchronized multi-region layers: (1) Compute: Active-active Cloud Run or GKE deployments across two or more regions (`us-central1` + `us-east4`) fronted by a Global External Application Load Balancer with health checks and automatic regional failover; (2) State: A strongly consistent multi-region persistence store (Cloud Spanner or Firestore multi-region `nam5`) so sessions started in `us-central1` resume seamlessly in `us-east4`; and (3) Model Inference: Dynamic fallback across regional Vertex AI endpoints.",
+    "whyWrong": {
+      "0": "Single-region deployments with manual rebuild runbooks and `InMemorySessionService` suffer hours of downtime and 100% session loss during a regional outage.",
+      "2": "Developer laptops on residential Wi-Fi violate enterprise reliability, security, and scalability standards.",
+      "3": "A zonal Persistent Disk cannot be mounted cross-region and becomes inaccessible if `us-central1` goes down."
+    },
+    "refs": [
+      "https://cloud.google.com/load-balancing/docs/https/setting-up-https-serverless",
+      "https://cloud.google.com/firestore/docs/locations"
+    ]
+  },
+  {
+    "id": "d4-dep-015",
+    "domain": 4,
+    "topic": "Deploying Multi-Agent Microservices vs Monolithic Agent Runtime",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise e-commerce platform is designing a multi-agent system consisting of a root `OrchestratorAgent`, a `CatalogSearchAgent` (handled by the Search team in Python), a `PaymentProcessingAgent` (handled by the PCI-compliant Payments team in Go/Java), and a `FraudScoringAgent` (requiring GPU-accelerated XGBoost/PyTorch models). Which two architectural reasons justify deploying these subagents as independent remote microservices (communicating via A2A / REST / gRPC) rather than compiling them into a single monolithic Python process? (Choose two.)",
+    "options": [
+      "Independent security and compliance boundaries: `PaymentProcessingAgent` can run inside an isolated PCI-DSS compliant VPC project with strict IAM service accounts that the general `CatalogSearchAgent` cannot access.",
+      "Polyglot runtime and hardware heterogeneity: `PaymentProcessingAgent` can run in Go/Java while `FraudScoringAgent` scales independently on GPU-enabled compute nodes without forcing CPU-only agents onto expensive GPU instances.",
+      "Deploying microservices over a network reduces physical speed-of-light latency to negative numbers.",
+      "Google Cloud prohibits running more than one Python function inside a single container image.",
+      "Monolithic processes automatically delete their own source code every 24 hours."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "While in-process subagents (`LlmAgent` subagents within a single ADK process) offer lowest latency for tightly coupled Python teams, distributing subagents as remote services (via Agent-to-Agent [A2A] protocol, gRPC, or OpenAPI) is architecturally required when: (1) Strict security/compliance isolation is needed (PCI-DSS payment environments with dedicated service accounts and VPC perimeters), or (2) Teams use different programming languages (Go/Java vs Python) or asymmetric hardware profiles (GPU-accelerated fraud models vs lightweight CPU search agents).",
+    "whyWrong": {
+      "2": "Network RPC calls add serialization and transport latency compared to in-memory function calls; they never produce negative latency.",
+      "3": "Containers can run arbitrarily complex Python applications with thousands of functions.",
+      "4": "Monolithic processes do not delete their own source code."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/multi-agents/",
+      "https://cloud.google.com/architecture/microservices-architecture-introduction"
+    ]
+  },
+  {
+    "id": "d4-dep-016",
+    "domain": 4,
+    "topic": "Cloud Run Memory Sizing for Large Document Processing Agents",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An ADK financial due-diligence agent deployed on Cloud Run downloads 150MB PDF annual reports into memory using `pypdf`/`pdfplumber` to extract financial tables before calling Gemini. With the default Cloud Run memory limit of `512Mi` and `--concurrency=10`, containers frequently crash with `MemoryError` or `Container terminated on signal 9 (OOMKilled)` when 5 users upload PDFs simultaneously. What is the most direct infrastructure fix?",
+    "options": [
+      "Disable HTTPS TLS certificates.",
+      "Decrease container memory to `128Mi` so that OOM kills happen faster.",
+      "Change the service region from `us-central1` to `europe-west1` without changing memory limits.",
+      "Increase the Cloud Run container memory allocation (e.g., `--memory=4Gi` or `8Gi`) and stream/clean up temporary PDF objects explicitly (`gc.collect()`) after extraction."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "When a container processes 150MB PDFs in memory with `--concurrency=10`, multiple concurrent requests easily exceed a `512Mi` RAM ceiling once Python object overhead and PDF parsing buffers are accounted for, triggering Linux kernel Out-Of-Memory (`SIGKILL` / exit code 137 / Signal 9) termination. Increasing `--memory` (up to `32Gi` on Cloud Run) and tuning concurrency/garbage collection resolves OOM crashes.",
+    "whyWrong": {
+      "0": "TLS certificates are handled at the Google Front End (GFE) load balancer and do not cause multi-gigabyte container RAM exhaustion.",
+      "1": "Decreasing memory to `128Mi` guarantees immediate OOM crashes even on a single request.",
+      "2": "Changing geographic regions does not increase available container RAM."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/configuring/memory-limits",
+      "https://cloud.google.com/run/docs/troubleshooting#oom"
+    ]
+  },
+  {
+    "id": "d4-dep-017",
+    "domain": 4,
+    "topic": "Querying Deployed Vertex AI Agent Engine Instances",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "After successfully deploying an ADK agent to Vertex AI Agent Engine, the deployment returns a resource name: `projects/123456/locations/us-central1/reasoningEngines/987654321`. How should your backend web application invoke this deployed agent programmatically using the Vertex AI Python SDK?",
+    "options": [
+      "Instantiate `remote_agent = reasoning_engines.ReasoningEngine('projects/123456/locations/us-central1/reasoningEngines/987654321')` and invoke `remote_agent.query(input=...)` or `remote_agent.stream_query(...)`.",
+      "Run `ssh root@987654321.google.com` and execute bash scripts interactively.",
+      "Send an unauthenticated FTP file transfer to port 21 of the reasoning engine ID.",
+      "Query the resource name using `SELECT * FROM reasoningEngines` inside Cloud Spanner."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Deployed Vertex AI Agent Engine instances are managed resources identified by their full resource path (`projects/{project}/locations/{location}/reasoningEngines/{id}`). Client applications reconnect to the live agent by passing this resource name to `reasoning_engines.ReasoningEngine(...)` (or via the REST/gRPC `:query` and `:streamQuery` endpoints authenticated with Google Cloud IAM tokens).",
+    "whyWrong": {
+      "1": "Vertex AI Agent Engine is a managed API service and does not expose root SSH access.",
+      "2": "Agent Engine endpoints communicate via IAM-authenticated HTTPS/gRPC, not legacy unauthenticated FTP.",
+      "3": "Cloud Spanner SQL engines cannot query Vertex AI Reasoning Engine API endpoints directly."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/use",
+      "https://google.github.io/adk-docs/deploy/agent-engine/"
+    ]
+  },
+  {
+    "id": "d4-dep-018",
+    "domain": 4,
+    "topic": "Agent-to-Agent (A2A) Protocol & Remote Subagent Deployment",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise is adopting the open Agent-to-Agent (A2A) protocol to enable a central ADK `ExecutiveAssistantAgent` deployed on Vertex AI Agent Engine to discover and delegate tasks to specialized remote agents (`HRBenefitsAgent` on Cloud Run and `ITProvisioningAgent` on GKE) built by different business units. How does a remote A2A-compliant subagent advertise its capabilities, input/output modalities, and authentication requirements to the orchestrator agent?",
+    "options": [
+      "Each remote agent sends broadcast UDP packets across the public internet every 10 milliseconds.",
+      "Each remote A2A agent publishes a standardized JSON Agent Card (typically at `/.well-known/agent.json`) describing its skills, supported modalities, endpoint URL, and authentication schemes, which the orchestrator agent consumes via `RemoteA2aAgent`.",
+      "Remote agents must email their Python source code files to the orchestrator agent's Gmail account.",
+      "The orchestrator agent guesses random URLs until it finds a working endpoint."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Agent-to-Agent (A2A) protocol standardizes interoperability across heterogeneous agent runtimes. Under A2A, every remote agent exposes a standardized metadata document known as an **Agent Card** (`/.well-known/agent.json`) specifying its identity, capabilities (`skills`), input/output content types, streaming support, and security schemes. ADK natively supports consuming remote A2A agents via `RemoteA2aAgent` using their Agent Card URL.",
+    "whyWrong": {
+      "0": "UDP internet broadcasts are blocked by routers and firewalls and are not part of the A2A specification.",
+      "2": "A2A enables black-box task delegation over HTTP/JSON-RPC without requiring source code sharing.",
+      "3": "Random URL guessing is an absurd anti-pattern; structured service discovery via Agent Cards is used."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/a2a/",
+      "https://google.github.io/A2A/"
+    ]
+  },
+  {
+    "id": "d4-dep-019",
+    "domain": 4,
+    "topic": "Database Connection Pooling in Serverless Cloud Run Agents",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An order management ADK agent deployed on Cloud Run connects to a Cloud SQL for PostgreSQL instance to execute `query_customer_orders` and `update_shipping_address` tools. During a flash sale, Cloud Run autoscales from 5 to 150 container instances. Suddenly, tool executions begin failing with `FATAL: remaining connection slots are reserved for non-replication superuser connections` because each container opens a default SQLAlchemy pool of 10 connections (1,500 total connections exceeding PostgreSQL's `max_connections=200`). How should you architecturally resolve this connection exhaustion?",
+    "options": [
+      "Set PostgreSQL `max_connections=10000000` on a db-f1-micro instance with 0.6 GB RAM.",
+      "Create a brand new SQLAlchemy `create_engine()` object inside the tool function on every single tool invocation and never close connections.",
+      "Deploy PgBouncer / Cloud SQL Auth Proxy with connection pooling enabled, initialize the SQLAlchemy engine as a module-level singleton with a tightly bounded pool size (e.g., `pool_size=2, max_overflow=1`) per container, and set `--max-instances` on Cloud Run to respect downstream database capacity.",
+      "Migrate all relational transactional order data into DNS TXT records."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Serverless compute (Cloud Run) scales out horizontally much faster than relational databases can handle raw TCP connections. Best practice requires: (1) Defining the database connection pool (`create_engine`) at the global module level (so it is reused across requests within the same container rather than recreated per tool call), (2) Keeping per-container `pool_size` small (e.g., 1–3 connections), (3) Using managed connection pooling / PgBouncer to multiplex thousands of serverless connections onto a fixed number of database backend processes, and (4) Bounding `--max-instances`.",
+    "whyWrong": {
+      "0": "Setting millions of connections on a micro instance causes immediate kernel panic and database crash due to memory exhaustion.",
+      "1": "Instantiating `create_engine()` inside the tool function leaks connection pools on every tool call and immediately exhausts database sockets.",
+      "3": "DNS TXT records cannot support ACID relational transactions or order management queries."
+    },
+    "refs": [
+      "https://cloud.google.com/sql/docs/postgres/manage-connections",
+      "https://cloud.google.com/run/docs/configuring/max-instances"
+    ]
+  },
+  {
+    "id": "d4-dep-020",
+    "domain": 4,
+    "topic": "Deploying WebSockets & Bi-Directional Streaming Audio Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are deploying a real-time multimodal customer support agent using ADK's `run_live` bi-directional streaming API (backed by the Gemini Multimodal Live API) over WebSockets. Users speak continuously into their microphone, and the agent streams back real-time voice audio while supporting barge-in (interrupting the agent mid-sentence when the user speaks). Which Cloud Run configuration requirements must be satisfied to support this bi-directional WebSocket architecture?",
+    "options": [
+      "Use static HTTP GET caching on Cloud CDN so every user hears the exact same pre-recorded audio file.",
+      "Disable WebSockets and force the user to mail physical cassette tapes to Google Cloud.",
+      "Set the Cloud Run request timeout to 1 second (`--timeout=1s`).",
+      "Expose an ASGI WebSocket endpoint (e.g., FastAPI `@app.websocket('/live')`), enable HTTP/2 end-to-end or WebSocket support on Cloud Run, configure request timeout (`--timeout`) to accommodate session length (up to 3,600s), and enable Session Affinity."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "ADK's `run_live` bi-directional audio/video streaming relies on persistent full-duplex WebSockets (or gRPC streaming) connecting the client browser/app to the agent container, which maintains a live session with the Gemini Multimodal Live API. Cloud Run natively supports WebSockets up to 60 minutes (`--timeout=3600`); pairing an async ASGI WebSocket server (FastAPI/Uvicorn) with `--session-affinity` ensures stable full-duplex audio streaming and instantaneous barge-in handling.",
+    "whyWrong": {
+      "0": "Static CDN caching serves identical pre-recorded responses and breaks interactive personalized conversations.",
+      "1": "Physical cassette tapes cannot support real-time interactive AI conversations.",
+      "2": "A 1-second timeout terminates the WebSocket connection immediately before a single sentence is spoken."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/runtime/",
+      "https://cloud.google.com/run/docs/triggering/websockets"
+    ]
+  },
+  {
+    "id": "d4-dep-021",
+    "domain": 4,
+    "topic": "Artifact Registry & Immutable Container Digests in Agent Deployment",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your security team audits your production Cloud Run agent deployment pipeline and discovers that `cloudbuild.yaml` deploys containers using the mutable image tag `us-central1-docker.pkg.dev/my-project/agents/support-agent:latest`. Why does using `:latest` create an operational risk during agent incident rollbacks, and how should you fix it?",
+    "options": [
+      "The `:latest` tag is mutable and gets overwritten on every build, making it impossible to guarantee exact reproducibility or audit which prompt/code revision was running during an incident; instead, deploy using the immutable cryptographic SHA-256 image digest (`@sha256:...`) stored in Artifact Registry.",
+      "The `:latest` tag causes Cloud Run containers to run 50% slower than images tagged `:production`.",
+      "Artifact Registry deletes any image tagged `:latest` after 5 minutes.",
+      "Using `:latest` disables Google Cloud IAM authentication."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In enterprise AgentOps, prompt templates, tool definitions, and Python dependencies are packaged inside container images. Deploying by mutable tag (`:latest`) means that if a new build overwrites `:latest`, rolling back or auditing the exact historical container state becomes ambiguous. Pinning deployments to immutable Artifact Registry SHA-256 digests (`image@sha256:4a8b...`) guarantees deterministic rollbacks and strict audit lineage.",
+    "whyWrong": {
+      "1": "Image tags are metadata labels and have zero impact on container CPU/memory runtime execution speed.",
+      "2": "Artifact Registry does not delete `:latest` images after 5 minutes unless an explicit cleanup policy is configured to do so.",
+      "3": "Container tag naming conventions do not alter IAM authentication enforcement."
+    },
+    "refs": [
+      "https://cloud.google.com/artifact-registry/docs/docker/names",
+      "https://cloud.google.com/run/docs/deploying#images"
+    ]
+  },
+  {
+    "id": "d4-dep-022",
+    "domain": 4,
+    "topic": "Sidecar Containers in Cloud Run for Agent Guardrails & Proxying",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare enterprise deploys an ADK clinical documentation agent on Cloud Run. Corporate security mandates that every outbound API call from the agent container to external third-party medical APIs must pass through a specialized mutual-TLS (mTLS) cryptographic signing proxy written in Go, and all inbound/outbound payloads must be inspected by a local low-latency PII/PHI scrubbing sidecar before leaving the compute instance. How can you satisfy this requirement on Cloud Run without migrating to GKE?",
+    "options": [
+      "Deploy three separate public Cloud Run services and route unencrypted PHI over the public internet between them.",
+      "Use Cloud Run multi-container (sidecar) deployments, defining the ADK Python agent as the main ingress container and configuring the mTLS Go proxy and PII scrubbing service as sidecar containers communicating over `localhost` within the same Cloud Run instance.",
+      "Rewrite the Go mTLS proxy and C++ PII scrubber completely in pure HTML.",
+      "Disable all third-party medical API integrations permanently."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Cloud Run natively supports multi-container deployments (up to 10 containers per instance, sharing the same network namespace / `localhost` loopback interface and optional in-memory volumes). Deploying the primary ADK agent container alongside dedicated security/mTLS/observability sidecar containers allows ultra-low-latency `localhost` IPC without exposing internal unencrypted traffic over external networks or requiring full Kubernetes cluster management.",
+    "whyWrong": {
+      "0": "Routing unencrypted PHI across separate public services over the internet violates HIPAA security mandates and adds network latency.",
+      "2": "HTML is a markup language and cannot implement cryptographic mTLS proxies or PII scrubbing engines.",
+      "3": "Disabling required integrations breaks core clinical functionality."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/deploying#sidecars",
+      "https://google.github.io/adk-docs/deploy/cloud-run/"
+    ]
+  },
+  {
+    "id": "d4-dep-023",
+    "domain": 4,
+    "topic": "Cost-Optimal Deployment for Event-Driven Batch Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A logistics company receives 500 PDF freight invoices per day uploaded sporadically by vendors to a Cloud Storage bucket (`gs://acme-vendor-invoices/`). Whenever a PDF is uploaded, an ADK extraction agent needs to wake up, parse the invoice using Gemini 2.5 Flash, call `create_erp_payable`, and terminate. Outside of these 500 sporadic 10-second executions, there is zero traffic. Which deployment architecture minimizes idle infrastructure cost while ensuring reliable event-driven execution?",
+    "options": [
+      "Deploy a 10-node GKE Standard cluster with 8 NVIDIA H100 GPUs running continuously.",
+      "Provision a dedicated 24/7 Compute Engine `n2-highmem-64` VM that polls the Cloud Storage bucket in a tight `while True` loop every millisecond.",
+      "Configure an Eventarc trigger on Cloud Storage (`google.cloud.storage.object.v1.finalized`) that invokes a serverless Cloud Run service configured with `--min-instances=0` (scale to zero), billing strictly for the exact seconds of container execution.",
+      "Hire a full-time employee to refresh the Cloud Storage console browser page every 30 seconds and click a button."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "For sporadic, event-driven workloads (such as processing 500 files uploaded throughout the day), pairing **Eventarc** (listening for `google.cloud.storage.object.v1.finalized` events) with a scale-to-zero **Cloud Run service** (`--min-instances=0`) provides 100% event-driven automation with $0 idle compute cost. Eventarc automatically handles event delivery, retries with exponential backoff, and IAM authentication.",
+    "whyWrong": {
+      "0": "Running 8 H100 GPUs 24/7 for sporadic API calls to Gemini Flash wastes tens of thousands of dollars per month.",
+      "1": "A 64-core VM polling in a tight loop 24/7 incurs thousands of dollars in idle compute and Class A Cloud Storage list API charges.",
+      "3": "Manual human polling is slow, expensive, and error-prone."
+    },
+    "refs": [
+      "https://cloud.google.com/eventarc/docs/run/cloud-storage",
+      "https://cloud.google.com/run/docs/configuring/min-instances"
+    ]
+  },
+  {
+    "id": "d4-dep-024",
+    "domain": 4,
+    "topic": "Managing Environment-Specific Agent Configurations (Dev/Staging/Prod)",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your ADK agent is promoted through three Google Cloud projects: `agent-dev`, `agent-staging`, and `agent-prod`. In `agent-dev`, the agent should connect to a sandbox ERP endpoint and use Gemini 2.5 Flash for lower cost; in `agent-prod`, it must connect to the live SAP production endpoint, use Gemini 2.5 Pro, and authenticate with a production API secret. How should you structure your agent codebase and deployment configuration to adhere to Twelve-Factor App principles?",
+    "options": [
+      "Hardcode `if project_id == 'prod'` statements throughout 50 different tool files with inline passwords.",
+      "Maintain three completely separate Git repositories and manually edit hardcoded passwords in `agent.py` before every deployment.",
+      "Commit production API secrets in plaintext inside a public `config.yaml` file.",
+      "Maintain a single immutable container image across all environments, injecting environment-specific parameters (`MODEL_NAME`, `ERP_BASE_URL`) via Cloud Run environment variables and mounting sensitive API credentials directly from Google Cloud Secret Manager."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Following Twelve-Factor App and GitOps best practices, the exact same immutable container image tested in `staging` should be promoted to `prod`. Environment-specific configurations (`MODEL_NAME`, `ERP_BASE_URL`, logging verbosity) are injected at runtime via environment variables, while sensitive credentials (API keys, database passwords) are securely mounted as environment variables or volume files directly from **Secret Manager** with least-privilege IAM bindings.",
+    "whyWrong": {
+      "0": "Hardcoding inline passwords across source files violates secret management and code maintainability standards.",
+      "1": "Maintaining separate codebases and manually editing files before deployment guarantees configuration drift and human error.",
+      "2": "Committing plaintext secrets to Git is a critical security vulnerability."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/configuring/secrets",
+      "https://cloud.google.com/run/docs/configuring/environment-variables"
+    ]
+  },
+  {
+    "id": "d4-dep-025",
+    "domain": 4,
+    "topic": "Decision Matrix: Selecting the Right Agent Compute Platform",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise architecture review board asks you to summarize the primary architectural decision boundary between **Vertex AI Agent Engine**, **Cloud Run**, and **Google Kubernetes Engine (GKE)** when deploying production agentic workflows on Google Cloud. Which summary accurately reflects Google Cloud architectural best practices?",
+    "options": [
+      "Use Vertex AI Agent Engine for turnkey managed Python/ADK agents with zero infrastructure/container management and built-in session state; use Cloud Run for custom Docker containers (custom binaries, custom FastAPI/WebSocket middleware, sidecars, scale-to-zero webhooks); and use GKE when self-hosting open-weight GPU models (vLLM), running >60-minute persistent connections, or requiring kernel/mesh customization.",
+      "Use Vertex AI Agent Engine exclusively for static HTML websites; use Cloud Run only for Microsoft Windows desktop apps; and use GKE only when you have fewer than 2 users.",
+      "All three services are identical aliases for the exact same unmanaged Compute Engine VM.",
+      "Vertex AI Agent Engine requires manual Kubernetes YAML authoring, whereas GKE requires zero configuration."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google Cloud provides a clear spectrum of agent compute runtimes tailored to operational control vs managed simplicity: (1) **Vertex AI Agent Engine**: highest abstraction—pass an ADK/Python agent object and dependencies, and Google manages containerization, scaling, `VertexAiSessionService` state, and API endpoints; (2) **Cloud Run**: serverless container abstraction—bring any custom Dockerfile, system binaries (`ffmpeg`), sidecars, or FastAPI/WebSocket server with scale-to-zero and zero cluster management (up to 60-min timeout); (3) **GKE**: full Kubernetes control—ideal for co-located GPU model serving (vLLM on L4/H100), unlimited connection durations, and complex service mesh topologies.",
+    "whyWrong": {
+      "1": "This completely mischaracterizes all three services.",
+      "2": "Agent Engine, Cloud Run, and GKE have distinct architectural abstractions, pricing models, timeout limits, and operational responsibilities.",
+      "3": "This reverses the operational responsibilities: Agent Engine requires zero Kubernetes YAML, whereas GKE uses Kubernetes manifests."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
+      "https://google.github.io/adk-docs/deploy/"
+    ]
+  }
+]

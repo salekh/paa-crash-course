@@ -1,0 +1,133 @@
+ProfessionalAgenticArchitect
+Certificationexamguide
+AGoogleCloudCertifiedProfessionalAgenticArchitectisatechnicalpractitionerwhodesigns
+andmanagesautonomous,AI-drivenagenticworkflowsinGoogleCloud.Thisindividualisan
+experienceddeveloperorarchitectwhobuildsagenticsolutionswhileconsideringreliability,
+performance,cost,security,andscalability.Thisindividualhasdeepexperienceutilizinglarge
+languagemodels(LLMs),applyingagentdesignpatterns,writingcode,andintegratingdata
+sourcesinGoogleCloud.
+
+Section1:Buildingagentsusinglow-codetools(~13%oftheexam)
+1.1Configuringagenticworkflowsandbehaviorusinglow-codetools.Considerationsinclude:
+● Configuringstate-basedworkflows(pages,transitionroutes,andeventhandlers)using
+GeminiEnterprisetools(e.g.,GeminiEnterpriseAgentDesignerandCustomer
+ExperienceAgentStudio[CXAgentStudio])
+● Creatingsysteminstructionsandin-consoleprompttemplates(e.g.,few-shotand
+chain-of-thought)toguideagentbehavior(e.g.,AgentDesignerandCXAgentStudio)
+1.2ConnectingenterprisedatatoGeminiEnterprise.Considerationsinclude:
+● Configuringagentstosecurelyconnectandqueryenterpriseproprietarydatasources
+(e.g.,GeminiEnterpriseandAgentSearch)
+● Ingestingandprocessingunstructuredmultimodaldata(e.g.,videos,audio,and
+images)intotheagenticworkflow
+
+Section2:Usingcodingagentsforapplicationdevelopment(~17%oftheexam)
+2.1Usingcodingagentseffectively.Considerationsinclude:
+● ConfiguringcodingagentswithModelContextProtocol(MCP)servers,customskills,
+andaccesstotools(e.g.,AntigravityandClaudeCodeonGoogleCloud)
+● Usingcodingagentsinsecuresandboxes(e.g.,GoogleKubernetesEngine[GKE],Cloud
+Workstations,andAntigravity)
+● Usingcodingagentstorefactorsourcecode,optimizeexecutionruntimes,andpatch
+application-layervulnerabilities
+
+1
+
+2.2Customizingcodingagentsforenterpriseworkflows.Considerationsinclude:
+● Creatingskills,plugins,extensionshooks,rules,andsubagentsusingAntigravity
+● AugmentingAntigravitywithAgentsCLItobuild,scale,govern,andoptimizedeployed
+agents
+
+Section3:Developingcustomagents(~33%oftheexam)
+3.1Designingandbuildingagenticworkflowsincode.Considerationsinclude:
+● Selectingandconfiguringtheappropriatelanguagemodel(e.g.,largelanguagemodel
+[LLM]vs.smalllanguagemodel[SLM],self-hostedvs.softwareasaservice[SaaS],and
+open-sourcesoftware[OSS]vs.proprietaryLLM)consideringcost,security,andagent
+architecture
+● Buildingcustomagentsusingopen-sourcelibraries(e.g.,AgentDevelopmentKit[ADK])
+● Configuringsessionsandmemory(e.g.,AgentPlatformMemoryBankandmanaged
+sessions)
+● ConfiguringskillsusingAgentsCLI(e.g.,pluginsandagentvs.humanmode)
+3.2Integratingenterprisedomainknowledge.Considerationsinclude:
+● Designing,configuring,andmanagingretrieval-augmentedgeneration(RAG)pipelines
+andvectorretrievalsystems(e.g.,embeddingmodels,similarityscoring,andreranking)
+usingappropriateservicessuchasvectordatabases(e.g.,VectorSearchandAgent
+Retrieval)
+● Configuringagentpermissions(e.g.,AgentIdentity)
+● UsingGoogleCloudtools(e.g.,AgentRegistry,GoogleCloudMCPServers)to
+configureprebuiltandcustomcapabilities(e.g.,customintegrationlayersformanaged
+databases,APIintegrations,andMCPserverthatconnectsagentstothird-partySaaS
+toolsandremoteservers)
+3.3Orchestratingandcoordinatingagenticworkflows.Considerationsinclude:
+● Orchestratingagentsusingagenticprotocols(e.g.,MCPandAgent2Agent[A2A])
+● Selectingandcoordinatingmultiagenthandoffsandworkflows(e.g.,parallelagents,
+sequentialagents,andgraphworkflow)usingGoogleCloudtools(e.g.,AgentIdentity,
+AgentRegistry,AgentRuntime,andagentpolicies)
+
+Section4:Evaluatinganddeployingagenticworkflows(~22%oftheexam)
+4.1Evaluatingagentsindevelopmentandinproduction.Considerationsinclude:
+● Creatingtestsetsforagentevaluation(e.g.,goldendata,prompts,andedgecases)
+
+2
+
+● Creatingcontinuousevaluationpipelinestoassessanagent’stoolexecutionbasedon
+establishedsuccesscriteria
+● Determiningtheappropriateevaluationframeworkandtooling(e.g.,ADKevaluation
+tooling(evalset),AgentPlatformGenAIevaluationservice,andcustomautoraters)
+● Evaluatinganagenticsystemagainstagoldendatasettoassessagentresponseand
+retrievalquality(e.g.,usingADK)
+4.2Deployingandscalingproductionworkloads.Considerationsinclude:
+● Selectingoptimaldeploymentruntimebasedontheusecase,requirements,andcost
+(e.g.,AgentRuntime,CloudRun,andGKE)
+● Troubleshootingagentissues(e.g.,drift,toolinvocationlatency,agentreasoningloops,
+andsystemfailures)
+● Monitoringandoptimizingagentsforperformance,reliability,andcost(e.g.,identify
+logicerrors,latencybottlenecks,andhallucinations)
+
+Section5:Securingandgoverningagenticworkflows(~15%oftheexam)
+5.1Configuringagentsecurityandgovernance.Considerationsinclude:
+● Implementingauthenticationandsecuretoolexecution(e.g.,agent-to-toolAPIcalls
+usingOAuth2.0)
+● Configuringprincipalaccessboundary(PAB)policiesusingAgentIdentity
+● ConfiguringAgentGatewaytomonitortrafficandtrackagents
+● Designingandconfiguringagenticgovernanceandpolicyenforcement(e.g.,Agent
+RegistryandModelArmor)
+5.2Implementingsecureagentbehaviorandexecution.Considerationsinclude:
+● Designingappropriatesafetyframeworksandguardrails(e.g.,AgentGateway,Model
+Armor,andhuman-in-the-loop[HITL])
+● Configuringsecureaccesstodataandidentitypropagation(e.g.,AgentGatewayand
+AgentRegistry)
+
+3
+
+Thefollowingtoolsareinscopeforthisexam:
+-AgentDevelopmentKit(ADK)
+-Agentevaluation
+-AgentGateway
+-AgentIdentity
+-AgentRegistry
+-AgentRetrievalandVectorSearch1.0
+-AgentRuntime(formerlyAgentEngine)
+-AgentSearch(formerlyVertexAISearch)
+-Agenticprotocols(e.g.,Agent2Agent[A2A],MCP)
+-AgentsCLIinAgentPlatform
+-Antigravity(CLI,SDK,App)
+-AuthManager(OAuth2.0)
+-BigQuery
+-CloudRun
+-CloudSQL
+-CloudStorage
+-Firestore
+-GeminiEnterprise
+-GeminiLLMs
+-GoogleCloudObservability(CloudLoggingandCloudTrace)
+-GoogleKubernetesEngine(GKE)
+-MemorystoreforRedis
+-ModelArmor
+-ModelContextProtocol(MCP)servers
+-ModelGarden
+-RAGEngine
+-SensitiveDataProtection
+-SkillRegistry
+
+4
+
+

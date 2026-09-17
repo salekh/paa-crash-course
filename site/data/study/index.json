@@ -1,0 +1,850 @@
+[
+ {
+  "id": "exam-overview",
+  "file": "00-exam-overview.md",
+  "title": "Exam Overview & Blueprint Strategy",
+  "domain": 0,
+  "order": 1,
+  "minutes": 16,
+  "summary": "Master the Google Cloud Certified Professional Agentic Architect exam format (GA 60Q/120m vs Beta 80Q/180m), the 5 domains, 28 in-scope tools, keyword-to-service decoder, and top 25 traps.",
+  "words": 3499,
+  "outline": [
+   {
+    "level": 2,
+    "text": "1. Exam Mechanics, Scoring & GA vs. Beta Format Comparison",
+    "id": "1-exam-mechanics-scoring-ga-vs-beta-format-comparison"
+   },
+   {
+    "level": 3,
+    "text": "Deconstructing PAA Question Anatomy",
+    "id": "deconstructing-paa-question-anatomy"
+   },
+   {
+    "level": 2,
+    "text": "2. The 5 Exam Domains & Exact Blueprint Weightings",
+    "id": "2-the-5-exam-domains-exact-blueprint-weightings"
+   },
+   {
+    "level": 2,
+    "text": "3. Complete 28 In-Scope Tools & Architectural Matrix",
+    "id": "3-complete-28-in-scope-tools-architectural-matrix"
+   },
+   {
+    "level": 2,
+    "text": "4. The 35-Row Keyword-to-Service Decoder Table",
+    "id": "4-the-35-row-keyword-to-service-decoder-table"
+   },
+   {
+    "level": 2,
+    "text": "5. The Well-Architected Agentic AI Framework",
+    "id": "5-the-well-architected-agentic-ai-framework"
+   },
+   {
+    "level": 2,
+    "text": "6. Structured Study Plans: 7-Day Crash Plan vs. 14-Day Mastery Plan",
+    "id": "6-structured-study-plans-7-day-crash-plan-vs-14-day-mastery-plan"
+   },
+   {
+    "level": 3,
+    "text": "Plan A: 7-Day Accelerated Crash Plan (3\u20134 hrs/day)",
+    "id": "plan-a-7-day-accelerated-crash-plan-34-hrsday"
+   },
+   {
+    "level": 3,
+    "text": "Plan B: 14-Day Deep Mastery Plan (2 hrs/day)",
+    "id": "plan-b-14-day-deep-mastery-plan-2-hrsday"
+   },
+   {
+    "level": 2,
+    "text": "7. Top 25 Exam Traps & Architectural Anti-Patterns",
+    "id": "7-top-25-exam-traps-architectural-anti-patterns"
+   }
+  ]
+ },
+ {
+  "id": "d1-lowcode",
+  "file": "01-lowcode-agents.md",
+  "title": "Section 1: Building Agents Using Low-Code Tools",
+  "domain": 1,
+  "order": 2,
+  "minutes": 16,
+  "summary": "Designing state-based conversational flows, transition routes, event handlers, system instructions, Agent Search, and multimodal ingestion using Gemini Enterprise Agent Designer and CX Agent Studio.",
+  "words": 3460,
+  "outline": [
+   {
+    "level": 2,
+    "text": "1. Architectural Decision Matrix: Gemini Enterprise Agent Designer vs. CX Agent Studio",
+    "id": "1-architectural-decision-matrix-gemini-enterprise-agent-designer-vs-cx-agent-studio"
+   },
+   {
+    "level": 3,
+    "text": "Comprehensive Platform Comparison Matrix",
+    "id": "comprehensive-platform-comparison-matrix"
+   },
+   {
+    "level": 2,
+    "text": "2. Sub-Objective 1.1: Designing State-Based Workflows in CX Agent Studio",
+    "id": "2-sub-objective-11-designing-state-based-workflows-in-cx-agent-studio"
+   },
+   {
+    "level": 3,
+    "text": "Core Primitives of the CX Agent Studio State Machine",
+    "id": "core-primitives-of-the-cx-agent-studio-state-machine"
+   },
+   {
+    "level": 2,
+    "text": "3. Sub-Objective 1.2: System Instructions, Agent Search Grounding & Multimodal Ingestion",
+    "id": "3-sub-objective-12-system-instructions-agent-search-grounding-multimodal-ingestion"
+   },
+   {
+    "level": 3,
+    "text": "Pillar 1: Engineering Production System Instructions",
+    "id": "pillar-1-engineering-production-system-instructions"
+   },
+   {
+    "level": 3,
+    "text": "Pillar 2: Enterprise Grounding with Agent Search",
+    "id": "pillar-2-enterprise-grounding-with-agent-search"
+   },
+   {
+    "level": 3,
+    "text": "Pillar 3: Multimodal Data Ingestion Pipeline",
+    "id": "pillar-3-multimodal-data-ingestion-pipeline"
+   },
+   {
+    "level": 2,
+    "text": "4. Domain 1 Exam Traps & Architectural Anti-Patterns",
+    "id": "4-domain-1-exam-traps-architectural-anti-patterns"
+   }
+  ]
+ },
+ {
+  "id": "d2-coding",
+  "file": "02-coding-agents.md",
+  "title": "Section 2: Using Coding Agents for Application Development",
+  "domain": 2,
+  "order": 3,
+  "minutes": 15,
+  "summary": "Accelerating SDLC using Antigravity (CLI, SDK, App), Claude Code on Google Cloud, MCP servers, skills, extension hooks, subagents, GKE/Cloud Workstations sandboxes, and Agents CLI governance.",
+  "words": 3406,
+  "outline": [
+   {
+    "level": 2,
+    "text": "1. Sub-Objective 2.1: Antigravity vs. Claude Code on Google Cloud",
+    "id": "1-sub-objective-21-antigravity-vs-claude-code-on-google-cloud"
+   },
+   {
+    "level": 3,
+    "text": "Comprehensive Platform Architecture Comparison",
+    "id": "comprehensive-platform-architecture-comparison"
+   },
+   {
+    "level": 2,
+    "text": "2. Sub-Objective 2.2: Customizing Coding Agents (MCP, Skills, Hooks & Subagents)",
+    "id": "2-sub-objective-22-customizing-coding-agents-mcp-skills-hooks-subagents"
+   },
+   {
+    "level": 3,
+    "text": "1. Model Context Protocol (MCP) Servers for Coding Agents",
+    "id": "1-model-context-protocol-mcp-servers-for-coding-agents"
+   },
+   {
+    "level": 3,
+    "text": "2. Custom Skills (`SKILL.md`) \u2014 Dynamic Procedural Knowledge",
+    "id": "2-custom-skills-skillmd-dynamic-procedural-knowledge"
+   },
+   {
+    "level": 3,
+    "text": "3. Project Rules & Repository Invariants",
+    "id": "3-project-rules-repository-invariants"
+   },
+   {
+    "level": 3,
+    "text": "4. Extension Hooks: Deterministic Security & Quality Guardrails",
+    "id": "4-extension-hooks-deterministic-security-quality-guardrails"
+   },
+   {
+    "level": 3,
+    "text": "5. Subagent Delegation & Context Isolation",
+    "id": "5-subagent-delegation-context-isolation"
+   },
+   {
+    "level": 2,
+    "text": "3. Sub-Objective 2.3: Isolated Execution Sandboxes (GKE & Cloud Workstations) & Governance",
+    "id": "3-sub-objective-23-isolated-execution-sandboxes-gke-cloud-workstations-governance"
+   },
+   {
+    "level": 3,
+    "text": "Pattern 1: Sandboxing Untrusted Agent Execution on Google Kubernetes Engine (GKE)",
+    "id": "pattern-1-sandboxing-untrusted-agent-execution-on-google-kubernetes-engine-gke"
+   },
+   {
+    "level": 3,
+    "text": "Pattern 2: Secure Interactive Developer & Agent Environments on Cloud Workstations",
+    "id": "pattern-2-secure-interactive-developer-agent-environments-on-cloud-workstations"
+   },
+   {
+    "level": 3,
+    "text": "Pattern 3: Enterprise Governance & Scaling with `Agents CLI`",
+    "id": "pattern-3-enterprise-governance-scaling-with-agents-cli"
+   },
+   {
+    "level": 2,
+    "text": "4. Domain 2 Exam Traps & Architectural Anti-Patterns",
+    "id": "4-domain-2-exam-traps-architectural-anti-patterns"
+   }
+  ]
+ },
+ {
+  "id": "d3-adk",
+  "file": "03-custom-agents-adk.md",
+  "title": "Section 3A: Custom Agents with ADK, Model Garden & Memory Bank",
+  "domain": 3,
+  "order": 4,
+  "minutes": 16,
+  "summary": "Architecting custom code-first agents using the Agent Development Kit (ADK), selecting LLMs vs SLMs in Model Garden, managing Agent Platform Memory Bank sessions, and operating Agents CLI.",
+  "words": 3445,
+  "outline": [
+   {
+    "level": 2,
+    "text": "1. Agent Development Kit (ADK) Core Architecture & Primitives",
+    "id": "1-agent-development-kit-adk-core-architecture-primitives"
+   },
+   {
+    "level": 3,
+    "text": "1.1 The ADK Agent Class Hierarchy",
+    "id": "11-the-adk-agent-class-hierarchy"
+   },
+   {
+    "level": 3,
+    "text": "1.2 State Management & Scope Prefixes (`Session.state`)",
+    "id": "12-state-management-scope-prefixes-sessionstate"
+   },
+   {
+    "level": 3,
+    "text": "1.3 Tool Definitions & Execution Semantics",
+    "id": "13-tool-definitions-execution-semantics"
+   },
+   {
+    "level": 3,
+    "text": "1.4 The Six Lifecycle Callbacks (Interceptors)",
+    "id": "14-the-six-lifecycle-callbacks-interceptors"
+   },
+   {
+    "level": 2,
+    "text": "2. Foundation Model Selection in Vertex AI Model Garden",
+    "id": "2-foundation-model-selection-in-vertex-ai-model-garden"
+   },
+   {
+    "level": 3,
+    "text": "2.1 LLM vs. SLM (Small Language Models) in Agent Topologies",
+    "id": "21-llm-vs-slm-small-language-models-in-agent-topologies"
+   },
+   {
+    "level": 3,
+    "text": "2.2 Proprietary First-Party vs. Open-Weights (OSS) Models",
+    "id": "22-proprietary-first-party-vs-open-weights-oss-models"
+   },
+   {
+    "level": 3,
+    "text": "2.3 Model Serving Endpoints: Serverless vs. Provisioned Throughput vs. Self-Hosted",
+    "id": "23-model-serving-endpoints-serverless-vs-provisioned-throughput-vs-self-hosted"
+   },
+   {
+    "level": 2,
+    "text": "3. Agent Platform Memory Bank & Managed Sessions",
+    "id": "3-agent-platform-memory-bank-managed-sessions"
+   },
+   {
+    "level": 3,
+    "text": "3.1 Short-Term Session State vs. Long-Term Memory Bank",
+    "id": "31-short-term-session-state-vs-long-term-memory-bank"
+   },
+   {
+    "level": 3,
+    "text": "3.2 Cross-Session Entity Tracking, Compaction & Conflict Resolution",
+    "id": "32-cross-session-entity-tracking-compaction-conflict-resolution"
+   },
+   {
+    "level": 3,
+    "text": "3.3 TTL Policies, GDPR Right-to-be-Forgotten & Privacy Isolation",
+    "id": "33-ttl-policies-gdpr-right-to-be-forgotten-privacy-isolation"
+   },
+   {
+    "level": 2,
+    "text": "4. Operating the Agents CLI (`adk` / `agents-cli`)",
+    "id": "4-operating-the-agents-cli-adk-agents-cli"
+   },
+   {
+    "level": 3,
+    "text": "4.1 Interactive Human Mode (Local Development & TUI Debugging)",
+    "id": "41-interactive-human-mode-local-development-tui-debugging"
+   },
+   {
+    "level": 3,
+    "text": "4.2 Headless CI/CD Automation Mode (DevOps & GitOps Pipelines)",
+    "id": "42-headless-cicd-automation-mode-devops-gitops-pipelines"
+   },
+   {
+    "level": 2,
+    "text": "5. Architectural Decision Tree: Custom Agent Design",
+    "id": "5-architectural-decision-tree-custom-agent-design"
+   },
+   {
+    "level": 2,
+    "text": "6. Exam Traps & Anti-Patterns (Must-Know for PAA Exam)",
+    "id": "6-exam-traps-anti-patterns-must-know-for-paa-exam"
+   }
+  ]
+ },
+ {
+  "id": "d3-rag-mcp",
+  "file": "04-rag-mcp-knowledge.md",
+  "title": "Section 3B: Enterprise Knowledge, RAG Engine, Vector Search & MCP Servers",
+  "domain": 3,
+  "order": 5,
+  "minutes": 16,
+  "summary": "Grounding custom agents with RAG Engine, Vector Search 1.0, Agent Retrieval, Agent Registry/Identity, and standardized Google Cloud & 3P MCP Servers.",
+  "words": 3559,
+  "outline": [
+   {
+    "level": 2,
+    "text": "1. Vertex AI RAG Engine Architecture",
+    "id": "1-vertex-ai-rag-engine-architecture"
+   },
+   {
+    "level": 3,
+    "text": "1.1 Document Parsing & Chunking Strategies",
+    "id": "11-document-parsing-chunking-strategies"
+   },
+   {
+    "level": 3,
+    "text": "1.2 Embedding Model Optimization (`text-embedding-005` & Multimodal)",
+    "id": "12-embedding-model-optimization-text-embedding-005-multimodal"
+   },
+   {
+    "level": 3,
+    "text": "1.3 Two-Stage Retrieval & Cross-Encoder Reranking",
+    "id": "13-two-stage-retrieval-cross-encoder-reranking"
+   },
+   {
+    "level": 2,
+    "text": "2. Vertex AI Vector Search 1.0 Deep Dive",
+    "id": "2-vertex-ai-vector-search-10-deep-dive"
+   },
+   {
+    "level": 3,
+    "text": "2.1 ScaNN Architecture & Index Tuning Parameters",
+    "id": "21-scann-architecture-index-tuning-parameters"
+   },
+   {
+    "level": 3,
+    "text": "2.2 Hybrid Search (Dense Semantic + Sparse Lexical BM25/SPLADE)",
+    "id": "22-hybrid-search-dense-semantic-sparse-lexical-bm25splade"
+   },
+   {
+    "level": 3,
+    "text": "2.3 Metadata Filtering (Restricts) & Pre-Filtering Security",
+    "id": "23-metadata-filtering-restricts-pre-filtering-security"
+   },
+   {
+    "level": 3,
+    "text": "2.4 Streaming vs. Batch Index Updates",
+    "id": "24-streaming-vs-batch-index-updates"
+   },
+   {
+    "level": 2,
+    "text": "3. Agent Retrieval, Agent Registry & Agent Identity",
+    "id": "3-agent-retrieval-agent-registry-agent-identity"
+   },
+   {
+    "level": 3,
+    "text": "3.1 Agent Retrieval & Semantic Query Routing",
+    "id": "31-agent-retrieval-semantic-query-routing"
+   },
+   {
+    "level": 3,
+    "text": "3.2 Agent Registry: Enterprise Capability Discovery",
+    "id": "32-agent-registry-enterprise-capability-discovery"
+   },
+   {
+    "level": 3,
+    "text": "3.3 Agent Identity & Cryptographic Access Control",
+    "id": "33-agent-identity-cryptographic-access-control"
+   },
+   {
+    "level": 2,
+    "text": "4. Model Context Protocol (MCP) Servers on Google Cloud",
+    "id": "4-model-context-protocol-mcp-servers-on-google-cloud"
+   },
+   {
+    "level": 3,
+    "text": "4.1 Transport Topologies: `stdio` vs. `SSE / Streamable HTTP`",
+    "id": "41-transport-topologies-stdio-vs-sse-streamable-http"
+   },
+   {
+    "level": 3,
+    "text": "4.2 First-Party Google Cloud Database MCP Servers (GenAI Toolbox for Databases)",
+    "id": "42-first-party-google-cloud-database-mcp-servers-genai-toolbox-for-databases"
+   },
+   {
+    "level": 3,
+    "text": "4.3 Integrating Third-Party SaaS MCP Servers (ServiceNow, Salesforce, Jira)",
+    "id": "43-integrating-third-party-saas-mcp-servers-servicenow-salesforce-jira"
+   },
+   {
+    "level": 2,
+    "text": "5. Architectural Comparison: Enterprise Grounding Mechanisms",
+    "id": "5-architectural-comparison-enterprise-grounding-mechanisms"
+   },
+   {
+    "level": 2,
+    "text": "6. Exam Traps & Anti-Patterns (Must-Know for PAA Exam)",
+    "id": "6-exam-traps-anti-patterns-must-know-for-paa-exam"
+   }
+  ]
+ },
+ {
+  "id": "d3-orchestration",
+  "file": "05-orchestration-a2a.md",
+  "title": "Section 3C: Multi-Agent Orchestration & Agent2Agent (A2A) Protocol",
+  "domain": 3,
+  "order": 6,
+  "minutes": 14,
+  "summary": "Designing multi-agent topologies (parallel, sequential, hierarchical, cyclic/DAG graphs) and implementing the open Agent2Agent (A2A) interoperability protocol on Agent Runtime.",
+  "words": 3060,
+  "outline": [
+   {
+    "level": 2,
+    "text": "1. Multi-Agent Topologies & Design Patterns",
+    "id": "1-multi-agent-topologies-design-patterns"
+   },
+   {
+    "level": 3,
+    "text": "1.1 Architectural Comparison of Multi-Agent Topologies",
+    "id": "11-architectural-comparison-of-multi-agent-topologies"
+   },
+   {
+    "level": 3,
+    "text": "1.2 Implementing Hierarchical Delegation vs. Agent-as-a-Tool in ADK",
+    "id": "12-implementing-hierarchical-delegation-vs-agent-as-a-tool-in-adk"
+   },
+   {
+    "level": 2,
+    "text": "2. Loop Prevention, Cycle Guardrails & State Handoffs",
+    "id": "2-loop-prevention-cycle-guardrails-state-handoffs"
+   },
+   {
+    "level": 3,
+    "text": "2.1 Five Defense-in-Depth Guardrails Against Infinite Reasoning Loops",
+    "id": "21-five-defense-in-depth-guardrails-against-infinite-reasoning-loops"
+   },
+   {
+    "level": 3,
+    "text": "2.2 State Handoff Contracts & Context Window Pruning",
+    "id": "22-state-handoff-contracts-context-window-pruning"
+   },
+   {
+    "level": 2,
+    "text": "3. The Agent2Agent (A2A) Interoperability Protocol",
+    "id": "3-the-agent2agent-a2a-interoperability-protocol"
+   },
+   {
+    "level": 3,
+    "text": "3.1 A2A vs. MCP: The Fundamental Architectural Boundary",
+    "id": "31-a2a-vs-mcp-the-fundamental-architectural-boundary"
+   },
+   {
+    "level": 3,
+    "text": "3.2 Agent Discovery & The Agent Card Specification (`/.well-known/agent.json`)",
+    "id": "32-agent-discovery-the-agent-card-specification-well-knownagentjson"
+   },
+   {
+    "level": 3,
+    "text": "3.3 The A2A Task Lifecycle & State Machine",
+    "id": "33-the-a2a-task-lifecycle-state-machine"
+   },
+   {
+    "level": 3,
+    "text": "3.4 Synchronous Polling, SSE Streaming & Asynchronous Push Notifications",
+    "id": "34-synchronous-polling-sse-streaming-asynchronous-push-notifications"
+   },
+   {
+    "level": 3,
+    "text": "3.5 Cross-Organization Security & Identity in A2A",
+    "id": "35-cross-organization-security-identity-in-a2a"
+   },
+   {
+    "level": 2,
+    "text": "4. Architectural Decision Tree: Selecting Topologies & Protocols",
+    "id": "4-architectural-decision-tree-selecting-topologies-protocols"
+   },
+   {
+    "level": 2,
+    "text": "5. Exam Traps & Anti-Patterns (Must-Know for PAA Exam)",
+    "id": "5-exam-traps-anti-patterns-must-know-for-paa-exam"
+   }
+  ]
+ },
+ {
+  "id": "d4-eval-deploy",
+  "file": "06-evaluation-deployment.md",
+  "title": "Section 4: Evaluating, Deploying & Observing Agentic Workflows",
+  "domain": 4,
+  "order": 7,
+  "minutes": 16,
+  "summary": "Evaluating agent quality using ADK evalset and Gen AI Evaluation Service, deploying on Agent Runtime vs Cloud Run vs GKE, and tracing reasoning loops with Cloud Trace and Cloud Logging.",
+  "words": 3486,
+  "outline": [
+   {
+    "level": 2,
+    "text": "1. Architectural Foundations of Agentic Evaluation & Deployment",
+    "id": "1-architectural-foundations-of-agentic-evaluation-deployment"
+   },
+   {
+    "level": 2,
+    "text": "2. Evaluation Frameworks: `ADK evalset` vs. `Gen AI Evaluation Service`",
+    "id": "2-evaluation-frameworks-adk-evalset-vs-gen-ai-evaluation-service"
+   },
+   {
+    "level": 3,
+    "text": "2.1 `ADK evalset`: Deterministic Trajectory & Tool-Execution CI Testing",
+    "id": "21-adk-evalset-deterministic-trajectory-tool-execution-ci-testing"
+   },
+   {
+    "level": 3,
+    "text": "2.2 `Gen AI Evaluation Service`: Cloud-Scale Batch & Semantic Evaluation",
+    "id": "22-gen-ai-evaluation-service-cloud-scale-batch-semantic-evaluation"
+   },
+   {
+    "level": 3,
+    "text": "2.3 Architectural Comparison Matrix: `ADK evalset` vs. `Gen AI Evaluation Service`",
+    "id": "23-architectural-comparison-matrix-adk-evalset-vs-gen-ai-evaluation-service"
+   },
+   {
+    "level": 2,
+    "text": "3. Golden Dataset Curation & Trajectory Metrics",
+    "id": "3-golden-dataset-curation-trajectory-metrics"
+   },
+   {
+    "level": 3,
+    "text": "3.1 Anatomy of an Enterprise Golden Dataset",
+    "id": "31-anatomy-of-an-enterprise-golden-dataset"
+   },
+   {
+    "level": 3,
+    "text": "3.2 Mathematical Trajectory Evaluation Metrics",
+    "id": "32-mathematical-trajectory-evaluation-metrics"
+   },
+   {
+    "level": 2,
+    "text": "4. Custom LLM-as-a-Judge Autoraters & Rubric Calibration",
+    "id": "4-custom-llm-as-a-judge-autoraters-rubric-calibration"
+   },
+   {
+    "level": 3,
+    "text": "4.1 Pointwise vs. Pairwise Evaluation Paradigms",
+    "id": "41-pointwise-vs-pairwise-evaluation-paradigms"
+   },
+   {
+    "level": 3,
+    "text": "4.2 Mitigating Judge Biases & Calibration Architecture",
+    "id": "42-mitigating-judge-biases-calibration-architecture"
+   },
+   {
+    "level": 2,
+    "text": "5. Production Compute Selection: `Agent Runtime` vs. `Cloud Run` vs. `GKE`",
+    "id": "5-production-compute-selection-agent-runtime-vs-cloud-run-vs-gke"
+   },
+   {
+    "level": 3,
+    "text": "5.1 Deep Dive into Google Cloud Agentic Runtimes",
+    "id": "51-deep-dive-into-google-cloud-agentic-runtimes"
+   },
+   {
+    "level": 3,
+    "text": "5.2 Compute Platform Selection Matrix",
+    "id": "52-compute-platform-selection-matrix"
+   },
+   {
+    "level": 2,
+    "text": "6. Observability, Reasoning Loop Diagnostics & Drift Detection",
+    "id": "6-observability-reasoning-loop-diagnostics-drift-detection"
+   },
+   {
+    "level": 3,
+    "text": "6.1 Distributed Tracing with `Cloud Trace` & OpenTelemetry",
+    "id": "61-distributed-tracing-with-cloud-trace-opentelemetry"
+   },
+   {
+    "level": 3,
+    "text": "6.2 Diagnosing & Breaking Infinite Agent Reasoning Loops",
+    "id": "62-diagnosing-breaking-infinite-agent-reasoning-loops"
+   },
+   {
+    "level": 3,
+    "text": "6.3 Detecting Concept Drift, Hallucinations & Token Anomalies with `Cloud Logging`",
+    "id": "63-detecting-concept-drift-hallucinations-token-anomalies-with-cloud-logging"
+   },
+   {
+    "level": 2,
+    "text": "7. Exam Traps & Architectural Anti-Patterns",
+    "id": "7-exam-traps-architectural-anti-patterns"
+   }
+  ]
+ },
+ {
+  "id": "d5-security",
+  "file": "07-security-governance.md",
+  "title": "Section 5: Securing & Governing Enterprise Agentic Workflows",
+  "domain": 5,
+  "order": 8,
+  "minutes": 16,
+  "summary": "Enforcing least-privilege access with Auth Manager, Principal Access Boundary (PAB), Agent Identity, Agent Gateway, Model Armor guardrails, HITL, and Sensitive Data Protection (DLP).",
+  "words": 3492,
+  "outline": [
+   {
+    "level": 2,
+    "text": "1. The Enterprise Agentic Threat Landscape & Zero-Trust Architecture",
+    "id": "1-the-enterprise-agentic-threat-landscape-zero-trust-architecture"
+   },
+   {
+    "level": 2,
+    "text": "2. Identity, Authentication & The Confused Deputy Problem",
+    "id": "2-identity-authentication-the-confused-deputy-problem"
+   },
+   {
+    "level": 3,
+    "text": "2.1 `Agent Identity`: Granular Cryptographic Agent Principals",
+    "id": "21-agent-identity-granular-cryptographic-agent-principals"
+   },
+   {
+    "level": 3,
+    "text": "2.2 `Auth Manager` (OAuth 2.0): User-Delegated vs. Service-to-Service Auth",
+    "id": "22-auth-manager-oauth-20-user-delegated-vs-service-to-service-auth"
+   },
+   {
+    "level": 3,
+    "text": "2.3 `Principal Access Boundary (PAB)` Policies & End-to-End Identity Propagation",
+    "id": "23-principal-access-boundary-pab-policies-end-to-end-identity-propagation"
+   },
+   {
+    "level": 2,
+    "text": "3. Centralized Traffic Governance: `Agent Gateway` & `Agent Registry`",
+    "id": "3-centralized-traffic-governance-agent-gateway-agent-registry"
+   },
+   {
+    "level": 3,
+    "text": "3.1 `Agent Gateway`: The Central Agentic Control Proxy",
+    "id": "31-agent-gateway-the-central-agentic-control-proxy"
+   },
+   {
+    "level": 3,
+    "text": "3.2 `Agent Registry`: Enterprise Capability & Policy Catalog",
+    "id": "32-agent-registry-enterprise-capability-policy-catalog"
+   },
+   {
+    "level": 2,
+    "text": "4. Runtime Safety Guardrails: `Model Armor` & `Human-in-the-Loop (HITL)`",
+    "id": "4-runtime-safety-guardrails-model-armor-human-in-the-loop-hitl"
+   },
+   {
+    "level": 3,
+    "text": "4.1 `Model Armor`: Inline Adversarial Defense & Content Safety",
+    "id": "41-model-armor-inline-adversarial-defense-content-safety"
+   },
+   {
+    "level": 3,
+    "text": "4.2 Designing Deterministic `Human-in-the-Loop (HITL)` Approval Workflows",
+    "id": "42-designing-deterministic-human-in-the-loop-hitl-approval-workflows"
+   },
+   {
+    "level": 2,
+    "text": "5. Data Privacy & RAG Protection: `Sensitive Data Protection (DLP)`",
+    "id": "5-data-privacy-rag-protection-sensitive-data-protection-dlp"
+   },
+   {
+    "level": 3,
+    "text": "5.1 De-Identification Transformation Techniques",
+    "id": "51-de-identification-transformation-techniques"
+   },
+   {
+    "level": 3,
+    "text": "5.2 Dual-Plane DLP Architecture for Agentic Workflows",
+    "id": "52-dual-plane-dlp-architecture-for-agentic-workflows"
+   },
+   {
+    "level": 2,
+    "text": "6. Exam Traps & Architectural Anti-Patterns",
+    "id": "6-exam-traps-architectural-anti-patterns"
+   }
+  ]
+ },
+ {
+  "id": "case-studies",
+  "file": "08-case-studies.md",
+  "title": "Enterprise Agentic Case Studies Deep-Dive & Architecture Blueprints",
+  "domain": 0,
+  "order": 9,
+  "minutes": 16,
+  "summary": "Complete architectural analysis, requirement-to-service mappings, target topologies, and exam traps for all six official PAA enterprise case studies.",
+  "words": 3511,
+  "outline": [
+   {
+    "level": 2,
+    "text": "Master Cross-Case Architectural Matrix",
+    "id": "master-cross-case-architectural-matrix"
+   },
+   {
+    "level": 2,
+    "text": "Case Study 1: FinServe Global",
+    "id": "case-study-1-finserve-global"
+   },
+   {
+    "level": 3,
+    "text": "1.1 Executive Summary & Architectural Vision",
+    "id": "11-executive-summary-architectural-vision"
+   },
+   {
+    "level": 3,
+    "text": "1.2 Requirement-to-GCP-Service Blueprint",
+    "id": "12-requirement-to-gcp-service-blueprint"
+   },
+   {
+    "level": 3,
+    "text": "1.3 Target Architecture & Security Governance Model",
+    "id": "13-target-architecture-security-governance-model"
+   },
+   {
+    "level": 3,
+    "text": "1.4 Top Exam Traps \u2014 FinServe Global",
+    "id": "14-top-exam-traps-finserve-global"
+   },
+   {
+    "level": 2,
+    "text": "Case Study 2: Cymbal OmniRetail",
+    "id": "case-study-2-cymbal-omniretail"
+   },
+   {
+    "level": 3,
+    "text": "2.1 Executive Summary & Architectural Vision",
+    "id": "21-executive-summary-architectural-vision"
+   },
+   {
+    "level": 3,
+    "text": "2.2 Requirement-to-GCP-Service Blueprint",
+    "id": "22-requirement-to-gcp-service-blueprint"
+   },
+   {
+    "level": 3,
+    "text": "2.3 Target Architecture & Interoperability Model",
+    "id": "23-target-architecture-interoperability-model"
+   },
+   {
+    "level": 3,
+    "text": "2.4 Top Exam Traps \u2014 Cymbal OmniRetail",
+    "id": "24-top-exam-traps-cymbal-omniretail"
+   },
+   {
+    "level": 2,
+    "text": "Case Study 3: Apex BioHealth",
+    "id": "case-study-3-apex-biohealth"
+   },
+   {
+    "level": 3,
+    "text": "3.1 Executive Summary & Architectural Vision",
+    "id": "31-executive-summary-architectural-vision"
+   },
+   {
+    "level": 3,
+    "text": "3.2 Requirement-to-GCP-Service Blueprint",
+    "id": "32-requirement-to-gcp-service-blueprint"
+   },
+   {
+    "level": 3,
+    "text": "3.3 Target Architecture & Clinical Verification Pattern",
+    "id": "33-target-architecture-clinical-verification-pattern"
+   },
+   {
+    "level": 3,
+    "text": "3.4 Top Exam Traps \u2014 Apex BioHealth",
+    "id": "34-top-exam-traps-apex-biohealth"
+   },
+   {
+    "level": 2,
+    "text": "Case Study 4: DevVelocity Cloud",
+    "id": "case-study-4-devvelocity-cloud"
+   },
+   {
+    "level": 3,
+    "text": "4.1 Executive Summary & Architectural Vision",
+    "id": "41-executive-summary-architectural-vision"
+   },
+   {
+    "level": 3,
+    "text": "4.2 Requirement-to-GCP-Service Blueprint",
+    "id": "42-requirement-to-gcp-service-blueprint"
+   },
+   {
+    "level": 3,
+    "text": "4.3 Target Architecture & Coding Agent Governance",
+    "id": "43-target-architecture-coding-agent-governance"
+   },
+   {
+    "level": 3,
+    "text": "4.4 Top Exam Traps \u2014 DevVelocity Cloud",
+    "id": "44-top-exam-traps-devvelocity-cloud"
+   },
+   {
+    "level": 2,
+    "text": "Case Study 5: AeroLogistics Fleet",
+    "id": "case-study-5-aerologistics-fleet"
+   },
+   {
+    "level": 3,
+    "text": "5.1 Executive Summary & Architectural Vision",
+    "id": "51-executive-summary-architectural-vision"
+   },
+   {
+    "level": 3,
+    "text": "5.2 Requirement-to-GCP-Service Blueprint",
+    "id": "52-requirement-to-gcp-service-blueprint"
+   },
+   {
+    "level": 3,
+    "text": "5.3 Target Architecture & Real-Time Loop Protection",
+    "id": "53-target-architecture-real-time-loop-protection"
+   },
+   {
+    "level": 3,
+    "text": "5.4 Top Exam Traps \u2014 AeroLogistics Fleet",
+    "id": "54-top-exam-traps-aerologistics-fleet"
+   },
+   {
+    "level": 2,
+    "text": "Case Study 6: MediaPulse Network",
+    "id": "case-study-6-mediapulse-network"
+   },
+   {
+    "level": 3,
+    "text": "6.1 Executive Summary & Architectural Vision",
+    "id": "61-executive-summary-architectural-vision"
+   },
+   {
+    "level": 3,
+    "text": "6.2 Requirement-to-GCP-Service Blueprint",
+    "id": "62-requirement-to-gcp-service-blueprint"
+   },
+   {
+    "level": 3,
+    "text": "6.3 Target Architecture & Rights Governance Pipeline",
+    "id": "63-target-architecture-rights-governance-pipeline"
+   },
+   {
+    "level": 3,
+    "text": "6.4 Top Exam Traps \u2014 MediaPulse Network",
+    "id": "64-top-exam-traps-mediapulse-network"
+   }
+  ]
+ }
+]

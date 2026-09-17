@@ -1,0 +1,733 @@
+[
+  {
+    "id": "cs-aer-001",
+    "domain": 3,
+    "topic": "Multi-Agent Graph Workflows in ADK",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. A sudden typhoon in the Western Pacific triggers severe airspace closures affecting 400 autonomous cargo drones carrying cold-chain medical supplies. You need to architect the core dispatch workflow in the Agent Development Kit (ADK) so that weather analysis, battery/fuel calculations, and FAA/EASA airspace checks execute concurrently, followed by a mandatory sequential safety verification gate before any trajectory update is dispatched to the aircraft. What should you do?",
+    "options": [
+      "Define a Directed Acyclic Graph (DAG) workflow in ADK using a ParallelAgent node containing the Weather Forecaster, Fuel/Battery Optimizer, and Airspace Compliance agents, connected downstream to a SequentialAgent that invokes the Safety Verification and Customs Clearance agents.",
+      "Configure a single monolithic Gemini 1.5 Pro prompt in Gemini Enterprise Agent Designer that sequentially queries weather, battery, and airspace APIs in a single chain-of-thought loop.",
+      "Deploy four independent Cloud Run microservices that poll Pub/Sub topics independently and write unvalidated trajectory updates directly to Memorystore for Redis.",
+      "Use a cyclic A2A (Agent2Agent) broadcast topology where every specialized agent can directly command autonomous aircraft propulsion systems as soon as its local calculation completes."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "ADK supports composable multi-agent orchestration primitives including ParallelAgent and SequentialAgent within a graph workflow. Running Weather Forecaster, Fuel/Battery Optimizer, and Airspace Compliance concurrently inside a ParallelAgent minimizes latency (helping meet the <800ms p99 SLA), while chaining their aggregated state into a SequentialAgent ensures deterministic safety and customs verification before any flight trajectory is dispatched.",
+    "whyWrong": {
+      "1": "A single sequential chain-of-thought prompt increases latency dramatically and cannot execute independent tool/agent evaluations concurrently.",
+      "2": "Writing unvalidated trajectory updates directly to Redis bypasses the mandatory safety verification gate required by FAA/EASA compliance.",
+      "3": "Allowing uncoordinated cyclic broadcasts to directly command aircraft without a sequential safety gate risks regulatory violations and mid-air conflicts."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit",
+      "https://cloud.google.com/agent-builder/docs/orchestration"
+    ]
+  },
+  {
+    "id": "cs-aer-002",
+    "domain": 3,
+    "topic": "SLM vs. LLM Model Selection & Hybrid Routing",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. AeroLogistics must keep p99 dispatch decision latency under 800 milliseconds for routine edge rerouting while still handling complex multi-hub cross-modal conflicts when severe storms shut down entire regional ports. How should you architect the model serving and routing layer to meet both performance and cost requirements?",
+    "options": [
+      "Route all 500,000 telemetry events per second directly to Gemini 1.5 Pro with a 2-million-token context window to ensure maximum reasoning depth on every edge update.",
+      "Deploy fine-tuned Small Language Models (SLMs) on GKE clusters equipped with GPUs/TPUs near regional dispatch hubs for sub-second edge routing, and configure an ADK router to escalate only multi-hub cross-modal anomalies to Gemini 1.5 Pro.",
+      "Deploy open-source 70B parameter LLMs on CPU-only Cloud Run instances in a single central region to minimize GPU licensing costs.",
+      "Replace all neural language models with static SQL stored procedures in BigQuery to guarantee deterministic sub-second query execution."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The AeroLogistics technical requirements explicitly call for deploying fine-tuned Small Language Models (SLMs) on GKE with GPUs/TPUs for sub-second (<800ms p99) edge routing decisions, while selectively escalating complex multi-hub cross-modal conflict resolution to Gemini 1.5 Pro. This hybrid tiering balances strict real-time edge latency with high-order reasoning capability and prevents runaway token costs.",
+    "whyWrong": {
+      "0": "Sending every high-frequency telemetry event to Gemini 1.5 Pro violates the 800ms p99 latency requirement and causes astronomical token spending.",
+      "2": "Running 70B parameter models on CPU-only Cloud Run instances will suffer from severe inference latency far exceeding 800 milliseconds.",
+      "3": "Static SQL heuristics cannot dynamically reason over unstructured weather advisories, customs rules, and cross-modal handoffs."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-selection"
+    ]
+  },
+  {
+    "id": "cs-aer-003",
+    "domain": 4,
+    "topic": "Execution Guardrails & Preventing Infinite Reasoning Loops",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. During early prototypes, cyclic negotiation between the Fuel/Battery Optimizer Agent and Airspace Compliance Agent resulted in unbounded reasoning loops, 15-second latency spikes, and runaway token costs when no valid flight path existed around a storm cell. Which two architectural guardrails should you implement to eliminate this failure mode? (Choose two.)",
+    "options": [
+      "Configure hard maximum reasoning step limits (max_steps) and wall-clock timeout circuit breakers on the ADK cyclic graph executor.",
+      "Increase the LLM temperature parameter to 1.0 so the agents generate creative flight trajectories faster.",
+      "Implement a deterministic fallback heuristic handler that triggers automatically when the step budget or timeout circuit breaker is tripped, routing aircraft to the nearest designated holding hub.",
+      "Disable Cloud Trace instrumentation during storm events to reduce network overhead between agents.",
+      "Allow the Fuel/Battery Optimizer Agent to override FAA airspace restrictions whenever battery reserves drop below 30%."
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "To prevent unbounded cyclic negotiation loops and 15-second latency spikes, ADK graph workflows must be configured with hard maximum reasoning step budgets (max_steps) and strict tool/agent timeout circuit breakers. When an unsolvable constraint occurs and the circuit breaker trips, the orchestrator must immediately invoke a deterministic fallback heuristic (such as routing to a safe holding hub) rather than continuing to burn tokens.",
+    "whyWrong": {
+      "1": "Increasing temperature to 1.0 introduces stochastic instability and increases the risk of hallucinated flight paths without bounding loop iterations.",
+      "3": "Disabling Cloud Trace removes critical real-time observability required by fleet operations directors and does not solve infinite agent reasoning loops.",
+      "4": "Overriding FAA/EASA airspace restrictions violates strict business and regulatory compliance requirements."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/guardrails",
+      "https://cloud.google.com/architecture/ai-ml/agent-design-patterns"
+    ]
+  },
+  {
+    "id": "cs-aer-004",
+    "domain": 3,
+    "topic": "Session State & Shared Scratchpad Architecture",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. When coordinating a cross-modal handoff between an incoming cargo drone and a ground electric vehicle (EV) courier, four specialized agents need sub-millisecond read/write access to ephemeral flight telemetry scratchpads while preserving long-term historical incident context across regional hubs. How should you configure the memory architecture?",
+    "options": [
+      "Store both high-frequency ephemeral scratchpads and long-term cross-hub memory in BigQuery tables using standard DML UPDATE statements.",
+      "Write ephemeral session state to Cloud Storage coldline buckets and query it via BigQuery external tables.",
+      "Use Memorystore for Redis as the low-latency shared scratchpad for active multi-agent session state, and persist long-term episodic cross-hub memory in Agent Platform Memory Bank.",
+      "Store all agent state exclusively inside browser cookies on the fleet operations director's dashboard."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "AeroLogistics requires sub-second (p99 < 800ms) dispatch coordination alongside multi-agent consensus. Memorystore for Redis provides sub-millisecond in-memory read/write performance ideal for high-frequency shared scratchpads during active graph execution, while Agent Platform Memory Bank manages structured long-term episodic memory and cross-session recall across regional dispatch hubs.",
+    "whyWrong": {
+      "0": "BigQuery DML operations have high latency (seconds) and concurrency limits unsuitable for sub-millisecond agent scratchpad updates.",
+      "1": "Cloud Storage Coldline is designed for infrequent archival storage and introduces high latency and retrieval costs.",
+      "3": "Client-side browser cookies cannot serve autonomous server-side multi-agent telemetry workflows."
+    },
+    "refs": [
+      "https://cloud.google.com/memorystore/docs/redis/overview",
+      "https://cloud.google.com/agent-builder/docs/memory-bank"
+    ]
+  },
+  {
+    "id": "cs-aer-005",
+    "domain": 4,
+    "topic": "Distributed Trajectory Tracing & Observability",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. Fleet operations directors need real-time observability into multi-agent consensus, handoff latency bottlenecks, token consumption per agent node, and tool invocation failures whenever severe weather triggers global rerouting. How should you instrument the ADK dispatch system?",
+    "options": [
+      "Configure agents to send an email via third-party SMTP servers after every tool call.",
+      "Write print statements to local container stdout and manually SSH into GKE nodes to inspect Docker logs after a storm passes.",
+      "Take hourly snapshots of Memorystore for Redis and load them into Cloud SQL for offline batch reporting.",
+      "Instrument the ADK agents with OpenTelemetry SDKs exporting distributed trace spans and custom token/latency attributes to Cloud Trace and Cloud Logging, propagating trace context across all A2A and MCP handoffs."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "OpenTelemetry integrated with Cloud Trace and Cloud Logging enables end-to-end distributed trajectory tracking across asynchronous multi-agent workflows. By propagating W3C trace context across ADK agent nodes, A2A messages, and MCP tool calls, operations directors can visualize exact p99 latency bottlenecks, token spikes, and fallback activations in real time.",
+    "whyWrong": {
+      "1": "Manual SSH log inspection is unscalable, lacks distributed trace correlation, and fails to provide real-time observability.",
+      "2": "Hourly Redis snapshots miss transient sub-second agent handoffs and provide no real-time trace visibility.",
+      "0": "Sending emails per tool call at 500,000 events/second would overwhelm mail servers and add unacceptable latency."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/setup/opentelemetry",
+      "https://cloud.google.com/stackdriver/docs/instrumentation/ai-agent-observability"
+    ]
+  },
+  {
+    "id": "cs-aer-006",
+    "domain": 5,
+    "topic": "Global Traffic Management, Load Shedding & Rate Limiting",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. During a category-5 hurricane in the Atlantic, millions of concurrent re-planning requests are triggered simultaneously across maritime vessels, cargo drones, and ground freight. You must protect backend Gemini 1.5 Pro quotas and prevent runaway cloud spending while ensuring critical cold-chain medical shipments receive priority routing. What should you configure?",
+    "options": [
+      "Deploy Agent Gateway in front of multi-region Cloud Run and GKE agent endpoints with priority-aware rate limiting, token bucket quotas, and automated load shedding that drops non-critical industrial freight re-planning during surge events.",
+      "Disable all authentication and TLS encryption on GKE ingress controllers to maximize packet throughput.",
+      "Delete the Pub/Sub telemetry subscription whenever CPU utilization exceeds 60%.",
+      "Hardcode a static sleep(10) delay inside every agent's Python code to slow down token consumption."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Agent Gateway provides centralized traffic governance, rate limiting, token quota enforcement, and priority load shedding across multi-region agent deployments. By classifying incoming requests by cargo criticality (e.g., prioritizing cold-chain medical supplies over standard industrial freight), Agent Gateway prevents runaway LLM costs and protects p99 SLAs during global storm surges.",
+    "whyWrong": {
+      "1": "Disabling authentication and TLS violates security requirements and does not manage LLM token quotas or prioritize critical cargo.",
+      "2": "Deleting the telemetry subscription blinds the entire fleet dispatch system, risking loss of life-critical medical cargo.",
+      "3": "Adding a static 10-second sleep violates the strict <800ms p99 dispatch latency SLA."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/agent-gateway",
+      "https://cloud.google.com/architecture/rate-limiting-strategies-techniques"
+    ]
+  },
+  {
+    "id": "cs-aer-007",
+    "domain": 5,
+    "topic": "Regulatory Compliance & Policy Guardrails",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. The Airspace Compliance Agent and Customs Clearance Agent must strictly obey FAA/EASA flight rules and international customs embargo regulations. You need to guarantee that even if an LLM hallucinates an unauthorized shortcut through restricted military airspace or sanctioned territory, the action is blocked before execution. What should you implement?",
+    "options": [
+      "Rely exclusively on a polite system prompt instructing the model to always respect international aviation law.",
+      "Enforce deterministic policy guardrails using Model Armor and Agent Registry policy gates that validate every proposed flight waypoint and customs manifest against authoritative geospatial and regulatory rule engines before tool execution.",
+      "Allow autonomous drones to fly the proposed trajectory first and log any regulatory violations in BigQuery for monthly legal review.",
+      "Set the LLM top_k parameter to 40 to prevent regulatory violations."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "For safety-critical and legally regulated operations like FAA/EASA flight compliance and customs clearance, probabilistic system prompts are insufficient. Combining Model Armor policy enforcement with deterministic pre-execution validation hooks registered in Agent Registry ensures that any trajectory intersecting restricted airspace or sanctioned jurisdictions is blocked before tool execution.",
+    "whyWrong": {
+      "0": "System prompts alone are vulnerable to edge-case hallucinations and cannot provide a hard deterministic compliance guarantee.",
+      "2": "Post-facto logging after violating restricted military airspace or international sanctions causes severe legal and safety consequences.",
+      "3": "Sampling parameters like top_k control token selection diversity but do not enforce geospatial or legal compliance."
+    },
+    "refs": [
+      "https://cloud.google.com/model-armor/docs/overview",
+      "https://cloud.google.com/agent-builder/docs/agent-registry-governance"
+    ]
+  },
+  {
+    "id": "cs-aer-008",
+    "domain": 3,
+    "topic": "Real-Time Telemetry Ingestion & Streaming Context",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. Fleet telemetry streams at 500,000 events/second into Pub/Sub and BigQuery, capturing GPS coordinates, battery degradation, and cold-chain cargo temperature. How should you feed relevant real-time anomaly triggers to the ADK dispatch agents without overwhelming agent context windows?",
+    "options": [
+      "Stream all 500,000 raw JSON telemetry events per second directly into the prompt context of the Weather Forecaster Agent.",
+      "Export BigQuery tables to CSV files once every 24 hours and upload them manually to Gemini Enterprise.",
+      "Use Dataflow streaming pipelines to aggregate Pub/Sub telemetry, update real-time vehicle state in Memorystore for Redis, and emit structured anomaly events only when thresholds (such as cold-chain temperature drift or rapid battery drain) are breached.",
+      "Store telemetry exclusively in local container memory on Cloud Run."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Feeding 500,000 raw telemetry events per second directly into LLM prompts is impossible due to context window limits, latency, and token cost. Filtering and aggregating high-velocity Pub/Sub streams via Dataflow to update low-latency state in Memorystore for Redis—and triggering agent workflows only on meaningful state transitions or threshold anomalies—keeps agent invocations focused, fast, and cost-effective.",
+    "whyWrong": {
+      "0": "Streaming 500,000 events/sec into an LLM context window immediately exceeds token limits and causes massive latency and cost.",
+      "1": "24-hour batch exports cannot support sub-second (<800ms) real-time autonomous fleet rerouting.",
+      "3": "Local container memory on stateless Cloud Run instances is ephemeral and cannot aggregate global 500k events/sec streams."
+    },
+    "refs": [
+      "https://cloud.google.com/dataflow/docs/guides/streaming-pipelines",
+      "https://cloud.google.com/memorystore/docs/redis/real-time-feature-store"
+    ]
+  },
+  {
+    "id": "cs-aer-009",
+    "domain": 2,
+    "topic": "Modernizing Legacy Heuristics Using Coding Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. AeroLogistics software engineers are migrating legacy C++ and Java heuristic routing modules into containerized Python ADK microservices. They want to accelerate code refactoring, generate unit tests for edge-case weather disruptions, and patch vulnerabilities without exposing proprietary fleet algorithms to public internet endpoints. What should they do?",
+    "options": [
+      "Paste proprietary C++ source code into public consumer AI web chat interfaces from unmanaged personal laptops.",
+      "Rewrite the entire codebase manually without automated test coverage to meet the project deadline.",
+      "Disable all static code analysis tools and deploy unverified legacy binaries directly to Cloud Run.",
+      "Deploy Antigravity coding agents inside secure Google Kubernetes Engine (GKE) or Cloud Workstations sandboxes configured with private MCP servers connecting to internal Git repositories and artifact registries."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Using Antigravity coding agents inside secure Google Cloud sandboxes (Cloud Workstations or private GKE clusters) with internal Model Context Protocol (MCP) connections allows developers to refactor legacy heuristic code into ADK microservices, generate high-coverage unit tests, and remediate vulnerabilities while keeping proprietary algorithms within VPC Service Controls boundaries.",
+    "whyWrong": {
+      "0": "Pasting proprietary code into public consumer web chats risks severe intellectual property leakage and violates enterprise governance.",
+      "2": "Deploying unverified legacy binaries without static analysis introduces security vulnerabilities and runtime instability.",
+      "1": "Manual rewriting without automated testing slows velocity and risks regressions in life-critical cold-chain routing logic."
+    },
+    "refs": [
+      "https://cloud.google.com/workstations/docs/overview",
+      "https://cloud.google.com/agent-builder/docs/coding-agents"
+    ]
+  },
+  {
+    "id": "cs-aer-010",
+    "domain": 3,
+    "topic": "Agent-to-Agent (A2A) Cross-Modal Handoff Protocol",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. When an autonomous cargo drone carrying semiconductor components approaches a coastal hub during high winds, the Airspace Dispatch Agent must coordinate a precision handoff with a regional Ground EV Courier Agent operated by an external logistics partner. How should you architect the inter-agent communication to ensure standardized, authenticated, and schema-validated handoffs?",
+    "options": [
+      "Use the standardized Agent2Agent (A2A) protocol over mTLS with Agent Identity tokens and JSON Schema-validated task contracts to negotiate arrival coordinates, battery state, and cold-chain transfer custody.",
+      "Have the drone agent post unencrypted plain-text messages to a public IRC channel monitored by ground drivers.",
+      "Share the internal Memorystore for Redis root password with the external logistics partner so their scripts can read raw memory keys.",
+      "Use screen-scraping bots to read the external partner's public marketing website every 5 minutes."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The Agent2Agent (A2A) protocol enables interoperable, asynchronous task delegation and negotiation between distinct autonomous agents across organizational boundaries. Securing A2A over mTLS with Google Cloud Agent Identity and strict JSON Schema payload validation ensures cryptographic non-repudiation, least-privilege access, and deterministic cross-modal handoffs.",
+    "whyWrong": {
+      "1": "Public plain-text IRC channels expose sensitive cargo telemetry and lack authentication or structured schema guarantees.",
+      "2": "Sharing internal Redis root credentials with external partners violates Principal Access Boundary (PAB) and zero-trust security principles.",
+      "3": "Screen-scraping marketing websites every 5 minutes cannot support sub-second real-time vehicle handoffs."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/a2a-protocol",
+      "https://cloud.google.com/iam/docs/agent-identity"
+    ]
+  },
+  {
+    "id": "cs-aer-011",
+    "domain": 1,
+    "topic": "Low-Code Operator Console & HITL Exception Handling",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. Fleet operations directors need an interactive conversational command console where they can inspect live multi-agent consensus recommendations during geopolitical airspace closures and issue Human-in-the-Loop (HITL) approvals or overrides using natural language. Which Google Cloud low-code tool should you use to build this state-based supervisor workflow?",
+    "options": [
+      "Cloud Storage static website hosting with hardcoded HTML tables updated once a week.",
+      "Customer Experience Agent Studio (CX Agent Studio) configured with deterministic state pages for 'Pending Review', 'Approved', and 'Manual Override', bound to webhook event handlers that invoke the ADK dispatch orchestrator.",
+      "Cloud SQL query editor accessed directly by operations directors running manual DELETE statements.",
+      "An unmanaged open-source forum software hosted on a single preemptible Compute Engine VM."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "CX Agent Studio allows rapid low-code creation of state-based conversational workflows using Pages, Transition Routes, and Event Handlers. Operations directors can converse with the supervisor agent to review multi-agent consensus rationales, while deterministic transition routes and webhooks enforce explicit Human-in-the-Loop (HITL) approval states before triggering ADK dispatch actions.",
+    "whyWrong": {
+      "0": "Static weekly HTML tables provide no real-time state management or interactive HITL override capability.",
+      "2": "Running manual SQL DELETE statements on production databases is error-prone, lacks conversational context, and risks data corruption.",
+      "3": "An unmanaged forum on a preemptible VM lacks high availability, state machine enforcement, and enterprise security."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/page",
+      "https://cloud.google.com/agent-builder/docs/cx-agent-studio"
+    ]
+  },
+  {
+    "id": "cs-aer-012",
+    "domain": 4,
+    "topic": "Continuous Pre-Deployment & Production Evaluation",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. Before deploying updated fine-tuned SLMs or modified ADK graph routing prompts to regional GKE clusters, you must verify that the system maintains 99.99% cold-chain compliance, obeys all FAA/EASA airspace rules, and completes reasoning within the 800ms p99 latency budget across 1,000 historical storm scenarios. What should you do?",
+    "options": [
+      "Deploy the changes directly to production during peak traffic and monitor whether any aircraft crash or violate airspace.",
+      "Ask three software developers to manually test five random prompts in a notebook before merging.",
+      "Construct a golden evaluation dataset of historical storm and cross-modal disruption trajectories, and execute automated CI/CD evaluation pipelines using ADK evalset tooling and custom autoraters that score safety compliance, tool call accuracy, and step latency.",
+      "Evaluate the model solely on standard academic NLP benchmarks like MMLU and GSM8K."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "ADK evalset tooling combined with the Agent Platform GenAI Evaluation Service allows engineering teams to run automated replay simulations against a golden dataset of complex historical edge cases. Custom autoraters and deterministic programmatic evaluators verify trajectory compliance, tool invocation accuracy, step counts, and p99 latency prior to production rollout.",
+    "whyWrong": {
+      "0": "Testing safety-critical aviation software in live production without pre-deployment validation endangers aircraft and cargo.",
+      "1": "Manual testing of five prompts is statistically insufficient to validate 99.99% reliability across global storm permutations.",
+      "3": "General academic benchmarks like MMLU do not measure geospatial FAA compliance, cold-chain constraints, or ADK tool invocation latency."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
+    ]
+  },
+  {
+    "id": "cs-aer-013",
+    "domain": 3,
+    "topic": "RAG Engine Grounding for Customs & Regulatory Tariffs",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. The Customs Clearance Agent must evaluate rapidly changing international customs regulations, hazardous material restrictions, and bilateral trade tariffs across 90 countries when rerouting cargo between international hubs. How should you architect the knowledge retrieval pipeline to ensure high accuracy and low latency?",
+    "options": [
+      "Retrain the base Gemini 1.5 Pro model weights from scratch every morning whenever a country updates its customs tariff schedule.",
+      "Allow the Customs Clearance Agent to use unverified public web search results from social media blogs.",
+      "Store all 90 countries' customs treaties in a single 50-megabyte text file and append it to every agent prompt.",
+      "Ingest authoritative customs and aviation regulatory documents into Vertex AI RAG Engine backed by Vector Search 1.0 with hybrid lexical/semantic search and cross-encoder reranking, exposing it as a grounded tool to the Customs Clearance Agent."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Vertex AI RAG Engine paired with Vector Search 1.0 provides sub-second hybrid retrieval (combining dense embeddings for semantic concepts with sparse lexical matching for exact tariff codes and regulatory statutes) plus reranking. This grounds the Customs Clearance Agent in up-to-date, authoritative regulatory text without the prohibitive cost and latency of full model retraining or massive context stuffing.",
+    "whyWrong": {
+      "0": "Retraining foundation model weights daily is prohibitively expensive, slow, and prone to catastrophic forgetting.",
+      "2": "Appending 50MB of text to every prompt violates latency SLAs (<800ms) and wastes millions of tokens per request.",
+      "1": "Relying on unverified social media blogs for customs compliance exposes AeroLogistics to severe legal penalties and cargo seizures."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview",
+      "https://cloud.google.com/vertex-ai/docs/vector-search/overview"
+    ]
+  },
+  {
+    "id": "cs-aer-014",
+    "domain": 5,
+    "topic": "Principal Access Boundary (PAB) & Least Privilege Identity",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. Regional dispatch agents deployed in European hubs should only be authorized to modify flight trajectories and access cold-chain telemetry for vehicles operating within European airspace, and must be blocked from altering flight plans in North American or Asian hubs. How should you enforce this security boundary?",
+    "options": [
+      "Provision dedicated Google Cloud Agent Identities for each regional dispatch agent and attach Principal Access Boundary (PAB) policies and IAM conditions that restrict tool execution and Memorystore/BigQuery resource access to their designated geographic jurisdiction.",
+      "Use a single global service account with Project Owner permissions for all regional agents across all 90 countries.",
+      "Rely on network firewall IP filtering alone while sharing the same OAuth 2.0 bearer token across all agents.",
+      "Ask regional dispatchers to promise not to query telemetry outside their assigned continent."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Principal Access Boundary (PAB) policies combined with Google Cloud Agent Identity enforce cryptographic least-privilege boundaries on autonomous agents. By binding regional attributes and IAM conditions to each agent's identity, even if an agent is compromised or experiences prompt injection, Google Cloud IAM blocks unauthorized cross-regional API or tool invocations.",
+    "whyWrong": {
+      "1": "A single global Project Owner service account violates least privilege and allows any regional agent to disrupt global operations.",
+      "2": "Sharing a single OAuth 2.0 bearer token prevents per-agent identity auditing and fails if requests traverse shared gateways.",
+      "3": "Organizational promises do not constitute technical security controls for autonomous software agents."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
+      "https://cloud.google.com/iam/docs/agent-identity"
+    ]
+  },
+  {
+    "id": "cs-aer-015",
+    "domain": 4,
+    "topic": "Multi-Region High Availability Deployment Architecture",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. To achieve 99.99% on-time delivery availability for critical cold-chain medical freight, the Graph Multi-Agent Dispatch System must withstand the complete outage of an entire Google Cloud region without losing active flight state or exceeding the 800ms p99 decision SLA. Which two architectural measures should you implement? (Choose two.)",
+    "options": [
+      "Deploy the stateless ADK orchestrator microservices and fine-tuned SLM inference endpoints across active-active multi-region GKE and Cloud Run clusters fronted by Cloud Load Balancing and Agent Gateway.",
+      "Deploy all dispatch agents in a single zonal Compute Engine instance group with manual snapshot backups.",
+      "Configure cross-region active-active replication for session and scratchpad state using Memorystore for Redis Cluster cross-region replication and multi-region Agent Platform Memory Bank.",
+      "Store active flight state only in local SSDs attached to individual GKE worker nodes.",
+      "Shut down autonomous flight operations globally whenever a single regional cloud zone experiences maintenance."
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "Achieving 99.99% availability and surviving full regional outages requires both compute redundancy (active-active multi-region GKE/Cloud Run deployments managed by global load balancing and Agent Gateway) and state durability (cross-region replicated Memorystore for Redis and multi-region Memory Bank so surviving regions can immediately resume in-flight agent graph execution).",
+    "whyWrong": {
+      "1": "A single zonal deployment has a single point of failure that causes prolonged downtime during zonal or regional outages.",
+      "3": "Local node SSDs are ephemeral; if a node or region fails, all active flight telemetry and negotiation state is permanently lost.",
+      "4": "Halting global medical freight operations during routine zone maintenance violates the 99.99% availability requirement."
+    },
+    "refs": [
+      "https://cloud.google.com/architecture/framework/reliability/multi-region-deployment",
+      "https://cloud.google.com/memorystore/docs/redis/high-availability"
+    ]
+  },
+  {
+    "id": "cs-aer-016",
+    "domain": 3,
+    "topic": "MCP Server Integration for Weather & Port Systems",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. The Weather Forecaster Agent and Fuel/Battery Optimizer Agent must query external meteorological radar APIs, maritime port congestion databases, and aviation NOTAM feeds. You want to decouple the agent reasoning logic from vendor-specific API schemas so data providers can be swapped without modifying ADK agent code. What should you do?",
+    "options": [
+      "Hardcode vendor-specific HTTP REST endpoints, XML parsers, and API keys directly inside the Python code of each ADK agent.",
+      "Implement standardized Model Context Protocol (MCP) servers that wrap external meteorological, port, and NOTAM APIs behind uniform tool schemas, and register them in Google Cloud Agent Registry.",
+      "Require external weather agencies to rewrite their mainframe software to match AeroLogistics' internal Python classes.",
+      "Store static weather forecasts from 2023 in local JSON files inside the container image."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Model Context Protocol (MCP) provides a standardized abstraction layer between AI agents and external data sources or tools. By wrapping third-party meteorological, port congestion, and NOTAM APIs in MCP servers registered in Agent Registry, ADK agents interact with consistent tool schemas and can seamlessly switch underlying providers without code changes.",
+    "whyWrong": {
+      "0": "Hardcoding vendor-specific parsers and credentials tightly couples agent code to external APIs and creates maintenance bottlenecks.",
+      "2": "External government weather agencies and port authorities will not rewrite their infrastructure for a single customer.",
+      "3": "Static historical weather files cannot support real-time autonomous storm avoidance."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/mcp-servers",
+      "https://modelcontextprotocol.io/introduction"
+    ]
+  },
+  {
+    "id": "cs-aer-017",
+    "domain": 5,
+    "topic": "Secure Agent-to-Tool Authentication with Auth Manager",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. When the Customs Clearance Agent submits electronic cargo manifests to international customs portals via MCP tools, it must authenticate using short-lived OAuth 2.0 access tokens scoped specifically to the customs authority of the destination country. How should you manage and inject these credentials?",
+    "options": [
+      "Store long-lived OAuth refresh tokens and client secrets in plain text inside the agent's system instructions.",
+      "Commit OAuth 2.0 private keys directly to the public GitHub repository hosting the ADK agent templates.",
+      "Use Google Cloud Auth Manager integrated with Secret Manager to dynamically mint, rotate, and inject short-lived, least-privilege OAuth 2.0 tokens into MCP tool execution requests at runtime.",
+      "Disable OAuth 2.0 authentication and transmit customs manifests over unencrypted HTTP."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Google Cloud Auth Manager (OAuth 2.0) provides centralized lifecycle management for agent-to-tool credentials. It securely stores secrets in Secret Manager and dynamically injects short-lived, narrowly scoped OAuth 2.0 access tokens during tool invocation without ever exposing raw credentials to the LLM context window or agent logs.",
+    "whyWrong": {
+      "0": "Putting secrets in system instructions exposes them to prompt injection leakage and Cloud Logging traces.",
+      "1": "Committing private keys to source control is a critical security vulnerability.",
+      "3": "International customs portals mandate strong cryptographic authentication and reject unauthenticated HTTP traffic."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/auth-manager",
+      "https://cloud.google.com/secret-manager/docs/overview"
+    ]
+  },
+  {
+    "id": "cs-aer-018",
+    "domain": 2,
+    "topic": "Customizing Antigravity with Agents CLI & Rules",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. AeroLogistics platform engineers want to standardize how development teams build and deploy new ADK subagents. They need every coding agent session in Antigravity to automatically enforce AeroLogistics architectural rules—such as requiring step-budget guardrails, OpenTelemetry trace spans, and sub-800ms timeout annotations on all generated agent code. What should they configure?",
+    "options": [
+      "Send weekly reminder emails to developers asking them to remember to add OpenTelemetry code.",
+      "Force developers to write machine code in assembly language without any IDE assistance.",
+      "Disable code reviews so developers can deploy untested agent prototypes faster.",
+      "Define custom workspace rules, extension hooks, and reusable skills in Antigravity, and use Agents CLI in CI/CD pipelines to lint, govern, and validate agent configurations before deployment."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Antigravity supports custom workspace rules, plugins, and extension hooks that guide coding agents during code generation to automatically include mandatory enterprise patterns (like OpenTelemetry tracing and step budgets). Augmenting this with Agents CLI in CI/CD pipelines ensures automated governance, validation, and scaling of deployed agents.",
+    "whyWrong": {
+      "0": "Manual email reminders rely on human memory and cannot prevent non-compliant code from reaching production.",
+      "2": "Disabling code reviews increases the likelihood of deploying unbounded agent loops and uninstrumented code.",
+      "1": "Writing assembly language is impractical for LLM agent orchestration and incompatible with ADK."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/agents-cli",
+      "https://cloud.google.com/agent-builder/docs/antigravity-customization"
+    ]
+  },
+  {
+    "id": "cs-aer-019",
+    "domain": 4,
+    "topic": "Troubleshooting Latency Spikes & Token Consumption",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. After a minor software update, Cloud Monitoring alerts indicate that p99 dispatch decision latency in the Southeast Asia hub has jumped from 450ms to 3,200ms, accompanied by a 400% spike in token usage. Using Cloud Trace trajectory graphs, you observe that the Weather Forecaster Agent is repeatedly invoking the Radar MCP tool 8 times per session with identical parameters. What is the most effective immediate remediation?",
+    "options": [
+      "Implement tool result caching in Memorystore for Redis keyed by spatial-temporal radar grid coordinates and configure an ADK duplicate tool-call circuit breaker to prevent redundant invocations within the same reasoning turn.",
+      "Upgrade the GKE cluster nodes from 16 vCPUs to 64 vCPUs while leaving the redundant tool loops unchanged.",
+      "Permanently shut down the Weather Forecaster Agent and fly cargo drones blindly through tropical storms.",
+      "Switch the underlying model from a fine-tuned SLM to a larger, slower foundation model."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Cloud Trace trajectory inspection pinpointed redundant identical MCP tool invocations as the root cause of both latency and token bloat. Caching spatial-temporal radar queries in Memorystore for Redis (with appropriate TTLs) and enabling an ADK duplicate-call circuit breaker eliminates repetitive external API round-trips and restores sub-800ms latency.",
+    "whyWrong": {
+      "1": "Adding CPU cores does not stop an LLM agent from sequentially executing 8 redundant network tool calls and consuming extra tokens.",
+      "2": "Flying autonomous aircraft blindly through tropical storms violates safety and business continuity requirements.",
+      "3": "Switching to a larger, slower model will further degrade p99 latency rather than fixing the redundant tool loop."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/trace-agent-trajectories",
+      "https://cloud.google.com/memorystore/docs/redis/caching-patterns"
+    ]
+  },
+  {
+    "id": "cs-aer-020",
+    "domain": 3,
+    "topic": "Dynamic Escalation Between Edge SLM and Gemini 1.5 Pro",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. You are designing the confidence router in ADK that decides whether an edge routing event can be resolved locally by the GKE-hosted fine-tuned SLM or must be escalated to Gemini 1.5 Pro. Which routing architecture best satisfies the sub-800ms edge SLA while ensuring complex multi-hub anomalies are properly escalated?",
+    "options": [
+      "Run both the SLM and Gemini 1.5 Pro synchronously in series for every single GPS ping and wait for both models to agree before taking any action.",
+      "Execute the GKE-hosted SLM first with structured output containing a confidence score and constraint-violation flag; if confidence >= 0.92 and no multi-hub conflict exists, commit the route immediately (<150ms), otherwise asynchronously trigger the Gemini 1.5 Pro multi-hub resolution graph while placing the vehicle on a safe local holding vector.",
+      "Flip a random coin in Python to send 50% of traffic to the SLM and 50% to Gemini 1.5 Pro regardless of complexity.",
+      "Require a human executive to manually review every single GPS telemetry event before selecting a model."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "A fast-path confidence router executes the local GPU/TPU-accelerated SLM in ~100-150ms. For the 95%+ of routine single-hub edge adjustments where confidence is high and constraints are satisfied, the route commits immediately well under the 800ms p99 SLA. When a complex multi-hub cross-modal conflict is detected, the aircraft transitions to a deterministic safe holding vector while Gemini 1.5 Pro resolves the global graph.",
+    "whyWrong": {
+      "0": "Running both models synchronously in series for every ping subjects all edge requests to Gemini 1.5 Pro latency and cost.",
+      "2": "Random 50/50 routing sends simple tasks to expensive models and complex multi-hub conflicts to small models incapable of solving them.",
+      "3": "Human manual review at 500,000 events/second is physically impossible."
+    },
+    "refs": [
+      "https://cloud.google.com/architecture/ai-ml/hybrid-llm-routing",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit"
+    ]
+  },
+  {
+    "id": "cs-aer-021",
+    "domain": 1,
+    "topic": "Ingesting Unstructured Multimodal Port & Weather Feeds",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. In addition to structured telemetry, regional dispatch hubs receive unstructured multimodal inputs including live satellite weather radar imagery, VHF marine radio audio advisories from port harbormasters, and PDF notices to airmen (NOTAMs). How should you ingest and synthesize these multimodal inputs into the dispatch workflow?",
+    "options": [
+      "Discard all audio and satellite imagery because AI agents can only process ASCII text files.",
+      "Hire 500 stenographers to manually type radio broadcasts into spreadsheets once a week.",
+      "Use Gemini multimodal capabilities integrated via Gemini Enterprise and ADK preprocessing nodes to transcribe VHF audio, extract spatial storm polygons from satellite imagery, and parse NOTAM PDFs into structured JSON risk alerts stored in Memorystore and Agent Search.",
+      "Convert satellite images into MP3 audio files before storing them in Cloud SQL."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Gemini models natively process multimodal inputs (video, images, audio, and PDF text). By using Gemini multimodal pipelines within Gemini Enterprise and ADK to extract structured spatial-temporal JSON risk alerts from VHF audio broadcasts, satellite radar images, and NOTAM documents, downstream routing agents can reason over unified real-time hazard state.",
+    "whyWrong": {
+      "0": "Discarding live satellite imagery and harbormaster radio advisories blinds the fleet to critical real-time hazards.",
+      "1": "Weekly manual stenography is far too slow for real-time autonomous vehicle routing.",
+      "3": "Converting images into MP3 files corrupts visual geospatial information and serves no technical purpose."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/overview",
+      "https://cloud.google.com/agent-builder/docs/multimodal-ingestion"
+    ]
+  },
+  {
+    "id": "cs-aer-022",
+    "domain": 5,
+    "topic": "Protecting Sensitive Cargo & Telemetry Data",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. Cold-chain medical freight manifests frequently contain Protected Health Information (PHI) such as organ transplant recipient identifiers, alongside high-value semiconductor shipping schedules. You must prevent PII/PHI from being logged in Cloud Logging, stored in LLM training datasets, or exposed to unauthorized agents. What should you configure?",
+    "options": [
+      "Rely on developers manually searching and deleting sensitive strings in log files every Friday.",
+      "Publish all cargo manifests to a public BigQuery dataset to simplify cross-agent debugging.",
+      "Disable all encryption at rest on Cloud Storage and Memorystore for Redis.",
+      "Integrate Sensitive Data Protection (Cloud DLP) inspection and de-identification templates into Agent Gateway and ADK telemetry pipelines to redact or tokenize PII/PHI before prompts reach LLM endpoints or observability logs."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Sensitive Data Protection (Cloud DLP) integrated at the Agent Gateway and ADK middleware layer automatically inspects, masks, or tokenizes sensitive PII/PHI (such as patient identifiers on medical freight manifests) in real time before data enters LLM context windows, Memory Bank, or Cloud Logging traces.",
+    "whyWrong": {
+      "1": "Publishing PHI and high-value semiconductor manifests to a public dataset violates HIPAA/privacy laws and physical security.",
+      "2": "Disabling encryption at rest exposes sensitive operational data to unauthorized infrastructure access.",
+      "0": "Manual weekly log scrubbing leaves PII/PHI exposed for days and violates compliance mandates."
+    },
+    "refs": [
+      "https://cloud.google.com/sensitive-data-protection/docs/overview",
+      "https://cloud.google.com/model-armor/docs/sensitive-data-filtering"
+    ]
+  },
+  {
+    "id": "cs-aer-023",
+    "domain": 3,
+    "topic": "Agent Registry & Skill Discovery for Cross-Hub Routing",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. As AeroLogistics expands operations across 90 countries, new specialized regional agents (such as Arctic Icebreaker Routing Agent or Alpine Drone De-Icing Agent) are frequently deployed. How can the global ADK orchestrator dynamically discover and invoke these new capabilities without redeploying the core orchestrator codebase?",
+    "options": [
+      "Register all specialized agents, their input/output schemas, and A2A endpoints in Google Cloud Agent Registry and Skill Registry, enabling dynamic runtime discovery and capability matching by the orchestrator.",
+      "Hardcode the IP addresses of all regional agents in a static hosts file inside the orchestrator container.",
+      "Require a complete 12-hour global system shutdown whenever a new regional agent is added.",
+      "Store agent capabilities only on paper manuals distributed to regional hub managers."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google Cloud Agent Registry and Skill Registry act as the authoritative catalog of available agents, skills, schemas, and security policies. The ADK orchestrator can query Agent Registry at runtime to discover newly registered regional agents matching specific environmental or geographic constraints and invoke them via A2A without core code redeployment.",
+    "whyWrong": {
+      "1": "Hardcoding static IP addresses prevents dynamic scaling and requires container rebuilds whenever endpoints change.",
+      "2": "A 12-hour global shutdown violates the 99.99% availability SLA for critical medical freight.",
+      "3": "Paper manuals cannot be queried programmatically by autonomous software orchestrators."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/agent-registry",
+      "https://cloud.google.com/agent-builder/docs/skill-registry"
+    ]
+  },
+  {
+    "id": "cs-aer-024",
+    "domain": 4,
+    "topic": "Cost Attribution & Token Budget Governance",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. Executive leadership requires granular cost visibility to track cloud compute and LLM token spending per regional dispatch hub, freight category (medical cold-chain vs. semiconductor vs. industrial), and weather event ID. How should you architect this cost attribution pipeline?",
+    "options": [
+      "Wait for the monthly consolidated Google Cloud invoice and divide the total cost equally among all 90 countries.",
+      "Inject standardized metadata labels (hub_id, cargo_class, weather_event_id) into Agent Gateway headers and OpenTelemetry trace spans, export token usage metrics to BigQuery billing sinks, and enforce per-category token budgets via Agent Gateway.",
+      "Run a separate Google Cloud Organization and billing account for every single autonomous drone.",
+      "Disable token counting in Gemini endpoints to save compute cycles."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "By propagating custom metadata headers (`hub_id`, `cargo_class`, `weather_event_id`) through Agent Gateway and OpenTelemetry spans and exporting usage logs to BigQuery, AeroLogistics gains exact real-time token and compute cost attribution per shipment class and storm event, while Agent Gateway can enforce budget caps per category.",
+    "whyWrong": {
+      "0": "Dividing monthly invoices equally hides cost drivers and fails to distinguish critical medical freight from lower-priority industrial cargo.",
+      "2": "Creating thousands of separate Google Cloud Organizations per vehicle creates unmanageable administrative overhead and quota fragmentation.",
+      "3": "Disabling token counting prevents budget enforcement and violates executive observability requirements."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/agent-gateway-monitoring",
+      "https://cloud.google.com/billing/docs/how-to/export-data-bigquery"
+    ]
+  },
+  {
+    "id": "cs-aer-025",
+    "domain": 3,
+    "topic": "Deterministic Cold-Chain Safety Verification Gate",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": "aerologistics",
+    "officialSample": false,
+    "question": "For this question, refer to the AeroLogistics Fleet case study. When rerouting a cargo drone carrying temperature-sensitive biologics (which spoil if internal cargo temperature exceeds 4°C), the Fuel/Battery Optimizer Agent proposes diverting to an alternate hub 45 minutes away. Which two architectural checks must be executed inside the Sequential Safety Verification Gate before approving this diversion? (Choose two.)",
+    "options": [
+      "Invoke a deterministic thermal-decay physics tool using current cargo temperature telemetry from Memorystore for Redis and predicted ambient route temperatures to verify internal cargo temperature will remain below 4°C upon arrival.",
+      "Ask the LLM to guess whether the biologics will survive based on the name of the pharmaceutical manufacturer.",
+      "Verify via an MCP tool connected to the destination hub's real-time resource registry that certified cold-storage charging bays and EV cross-modal transfer units are available at the estimated time of arrival.",
+      "Skip battery reserve checks if the destination hub is located in a sunny climate.",
+      "Automatically approve any diversion proposed by an agent with 'Optimizer' in its name."
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "Maintaining 99.99% cold-chain integrity requires combining multi-agent proposals with deterministic verification gates. The sequential safety gate must: (1) execute a deterministic thermal-decay calculation using live Redis telemetry and ambient weather data to guarantee the 4°C threshold is not breached en route, and (2) verify destination hub cold-storage and cross-modal transfer availability via MCP tools before committing the aircraft.",
+    "whyWrong": {
+      "1": "Allowing an LLM to guess biological thermal survival without physics calculations risks spoiling life-saving medical supplies.",
+      "3": "Skipping battery reserve checks risks aircraft power failure mid-flight regardless of sunlight.",
+      "4": "Blindly trusting an agent proposal without sequential safety verification violates core architectural requirements."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/workflows",
+      "https://cloud.google.com/architecture/ai-ml/deterministic-verification-gates"
+    ]
+  }
+]

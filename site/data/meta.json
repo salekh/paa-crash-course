@@ -1,0 +1,29 @@
+{
+ "questionCount": 1150,
+ "officialSampleCount": 60,
+ "byDomain": {
+  "3": 439,
+  "4": 211,
+  "5": 190,
+  "2": 169,
+  "1": 141
+ },
+ "byDifficulty": {
+  "hard": 446,
+  "medium": 604,
+  "easy": 100
+ },
+ "byCaseStudy": {
+  "aerologistics": 50,
+  "apex": 50,
+  "cymbal": 50,
+  "devvelocity": 50,
+  "finserve": 50,
+  "mediapulse": 50,
+  "none": 850
+ },
+ "topicCount": 1091,
+ "areaCount": 13,
+ "studyModules": 9,
+ "studyWords": 30918
+}

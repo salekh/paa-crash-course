@@ -1,0 +1,734 @@
+[
+  {
+    "id": "cs-med-026",
+    "domain": 3,
+    "topic": "Agent-to-Agent (A2A) Syndication & Affiliate Broadcast Handoff",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. When MediaPulse breaks a major international story, its central Publishing Agent must distribute customized multi-format packages (localized text, 4K video cuts, and audio stems) to external affiliate broadcast networks that operate their own autonomous ingestion agents. How should you architect this cross-enterprise agent handoff?",
+    "options": [
+      "Implement the standardized Agent2Agent (A2A) protocol over mTLS with Google Cloud Agent Identity and cryptographically signed JSON-LD/C2PA payload contracts so affiliate agents can autonomously negotiate format specifications and verify syndication entitlements.",
+      "Give external affiliate networks full IAM Project Owner access to MediaPulse's internal Firestore and BigQuery datasets.",
+      "Upload all breaking news packages to public torrent trackers with no encryption.",
+      "Require human engineers from both companies to exchange USB hard drives at an airport every morning."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The Agent2Agent (A2A) protocol provides standardized, asynchronous cross-organizational agent communication. By securing A2A with Google Cloud Agent Identity over mTLS and embedding signed licensing/provenance manifests, MediaPulse's Publishing Agent can safely negotiate delivery formats and push localized media packages to external affiliate agents within seconds.",
+    "whyWrong": {
+      "1": "Granting Project Owner IAM access to external affiliates compromises internal embargoes, billing data, and proprietary AI models.",
+      "2": "Public torrent trackers expose high-value syndicated content to piracy and copyright theft.",
+      "3": "Physical USB drive exchange takes days and violates the sub-10-minute breaking news SLA."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/a2a-protocol",
+      "https://cloud.google.com/iam/docs/agent-identity"
+    ]
+  },
+  {
+    "id": "cs-med-027",
+    "domain": 4,
+    "topic": "Automated Autorater Calibration for Brand Tone & Style Alignment",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. MediaPulse operates diverse media brands ranging from serious financial journalism (PulseFinance) to youth-focused pop culture social campaigns (PulseVibe). You use custom LLM autoraters in ADK to score brand tone alignment before CMS staging, but human editors report that the autorater frequently penalizes punchy colloquial idioms in PulseVibe articles. How should you calibrate the evaluation pipeline?",
+    "options": [
+      "Use a single rigid academic prose rubric for all media brands and force youth social campaigns to read like legal contracts.",
+      "Configure brand-specific evaluation rubrics and few-shot anchor examples in the ADK evalset autorater prompts, dynamically selected via the brand_id metadata header, and periodically align autorater scores against human editorial pairwise preference ratings using Spearman rank correlation.",
+      "Disable tone evaluation entirely and allow financial articles to use slang and emojis.",
+      "Set the autorater LLM temperature to 2.0 so it gives random scores every time."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "LLM autoraters require domain- and brand-specific rubrics to evaluate subjective qualities like tone alignment accurately. Conditioning the autorater prompt on `brand_id` to inject tailored rubrics and few-shot anchor examples—and continuously validating alignment against human editor preference rankings—eliminates false penalties while preserving strict editorial standards.",
+    "whyWrong": {
+      "0": "Forcing youth social campaigns to sound like legal contracts destroys audience engagement and advertising ROI.",
+      "2": "Allowing slang and unverified emojis in institutional financial journalism damages brand credibility.",
+      "3": "High temperature on an evaluator introduces severe scoring variance and makes CI/CD quality gates unreliable."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-autorater",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
+    ]
+  },
+  {
+    "id": "cs-med-028",
+    "domain": 5,
+    "topic": "Rate Limiting & Cost Protection Against Viral Traffic Spikes",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. MediaPulse embeds interactive AI social campaign agents on its public streaming portals where subscribers can ask follow-up questions about live broadcasts. During a viral global sports finals broadcast, 2 million concurrent users trigger interactive agent queries simultaneously, threatening to exhaust enterprise Gemini quotas needed by the core newsroom publishing pipeline. What should you configure?",
+    "options": [
+      "Remove all rate limits and allow a single viral event to consume the entire annual cloud budget in 20 minutes.",
+      "Shut down the internal newsroom publishing pipeline during major sports events so public chat users can have unlimited tokens.",
+      "Deploy Agent Gateway with isolated quota pools and priority tiering that strictly reserves guaranteed LLM token throughput for internal newsroom publishing pipelines while applying per-subscriber rate limiting, response caching in Memorystore, and graceful degradation to SLMs for public viral traffic.",
+      "Block all subscribers from accessing the streaming portal during live broadcasts."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Agent Gateway provides centralized multi-tenant quota isolation and traffic shaping. By separating mission-critical B2B/newsroom publishing quotas from public B2C interactive chat quotas—and applying per-user rate limits, Redis semantic caching for common sports questions, and automatic fallback to cost-effective SLMs—MediaPulse protects both newsroom SLAs and cloud budgets.",
+    "whyWrong": {
+      "1": "Halting breaking news publishing during major global events violates core business requirements.",
+      "0": "Uncapped token consumption during viral events leads to runaway financial loss and quota exhaustion.",
+      "3": "Blocking subscribers during live broadcasts causes massive subscription churn and lost ad revenue."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/agent-gateway",
+      "https://cloud.google.com/architecture/rate-limiting-strategies-techniques"
+    ]
+  },
+  {
+    "id": "cs-med-029",
+    "domain": 2,
+    "topic": "Refactoring Legacy CMS Plugins Using Coding Agents in Sandboxes",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. MediaPulse is retiring legacy PHP and Ruby CMS plugins that caused synchronization bottlenecks and replacing them with asynchronous Python ADK microservices and MCP servers. Developers want to use Claude Code / Antigravity coding agents to translate the legacy business logic into Python and generate integration tests without risking leaks of proprietary subscriber paywall algorithms. What environment should they use?",
+    "options": [
+      "Print out 200,000 lines of PHP code on paper and translate them manually with a typewriter.",
+      "Upload the proprietary paywall source code to public pastebin websites and share links with unverified online coding assistants.",
+      "Run coding agents directly on production CMS database nodes using root SSH keys.",
+      "Run Antigravity / Claude Code inside VPC-SC protected Cloud Workstations with private access to internal Git repositories and containerized local test runners, ensuring zero source code leaves the corporate Google Cloud perimeter."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Cloud Workstations integrated with VPC Service Controls (VPC-SC) and private Antigravity / Claude Code endpoints provide a secure, isolated development sandbox. Engineers can rapidly translate legacy PHP/Ruby plugins into Python ADK/MCP microservices and run automated integration test suites while maintaining strict intellectual property protection.",
+    "whyWrong": {
+      "1": "Uploading proprietary paywall algorithms to public pastebins enables immediate credential and IP theft.",
+      "2": "Running development agents as root on live database servers risks accidental data deletion and service outages.",
+      "0": "Manual typewriter translation is absurdly slow and error-prone."
+    },
+    "refs": [
+      "https://cloud.google.com/workstations/docs/security",
+      "https://cloud.google.com/agent-builder/docs/coding-agents"
+    ]
+  },
+  {
+    "id": "cs-med-030",
+    "domain": 1,
+    "topic": "Configuring Few-Shot Multimodal Prompt Templates for Video Tagging",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. MediaPulse archivist teams use Gemini Enterprise Agent Designer to configure an Automated Archival Tagging Agent that watches raw 4K field footage and outputs structured JSON metadata (identifying key public figures, locations, emotional tone, and potential copyright hazards like background music or brand logos). How should you design the prompt template in Agent Designer?",
+    "options": [
+      "Create a multimodal system instruction template in Agent Designer with explicit JSON schema definitions and few-shot video/image examples illustrating correct identification of public figures, background brand logos, and licensed audio cues.",
+      "Use an empty system prompt and hope the model guesses what metadata fields Firestore needs.",
+      "Instruct the model to write a 10-page fictional movie script instead of structured metadata.",
+      "Pass only the file size in bytes to the model without the video content."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In Gemini Enterprise Agent Designer, combining multimodal few-shot examples (showing sample video frames/audio clips paired with ideal JSON metadata extractions) and explicit schema constraints guides Gemini LLMs to consistently detect visual/audio copyright hazards and entities.",
+    "whyWrong": {
+      "1": "An empty prompt produces unstructured, inconsistent prose that breaks downstream Firestore indexing.",
+      "2": "Fictional movie scripts do not provide factual archival metadata or copyright detection.",
+      "3": "File size in bytes contains zero visual or semantic information about the video content."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/multimodal-prompts",
+      "https://cloud.google.com/agent-builder/docs/agent-designer"
+    ]
+  },
+  {
+    "id": "cs-med-031",
+    "domain": 3,
+    "topic": "Fine-Grained Chunking & Metadata Indexing for Multimodal RAG",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. When the Research Agent queries Agent Search and Vertex AI RAG Engine for verified field notes and interview transcripts, it needs to cite exact video timecodes (`HH:MM:SS`) and speaker identities so human editors can instantly jump to the source frame during HITL verification. How should you configure document ingestion and chunking?",
+    "options": [
+      "Concatenate all 10,000 daily transcripts into a single giant text blob with all timecodes and speaker names stripped out.",
+      "Segment audio/video transcripts into speaker-turn and timecode-aligned semantic chunks during ingestion, attaching fine-grained metadata attributes (`asset_uri`, `speaker_id`, `start_timecode`, `end_timecode`, `syndicate_division`) stored in Agent Search and Vector Search 1.0.",
+      "Split transcripts mid-word every 10 characters with zero overlap or metadata.",
+      "Store transcripts only as unsearchable bitmap images."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Preserving granular provenance in multimodal RAG requires timecode- and speaker-aware chunking at ingestion time. By embedding `start_timecode`, `end_timecode`, `speaker_id`, and `asset_uri` into each vector chunk's metadata in Agent Search / Vector Search 1.0, retrieved passages automatically carry exact video frame links for instant HITL verification.",
+    "whyWrong": {
+      "0": "Stripping timecodes and speaker names makes it impossible for editors or autoraters to verify who said what and when.",
+      "2": "Arbitrary 10-character splitting destroys semantic meaning and sentence coherence.",
+      "3": "Unsearchable bitmap images cannot be indexed for semantic retrieval."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/chunking-strategies",
+      "https://cloud.google.com/generative-ai-app-builder/docs/metadata"
+    ]
+  },
+  {
+    "id": "cs-med-032",
+    "domain": 5,
+    "topic": "Securing OAuth 2.0 Scopes for Slack & CMS MCP Servers",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. The Drafting Agent uses an MCP server to post draft notifications to newsroom Slack channels and create unpublished draft entries in the SaaS CMS. However, security policy strictly forbids the Drafting Agent from executing final live publication or deleting existing published articles. How should you enforce this at the authentication layer?",
+    "options": [
+      "Embed the Chief Digital Officer's personal Slack session cookie inside every agent container.",
+      "Give the Drafting Agent a master API key with full super-admin delete and publish privileges.",
+      "Configure Google Cloud Auth Manager to issue distinct, narrowly scoped OAuth 2.0 access tokens (`cms:draft:create`, `slack:chat:write`) to the Drafting Agent's identity, while reserving `cms:article:publish` and `cms:article:delete` scopes exclusively for the post-gate Publishing Agent and human editors.",
+      "Disable all authentication on the CMS API so any network client can publish or delete articles."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Least-privilege tool execution requires scoping OAuth 2.0 permissions to the specific role of each agent in the sequential pipeline. Using Auth Manager to bind fine-grained OAuth scopes (`cms:draft:create` vs. `cms:article:publish`) to distinct Agent Identities guarantees that even if the Drafting Agent hallucinates a publish tool call, the CMS MCP server rejects it with HTTP 403 Forbidden.",
+    "whyWrong": {
+      "1": "A master super-admin API key allows a compromised or hallucinating drafting agent to publish unverified stories or delete archives.",
+      "0": "Sharing personal executive session cookies violates non-repudiation and security compliance.",
+      "3": "Unauthenticated CMS endpoints invite immediate vandalism and unauthorized content injection."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/auth-manager",
+      "https://cloud.google.com/iam/docs/agent-identity-best-practices"
+    ]
+  },
+  {
+    "id": "cs-med-033",
+    "domain": 4,
+    "topic": "Distributed Trace Correlation Across Multi-Stage Publishing Pipelines",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. A breaking news story takes 9 minutes and 40 seconds to complete the pipeline—just barely meeting the 10-minute SLA. To optimize performance, you need to visualize the exact timeline across the Research Agent, Drafting Agent, Fact-Check Agent, 28 parallel Localization Agents, and external DAM/CMS MCP calls in a single unified waterfall view. What should you configure?",
+    "options": [
+      "Measure latency by having an intern use a physical stopwatch while watching the CMS dashboard.",
+      "Generate a new random trace ID on every single function call so spans cannot be linked together.",
+      "Use console.log timestamps written to local container disk without synchronized NTP clocks.",
+      "Instrument all ADK agent stages and MCP servers with OpenTelemetry, propagating a unified W3C traceparent header (`trace_id`) across sequential handoffs and parallel Pub/Sub fan-out messages into Google Cloud Trace."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Propagating the W3C `traceparent` context (`trace_id` and `span_id`) across synchronous A2A calls, MCP tool invocations, and asynchronous Pub/Sub headers allows Google Cloud Trace to reconstruct the entire multi-agent execution tree—including all 28 parallel localization branches—into a single waterfall timeline.",
+    "whyWrong": {
+      "1": "Generating unlinked random trace IDs destroys parent-child span relationships and prevents end-to-end waterfall analysis.",
+      "2": "Unsynchronized local disk logs cannot correlate parallel distributed microservices across regions.",
+      "0": "A physical stopwatch cannot measure internal microservice, RAG, or MCP tool latency breakdowns."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/setup/opentelemetry",
+      "https://www.w3.org/TR/trace-context/"
+    ]
+  },
+  {
+    "id": "cs-med-034",
+    "domain": 3,
+    "topic": "Parallel Fan-Out & Fault Tolerance in 28-Language Localization",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. When the Localization Agent stage triggers parallel translation and audio dubbing across 28 languages, a transient model timeout in a single regional language worker (e.g., Tagalog) must not block or delay the immediate publication of the other 27 completed language editions. Which two architectural patterns should you implement in ADK? (Choose two.)",
+    "options": [
+      "Configure the ADK parallel localization fan-out with independent per-branch fault isolation and non-blocking completion semantics so each localized edition stages and publishes independently to its regional CMS channel as soon as its individual verification gate passes.",
+      "Wrap each individual language worker branch with an isolated retry and fallback policy (e.g., retrying the timed-out Tagalog branch with an alternate regional endpoint or flagging it for human translator queue) without aborting sibling branches.",
+      "Configure a strict all-or-nothing barrier where a single failure in any of the 28 languages aborts and deletes all 27 successfully completed translations.",
+      "Execute all 28 language translations sequentially in a single thread, taking 25 minutes total.",
+      "Skip fact-checking on retried branches to save time."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "To achieve sub-10-minute global publishing across 28 languages with high availability, parallel branches must be decoupled via non-blocking completion semantics (streaming out each completed language to its respective CMS immediately) and per-branch fault isolation (retrying or queuing only the failed locale without rolling back or blocking the other 27 successful locales).",
+    "whyWrong": {
+      "2": "An all-or-nothing barrier turns a single transient regional glitch into a global outage across all 28 languages.",
+      "3": "Sequential single-threaded translation across 28 languages violates the 10-minute breaking news SLA.",
+      "4": "Skipping fact-checking on retries introduces hallucinations and violates core editorial governance."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/parallel-workflows",
+      "https://cloud.google.com/architecture/ai-ml/fault-tolerant-agent-orchestration"
+    ]
+  },
+  {
+    "id": "cs-med-035",
+    "domain": 5,
+    "topic": "Protecting Confidential Journalist Sources with Memory Isolation",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. Investigative journalists store confidential source interviews and off-the-record field notes in isolated Cloud Storage buckets and Agent Platform Memory Bank namespaces. You must guarantee that when the general Drafting Agent generates daily entertainment or sports articles, it can never retrieve or cross-contaminate memory chunks from confidential investigative sessions. What should you configure?",
+    "options": [
+      "Enforce strict tenant and namespace isolation in Agent Platform Memory Bank and Vector Search 1.0 bound to Principal Access Boundary (PAB) policies and CMEK (Customer-Managed Encryption Keys) scoped exclusively to the Investigative Journalism Agent Identity.",
+      "Store all confidential whistleblower notes and public sports scores in a single shared Memorystore key with no access controls.",
+      "Include confidential whistleblower names in the global system prompt shared by all 10,000 daily articles.",
+      "Disable encryption on Cloud Storage buckets to improve read throughput."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Protecting confidential journalistic sources requires cryptographic and logical multi-tenancy. Partitioning Agent Platform Memory Bank and Vector Search 1.0 namespaces by sensitivity classification—enforced via Principal Access Boundary (PAB) policies and isolated Cloud KMS Customer-Managed Encryption Keys (CMEK)—guarantees that general entertainment/sports agents cannot decrypt or query investigative memory spaces.",
+    "whyWrong": {
+      "1": "Sharing a single unpartitioned memory key risks accidental cross-session retrieval and source exposure.",
+      "2": "Putting whistleblower names in global system prompts leaks confidential identities across every generated article.",
+      "3": "Disabling storage encryption violates basic enterprise security and source protection mandates."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/memory-bank-security",
+      "https://cloud.google.com/kms/docs/cmek"
+    ]
+  },
+  {
+    "id": "cs-med-036",
+    "domain": 2,
+    "topic": "Customizing Antigravity with Editorial Linting & Subagents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. MediaPulse's software engineering team wants to create specialized subagents and pre-commit extension hooks inside Antigravity so that whenever a developer modifies an ADK prompt template or MCP tool schema, a specialized Security & Rights Subagent automatically audits the change for potential copyright bypasses or missing OAuth scopes before a pull request is created. What should they configure?",
+    "options": [
+      "Ask developers to manually print their code and mail it to the legal department for review.",
+      "Configure custom Antigravity subagents, workspace rules, and pre-commit extension hooks that automatically invoke the Security & Rights Subagent and Agents CLI validation checks on modified files.",
+      "Disable all git hooks and allow direct pushes to the production main branch without testing.",
+      "Use a standard spell-checker plugin designed for high school essays."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Antigravity supports extensible developer workflows through custom subagents, workspace rules, and lifecycle hooks (such as pre-commit / pre-PR hooks). Configuring a dedicated Security & Rights Subagent inside Antigravity shifts governance left, catching missing OAuth scopes or weakened Model Armor guardrails during active coding.",
+    "whyWrong": {
+      "0": "Mailing printed code to legal takes weeks and halts agile software delivery.",
+      "2": "Direct untested pushes to production risk deploying broken or non-compliant agent pipelines.",
+      "3": "High school spell-checkers cannot analyze OAuth 2.0 scopes, MCP schemas, or Model Armor policies."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/antigravity-subagents",
+      "https://cloud.google.com/agent-builder/docs/agents-cli"
+    ]
+  },
+  {
+    "id": "cs-med-037",
+    "domain": 3,
+    "topic": "Grounded Fact-Checking Against Real-Time Wire Feeds",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. During rapidly evolving breaking news (such as election night results or natural disasters), facts change minute by minute. How should you configure the Agent Search and Vertex AI RAG Engine ingestion pipeline so the Fact-Check Agent always verifies drafts against the latest wire updates rather than stale cached data from 2 hours ago?",
+    "options": [
+      "Turn off RAG retrieval during breaking news and rely solely on the LLM's static pre-training cutoff date.",
+      "Run a batch re-indexing job once a week on Sunday nights.",
+      "Configure streaming ingestion into Agent Search and Vector Search 1.0 streaming index updates triggered by Pub/Sub wire arrival events, and apply recency-weighted ranking / timestamp filtering (`published_timestamp >= current_story_window`) during retrieval.",
+      "Cache all search results for 48 hours in the browser."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Real-time breaking news verification requires streaming index updates rather than batch re-indexing. By piping live wire feeds via Pub/Sub directly into Vector Search 1.0 streaming endpoints / Agent Search real-time ingestion APIs and applying timestamp metadata filtering with recency boosting, the Fact-Check Agent immediately grounds claims against up-to-the-second dispatches.",
+    "whyWrong": {
+      "1": "Weekly Sunday batch indexing leaves the agent completely blind to breaking news throughout the week.",
+      "0": "Static pre-training cutoffs contain zero knowledge of live breaking events happening today.",
+      "3": "48-hour caching serves stale, outdated information during fast-moving emergencies."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/streaming-updates",
+      "https://cloud.google.com/generative-ai-app-builder/docs/refresh-data"
+    ]
+  },
+  {
+    "id": "cs-med-038",
+    "domain": 4,
+    "topic": "A/B Testing Localized Headlines & Editorial Engagement ROI",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. MediaPulse wants to optimize subscriber engagement and programmatic ad revenue by allowing the Localization Agent to generate three culturally tailored headline variants per language, while systematically measuring which prompt strategy yields the highest click-through rate (CTR) and reader retention without sacrificing factual accuracy. How should you architect this experiment?",
+    "options": [
+      "Change the prompt randomly every minute without logging which prompt generated which headline.",
+      "Allow the agent to generate clickbait headlines with fabricated sensational claims to maximize clicks.",
+      "Test headlines by asking three software engineers in a single office which language they prefer.",
+      "Verify all three headline variants through the Fact-Check & Rights Gate first, deploy them via CMS A/B testing webhooks, stream impression/CTR telemetry into BigQuery linked to the generating `prompt_version_id` and `agent_trace_id`, and feed engagement metrics back into Vertex AI Experiments / ADK evaluation dashboards."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Closing the editorial ROI loop requires connecting production user engagement telemetry back to agent version metadata. By ensuring all variants first pass the deterministic Fact-Check Gate (preventing clickbait hallucinations), logging `prompt_version_id` and `trace_id` alongside CMS A/B test impressions in BigQuery, and analyzing results in Vertex AI Experiments, MediaPulse optimizes engagement scientifically and safely.",
+    "whyWrong": {
+      "1": "Fabricated sensational clickbait violates the zero-hallucination business requirement and destroys journalistic trust.",
+      "2": "Three software engineers cannot evaluate cultural resonance across 28 global language markets.",
+      "0": "Without logging prompt version metadata, it is impossible to attribute engagement uplift to specific agent changes."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/experiments/intro-vertex-ai-experiments",
+      "https://cloud.google.com/bigquery/docs/analytics"
+    ]
+  },
+  {
+    "id": "cs-med-039",
+    "domain": 1,
+    "topic": "Connecting Multimodal DAM Archives to Gemini Enterprise",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. Documentary producers using Gemini Enterprise want to search MediaPulse's petabyte-scale Cloud Storage archive using multimodal natural language queries such as 'Find 4K b-roll clips from 2022 showing solar panel installations in arid desert regions where the syndication license permits global streaming.' How should you configure this search capability?",
+    "options": [
+      "Ingest Cloud Storage media URIs and Firestore/BigQuery licensing metadata into Agent Search configured with Vertex AI multimodal embeddings (embedding visual scenes, audio tracks, and structured rights attributes into a unified searchable index).",
+      "Require producers to manually watch thousands of hours of unlabeled MP4 files from start to finish.",
+      "Store video files in a relational Cloud SQL table using BLOB columns and run LIKE '%solar%' queries on binary video bytes.",
+      "Delete all video archives older than 7 days to reduce search latency."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Agent Search integrated with Vertex AI Multimodal Embeddings maps visual video frames, audio tracks, and text descriptions into a shared semantic vector space while indexing structured metadata attributes (like `license_scope='global_streaming'` and `year=2022`) from Firestore/BigQuery. Producers can retrieve exact 4K b-roll clips matching both visual semantics and legal rights in sub-second queries.",
+    "whyWrong": {
+      "1": "Manually watching thousands of hours of raw video takes months and defeats newsroom agility.",
+      "2": "SQL LIKE queries on raw binary MP4 bytes cannot match visual scenes and cause severe database performance collapse.",
+      "3": "Deleting historical archives destroys MediaPulse's most valuable documentary and syndication asset."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/multimodal-embeddings",
+      "https://cloud.google.com/generative-ai-app-builder/docs/multimodal-search"
+    ]
+  },
+  {
+    "id": "cs-med-040",
+    "domain": 3,
+    "topic": "Model Selection for High-Volume vs. Deep Investigative Tasks",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. MediaPulse produces 10,000 daily assets ranging from simple 150-word automated weather/traffic bulletins to complex 5,000-word investigative reports synthesizing hours of video and legal filings. To optimize token costs and latency while maintaining quality, how should you configure model selection across ADK workflows?",
+    "options": [
+      "Use the largest, most expensive foundation model with maximum thinking budget for every trivial 50-word traffic update.",
+      "Configure a tiered model selection policy in ADK: use Gemini 1.5 Flash (or fine-tuned SLMs) for high-volume, low-latency tasks like routine bulletins, metadata extraction, and initial classification, while routing complex multimodal synthesis, investigative drafting, and nuanced fact-checking to Gemini 1.5 Pro.",
+      "Use a 100-million-parameter toy model for complex investigative journalism and legal copyright verification.",
+      "Hardcode a single model globally and forbid architects from ever changing model endpoints."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Cost and performance optimization across 10,000 daily assets requires right-sizing models to task complexity. Gemini 1.5 Flash delivers ultra-low latency and high cost efficiency for routine structured extraction and short bulletins, while Gemini 1.5 Pro's deep multimodal reasoning and 2M context window are reserved for complex investigative journalism and rigorous rights verification.",
+    "whyWrong": {
+      "0": "Using flagship pro models for trivial traffic updates wastes massive token budgets and slows throughput.",
+      "2": "Tiny toy models lack the reasoning capacity for complex investigative journalism and cause high hallucination rates.",
+      "3": "Forbidding model tiering prevents cost governance and architectural evolution."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-selection",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit"
+    ]
+  },
+  {
+    "id": "cs-med-041",
+    "domain": 5,
+    "topic": "Automated Quarantine & Incident Response for Compromised Sources",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. Suppose an external news wire agency announces that one of its dispatches from 30 minutes ago was the result of a cyberattack and contains fabricated geopolitical claims. MediaPulse's autonomous pipeline has already ingested that wire and drafted 28 localized stories currently staged in the CMS awaiting publication. How should your architecture execute immediate automated quarantine?",
+    "options": [
+      "Delete the entire MediaPulse Cloud Storage archive and shut down the company website.",
+      "Wait until next month's editorial meeting to manually search the CMS for affected articles across 28 languages.",
+      "Maintain bidirectional lineage tracking in Firestore/BigQuery linking every generated asset and localized draft to its source wire `document_id`; when a wire retraction/compromise event arrives via Pub/Sub, trigger an automated ADK Quarantine Workflow that revokes Agent Registry staging approvals, pulls staged drafts via CMS MCP tools, and alerts human editors.",
+      "Ignore wire retractions once an article has passed the initial Drafting stage."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Data lineage and automated incident response are critical for autonomous media governance. By recording exact source provenance (`wire_document_id` -> `article_uuid` -> `28_localized_cms_ids`) in Firestore/BigQuery, an incoming wire retraction event immediately triggers an automated quarantine workflow that halts or unstages affected assets across all 28 regional CMS endpoints within seconds.",
+    "whyWrong": {
+      "1": "Waiting a month allows fabricated geopolitical claims to be published globally across 28 languages.",
+      "0": "Deleting the entire company archive is a destructive overreaction that destroys legitimate journalism.",
+      "3": "Ignoring wire retractions violates journalistic integrity and the zero-hallucination mandate."
+    },
+    "refs": [
+      "https://cloud.google.com/architecture/ai-ml/data-lineage-for-generative-ai",
+      "https://cloud.google.com/agent-builder/docs/governance-policies"
+    ]
+  },
+  {
+    "id": "cs-med-042",
+    "domain": 4,
+    "topic": "Evaluating Multimodal Copyright Compliance Before Publication",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. Early prototypes occasionally used copyrighted archival video clips or background music tracks without proper syndication licenses. Before staging a localized video broadcast, how should the evaluation pipeline verify that zero unlicensed visual or audio segments are present in the final rendered video?",
+    "options": [
+      "Ask the video editing agent if it promises it didn't use copyrighted clips.",
+      "Check only the title string of the video file and assume that if the title says 'Licensed', the video frames are compliant.",
+      "Mute the video randomly every 10 seconds to evade copyright detection algorithms.",
+      "Configure a multimodal pre-staging evaluation gate in ADK that computes visual and audio perceptual hashes/embeddings across every frame and audio track of the rendered video, queries the DAM Rights MCP server to verify active licenses for all detected segments, and blocks publication if any unmatched or unlicensed clip is found."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Guaranteeing zero copyright infringement in video broadcasts requires frame-level visual and audio fingerprint/embedding verification. Scanning the final rendered video's multimodal embeddings against the DAM Rights database via MCP ensures that every embedded clip, photo, and music stem has a verified, active license for the target publication channel.",
+    "whyWrong": {
+      "1": "File titles can be easily mislabeled and do not inspect embedded third-party footage or background audio.",
+      "2": "Randomly muting audio ruins broadcast quality and does not legalize unlicensed visual footage.",
+      "0": "Conversational promises from an LLM cannot verify legal copyright ownership."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/multimodal-embeddings",
+      "https://cloud.google.com/agent-builder/docs/mcp-servers"
+    ]
+  },
+  {
+    "id": "cs-med-043",
+    "domain": 2,
+    "topic": "Scaling Agent Skill Development Across 28 Regional Tech Teams",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. Regional engineering teams in Tokyo, Paris, and São Paulo develop localized social media formatting skills and regional CMS plugins using Antigravity. How should MediaPulse govern, share, and reuse these custom skills across all global divisions without duplicating code?",
+    "options": [
+      "Publish verified, schema-validated skills and plugins to the centralized Google Cloud Skill Registry using Agents CLI, enabling discovery, version pinning, and IAM-governed reuse across all regional Antigravity and ADK environments.",
+      "Send skill source code via unencrypted email attachments between developers.",
+      "Require each of the 28 regional teams to reinvent every single plugin from scratch in isolation.",
+      "Store all enterprise skills in a single unversioned public Google Doc."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google Cloud Skill Registry combined with Agents CLI provides a centralized, governed marketplace for internal agent skills and plugins. Regional teams can publish validated capabilities with semantic versioning and IAM access controls, enabling global reuse and eliminating redundant engineering effort.",
+    "whyWrong": {
+      "1": "Emailing code attachments lacks version control, security scanning, and automated dependency management.",
+      "2": "Reinventing plugins 28 times wastes massive engineering budget and creates inconsistent behavior.",
+      "3": "An unversioned public Google Doc exposes proprietary code and cannot be programmatically imported by ADK runtimes."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/skill-registry",
+      "https://cloud.google.com/agent-builder/docs/agents-cli"
+    ]
+  },
+  {
+    "id": "cs-med-044",
+    "domain": 3,
+    "topic": "Structured Citation Enforcement in Journalistic Drafting",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. To ensure human editors and automated autoraters can verify every factual claim in a drafted article, the Drafting Agent must output structured inline citations linking every sentence or quote directly to the specific archival document ID or wire timestamp in Agent Search. How should you enforce this output structure in ADK?",
+    "options": [
+      "Ask the model to put footnotes at the end if it remembers, with no schema validation.",
+      "Configure the Drafting Agent's Gemini API call with Controlled Generation (response_schema) requiring an array of structured claim objects, where each object contains `statement_text`, `source_document_id`, `exact_quote_span`, and `timecode`, validated deterministically before passing to the Fact-Check Agent.",
+      "Allow the Drafting Agent to invent fictional citation numbers like '[Source: Trust Me]'.",
+      "Strip all citations before sending the draft to the Fact-Check Agent to save tokens."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Enforcing a strict Pydantic / OpenAPI `response_schema` via Controlled Generation forces the Drafting Agent to pair every factual statement with its exact `source_document_id` and evidentiary span retrieved from Agent Search. Downstream deterministic validators and autoraters can then programmatically verify that every cited document ID exists and supports the claim.",
+    "whyWrong": {
+      "0": "Unconstrained natural language footnotes frequently omit citations or fail to parse cleanly.",
+      "2": "Fictional citations violate journalistic integrity and the zero-hallucination requirement.",
+      "3": "Stripping citations prevents the Fact-Check Agent from verifying source grounding."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output",
+      "https://cloud.google.com/generative-ai-app-builder/docs/grounding-overview"
+    ]
+  },
+  {
+    "id": "cs-med-045",
+    "domain": 1,
+    "topic": "State-Based Editorial Escalation Flows in CX Agent Studio",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. When an automated copyright check flags a borderline fair-use question on a breaking video clip, the system notifies the on-duty legal counsel via an interactive CX Agent Studio bot embedded in Slack. Counsel can ask the bot to play the clip, inspect the licensing contract, and issue a binding 'Approve under Fair Use', 'Replace Clip', or 'Escalate to General Counsel' decision. How should this state machine be modeled?",
+    "options": [
+      "Allow any anonymous Slack guest user to type 'approve' in a public channel to release embargoed legal holds.",
+      "Use a single stateless webhook that forgets the counsel's identity and video ID after every message.",
+      "Design dedicated CX Agent Studio Pages for each review state ('Clip Inspection', 'Contract Verification', 'Decision Confirmation') with deterministic Transition Routes and webhook event handlers that record the counsel's cryptographically signed decision in Firestore and resume the ADK pipeline.",
+      "Force legal counsel to write Java code to update the Firestore database manually."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "CX Agent Studio excels at structured, stateful human-in-the-loop interaction flows. Modeling the legal review as explicit Pages with conditional Transition Routes and authenticated webhooks ensures that legal counsel can interactively inspect evidence and that their binding decision deterministically transitions the ADK publishing workflow.",
+    "whyWrong": {
+      "1": "Stateless webhooks lose multi-turn context, forcing legal counsel to re-enter video IDs on every turn.",
+      "0": "Allowing unauthenticated guests to approve legal holds exposes MediaPulse to severe copyright liability.",
+      "3": "Requiring lawyers to write Java code slows emergency breaking news clearance."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/page",
+      "https://cloud.google.com/agent-builder/docs/cx-agent-studio"
+    ]
+  },
+  {
+    "id": "cs-med-046",
+    "domain": 4,
+    "topic": "Continuous Drift Monitoring for 28-Language Localization Quality",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. Six months after launch, regional editors in Southeast Asia notice that newly emerging political neologisms and economic terms are being mistranslated by the Localization Agent. How should you architect a continuous production feedback and evaluation loop to detect and remediate linguistic drift automatically?",
+    "options": [
+      "Shut down localization for all Southeast Asian languages permanently.",
+      "Ignore human editor corrections and overwrite their edits with the original mistranslated agent output.",
+      "Wait 5 years before updating any translation prompts or glossaries.",
+      "Capture human editor post-edit modifications (diffs between autonomous localized drafts and human-approved published versions) from the CMS via MCP webhooks, log these diffs to BigQuery, run automated weekly ADK evalset drift analyses, and dynamically update the RAG terminology glossary and few-shot examples in Agent Search."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Human-in-the-Loop post-edits are the highest-signal ground truth for detecting linguistic and domain drift. Capturing CMS editorial diffs via MCP webhooks, quantifying edit distance/drift in BigQuery, and feeding validated neologisms directly into the RAG Engine glossary and ADK evalset ensures continuous self-improving localization quality.",
+    "whyWrong": {
+      "1": "Overwriting human editorial corrections destroys quality and alienates newsroom staff.",
+      "2": "Waiting 5 years leaves global news broadcasts riddled with mistranslated terminology.",
+      "0": "Shutting down regional localization violates MediaPulse's 28-language global syndication business model."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/model-monitoring/overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
+    ]
+  },
+  {
+    "id": "cs-med-047",
+    "domain": 5,
+    "topic": "Enforcing Zero-Trust Data Access for External Freelance Journalists",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. MediaPulse collaborates with thousands of freelance investigative journalists globally who submit raw field notes and video via an external contributor portal powered by Gemini Enterprise. You must ensure a freelance contributor can only query and upload assets linked to their specific assigned story ID and cannot use prompt manipulation to search internal syndicate archives. What should you implement?",
+    "options": [
+      "Authenticate freelancers via Identity-Aware Proxy (IAP) and Auth Manager, assign a restricted Contributor Agent Identity governed by Principal Access Boundary (PAB) policies scoped strictly to `resource.labels.story_id == principal.claims.story_id`, and enforce Model Armor prompt injection filters at Agent Gateway.",
+      "Grant all external freelance contributors the IAM role roles/editor on the main production Google Cloud project.",
+      "Share a single global VPN password with all freelancers worldwide.",
+      "Disable access controls on Agent Search so anyone on the internet can browse unpublished investigative notes."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Combining Identity-Aware Proxy (IAP), Auth Manager, and Principal Access Boundary (PAB) policies with attribute-based conditions (`story_id` matching) guarantees zero-trust isolation at the IAM level. Even if a freelancer attempts prompt injection (mitigated further by Model Armor at Agent Gateway), the underlying Agent Identity is cryptographically incapable of reading other stories.",
+    "whyWrong": {
+      "1": "Project Editor permissions allow any external freelancer to view, modify, or delete global company infrastructure and embargoed stories.",
+      "2": "A shared global VPN password provides zero per-story data isolation and cannot be audited per individual.",
+      "3": "Publicly exposing unpublished investigative notes destroys journalistic confidentiality and competitive scoops."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
+      "https://cloud.google.com/iap/docs/concepts-overview"
+    ]
+  },
+  {
+    "id": "cs-med-048",
+    "domain": 3,
+    "topic": "Handling Multimodal Token Limits for Live 8-Hour Legislative Broadcasts",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. During live 8-hour parliamentary hearings or marathon supreme court sessions, MediaPulse streams continuous 4K broadcast feeds into Cloud Storage and needs autonomous agents to publish rolling breaking-news summaries every 5 minutes. Passing the entire cumulative 8-hour raw 4K video into every 5-minute prompt would exceed context limits and latency SLAs. How should you architect this rolling synthesis pipeline?",
+    "options": [
+      "Wait until the entire 8-hour hearing finishes before generating the very first breaking news alert.",
+      "Implement a sliding-window streaming architecture in ADK: process incoming 5-minute video/audio segments with Gemini 1.5 Pro multimodal ingestion, write structured segment summaries and key quotes into Agent Platform Memory Bank / RAG Engine, and generate each rolling update by combining the active 5-minute video window with retrieved historical context from Memory Bank.",
+      "Downsample the video to 1 frame per hour so 99.9% of spoken testimony is lost.",
+      "Restart the parliamentary hearing from the beginning every 5 minutes."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "For continuous long-duration live broadcasts, a sliding-window multimodal architecture combined with episodic memory (Agent Platform Memory Bank and RAG Engine) keeps per-turn context windows bounded and fast. Each 5-minute window is analyzed in full multimodal fidelity, while prior hours are queried via low-latency structured memory retrieval.",
+    "whyWrong": {
+      "0": "Waiting 8 hours before reporting breaking legislative votes violates the sub-10-minute breaking news SLA.",
+      "2": "1 frame per hour discards all audio testimony and visual evidence.",
+      "3": "MediaPulse cannot command a national parliament to restart its session."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/memory-bank",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/video-understanding"
+    ]
+  },
+  {
+    "id": "cs-med-049",
+    "domain": 4,
+    "topic": "Validating MCP Tool Execution Success in Pre-Production CI/CD",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. Before deploying an updated Publishing Agent to production, your CI/CD pipeline must verify that the agent correctly sequences its tool invocations—specifically verifying that it calls `check_copyright_license` and receives `status: APPROVED` before calling `cms_publish_article`. How should you automate this check?",
+    "options": [
+      "Run the test against the live production CMS so test articles are published to millions of real readers.",
+      "Check only whether the agent's final natural language response contains the word 'Success'.",
+      "Use ADK evaluation tooling (`evalset`) configured with trajectory evaluation assertions that inspect the recorded sequence of tool calls and arguments against expected golden trajectories, failing the CI/CD build if `cms_publish_article` is ever invoked prior to a successful `check_copyright_license` call.",
+      "Disable tool invocation logging during CI/CD tests."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Evaluating autonomous agents requires validating not just the final text output, but the intermediate execution trajectory (tool selection, argument accuracy, and causal ordering). ADK trajectory evaluation assertions verify that safety-critical tool calls (`check_copyright_license`) strictly precede side-effecting tool calls (`cms_publish_article`) against mocked MCP servers in CI/CD.",
+    "whyWrong": {
+      "1": "An agent could hallucinate the word 'Success' while skipping copyright verification or failing to call the CMS tool.",
+      "0": "Running CI/CD tests against live production publishing endpoints pollutes public news channels with test artifacts.",
+      "3": "Disabling tool logging prevents any verification of agent tool execution behavior."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-trajectory"
+    ]
+  },
+  {
+    "id": "cs-med-050",
+    "domain": 5,
+    "topic": "Comprehensive Editorial Integrity & Governance Architecture",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": "mediapulse",
+    "officialSample": false,
+    "question": "For this question, refer to the MediaPulse Network case study. Chief Digital & Editorial Officer David K. Sterling states: 'By orchestrating multimodal Gemini agents through MCP integrations, strict Model Armor rights guardrails, and continuous automated fact-checking on Google Cloud, MediaPulse delivers verified global storytelling in real time.' Which three architectural components directly realize his executive vision? (Choose three.)",
+    "options": [
+      "Standardized Model Context Protocol (MCP) servers managed with Auth Manager (OAuth 2.0) connecting ADK agents to third-party CMS, Slack, and Digital Asset Management (DAM) rights systems.",
+      "Model Armor and Agent Registry policy gates that enforce zero copyright infringement, territorial licensing boundaries, and prompt injection defense across all pipeline stages.",
+      "Continuous pre-staging evaluation using ADK evalset and custom LLM autoraters grounded on verified journalistic archives in Agent Search to guarantee zero factual hallucinations.",
+      "Allowing unverified social media rumors to bypass fact-checking whenever breaking news latency approaches 9 minutes.",
+      "Sharing a single unauthenticated root API key across all 28 regional syndicates and external freelance contributors.",
+      "Replacing all human investigative editors with random number generators."
+    ],
+    "answer": [
+      0,
+      1,
+      2
+    ],
+    "explanation": "David K. Sterling's executive statement directly highlights three foundational pillars of the MediaPulse architecture: (1) standardized MCP integrations with OAuth 2.0 connecting agents to SaaS editorial/rights tools; (2) strict Model Armor and Agent Registry guardrails protecting copyright and safety; and (3) continuous automated fact-checking and autorater evaluation grounded in verified Agent Search archives.",
+    "whyWrong": {
+      "3": "Allowing unverified social media rumors to bypass fact-checking directly violates the zero-hallucination business requirement.",
+      "4": "Sharing unauthenticated root keys violates Principal Access Boundary (PAB) governance and embargo security.",
+      "5": "MediaPulse explicitly mandates Human-in-the-Loop (HITL) editorial sign-off for sensitive investigative journalism."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/mcp-servers",
+      "https://cloud.google.com/model-armor/docs/overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
+    ]
+  }
+]

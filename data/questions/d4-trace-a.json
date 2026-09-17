@@ -1,0 +1,731 @@
+[
+  {
+    "id": "d4-trc-001",
+    "domain": 4,
+    "topic": "OpenTelemetry Instrumentation & Cloud Trace Waterfall Analysis",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Users report that an ADK financial research agent deployed on Cloud Run occasionally takes 16 seconds to respond to a single query. The agent executes a multi-step workflow: (1) Planner LLM call, (2) Parallel execution of `search_sec_filings` and `query_market_data`, and (3) Synthesizer LLM call. Looking only at HTTP ingress logs in Cloud Run shows a single 16,200ms request duration, providing zero visibility into whether the latency bottleneck lies in Gemini model prefill, slow external SEC API calls, or sequential blocking code. How should you instrument the agent to pinpoint the exact millisecond breakdown of every reasoning step and tool execution?",
+    "options": [
+      "Instrument the ADK agent with OpenTelemetry using `CloudTraceSpanExporter` (or ADK's built-in tracing / OpenInference instrumentation) to emit hierarchical child spans for each LLM invocation, subagent handoff, and tool call, and inspect the resulting waterfall timeline in Google Cloud Trace.",
+      "Add `print('here')` statements without timestamps to stdout and manually scroll through millions of text lines.",
+      "Use Cloud Billing monthly invoice PDFs to debug per-request millisecond latency.",
+      "Disable parallel tool execution so that requests take 30 seconds instead of 16 seconds."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google Cloud Trace paired with OpenTelemetry (`opentelemetry-exporter-gcp-trace` and GenAI semantic conventions) provides hierarchical waterfall visualization of complex agent trajectories. Each user turn creates a root trace span containing child spans for `llm.generate_content`, `agent.handoff`, and `tool.execute` with exact start/end timestamps. Inspecting the Cloud Trace waterfall immediately reveals whether latency is caused by model TTFT, token generation throughput, or a slow external API tool call.",
+    "whyWrong": {
+      "1": "Unstructured `print('here')` statements lack timestamps, span hierarchy, or concurrency correlation across parallel async tasks.",
+      "2": "Monthly billing invoices aggregate total spend and contain zero runtime latency telemetry.",
+      "3": "Disabling parallel execution worsens latency rather than diagnosing the bottleneck."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/setup/python-ot",
+      "https://google.github.io/adk-docs/observability/"
+    ]
+  },
+  {
+    "id": "d4-trc-002",
+    "domain": 4,
+    "topic": "Correlating Structured Cloud Logging with Cloud Trace Spans",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "While inspecting a slow 14-second agent trace waterfall in Google Cloud Trace, an SRE clicks on a failed child span named `tool.execute.issue_refund` and wants to immediately view the exact structured JSON error payload, SQL query parameters, and Python exception traceback logged during that specific span inside the Cloud Trace UI without manually searching through millions of logs in Logs Explorer. How should you format your application's structured JSON log entries written to `stdout`/`stderr` on Cloud Run to enable automatic trace-to-log correlation?",
+    "options": [
+      "Write logs in plain unformatted ASCII text with random emojis at the beginning of each line.",
+      "Include the special fields `\"logging.googleapis.com/trace\": \"projects/PROJECT_ID/traces/TRACE_ID\"` and `\"logging.googleapis.com/spanId\": \"SPAN_ID\"` in every structured JSON log dictionary emitted during that active OpenTelemetry span.",
+      "Store logs inside local container `/var/log/mylog.txt` without exporting them to stdout or Cloud Logging.",
+      "Email every log line individually to the SRE team via SMTP."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "When Cloud Run or GKE containers write structured JSON logs to `stdout`/`stderr`, the Google Cloud Logging agent automatically parses reserved fields. Specifically, populating `\"logging.googleapis.com/trace\": \"projects/<PROJECT_ID>/traces/<32-hex-trace-id>\"` and `\"logging.googleapis.com/spanId\": \"<16-hex-span-id>\"` links every log entry directly to its exact OpenTelemetry span, allowing engineers to view contextual logs inline inside the Cloud Trace waterfall viewer.",
+    "whyWrong": {
+      "0": "Unstructured plain text without trace/span hex IDs cannot be correlated with specific spans in Cloud Trace.",
+      "2": "Files written to local container disk (`/var/log`) are ephemeral and invisible to Cloud Logging / Cloud Trace unless written to stdout/stderr or exported via the Logging API.",
+      "3": "Emailing individual log lines via SMTP causes massive spam, high latency, and zero trace correlation."
+    },
+    "refs": [
+      "https://cloud.google.com/logging/docs/structured-logging#special-payload-fields",
+      "https://cloud.google.com/trace/docs/trace-log-integration"
+    ]
+  },
+  {
+    "id": "d4-trc-003",
+    "domain": 4,
+    "topic": "Distributed Trace Context Propagation Across Remote Subagents",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise e-commerce orchestrator agent deployed on Cloud Run (`OrchestratorService`) delegates fraud scoring to a separate microservice (`FraudAgentService`) running on Google Kubernetes Engine (GKE) via HTTP POST requests. Currently, when an engineer inspects a user transaction in Cloud Trace, they see two completely disconnected traces: Trace A showing `OrchestratorService` waiting 2.1 seconds for an HTTP call, and a separate orphan Trace B showing `FraudAgentService` executing internal tools. How should you unify these into a single end-to-end distributed trace waterfall?",
+    "options": [
+      "Disable Cloud Trace on `FraudAgentService` so only Trace A exists.",
+      "Set the trace ID of every request across the entire company to the static string `'00000000000000000000000000000001'` so that all millions of users share one single trace.",
+      "Configure OpenTelemetry W3C Trace Context propagation (`TraceContextTextMapPropagator` / `HTTPXClientInstrumentor`) on `OrchestratorService` to inject the `traceparent` HTTP header into outbound requests, and configure ASGI/FastAPI middleware on `FraudAgentService` to extract `traceparent` as the parent context for its child spans.",
+      "Pass the trace ID inside an encrypted JPEG image attachment."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Distributed tracing across microservice boundaries requires propagating trace context headers across network calls. By enabling **W3C Trace Context propagation** (`traceparent: 00-<trace-id>-<parent-span-id>-<flags>`), the calling agent (`OrchestratorService`) injects its active trace and span ID into the outbound HTTP/gRPC header, and the receiving subagent (`FraudAgentService`) extracts it to parent its spans under the same `trace-id`. Cloud Trace automatically stitches all spans from both Cloud Run and GKE into a single unified end-to-end waterfall.",
+    "whyWrong": {
+      "0": "Disabling tracing on the subagent blinds engineers to internal GKE execution bottlenecks.",
+      "1": "Hardcoding a static trace ID across all concurrent users merges millions of unrelated conversations into a corrupted, unparseable trace.",
+      "3": "Passing trace metadata inside image attachments violates W3C HTTP propagation standards and breaks automated instrumentation."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/setup/python-ot#context-propagation",
+      "https://www.w3.org/TR/trace-context/"
+    ]
+  },
+  {
+    "id": "d4-trc-004",
+    "domain": 4,
+    "topic": "Real-Time Infinite Loop Detection & Termination in Production",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In production, a rare edge-case user query causes an ADK customer support agent to enter a cyclic tool-calling loop: it calls `get_customer_profile(id='99')`, receives a JSON response indicating `status='MIGRATED_TO_ID_99'`, and repeatedly calls `get_customer_profile(id='99')` with the exact same arguments 40 times in a row until the HTTP request times out after 60 seconds, burning $1.50 in tokens per occurrence. What runtime guardrail and observability mechanism should you implement to immediately halt and alert on cyclic loops?",
+    "options": [
+      "Rely on monthly billing alerts sent 30 days after the loop occurs.",
+      "Increase the Cloud Run HTTP timeout to 3,600 seconds so the agent can repeat the call 2,400 times.",
+      "Delete the `get_customer_profile` tool from production so no customer profiles can ever be retrieved.",
+      "Implement an ADK `before_tool_callback` (or custom runner step interceptor) that maintains a sliding window of `(tool_name, canonical_args_hash)` pairs in `session.state`; if an identical tool call hash is repeated `N` times (e.g., `N=3`) or total turn steps exceed `max_steps=10`, abort tool execution, emit a structured log with `severity='ERROR'` and `event_type='AGENT_LOOP_DETECTED'`, and trigger a Cloud Monitoring log-based alert."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Preventing runaway agent loops in production requires both **active runtime circuit breaking** and **real-time observability alerting**: (1) At runtime, an ADK `before_tool_callback` / `before_model_callback` inspects the current trajectory history for cyclic `(tool_name, hash(sorted_args))` repetitions or hard step ceilings (`max_steps`); when a cycle is detected, it short-circuits the loop by returning a synthetic error message instructing the LLM to gracefully apologize or escalate; (2) It simultaneously emits a structured log event (`event_type='AGENT_LOOP_DETECTED'`), which triggers a Cloud Monitoring log-based metric alert to notify engineers immediately.",
+    "whyWrong": {
+      "0": "Monthly billing alerts fire weeks too late after thousands of dollars have already been wasted.",
+      "1": "Increasing timeouts allows runaway loops to consume 60x more tokens and quota without solving the cyclic failure.",
+      "2": "Deleting core business tools breaks legitimate customer support workflows."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/",
+      "https://cloud.google.com/logging/docs/alerting/log-based-alerts"
+    ]
+  },
+  {
+    "id": "d4-trc-005",
+    "domain": 4,
+    "topic": "OpenTelemetry Semantic Conventions for GenAI Spans",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise observability platform ingests OpenTelemetry traces from 40 different AI agents built across Google ADK, LangChain, and custom Python scripts into Cloud Trace and BigQuery. To build unified cross-agent dashboards tracking token consumption, model versions, and tool error rates, your architecture team mandates adherence to standard OpenTelemetry GenAI Semantic Conventions. Which set of span attributes should be recorded on every LLM generation span?",
+    "options": [
+      "`gen_ai.system` (e.g., `'vertex_ai'`), `gen_ai.request.model` (e.g., `'gemini-2.5-pro'`), `gen_ai.request.temperature`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, and `gen_ai.response.finish_reasons`.",
+      "Only `http.status_code=200` and `container.cpu.utilization`.",
+      "Custom randomly named attributes like `my_tokens_in_123` and `model_used_today_abc` that differ in every agent repository.",
+      "A single string attribute containing a screenshot of the developer's IDE."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The OpenTelemetry Semantic Conventions for Generative AI (`gen_ai.*` namespace) define standardized span attribute keys across frameworks: `gen_ai.system` (`vertex_ai` / `google_genai`), `gen_ai.request.model`, `gen_ai.request.temperature`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, and `gen_ai.response.finish_reasons` (e.g., `['STOP']` vs `['MAX_TOKENS']` vs `['SAFETY']`). Standardized attribute naming allows unified SQL/PromQL analytics and FinOps token dashboards across all enterprise agents.",
+    "whyWrong": {
+      "1": "HTTP status codes and CPU utilization cannot track token consumption, model versions, or safety finish reasons.",
+      "2": "Inconsistent, ad-hoc attribute naming breaks cross-agent aggregation queries and observability dashboards.",
+      "3": "IDE screenshots are non-queryable binary blobs irrelevant to runtime telemetry."
+    },
+    "refs": [
+      "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "https://cloud.google.com/trace/docs/overview"
+    ]
+  },
+  {
+    "id": "d4-trc-006",
+    "domain": 4,
+    "topic": "Detecting Semantic Prompt & Intent Distribution Drift in Production",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Three months after deploying an ADK telecom support agent trained and evaluated primarily on mobile phone plan inquiries, the company launches a new home fiber-optic internet service. Without any code changes to the agent, customer satisfaction drops by 22% because thousands of users are now asking fiber-optic installation questions that the agent's retrieval index and tools were never designed to handle. Traditional infrastructure metrics (CPU, memory, HTTP 200 rate, p95 latency) remain 100% green. What observability pipeline should you implement to automatically detect this semantic input drift?",
+    "options": [
+      "Monitor only whether the Cloud Run container returns HTTP status code 200.",
+      "Export structured production prompt logs to BigQuery via a Cloud Logging sink, compute vector embeddings (`text-embedding-005`) on incoming user queries, and configure Vertex AI Model Monitoring (or a scheduled BigQuery clustering/distance job) to alert when the cosine distance distribution between live user queries and the golden baseline dataset exceeds a drift threshold.",
+      "Check if the average length of user prompts is exactly 42 characters.",
+      "Wait for the annual company financial audit to discover that customers are unhappy."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Semantic input drift (covariate shift in natural language user intents) is invisible to traditional HTTP/infrastructure metrics because the agent still returns `HTTP 200 OK` within normal latency—it just gives unhelpful or hallucinated answers to out-of-distribution topics. Streaming production prompts to BigQuery, generating vector embeddings (`text-embedding-005`), and running **embedding drift detection** (measuring Euclidean/cosine distance shift or cluster emergence against the baseline evaluation dataset distribution) provides early automated warning when user topics shift.",
+    "whyWrong": {
+      "0": "HTTP 200 indicates network transport success, not whether the agent understood or accurately answered a novel domain topic.",
+      "2": "Prompt character length remains similar even when topics shift from mobile phones to fiber-optic internet.",
+      "3": "Waiting months for financial audits allows severe customer churn to accumulate."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/model-monitoring/overview",
+      "https://cloud.google.com/logging/docs/export/configure_export_v2"
+    ]
+  },
+  {
+    "id": "d4-trc-007",
+    "domain": 4,
+    "topic": "Privacy-Preserving Observability: Scrubbing PII from Spans & Logs",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You have enabled OpenTelemetry tracing on a wealth management ADK agent so that every user prompt, LLM response, and tool argument dictionary is recorded in span attributes (`gen_ai.prompt`, `gen_ai.completion`, `tool.args`) exported to Cloud Trace. During a security review, auditors note that users frequently type raw credit card numbers, Social Security Numbers, and bank account routing numbers in their prompts, which are now visible in plaintext to any developer with the `Cloud Trace User` IAM role. How should you architecturally sanitize telemetry without losing structural trace visibility?",
+    "options": [
+      "Grant the `Cloud Trace User` role to all anonymous internet users so everyone has equal access.",
+      "Disable Cloud Trace, Cloud Logging, and Cloud Monitoring completely across all production systems.",
+      "Implement a custom OpenTelemetry `SpanProcessor` (or ADK telemetry callback filter) that intercepts spans before export, applies deterministic regex/Sensitive Data Protection (Cloud DLP) redaction rules to replace PII patterns (`[REDACTED_SSN]`, `[REDACTED_CC]`) inside `gen_ai.prompt` and `tool.args` attributes, and exports only sanitized spans to Cloud Trace.",
+      "Encrypt the entire trace payload with a random key that is immediately deleted so nobody—including SREs—can ever view any trace waterfall."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In OpenTelemetry architectures, a custom **`SpanProcessor`** (registered in the `TracerProvider` pipeline prior to `BatchSpanProcessor` / `CloudTraceSpanExporter`) intercepts every span in memory before it leaves the application container. By running fast regex scrubbers or Sensitive Data Protection (Cloud DLP) redaction templates over string attributes (`gen_ai.prompt`, `tool.args`) inside `on_end()`, sensitive PII/PHI is replaced with safe tokens (`[REDACTED_SSN]`) while preserving span timing, hierarchy, tool names, and token metrics for SREs.",
+    "whyWrong": {
+      "0": "Granting public access to trace logs containing financial PII is a severe regulatory data breach.",
+      "1": "Disabling all observability leaves production operations completely blind to outages, latency spikes, and infinite loops.",
+      "3": "Destroying encryption keys renders traces permanently unreadable, defeating the purpose of observability."
+    },
+    "refs": [
+      "https://opentelemetry.io/docs/languages/python/instrumentation/#span-processors",
+      "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data"
+    ]
+  },
+  {
+    "id": "d4-trc-008",
+    "domain": 4,
+    "topic": "FinOps Token Usage Attribution & Multi-Tenant Cost Chargeback",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise AI platform hosts a shared ADK agent gateway serving 8 internal business units (`Marketing`, `Legal`, `HR`, `Sales`, etc.). All requests invoke Vertex AI Gemini 2.5 Pro under a single shared Google Cloud project, resulting in a single monthly Vertex AI billing line item of $65,000. The CFO requires an exact monthly chargeback report showing the dollar cost and token consumption broken down by business unit, agent workflow, and specific tool use. How should you design this FinOps observability pipeline?",
+    "options": [
+      "Count the number of lines of Python code in each department's folder to estimate token costs.",
+      "Divide the $65,000 bill equally by 8 every month regardless of whether `HR` sent 10 queries and `Marketing` sent 2,000,000 queries.",
+      "Create 8,000 separate Google Cloud billing accounts—one for every individual employee.",
+      "Inject `business_unit`, `agent_id`, and `user_id` labels into every structured Cloud Logging record alongside `input_tokens`, `output_tokens`, and `cached_tokens` from `usage_metadata`, sink the logs to a partitioned BigQuery table, and join token volumes with Vertex AI SKU pricing tables in a Looker Studio FinOps dashboard."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Because shared agent gateways multiplex traffic through common Vertex AI endpoints, native Cloud Billing SKU reports show project-level totals rather than application-level tenant splits. Emitting structured JSON logs containing exact `usage_metadata` (`prompt_token_count`, `candidates_token_count`, `cached_content_token_count`, `model_name`) tagged with authenticated `business_unit` / `tenant_id` metadata and sinking to BigQuery enables granular SQL cost attribution and chargeback dashboards.",
+    "whyWrong": {
+      "0": "Static lines of Python code have zero correlation with runtime token consumption volume.",
+      "1": "Equal division penalizes low-usage departments and fails to incentivize prompt/caching optimization in high-usage departments.",
+      "2": "Managing thousands of individual billing accounts creates extreme administrative overhead and forfeits enterprise volume discounts."
+    },
+    "refs": [
+      "https://cloud.google.com/logging/docs/export/bigquery",
+      "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+    ]
+  },
+  {
+    "id": "d4-trc-009",
+    "domain": 4,
+    "topic": "Diagnosing Tool Execution Timeouts vs LLM Reasoning Latency",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are analyzing a Cloud Trace waterfall for a slow 12-second turn in an ADK travel booking agent. The trace shows the following span sequence: `Span 1: llm.generate_content (850ms)` -> `Span 2: tool.execute.search_flights (10,400ms)` -> `Span 3: llm.generate_content (750ms)`. Based on this trace evidence, what is the root cause of the 12-second latency, and what engineering action should you take?",
+    "options": [
+      "The latency bottleneck is overwhelmingly inside the external `search_flights` tool execution (10.4s out of 12.0s total), whereas both Gemini LLM reasoning calls completed in under 1 second each; focus optimization on adding connection pooling, caching, or async pagination to the `search_flights` API client rather than changing LLM models.",
+      "The Gemini LLM is taking 12 seconds to generate tokens; downgrade the model to a 1-parameter linear regression.",
+      "The network cable between Span 1 and Span 3 is broken.",
+      "Cloud Trace is adding 10.4 seconds of artificial delay to the tool execution."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "A primary benefit of OpenTelemetry span decomposition in agentic workflows is separating **LLM inference latency** (`llm.generate_content`: 850ms + 750ms = 1.6s) from **external tool execution latency** (`tool.execute.search_flights`: 10,400ms = 86.7% of total turn time). Without span-level tracing, teams often mistakenly blame 'slow LLMs' and waste time downgrading models when the actual bottleneck is an unoptimized third-party REST/database call.",
+    "whyWrong": {
+      "1": "The trace explicitly proves Gemini inference took only 1.6 seconds total across two turns.",
+      "2": "Span transitions occur in memory within the same Python process; no physical cable is broken.",
+      "3": "Asynchronous OpenTelemetry span export adds microseconds of overhead, never 10.4 seconds."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/trace-span-overview",
+      "https://google.github.io/adk-docs/observability/"
+    ]
+  },
+  {
+    "id": "d4-trc-010",
+    "domain": 4,
+    "topic": "Monitoring Safety Filter Block Rates & Finish Reason Anomalies",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "After deploying a new system prompt for a healthcare pharmacy agent, customer support tickets spike with users reporting that the agent abruptly responds with generic error messages ('I cannot assist with that request') when patients ask legitimate questions about side effects of prescribed blood thinners. How should you use Cloud Logging and Cloud Monitoring to verify whether Vertex AI Safety Filters are falsely blocking valid medical responses?",
+    "options": [
+      "Monitor only the disk I/O read operations per second on the container boot disk.",
+      "Create a Cloud Logging log-based metric that counts model responses where `candidates[0].finish_reason == 'SAFETY'` (or `finish_reason == 'RECITATION'`) grouped by `safety_ratings.category` (e.g., `HARM_CATEGORY_DANGEROUS_CONTENT`), and configure a Cloud Monitoring alert when the safety block rate exceeds 2%.",
+      "Check if the HTTP status code is 404 Not Found.",
+      "Ask patients to stop asking about medication side effects."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "When Gemini blocks a response due to safety thresholds, the API still returns an `HTTP 200 OK` response payload, but sets `candidates[0].finish_reason = 'SAFETY'` (and populates `safety_ratings` with `blocked=True` and probability/severity scores). Tracking `finish_reason` distributions via structured logs and Cloud Monitoring log-based metrics immediately identifies false-positive safety filter spikes triggered by medical/clinical terminology.",
+    "whyWrong": {
+      "0": "Disk I/O metrics do not reflect semantic safety filter triggers inside remote Vertex AI inference.",
+      "2": "Safety-blocked API responses return HTTP 200 OK with a `SAFETY` finish reason, not HTTP 404.",
+      "3": "Patients asking about prescription side effects is the core business purpose of a pharmacy assistant."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/configure-safety-attributes",
+      "https://cloud.google.com/logging/docs/logs-based-metrics"
+    ]
+  },
+  {
+    "id": "d4-trc-011",
+    "domain": 4,
+    "topic": "Tracking Subagent Delegation Graphs & Multi-Agent Topology",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In a complex 7-agent enterprise customer resolution system built with ADK, a root coordinator agent can dynamically route tasks through multiple levels of subagents (`Coordinator` -> `OrderAgent` -> `LogisticsSubAgent` -> `CustomsClearanceAgent`). Product managers want to visualize a directed graph (Sankey / topology diagram) showing the exact percentage of production traffic flowing along each agent-to-agent handoff edge and identifying where drop-offs or escalations occur. What telemetry data structure enables this topology reconstruction?",
+    "options": [
+      "Count total container restarts per week in Cloud Run.",
+      "Log only the final user rating (1 to 5 stars) without recording intermediate agent transitions.",
+      "Record structured parent-child span relationships in OpenTelemetry (`parent_span_id` -> `span_id`) along with explicit custom span attributes `adk.source_agent` and `adk.target_agent` on every `transfer_to_agent` event, exporting the spans to BigQuery for graph edge aggregation.",
+      "Take a photo of the architecture whiteboard and upload it to Cloud Storage."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Reconstructing runtime multi-agent execution graphs (directed acyclic graphs or cyclic state machines) requires recording directed edges (`source_agent` -> `target_agent`) linked by shared `trace_id` and `parent_span_id` hierarchy. Sinking these OpenTelemetry spans to BigQuery allows executing SQL `GROUP BY source_agent, target_agent` queries to build live Sankey flow diagrams, transition probability matrices, and drop-off heatmaps.",
+    "whyWrong": {
+      "0": "Container restarts measure process stability, not logical agent routing topologies.",
+      "1": "End-of-session star ratings provide zero visibility into intermediate subagent handoff paths.",
+      "3": "Static whiteboard photos show intended design, not actual runtime production traffic flows."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/observability/",
+      "https://cloud.google.com/trace/docs/trace-export- overview"
+    ]
+  },
+  {
+    "id": "d4-trc-012",
+    "domain": 4,
+    "topic": "Observability for Streaming Agents: Tracking Time-to-First-Token vs Inter-Token Latency",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You operate a real-time streaming customer chat agent using ADK's `Runner.run_async` generator (`stream=True`). Users complain that the chat interface feels 'laggy and frozen for 5 seconds before text suddenly bursts onto the screen all at once'. To distinguish whether the delay is caused by slow prefill/tool execution prior to the first token or slow token generation throughput after streaming starts, which two distinct OpenTelemetry span events/metrics should your streaming wrapper record?",
+    "options": [
+      "Count how many vowels are in the final paragraph.",
+      "Record only the total HTTP socket close timestamp.",
+      "Measure the ping time between the developer's home router and `8.8.8.8`.",
+      "Record a span event `gen_ai.content.first_token` to compute Time to First Token (`ttft_ms = first_token_timestamp - request_start_timestamp`), and compute Time Per Output Token (`tpot_ms = (stream_end_timestamp - first_token_timestamp) / output_token_count`)."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In streaming LLM applications, total duration conflates two distinct phases: (1) **Time to First Token (TTFT)**, governed by prompt prefill length, context cache hits, and synchronous tool execution before the final response stream begins; and (2) **Time Per Output Token (TPOT / Inter-Token Latency)**, governed by autoregressive decoding speed. Adding a timestamped OpenTelemetry span event (`add_event('first_token_received')`) when the first non-empty content chunk arrives cleanly decouples TTFT from TPOT.",
+    "whyWrong": {
+      "0": "Vowel counts have zero relation to streaming latency.",
+      "1": "Total socket close duration cannot distinguish whether a 5-second delay happened before token 1 arrived or slowly between tokens 1 and 200.",
+      "2": "Developer home router ping to Google DNS has no relation to production server-to-Vertex-AI streaming latency."
+    },
+    "refs": [
+      "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
+      "https://cloud.google.com/trace/docs/setup/python-ot"
+    ]
+  },
+  {
+    "id": "d4-trc-013",
+    "domain": 4,
+    "topic": "Detecting Tool Schema Drift & Silent API Contract Breakage",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An ADK insurance agent calls an internal microservice tool `get_policy_coverage(policy_id: str)`. Last night, the backend microservice team deployed an update that renamed a JSON response field from `\"deductible_usd\"` to `\"deductible_amount\"` without notifying the AI team. Because the HTTP call still returns `200 OK` with valid JSON, no HTTP error alerts fired. However, the LLM now sees `null`/missing deductible values and tells customers 'Your policy has no deductible information on file.' How can you configure observability to detect silent downstream tool schema drift?",
+    "options": [
+      "Validate tool return payloads against strict Pydantic response models inside the ADK tool wrapper (or `after_tool_callback`), emitting a structured warning/error log (`event_type='TOOL_SCHEMA_VALIDATION_ERROR'`) whenever unexpected missing fields or type mismatches occur, and alert on schema validation failure rates in Cloud Monitoring.",
+      "Check only if the HTTP status code from the microservice is 200.",
+      "Wait 6 months for customers to sue the insurance company over incorrect deductible quotes.",
+      "Disable JSON parsing in Python and pass raw binary memory pointers to the LLM."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Silent downstream API contract changes (`200 OK` with renamed or dropped JSON keys) are a major cause of subtle agent hallucinations. Enforcing strict **output schema validation** using Pydantic models inside ADK's tool execution layer (or `after_tool_callback`) catches contract drift immediately at runtime, logs a structured schema error (`TOOL_SCHEMA_VALIDATION_ERROR` with the offending field diff), and triggers an SRE alert before the LLM hallucinates over incomplete data.",
+    "whyWrong": {
+      "1": "The scenario explicitly states the microservice returns HTTP 200 OK despite renaming the JSON key.",
+      "2": "Relying on customer lawsuits for bug detection is a catastrophic operational failure.",
+      "3": "LLMs process text/tokens and cannot read raw C/Python memory pointers."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/",
+      "https://docs.pydantic.dev/latest/"
+    ]
+  },
+  {
+    "id": "d4-trc-014",
+    "domain": 4,
+    "topic": "Observability for Context Cache Hit Rates in Production",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You enabled Vertex AI Context Caching for a legal research agent to cache a 100,000-token statutory code repository. After a minor code deployment on Tuesday, your daily Vertex AI token bill unexpectedly jumps from $300/day to $2,400/day. You suspect a developer accidentally injected a dynamic timestamp (`Current time: 2026-09-17T13:02:36Z`) at line 1 of the system prompt, invalidating the cached prefix on every request. Which Cloud Monitoring metric / log query allows you to immediately confirm a drop in context cache hit efficiency?",
+    "options": [
+      "Check the CPU fan speed of the Cloud Run load balancer.",
+      "Query structured logs / custom metrics for the ratio `SUM(usage_metadata.cached_content_token_count) / SUM(usage_metadata.prompt_token_count)` over time, verifying whether the cached token ratio dropped from ~90% to 0% immediately after Tuesday's deployment.",
+      "Count the number of git branches in the repository.",
+      "Monitor whether the Cloud Storage bucket name contains uppercase letters."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Monitoring the **Cache Hit Token Ratio** (`cached_content_token_count / prompt_token_count`) as a time-series metric in Cloud Monitoring is essential for FinOps governance. If a dynamic variable (timestamp, user ID, UUID) is inadvertently placed *before* the cached content block in the prompt assembly order, prefix matching fails and `cached_content_token_count` drops to 0, causing an instant 4x–10x spike in input token billing.",
+    "whyWrong": {
+      "0": "Serverless load balancers do not expose physical CPU fan speed metrics, nor does fan speed indicate context cache hits.",
+      "2": "Git branch counts have zero impact on runtime Vertex AI context cache hit ratios.",
+      "3": "Cloud Storage bucket naming rules do not affect Gemini prompt prefix caching."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
+      "https://cloud.google.com/monitoring/custom-metrics"
+    ]
+  },
+  {
+    "id": "d4-trc-015",
+    "domain": 4,
+    "topic": "Alerting on Error Budget Burn Rate & Latency SLOs for Agents",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your SRE team defines a Service Level Objective (SLO) for an enterprise ADK IT helpdesk agent: 99.0% of conversational turns must complete successfully (`HTTP 200` without unhandled exceptions or loop termination) with an end-to-end turn latency under 6,000 milliseconds over a rolling 30-day window. If a sudden degradation causes 15% of turns to time out, waiting for the 30-day rolling average to drop below 99.0% takes too long, whereas alerting on a single slow request causes pager fatigue. What Google Cloud Service Monitoring alerting strategy should you configure?",
+    "options": [
+      "Check the SLO dashboard once every 30 days on the last day of the month.",
+      "Page the on-call engineer via phone call every single time any single request takes 6,001 milliseconds.",
+      "Configure multi-window, multi-burn-rate alerting policies in Google Cloud Service Monitoring that alert when the error budget burn rate exceeds a fast threshold (e.g., 14.4x burn rate over a 1-hour window consuming 2% of the monthly error budget) to page SREs only on sustained, statistically significant SLO threats.",
+      "Change the SLO definition to 0.01% availability so alerts never fire."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Following Google SRE best practices supported natively in **Cloud Service Monitoring**, **burn-rate alerts** measure how fast the service is consuming its 30-day error budget relative to the sustainable rate (1.0x). A fast-burn alert (e.g., 14.4x burn rate sustained over 1 hour and 5 minutes) detects major outages within minutes while ignoring isolated single-request latency spikes, eliminating pager fatigue while protecting the 30-day SLO.",
+    "whyWrong": {
+      "0": "Checking once a month discovers outages weeks after the entire error budget has been exhausted.",
+      "1": "Paging on every single request exceeding 6,000ms causes extreme alert fatigue and sleepless nights over transient network blips.",
+      "3": "Lowering the SLO to 0.01% abandons enterprise reliability commitments."
+    },
+    "refs": [
+      "https://cloud.google.com/monitoring/services/slo-burn-rate-alerting",
+      "https://sre.google/workbook/alerting-on-slos/"
+    ]
+  },
+  {
+    "id": "d4-trc-016",
+    "domain": 4,
+    "topic": "Sampling Strategies for High-Volume OpenTelemetry Traces",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global retail agent processes 50 million conversational turns per day. Exporting and storing 100% of OpenTelemetry traces with full verbose prompt/response span attributes in Cloud Trace and BigQuery exceeds your observability storage budget. However, you must ensure that 100% of failed turns (tool errors, safety blocks, loop detections, or latency > 10 seconds) are captured in full detail, while routine fast successful turns are sampled at 1%. Which sampling architecture should you implement?",
+    "options": [
+      "Delete all error traces and store only 100% of fast successful traces.",
+      "Use Head-Based Sampling at 1% on the client ingress load balancer, which blindly drops 99% of error and timeout traces before the agent even runs.",
+      "Turn off tracing completely on weekdays and only trace on Sundays.",
+      "Deploy an OpenTelemetry Collector (as a sidecar or GKE gateway) configured with **Tail-Based Sampling** (`tail_sampling` processor) that buffers spans for a trace in memory until completion, retaining 100% of traces containing error attributes or high latency (`>10s`) and probabilistically sampling 1% of healthy fast traces."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "**Head-based sampling** makes a random keep/drop decision at the very start of a request—meaning 99% of rare downstream tool exceptions or 12-second latency spikes are permanently discarded. **Tail-based sampling** (implemented via the OpenTelemetry Collector `tail_sampling` processor) inspects the completed trace waterfall *after* execution finishes: it deterministically retains 100% of traces exhibiting `status=ERROR`, `finish_reason=SAFETY`, or high latency, while sampling routine happy-path traces at 1% to control storage costs.",
+    "whyWrong": {
+      "0": "Deleting error traces destroys the exact diagnostic data engineers need to fix bugs.",
+      "1": "Head-based sampling at 1% misses 99% of production errors and slow outliers because the decision is made before execution begins.",
+      "2": "Disabling weekday tracing blinds operations during peak business hours."
+    },
+    "refs": [
+      "https://opentelemetry.io/docs/concepts/sampling/#tail-sampling",
+      "https://cloud.google.com/trace/docs/trace-sampling"
+    ]
+  },
+  {
+    "id": "d4-trc-017",
+    "domain": 4,
+    "topic": "Detecting Hallucination & Output Quality Drift via Online Evaluation Sampling",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "While latency and HTTP status codes remain stable, your product team suspects that recent updates to a dynamic enterprise knowledge base have degraded the factual groundedness of answers produced by your live production RAG agent. Because live user queries have no ground-truth reference answers, how should you architect an automated observability pipeline to continuously monitor production `GROUNDEDNESS` and `ANSWER_RELEVANCE`?",
+    "options": [
+      "Configure a Cloud Logging sink that exports a 2% sample of completed production `(prompt, retrieved_context, final_response)` tuples to a BigQuery staging table, and schedule an hourly/daily Vertex AI Gen AI Evaluation Service job (`EvalTask` with reference-free `GROUNDEDNESS` and `ANSWER_RELEVANCE` metrics) that publishes time-series quality scores to Cloud Monitoring.",
+      "Require every live user to write a 500-word ground-truth reference answer before they are allowed to ask a question.",
+      "Measure only the network packet size of retrieved documents.",
+      "Run `ROUGE-1` comparing the user's question against the user's own question."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "**Continuous Online Evaluation (Asynchronous Production Judge Sampling)** bridges offline pre-deployment testing with live runtime observability. By sampling 1–5% of live production traces (containing `user_prompt`, `retrieved_rag_chunks`, and `agent_response`) via a BigQuery log sink and running reference-free LLM-as-a-judge metrics (`GROUNDEDNESS`, `ANSWER_RELEVANCE`, `SAFETY`) asynchronously in Vertex AI Evaluation Service, teams can plot daily semantic quality time-series charts and trigger alerts when groundedness drifts downward.",
+    "whyWrong": {
+      "1": "Users ask questions because they do not know the answer; forcing them to write ground-truth answers is absurd.",
+      "2": "Packet size in bytes does not measure factual faithfulness or semantic hallucinations.",
+      "3": "Comparing a question against itself always yields a 1.0 ROUGE score and evaluates nothing."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/logging/docs/export/bigquery"
+    ]
+  },
+  {
+    "id": "d4-trc-018",
+    "domain": 4,
+    "topic": "Tracing Parallel Tool Execution & Fan-Out Concurrency",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An ADK wealth management agent executes three independent tool calls (`fetch_equities`, `fetch_bonds`, `fetch_real_estate`) concurrently using `asyncio.gather()`. Each tool call takes 1,200 milliseconds. However, when inspecting the Cloud Trace waterfall, you see the three tool spans executing strictly one after another in a staircase pattern (`0ms–1200ms`, `1200ms–2400ms`, `2400ms–3600ms`), resulting in a 3.6-second total duration instead of 1.2 seconds. What does this trace waterfall diagnostic reveal about your agent code?",
+    "options": [
+      "Cloud Trace automatically rearranges parallel spans into a staircase pattern for aesthetic reasons.",
+      "Despite being wrapped in `asyncio.gather()`, the underlying tool implementations are using synchronous blocking I/O libraries (such as synchronous `requests.get()` or `time.sleep()`) that block the single Python event loop thread; refactor the tools to use non-blocking async clients (`httpx.AsyncClient`) or run blocking calls in `asyncio.to_thread()`.",
+      "The speed of light slowed down inside the Google Cloud data center.",
+      "`asyncio.gather()` always multiplies execution time by 3."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "A classic Python async bug visible immediately in Cloud Trace waterfalls is the **'staircase waterfall' inside an intended parallel fan-out**. When synchronous blocking code (`requests.get`, synchronous database drivers) runs inside an `async def` function without `await` or thread offloading, it monopolizes the single-threaded Python event loop, forcing tasks inside `asyncio.gather()` to execute serially. Switching to `httpx.AsyncClient` or `asyncio.to_thread()` restores true overlapping parallel spans (`0ms–1200ms` for all three).",
+    "whyWrong": {
+      "0": "Cloud Trace accurately plots exact start and end timestamps recorded by OpenTelemetry; it never falsifies concurrency.",
+      "2": "Physical constants do not change inside data centers.",
+      "3": "Properly implemented non-blocking `asyncio.gather()` executes independent I/O tasks concurrently in `max(t1, t2, t3)` duration (~1.2s)."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/trace-span-overview",
+      "https://docs.python.org/3/library/asyncio-task.html#running-tasks-concurrently"
+    ]
+  },
+  {
+    "id": "d4-trc-019",
+    "domain": 4,
+    "topic": "Observability for Vector Search & RAG Retrieval Latency Spans",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your ADK enterprise search agent executes a RAG tool that performs three internal sub-steps: (1) Call `text-embedding-005` to embed the user query, (2) Query a Vertex AI Vector Search index for top-20 approximate nearest neighbors, and (3) Call a Vertex AI Reranker model to score and sort the top-5 passages. When the RAG tool takes 2.8 seconds, how should you instrument the tool function to isolate which of the three RAG sub-steps caused the slowdown?",
+    "options": [
+      "Measure only the total memory of the Vector Search index once a year.",
+      "Combine all three steps into a single opaque span named `do_everything` so internal timings are hidden.",
+      "Create three nested child OpenTelemetry spans inside the RAG tool function (`rag.embed_query`, `rag.vector_search`, and `rag.rerank_passages`) using `tracer.start_as_current_span()`, recording the embedding dimension, neighbor count, and reranker document count as span attributes.",
+      "Delete the Reranker model without checking if it was actually the slow component."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Instrumenting complex compound tools (like multi-stage RAG pipelines: Embed -> ANN Vector Search -> Cross-Encoder Rerank) with fine-grained nested child spans (`tracer.start_as_current_span('rag.rerank_passages')`) breaks down the opaque tool duration into its constituent network and compute stages. This immediately reveals whether latency stems from embedding API calls, Vector Search shard load, or cross-encoder reranking over overly long passages.",
+    "whyWrong": {
+      "0": "Annual memory checks cannot diagnose per-request latency spikes.",
+      "1": "A single opaque span hides which of the three internal network calls caused the 2.8-second delay.",
+      "3": "Deleting reranking degrades retrieval accuracy without verifying if reranking was even the bottleneck."
+    },
+    "refs": [
+      "https://opentelemetry.io/docs/languages/python/instrumentation/#creating-spans",
+      "https://cloud.google.com/trace/docs/setup/python-ot"
+    ]
+  },
+  {
+    "id": "d4-trc-020",
+    "domain": 4,
+    "topic": "Detecting Prompt Injection & Security Anomalies via Log Analytics",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your security operations center (SOC) wants real-time visibility into adversarial users attempting prompt injection, system instruction exfiltration, or jailbreak attacks against your deployed ADK customer service agents. In addition to blocking malicious requests via Model Armor / safety callbacks, how should you structure your security observability pipeline in Google Cloud?",
+    "options": [
+      "Send an automated email to the attacker thanking them for testing the system.",
+      "Ignore blocked prompt injection attempts because if they were blocked, nothing bad happened.",
+      "Write attacker IP addresses on a physical chalkboard in the office breakroom.",
+      "Emit structured security audit logs to Cloud Logging with `severity='WARNING'` or `'CRITICAL'`, including standardized threat classification fields (`event_type='PROMPT_INJECTION_DETECTED'`, `attacker_ip`, `user_id`, `matched_rule`, `sanitized_snippet`), and route these logs via a sink to Google SecOps (Chronicle) / BigQuery with real-time Cloud Monitoring security alerts."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Blocked prompt injection attempts are vital threat-intelligence signals indicating active reconnaissance against your agent's tools and data. Emitting structured JSON security events (`PROMPT_INJECTION_DETECTED` with attacker IP, session ID, user identity, and rule trigger) to Cloud Logging and forwarding them to **Google SecOps (Chronicle)** or BigQuery enables automated IP banning (via Cloud Armor dynamic address groups) and threat hunting across sessions.",
+    "whyWrong": {
+      "0": "Communicating with attackers encourages further exploitation.",
+      "1": "Ignoring blocked attacks allows persistent attackers to probe hundreds of variations until they discover an unblocked bypass.",
+      "2": "Physical chalkboards cannot trigger automated WAF IP blocks or SIEM correlation."
+    },
+    "refs": [
+      "https://cloud.google.com/security-command-center/docs/model-armor-overview",
+      "https://cloud.google.com/logging/docs/structured-logging"
+    ]
+  },
+  {
+    "id": "d4-trc-021",
+    "domain": 4,
+    "topic": "Using ADK Callbacks (`before_model_callback`, `after_model_callback`) for Custom Telemetry",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You want to add custom enterprise telemetry across all ADK agents in your organization—specifically logging the exact system prompt hash, active user tier, and exact token latency on every single LLM call—without modifying the core ADK library code or wrapping every individual tool function manually. Which native ADK extension mechanism should you use?",
+    "options": [
+      "Register custom functions on the ADK agent's `before_model_callback` and `after_model_callback` (as well as `before_tool_callback` / `after_tool_callback`) hooks, which receive the `CallbackContext` and `LlmRequest` / `LlmResponse` objects on every step.",
+      "Fork the `google-adk` GitHub repository and rewrite the entire library in COBOL.",
+      "Use a network packet sniffer (`tcpdump`) on the host VM kernel to decrypt TLS 1.3 traffic.",
+      "Ask users to time the agent with a stopwatch and type the number of seconds into the chat window."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The Google Agent Development Kit (ADK) provides a clean lifecycle callback architecture (`before_agent_callback`, `after_agent_callback`, `before_model_callback`, `after_model_callback`, `before_tool_callback`, `after_tool_callback`). By attaching standard telemetry hooks to these callbacks, engineers can inspect `CallbackContext`, record custom OpenTelemetry attributes, enforce token budgets, or log structured JSON payloads across all agents uniformly without touching core framework internals.",
+    "whyWrong": {
+      "1": "Forking and rewriting frameworks creates an unmaintainable maintenance burden.",
+      "2": "Decrypting TLS 1.3 via kernel packet sniffers is complex, brittle, and lacks application-layer context like `session.state`.",
+      "3": "User manual stopwatch timing is absurd and unscalable."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/",
+      "https://google.github.io/adk-docs/observability/"
+    ]
+  },
+  {
+    "id": "d4-trc-022",
+    "domain": 4,
+    "topic": "Diagnosing Session State Serialization & Payload Bloat",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An ADK data analyst agent deployed on Cloud Run using `VertexAiSessionService` exhibits fast 900ms latency on Turn 1 of a conversation, but latency degrades linearly with every turn: Turn 5 takes 3.2 seconds, Turn 10 takes 7.8 seconds, and Turn 15 fails with a gRPC payload size limit error. Inspecting the Cloud Trace waterfall shows that the `session.load` and `session.save` spans are growing from 15ms on Turn 1 to 4,500ms on Turn 14. What is the root cause and how should you fix it?",
+    "options": [
+      "Cloud Run CPUs physically degrade and lose 10% of their transistors on every HTTP request.",
+      "Tools are storing massive raw DataFrames or multi-megabyte JSON blobs directly inside `session.state` (or raw tool output history) on every turn, causing quadratic state serialization bloat; offload large artifacts to Cloud Storage / BigQuery and store only lightweight URI references (`gs://...` or table IDs) inside `session.state`.",
+      "`VertexAiSessionService` deliberately adds a `time.sleep(turn_number)` delay to punish talkative users.",
+      "The user's internet connection slows down after typing 10 messages."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "A common stateful agent anti-pattern is dumping multi-megabyte tool outputs (full SQL result sets, raw base64 PDFs, large pandas DataFrames) directly into `session.state` or unpruned tool event histories. Because state is loaded from and saved to persistent storage (`VertexAiSessionService` / Firestore) on *every turn*—and passed into the LLM context window—serialization latency and token prefill costs grow quadratically. Storing large artifacts externally (Cloud Storage / BigQuery / ADK `ArtifactService`) and keeping only lightweight reference pointers in `session.state` keeps turn latency constant O(1).",
+    "whyWrong": {
+      "0": "Silicon transistors do not physically disappear during HTTP requests.",
+      "2": "`VertexAiSessionService` does not inject artificial sleep delays; latency is proportional to serialized byte size.",
+      "3": "Client internet speed does not cause server-side `session.load` / `session.save` spans inside Google Cloud to take 4.5 seconds."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/state/",
+      "https://google.github.io/adk-docs/artifacts/"
+    ]
+  },
+  {
+    "id": "d4-trc-023",
+    "domain": 4,
+    "topic": "End-to-End Agent Observability Architecture on Google Cloud",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are designing the reference observability architecture for all production Tier-1 agentic workflows at a Fortune 500 financial enterprise on Google Cloud. Which three architectural components should you integrate to achieve comprehensive visibility across latency, reasoning quality, cost, and runtime reliability? (Choose three.)",
+    "options": [
+      "Google Cloud Trace with OpenTelemetry GenAI instrumentation to capture distributed trace waterfalls, token metadata, and subagent handoff spans.",
+      "Google Cloud Logging structured JSON logs (correlated via `trace` and `spanId`) exported via Log Sinks to BigQuery for long-term FinOps token analytics, drift detection, and audit compliance.",
+      "Google Cloud Monitoring custom metrics and multi-burn-rate SLO alerting policies tracking error budgets, safety block rates, and loop detection counters.",
+      "Storing all production logs exclusively inside volatile container `/tmp` directories that are erased on scale-down.",
+      "Disabling all exception handling so that containers crash silently without emitting stderr logs.",
+      "Using manual carrier pigeons to deliver weekly latency reports between data centers."
+    ],
+    "answer": [
+      0,
+      1,
+      2
+    ],
+    "explanation": "The Google Cloud Observability triad for AgentOps consists of: (1) **Cloud Trace (OpenTelemetry)** for fine-grained latency waterfalls and distributed multi-agent span hierarchy; (2) **Cloud Logging + BigQuery Log Sinks** for structured JSON payloads, trace-correlated debugging, FinOps token chargebacks, and offline/online evaluation dataset harvesting; and (3) **Cloud Monitoring** for real-time time-series metrics, custom token/loop counters, and multi-burn-rate SLO alerting.",
+    "whyWrong": {
+      "3": "Volatile `/tmp` logs are permanently lost when serverless containers scale down or crash.",
+      "4": "Silencing exceptions blinds operations to production bugs.",
+      "5": "Carrier pigeons are not a supported Google Cloud telemetry transport protocol."
+    },
+    "refs": [
+      "https://cloud.google.com/stackdriver/docs",
+      "https://google.github.io/adk-docs/observability/"
+    ]
+  },
+  {
+    "id": "d4-trc-024",
+    "domain": 4,
+    "topic": "Detecting Deadlocks & Orphaned Subagent Tasks in Async Workflows",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An ADK supply chain orchestrator spawns 4 asynchronous subagent tasks that acquire distributed locks in Cloud Memorystore for Redis to update inventory allocations. Occasionally, when an external ERP API times out, a subagent task crashes without releasing its Redis lock or closing its OpenTelemetry span, causing subsequent user requests for the same SKU to hang indefinitely waiting for the orphaned lock. How should you instrument and harden this workflow?",
+    "options": [
+      "Restart the entire Google Cloud region whenever a single SKU lock hangs.",
+      "Set Redis lock TTL to infinity (`-1`) so orphaned locks remain locked forever until the Redis cluster is deleted.",
+      "Remove all `try...except` blocks from the codebase.",
+      "Wrap every subagent and tool execution in a Python `try...finally` context manager (or async context manager) with an explicit `asyncio.wait_for(timeout=...)` deadline that guarantees lock release (with Redis key TTL auto-expiration) and records exception details on the OpenTelemetry span (`span.record_exception(e)`, `span.set_status(StatusCode.ERROR)`) before closing the span."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In asynchronous distributed agent workflows, unhandled cancellations (`asyncio.CancelledError`) or timeouts can leave resources leaked and OpenTelemetry spans unclosed ('zombie spans'). Enforcing strict per-step timeouts (`asyncio.wait_for`), setting automatic lease TTLs on distributed Redis locks, and wrapping spans in `try...except...finally` blocks that explicitly invoke `span.record_exception(e)` and `span.set_status(Status(StatusCode.ERROR))` guarantees both clean lock release and accurate trace error attribution.",
+    "whyWrong": {
+      "0": "Restarting cloud regions is impossible and unnecessary for application-level lock management.",
+      "1": "Infinite lock TTLs guarantee permanent deadlocks whenever a worker container crashes mid-execution.",
+      "2": "Removing exception handling worsens resource leaks and leaves spans unclosed."
+    },
+    "refs": [
+      "https://opentelemetry.io/docs/languages/python/instrumentation/#record-exceptions",
+      "https://docs.python.org/3/library/asyncio-task.html#timeouts"
+    ]
+  },
+  {
+    "id": "d4-trc-025",
+    "domain": 4,
+    "topic": "Debugging Non-Deterministic Routing Flips via Prompt Snapshot Logging",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An ADK customer support router agent (`temperature=0.2`) routes 98% of 'Account Closure' requests to `RetentionAgent`, but 2% of the time routes them to `GeneralFAQAgent`. When investigating one of the 2% failed sessions in Cloud Logging, engineers see only the user's final message (`'Close my account please'`), which works 100% of the time when tested in isolation in `adk web`. Why is the bug irreproducible from just the final user message, and what must your observability pipeline capture to reproduce it deterministically?",
+    "options": [
+      "LLM routing decisions depend on the entire assembled prompt context—including prior multi-turn conversation history, dynamic few-shot examples retrieved from Vector Search, and current `session.state` variables injected into the system prompt; log or snapshot the complete serialized `LlmRequest` payload (or session event history + state) on routing anomalies so the exact context can be replayed in `EvalSet`.",
+      "The bug is caused by cosmic rays flipping bits in the user's keyboard; ignore it.",
+      "Delete `RetentionAgent` so that 100% of requests go to `GeneralFAQAgent`.",
+      "Log only the timestamp of the request without any text or session state."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In stateful multi-turn agents with dynamic context assembly (RAG chunks, dynamic few-shot examples, `session.state` variables interpolated into system instructions), the LLM's probability distribution over tool/subagent choices is conditioned on the **entire assembled prompt context**, not just the final user utterance. Capturing the full `LlmRequest` snapshot (system instruction + injected state + full message history + tool declarations) via `before_model_callback` on anomalous traces allows engineers to export the exact state into an ADK `.evalset.json` file and reproduce the failure deterministically.",
+    "whyWrong": {
+      "1": "Blaming cosmic rays ignores deterministic context differences between isolated single-turn tests and complex multi-turn production sessions.",
+      "2": "Deleting `RetentionAgent` breaks business retention workflows.",
+      "3": "Timestamps alone cannot reconstruct the multi-turn conversation state or retrieved context that confused the router model."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  }
+]

@@ -1,0 +1,733 @@
+[
+  {
+    "id": "d5-pab-001",
+    "domain": 5,
+    "topic": "Principal Access Boundary (PAB) Policy Structure & Binding",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A cloud security architect is designing Principal Access Boundary (PAB) governance for an autonomous FinOps Agent running under service account `sa-finops-agent@org-admin.iam.gserviceaccount.com`. The service account has been granted `roles/compute.admin` at the Organization root so it can inspect and resize VMs across 200 projects. However, company policy dictates that this specific agent instance must never access or modify resources inside the `folder-regulated-pci` folder hierarchy, even if instructed to do so by an authorized user or an administrator. Which PAB configuration enforces this restriction at the Google Cloud IAM layer?",
+    "options": [
+      "Create a Principal Access Boundary (PAB) policy whose eligible resource rules include the Organization root but explicitly exclude `//cloudresourcemanager.googleapis.com/folders/folder-regulated-pci` (or restrict eligible resources solely to the non-PCI folders), and create a PAB policy binding attaching this policy directly to `principal://iam.googleapis.com/projects/org-admin/serviceAccounts/sa-finops-agent@org-admin.iam.gserviceaccount.com`.",
+      "Remove `roles/compute.admin` from the Organization root and manually grant `roles/owner` on every individual VM instance outside the PCI folder.",
+      "Configure a VPC firewall rule inside the PCI folder blocking ICMP ping traffic from the agent's subnet.",
+      "Add an IAM Allow policy on `folder-regulated-pci` granting `roles/viewer` to `sa-finops-agent` so that `roles/compute.admin` is overwritten."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Principal Access Boundary (PAB) policies define the universe of eligible resources a principal can access. Binding a PAB policy directly to the `sa-finops-agent` service account principal ensures that Google Cloud IAM evaluates both the IAM Allow policies and the PAB policy; because resources under `folder-regulated-pci` are outside the PAB eligible resource set, any API call targeting them is deterministically denied.",
+    "whyWrong": {
+      "1": "Granting `roles/owner` on individual VMs violates least privilege and creates unmanageable IAM sprawl across 200 projects.",
+      "2": "Compute Engine API calls are HTTPS control-plane requests sent to `compute.googleapis.com`, not ICMP network traffic between VPC subnets.",
+      "3": "IAM Allow policies in Google Cloud are additive (union); granting `roles/viewer` on a child folder does not revoke or override `roles/compute.admin` inherited from the Organization root."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
+      "https://cloud.google.com/iam/docs/policy-evaluation"
+    ]
+  },
+  {
+    "id": "d5-pab-002",
+    "domain": 5,
+    "topic": "Auth Manager 3-Legged OAuth vs Service Account Auth",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise HR assistant built on Vertex AI Agent Builder needs to query Workday REST APIs to retrieve an employee's personal PTO balance and submit leave requests. Workday enforces per-user security groups and audit logging based on the authenticated user's OAuth 2.0 subject claim. If the agent authenticates using a static integration system account, Workday returns PTO balances for all employees in the company, creating a severe data leakage risk if prompt injection occurs. How should you configure Auth Manager for the Workday tool?",
+    "options": [
+      "Configure Auth Manager with OAuth 2.0 Client Credentials grant using a single shared Workday Super-User client ID and secret.",
+      "Configure Auth Manager with a 3-legged OAuth 2.0 Authorization Code grant flow with PKCE against Workday's OAuth authorization server, prompting the employee to authenticate and authorize their own session so the agent executes Workday API calls using the employee's individual user-scoped access token.",
+      "Ask the employee to paste their Workday username and password into the chat window and have a Python script perform screen scraping.",
+      "Disable authentication on Workday's API gateway for requests originating from Google Cloud IP ranges."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Using a 3-legged OAuth 2.0 Authorization Code flow with PKCE managed by Auth Manager ensures that the user explicitly authenticates with Workday and grants user-scoped consent. The resulting access token carries the individual employee's identity, enforcing Workday's native row-level security and per-user audit trails.",
+    "whyWrong": {
+      "0": "Client Credentials grant authenticates the application (machine-to-machine) rather than the end user, retaining broad system-level privileges and confused-deputy risk.",
+      "2": "Collecting user passwords in chat violates zero-trust security principles and exposes credentials in logs.",
+      "3": "IP allowlisting without authentication exposes all employee HR records to any workload running in Google Cloud."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/auth-manager",
+      "https://datatracker.ietf.org/doc/html/rfc7636"
+    ]
+  },
+  {
+    "id": "d5-pab-003",
+    "domain": 5,
+    "topic": "OAuth 2.0 Token Exchange (RFC 8693) in A2A Delegation",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In a multi-agent A2A enterprise architecture, an authenticated employee (`alice@corp.com`) invokes an Executive Assistant Agent (`agent-exec`). To fulfill a travel booking request, `agent-exec` invokes an Expense Policy Sub-Agent (`agent-expense`), which subsequently calls a Corporate Card API. The Corporate Card API requires cryptographic proof that: (1) the original request was initiated by `alice@corp.com`, (2) `agent-expense` is the immediate caller, and (3) `agent-exec` authorized the delegation to `agent-expense`. Which standard OAuth 2.0 mechanism satisfies all three requirements?",
+    "options": [
+      "Passing `alice@corp.com` in an unverified HTTP query parameter `?user=alice@corp.com` while using a shared API key.",
+      "OAuth 2.0 Implicit Grant flow where `alice@corp.com`'s browser token is saved in a public Cloud Storage bucket read by all agents.",
+      "OAuth 2.0 Token Exchange (RFC 8693) using the On-Behalf-Of (OBO) delegation pattern, where each agent exchanges its incoming subject token and actor token at the Security Token Service (STS) to receive a new JWT containing `sub: alice@corp.com` and nested `act` claims recording `agent-exec` and `agent-expense`.",
+      "Having `agent-expense` generate a self-signed certificate claiming to be `alice@corp.com`."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "RFC 8693 (OAuth 2.0 Token Exchange) explicitly defines the `act` (actor) claim structure for multi-hop delegation chains. When `agent-exec` exchanges Alice's token for a downstream call to `agent-expense`, the STS mints a token with `sub: alice@corp.com` and `act: { sub: agent-expense, act: { sub: agent-exec } }`, providing verifiable cryptographic non-repudiation of the entire A2A chain.",
+    "whyWrong": {
+      "1": "The Implicit flow is deprecated for security reasons, and storing tokens in public buckets exposes credentials to unauthorized access.",
+      "0": "Unverified query parameters can be arbitrarily spoofed by any caller holding the shared API key.",
+      "3": "Self-signed certificates forged by sub-agents lack trusted IdP/STS signatures and violate identity federation standards."
+    },
+    "refs": [
+      "https://datatracker.ietf.org/doc/html/rfc8693",
+      "https://cloud.google.com/iam/docs/workload-identity-federation"
+    ]
+  },
+  {
+    "id": "d5-pab-004",
+    "domain": 5,
+    "topic": "Preventing Confused Deputy in Multi-Tenant BigQuery Agents",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A B2B SaaS analytics company stores customer data in BigQuery using a shared dataset `analytics_prod` where each tenant owns specific authorized views (`view_tenant_101`, `view_tenant_102`). An AI Data Analyst Agent executes SQL queries against BigQuery using its service account `sa-analyst@saas.iam.gserviceaccount.com`, which has `roles/bigquery.dataViewer` on the entire `analytics_prod` dataset. A tenant user from Tenant 101 crafts a prompt injection that convinces the agent to run `SELECT * FROM analytics_prod.view_tenant_102`. Because `sa-analyst` has dataset-level access, the query succeeds. How should you use IAM Credential Access Boundaries (downscoping) or PAB to prevent this at runtime?",
+    "options": [
+      "Cache all query results in a single global Redis key shared across all tenants.",
+      "Add a comment `/* tenant 101 only */` to the generated SQL string before sending it to BigQuery.",
+      "Grant `sa-analyst` the `roles/bigquery.admin` role so it can check table permissions before querying.",
+      "Before invoking the BigQuery tool for a Tenant 101 user session, have the Agent Gateway exchange `sa-analyst`'s base credential for a short-lived downscoped OAuth access token restricted via an IAM Credential Access Boundary (or session PAB) that grants `roles/bigquery.dataViewer` strictly on resource `//bigquery.googleapis.com/projects/saas/datasets/analytics_prod/tables/view_tenant_101`."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Downscoping short-lived credentials with IAM Credential Access Boundaries (or applying a session-scoped Principal Access Boundary) restricts the effective resource scope of the OAuth token passed to the BigQuery client. Even if prompt injection causes the agent to execute SQL targeting `view_tenant_102`, the BigQuery API rejects the request with `403 Permission Denied` because the downscoped token is cryptographically restricted to `view_tenant_101`.",
+    "whyWrong": {
+      "1": "SQL comments are ignored by the BigQuery authorization engine and provide zero security enforcement.",
+      "2": "Granting `roles/bigquery.admin` increases the service account's privileges and worsens the confused-deputy impact.",
+      "0": "Global Redis caching across tenants introduces cross-tenant cache leakage vulnerabilities."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/downscoping-short-lived-credentials",
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies"
+    ]
+  },
+  {
+    "id": "d5-pab-005",
+    "domain": 5,
+    "topic": "Auth Manager Refresh Token Security & Lifecycle",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise deploys a background autonomous assistant that monitors a user's Salesforce opportunities and sends daily briefings every morning at 7:00 AM, even when the user is offline. To support offline execution, the agent requires OAuth 2.0 `offline_access` (refresh tokens) for Salesforce. Security policy mandates that refresh tokens must be encrypted at rest using Customer-Managed Encryption Keys (CMEK) in Cloud HSM, automatically rotated upon use, and immediately revoked if the employee's corporate identity is disabled in Cloud Identity. What is the recommended Google Cloud architecture?",
+    "options": [
+      "Use Vertex AI Agent Builder's managed Auth Manager configured with CMEK integration in Cloud KMS (HSM-backed) to store and auto-rotate OAuth refresh tokens, coupled with an Eventarc trigger on Cloud Identity user suspension audit events that invokes Auth Manager's token revocation API.",
+      "Write the user's Salesforce refresh token to a plaintext `.env` file inside the Cloud Run container image.",
+      "Ask the user to wake up at 6:55 AM every day to manually paste a fresh access token into the chat window.",
+      "Store refresh tokens in browser `localStorage` without encryption."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Auth Manager manages the full lifecycle of OAuth 2.0 `offline_access` refresh tokens encrypted with CMEK in Cloud KMS/HSM. Integrating Cloud Identity user lifecycle events via Eventarc ensures immediate automated revocation of stored tokens when an employee leaves or is suspended.",
+    "whyWrong": {
+      "1": "Storing user refresh tokens in container images exposes credentials to anyone with registry read access and cannot handle token rotation.",
+      "2": "Manual daily token pasting defeats autonomous background agent workflows.",
+      "3": "Browser `localStorage` is inaccessible to offline server-side cron jobs and vulnerable to XSS theft."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/auth-manager",
+      "https://cloud.google.com/kms/docs/cmek"
+    ]
+  },
+  {
+    "id": "d5-pab-006",
+    "domain": 5,
+    "topic": "Workload Identity Federation for Multi-Cloud Agent Tools",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An autonomous SecOps agent running on Google Kubernetes Engine (GKE) needs to query security logs stored in an AWS S3 bucket and an Azure Log Analytics workspace. Corporate security policy strictly bans the creation or storage of long-lived AWS IAM access keys (`AKIA...`) and Azure Client Secrets anywhere in Google Cloud. Which TWO configuration steps must you implement to enable secure, keyless cross-cloud authentication? (Choose two.)",
+    "options": [
+      "Hardcode a root AWS access key in a Kubernetes ConfigMap mounted at `/etc/aws/credentials`.",
+      "Disable IAM authentication on the AWS S3 bucket by setting the bucket policy to `Principal: *`.",
+      "Create an SSH tunnel using a shared private key stored in a public Git repository.",
+      "Enable GKE Workload Identity on the cluster so the agent pod receives a Google-signed OIDC identity token representing its Kubernetes Service Account / Google Cloud Service Account identity.",
+      "Configure an AWS IAM OIDC Identity Provider and an Azure AD Federated Identity Credential that trust Google Cloud's OIDC issuer (`https://accounts.google.com`) and validate the specific `sub` / `aud` claims of the agent's service account before issuing temporary AWS STS / Azure AD tokens."
+    ],
+    "answer": [
+      3,
+      4
+    ],
+    "explanation": "Keyless outbound cross-cloud authentication leverages GKE Workload Identity to issue short-lived Google-signed OIDC tokens to the agent pod, which external cloud providers (AWS IAM OIDC and Azure AD Federated Identity Credentials) validate cryptographically to issue temporary session tokens.",
+    "whyWrong": {
+      "0": "ConfigMaps store plaintext data and hardcoding static AWS keys violates the zero-static-secret mandate.",
+      "1": "Making S3 buckets containing security logs publicly readable (`Principal: *`) causes catastrophic data exposure.",
+      "2": "Storing private SSH keys in public Git repositories exposes infrastructure to immediate compromise."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
+      "https://cloud.google.com/iam/docs/workload-identity-federation"
+    ]
+  },
+  {
+    "id": "d5-pab-007",
+    "domain": 5,
+    "topic": "Principal Access Boundary (PAB) vs IAM Deny Policies",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A principal architect is reviewing Google Cloud IAM governance options to secure a fleet of 50 autonomous engineering agents. The architect needs to understand the exact evaluation relationship between IAM Allow policies, IAM Deny policies, and Principal Access Boundary (PAB) policies when an agent attempts to invoke a Google Cloud API (such as `storage.objects.get`). Which statement accurately describes how Google Cloud IAM evaluates access?",
+    "options": [
+      "Principal Access Boundary policies automatically grant access to resources even if no IAM Allow policy exists.",
+      "If an IAM Allow policy grants `roles/owner` at the Organization level, it automatically overrides both IAM Deny policies and Principal Access Boundary policies.",
+      "For an API request to succeed, ALL THREE conditions must be satisfied simultaneously: (1) no applicable IAM Deny policy denies the permission, (2) at least one applicable IAM Allow policy grants the permission on the target resource, AND (3) the target resource is explicitly permitted within the Principal Access Boundary (PAB) policy bound to the principal; a failure in any single layer results in `Access Denied`.",
+      "IAM Deny policies are only evaluated if the user logs in from an unrecognized IP address."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Google Cloud IAM policy evaluation follows a strict intersection model: effective access requires passing IAM Deny evaluation (not denied), IAM Allow evaluation (explicitly granted), AND Principal Access Boundary evaluation (within the principal's eligible resource boundary). Neither Allow policies nor PAB policies can grant access independently without the other.",
+    "whyWrong": {
+      "1": "Neither `roles/owner` nor any Allow policy can override an explicit IAM Deny rule or bypass a Principal Access Boundary restriction.",
+      "0": "PAB policies are purely restrictive boundaries (defining maximum eligible resources); they never grant permissions on their own.",
+      "3": "IAM Deny policies are evaluated unconditionally on every API call matching the principal and permission rules."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/policy-evaluation",
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies"
+    ]
+  },
+  {
+    "id": "d5-pab-008",
+    "domain": 5,
+    "topic": "Identity Context Binding in Multi-Agent A2A Handoffs",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A customer service orchestrator agent (`agent-router`) authenticates a customer (`cust_id: 88210`) and hands off a refund dispute to a specialized Refund Sub-Agent (`agent-refund`) over the A2A protocol. Security testing reveals that if an attacker intercepts or replays an A2A handoff token from an earlier session belonging to `cust_id: 99999`, `agent-refund` processes the refund into `cust_id: 99999`'s account while executing within `cust_id: 88210`'s active chat session. How should you prevent cross-session A2A token substitution and replay attacks?",
+    "options": [
+      "Use the same static JWT token for all customer sessions globally.",
+      "Extend A2A token expiration times to 365 days so tokens never expire during long conversations.",
+      "Pass the customer ID as a plain integer in the JSON body without signing or binding it to the session.",
+      "Bind each A2A delegation JWT to a unique, cryptographically signed `session_id` and short-lived expiration (`exp` <= 60 seconds) alongside a single-use `jti` (JWT ID) tracked in a distributed replay cache at the Agent Gateway, verifying that `token.session_id == active_conversation.session_id` and `token.sub == active_conversation.user_id` before executing sub-agent tools."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Cryptographic context binding links the A2A delegation token to the specific active conversation (`session_id`), the authenticated subject (`sub`), a short lifetime (`exp`), and a unique `jti` checked against a replay cache, making cross-session token substitution or replay mathematically impossible.",
+    "whyWrong": {
+      "1": "Long-lived tokens (365 days) dramatically increase the window of vulnerability for replay and theft.",
+      "2": "Unsigned integers in JSON bodies can be trivially modified or mismatched across concurrent sessions.",
+      "0": "A static global token completely eliminates user and session isolation."
+    },
+    "refs": [
+      "https://datatracker.ietf.org/doc/html/rfc7519",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d5-pab-009",
+    "domain": 5,
+    "topic": "Workforce Identity Attribute Mapping for Agent Tool Access",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise federates Azure AD (Entra ID) with Google Cloud Workforce Identity Federation. Employees are assigned custom attributes in Azure AD: `department` (e.g., `Finance`, `Engineering`) and `clearance_level` (`L1`, `L2`, `L3`). You deploy an Enterprise Search Agent that queries Vertex AI Search data stores containing confidential M&A documents restricted to `Finance` employees with `clearance_level == L3`. How should you enforce this fine-grained attribute-based access control (ABAC) without creating dozens of separate Workforce Identity Pools?",
+    "options": [
+      "Configure Workforce Identity Pool attribute mappings (`google.posix_username`, `attribute.department`, `attribute.clearance_level`) from the Azure AD OIDC/SAML assertion, and apply IAM Conditions / Principal Access Boundary rules on the Vertex AI Search data store requiring `request.auth.claims.department == 'Finance' && request.auth.claims.clearance_level == 'L3'`.",
+      "Create a separate Google Cloud Organization for every clearance level and department combination.",
+      "Ask the employee to type their clearance level into the chat prompt and use a system instruction to verify it.",
+      "Grant `allAuthenticatedUsers` access to the M&A data store and filter results in client-side CSS."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Workforce Identity Federation supports custom attribute mappings (`attribute.*`) directly from IdP SAML/OIDC assertions into Google Cloud IAM. These mapped claims can then be referenced inside IAM Conditions and Principal Access Boundary rules to enforce deterministic ABAC at the API layer.",
+    "whyWrong": {
+      "1": "Creating separate organizations per attribute combination is an administrative anti-pattern.",
+      "2": "Self-asserted attributes in chat prompts can be trivially spoofed via prompt injection.",
+      "3": "Client-side CSS hiding transmits confidential M&A documents to the user's browser network tab in plaintext."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/workforce-identity-federation",
+      "https://cloud.google.com/iam/docs/conditions-overview"
+    ]
+  },
+  {
+    "id": "d5-pab-010",
+    "domain": 5,
+    "topic": "Securing OAuth Callback Redirect URIs in Auth Manager",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When configuring a 3-legged OAuth 2.0 integration in Auth Manager for an enterprise agent that connects to Slack and GitHub, a security auditor checks the OAuth client configuration for open redirector vulnerabilities and authorization code interception. Which configuration practice is mandatory to secure the OAuth 2.0 redirect flow?",
+    "options": [
+      "Use a wildcard redirect URI (`https://*.company.com/*` or `http://*`) so developers can test easily on any domain.",
+      "Register an exact, strictly matching HTTPS callback Redirect URI pointing exclusively to the managed Auth Manager / Agent Gateway callback endpoint, enforce PKCE (`code_challenge` with `S256`), and validate the cryptographic `state` parameter upon callback receipt.",
+      "Disable the `state` parameter to reduce URL length.",
+      "Send the authorization code over unencrypted HTTP to port 8080."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Strict exact-match HTTPS redirect URI registration prevents open-redirector attacks where authorization codes are leaked to attacker-controlled subdomains, while PKCE (`S256`) prevents authorization code interception and the `state` parameter prevents Cross-Site Request Forgery (CSRF).",
+    "whyWrong": {
+      "0": "Wildcard redirect URIs allow attackers to steal authorization codes via open redirects or compromised development subdomains.",
+      "2": "Disabling the `state` parameter leaves the OAuth callback vulnerable to CSRF session fixation attacks.",
+      "3": "Plaintext HTTP exposes authorization codes to network sniffing."
+    },
+    "refs": [
+      "https://datatracker.ietf.org/doc/html/rfc6749#section-10.6",
+      "https://cloud.google.com/agent-builder/docs/auth-manager"
+    ]
+  },
+  {
+    "id": "d5-pab-011",
+    "domain": 5,
+    "topic": "Dynamic Session PAB Binding for Autonomous Sub-Agents",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise Incident Response Agent (`sa-ir-orchestrator`) investigates security alerts across 100 Google Cloud projects. When an alert fires in `project-payments-prod`, the orchestrator spawns an ephemeral Forensics Sub-Agent container to snapshot disks and inspect logs inside `project-payments-prod`. Security policy requires that this Forensics Sub-Agent instance must be mathematically incapable of accessing any of the other 99 projects during its lifecycle. How should the orchestrator provision credentials for the Forensics Sub-Agent?",
+    "options": [
+      "Grant the Forensics Sub-Agent `roles/viewer` across all 100 projects.",
+      "Mount the orchestrator's master JSON private key into the Forensics Sub-Agent container and pass `--project=project-payments-prod` as a command-line flag.",
+      "Have the orchestrator invoke the IAM Credentials API (`generateAccessToken`) with a Credential Access Boundary (or dynamic Principal Access Boundary session binding) restricting eligible resources strictly to `//cloudresourcemanager.googleapis.com/projects/project-payments-prod`, and inject only that downscoped short-lived token into the Forensics Sub-Agent container.",
+      "Disable IAM checks on `project-payments-prod` during incident response."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Injecting a short-lived token downscoped via an IAM Credential Access Boundary (or dynamic PAB binding) ensures the Forensics Sub-Agent's credential is cryptographically restricted to `project-payments-prod` at the Google Cloud IAM control plane. Even if the sub-agent code or prompt is hijacked, attempts to call APIs in any other project fail with `403 Forbidden`.",
+    "whyWrong": {
+      "1": "Mounting the master JSON key gives the sub-agent full access to all 100 projects; a command-line flag is easily ignored or changed by compromised code.",
+      "0": "Granting access across all 100 projects violates the strict per-incident project isolation requirement.",
+      "3": "Disabling IAM checks during an active security incident exposes production data to unauthorized access."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/downscoping-short-lived-credentials",
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies"
+    ]
+  },
+  {
+    "id": "d5-pab-012",
+    "domain": 5,
+    "topic": "Preventing Token Leakage in Agent Execution Logs & Traces",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "During a security audit of a multi-agent workflow built on Vertex AI Agent Engine, auditors inspect Cloud Trace and Cloud Logging records. They discover that when the orchestrator calls downstream REST APIs via custom Python tools, the full HTTP `Authorization: Bearer ya29.c.b0Aaek...` headers and OAuth refresh tokens are being written verbatim into OpenTelemetry span attributes and Python exception stack traces. Anyone with `roles/logging.viewer` can steal active user session tokens from the logs. How should you remediate this?",
+    "options": [
+      "Increase the log retention period from 30 days to 3,650 days.",
+      "Grant `roles/logging.viewer` to `allUsers` so everyone has equal access to the tokens.",
+      "Disable HTTPS on the downstream REST APIs so bearer tokens are no longer needed.",
+      "Configure the Agent Gateway / SDK telemetry interceptor to scrub sensitive HTTP headers (`Authorization`, `X-API-Key`, `Cookie`) and OAuth token payloads before emitting OpenTelemetry spans, and attach a Sensitive Data Protection (Cloud DLP) log-redaction filter on the Cloud Logging ingestion sink to mask any high-entropy bearer tokens (`ya29.*`, `eyJ*`)."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Preventing credential leakage in observability pipelines requires both source-side sanitization (configuring OpenTelemetry / SDK interceptors to redact `Authorization` headers and secrets before trace export) and sink-side defense-in-depth (DLP log inspection/redaction on token patterns like `ya29.*` and JWT prefixes `eyJ*`).",
+    "whyWrong": {
+      "1": "Granting `allUsers` log viewer access exposes active session tokens to the public internet.",
+      "2": "Disabling authentication/HTTPS on REST APIs removes access control entirely.",
+      "0": "Increasing retention keeps leaked tokens accessible for longer without fixing the vulnerability."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/setup",
+      "https://cloud.google.com/sensitive-data-protection/docs/inspecting-text"
+    ]
+  },
+  {
+    "id": "d5-pab-013",
+    "domain": 5,
+    "topic": "Auth Manager Token Caching & Concurrency Governance",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise sales agent handles burst traffic during end-of-quarter close, executing up to 500 concurrent tool calls per second against an external CRM API on behalf of authenticated sales reps. Initially, the agent requested a new OAuth 2.0 access token from the CRM's OAuth token endpoint on every single tool invocation, causing the CRM IdP to throttle the agent with HTTP 429 (`Too Many Requests`) on the `/oauth/token` endpoint. How should Auth Manager token caching be configured to resolve this without compromising user isolation?",
+    "options": [
+      "Configure Auth Manager's encrypted in-memory token cache keyed strictly by the composite key `(authenticated_user_id, tool_id, requested_scopes)`, serving cached access tokens until 60 seconds prior to their `exp` timestamp and using single-flight locking per user key to prevent concurrent refresh stampedes.",
+      "Cache a single access token globally across all 500 sales reps so only one token request is made per hour.",
+      "Disable OAuth expiration completely on the CRM server so tokens last forever.",
+      "Remove authentication from the CRM API during end-of-quarter close."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Caching OAuth access tokens keyed by the strict tuple `(authenticated_user_id, tool_id, scopes)` with proactive pre-expiry refresh and single-flight request coalescing eliminates redundant `/oauth/token` round-trips while preserving strict per-user identity isolation.",
+    "whyWrong": {
+      "1": "Sharing a single cached token across different sales reps causes severe cross-user data leakage and confused-deputy audit failures.",
+      "2": "Non-expiring tokens violate OAuth security standards and create permanent compromise risk if leaked.",
+      "3": "Disabling authentication during peak business operations exposes critical CRM data."
+    },
+    "refs": [
+      "https://cloud.google.com/agent-builder/docs/auth-manager",
+      "https://datatracker.ietf.org/doc/html/rfc6749"
+    ]
+  },
+  {
+    "id": "d5-pab-014",
+    "domain": 5,
+    "topic": "Securing Agent Service Accounts Against Key Creation",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "To prevent developers or compromised CI/CD pipelines from creating downloadable persistent JSON private keys for service accounts used by Vertex AI Enterprise Agents, which Google Cloud Organization Policy constraint should the security team enforce across all agent projects?",
+    "options": [
+      "Enforce `constraints/compute.disableSerialPortAccess`.",
+      "Enforce the boolean constraint `constraints/iam.disableServiceAccountKeyCreation` at the Organization or Folder level.",
+      "Delete all service accounts every Friday afternoon.",
+      "Set `constraints/iam.allowServiceAccountCredentialLifetimeExtension` to true for all users."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Organization Policy constraint `constraints/iam.disableServiceAccountKeyCreation` deterministically blocks the creation of user-managed persistent JSON private keys for service accounts, forcing workloads to rely exclusively on managed short-lived credentials (such as attached service accounts, Workload Identity, or IAM Credentials API).",
+    "whyWrong": {
+      "0": "`disableSerialPortAccess` controls interactive serial console access to Compute Engine VMs, not IAM key creation.",
+      "2": "Deleting active service accounts breaks production agent runtimes.",
+      "3": "Extending credential lifetimes weakens security rather than preventing persistent key creation."
+    },
+    "refs": [
+      "https://cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts",
+      "https://cloud.google.com/iam/docs/best-practices-for-securing-service-accounts"
+    ]
+  },
+  {
+    "id": "d5-pab-015",
+    "domain": 5,
+    "topic": "Principal Access Boundary (PAB) Evaluation with IAM Conditions",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global bank operates a Treasury Agent running under `sa-treasury-agent`. The bank binds a Principal Access Boundary (PAB) policy to `sa-treasury-agent` that includes a conditional access rule: the agent is only eligible to access production Cloud KMS signing keys (`projects/prod-kms/locations/global/keyRings/swift-signing/*`) when `request.time.getHours('America/New_York') >= 8 && request.time.getHours('America/New_York') < 17` (8:00 AM to 5:00 PM EST business hours). At 11:30 PM EST, an attacker triggers a prompt injection attempting to sign a fraudulent SWIFT message using the KMS signing key. What happens when the agent calls `kms.projects.locations.keyRings.cryptoKeys.cryptoKeyVersions.asymmetricSign`?",
+    "options": [
+      "The KMS API queues the signing request and automatically executes it at 8:00 AM the next morning without re-verifying authorization.",
+      "The API call succeeds because `roles/cloudkms.signer` is an IAM Allow role that ignores PAB time conditions.",
+      "Google Cloud IAM evaluates the PAB policy condition against the current request timestamp (`11:30 PM EST`), determines that the KMS key resource is outside the agent's eligible access boundary at that time, and denies the API call with `403 Permission Denied` even though the service account holds `roles/cloudkms.signer`.",
+      "The agent automatically changes the Google Cloud server clock to 10:00 AM EST to bypass the rule."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Principal Access Boundary (PAB) policies support CEL-based IAM Conditions (such as `request.time`, IP address, or resource attributes). When a PAB condition evaluates to false at runtime, the target resource is excluded from the principal's eligible boundary, causing Google Cloud IAM to deterministically reject the call regardless of standing IAM Allow roles.",
+    "whyWrong": {
+      "1": "IAM Allow roles (`roles/cloudkms.signer`) cannot bypass a Principal Access Boundary restriction.",
+      "0": "Google Cloud IAM synchronous APIs do not queue unauthorized requests for later execution; they immediately return HTTP 403.",
+      "3": "`request.time` is evaluated by Google Cloud's trusted control plane clocks, which cannot be modified by client workloads."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
+      "https://cloud.google.com/iam/docs/conditions-attribute-reference"
+    ]
+  },
+  {
+    "id": "d5-pab-016",
+    "domain": 5,
+    "topic": "Cross-Domain Identity Propagation Between Dialogflow CX and Vertex AI Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A retail customer logs into a mobile app authenticated via Firebase Authentication / Google Cloud Identity Platform (receiving an OIDC ID token) and interacts with a front-end CX Agent Studio voice/chat flow. When a complex order modification is requested, CX Agent Studio invokes a backend Vertex AI Reasoning Engine (Agent Engine) sub-agent via a fulfillment tool. How should the customer's authenticated identity be securely passed to the Vertex AI Reasoning Engine sub-agent so it can verify the caller's identity and enforce row-level access?",
+    "options": [
+      "Ask the customer to read their 1,024-character JWT aloud over the phone.",
+      "Extract the user's first name from the JWT in the mobile app and send only `{\"first_name\": \"John\"}` to the backend sub-agent.",
+      "Hardcode a single test user ID in the Reasoning Engine sub-agent code.",
+      "Configure the CX Agent Studio session parameter / webhook header to pass the customer's signed Identity Platform OIDC JWT in an authorization header (`X-Forwarded-Authorization` or `Authorization: Bearer <user_jwt>`) alongside the service-to-service IAM token, and configure the Reasoning Engine sub-agent to validate the JWT signature, issuer (`iss`), audience (`aud`), and expiration against Google's public JWKS keys."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Passing the cryptographically signed OIDC ID token issued by Identity Platform in a dedicated authorization header allows the downstream Reasoning Engine sub-agent to independently verify the token signature against Google's public JWKS endpoint, guaranteeing authentic end-to-end user identity propagation.",
+    "whyWrong": {
+      "1": "Passing an unsigned first name string allows any caller or prompt injection payload to impersonate any user named John.",
+      "2": "Hardcoding a test user ID breaks multi-user isolation in production.",
+      "0": "Reading JWT strings aloud over voice channels is completely impractical and insecure."
+    },
+    "refs": [
+      "https://cloud.google.com/identity-platform/docs/verify-token",
+      "https://cloud.google.com/dialogflow/cx/docs/concept/webhook"
+    ]
+  },
+  {
+    "id": "d5-pab-017",
+    "domain": 5,
+    "topic": "Preventing Privilege Escalation via Agent Self-Modification",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are designing a DevSecOps platform agent (`sa-platform-agent`) that assists developers by creating IAM service accounts and binding least-privilege roles for new microservices in `folder-app-staging`. A critical security risk is self-privilege escalation: if `sa-platform-agent` possesses `resourcemanager.projects.setIamPolicy` or `iam.serviceAccounts.setIamPolicy`, a prompt injection attack could trick the agent into granting `roles/owner` to itself or removing its own Principal Access Boundary (PAB) binding. Which TWO architectural controls prevent self-privilege escalation? (Choose two.)",
+    "options": [
+      "Disable Cloud Audit Logs on IAM policy changes so self-escalation attempts go unnoticed.",
+      "Share the `sa-platform-agent` private key with all external contractors.",
+      "Apply an IAM Deny policy or Principal Access Boundary (PAB) policy at the Organization/Folder level that explicitly denies `sa-platform-agent` the ability to modify IAM policies on its own service account resource or modify any PAB policy bindings (`iam.googleapis.com/principalAccessBoundaryPolicyBindings.*`).",
+      "Enforce IAM Role Granting constraints using IAM Conditions (`api.getAttribute('iam.googleapis.com/modifiedGrantsByRole', []).hasOnly(['roles/run.invoker', 'roles/storage.objectViewer'])`) so `sa-platform-agent` can only delegate specific pre-approved low-privilege roles and can never grant administrative roles like `roles/owner` or `roles/iam.securityAdmin`.",
+      "Grant `sa-platform-agent` Organization Administrator permissions but instruct it via system prompt never to modify its own roles."
+    ],
+    "answer": [
+      2,
+      3
+    ],
+    "explanation": "Preventing IAM self-privilege escalation requires (1) blocking the agent from altering its own identity/PAB bindings via IAM Deny / PAB rules, and (2) using IAM Condition attributes (`iam.googleapis.com/modifiedGrantsByRole`) to restrict `setIamPolicy` calls strictly to an allowlist of safe, low-privilege roles (`roles/run.invoker`, etc.).",
+    "whyWrong": {
+      "4": "System prompts cannot enforce IAM security boundaries against prompt injection.",
+      "0": "Disabling audit logs hides security breaches rather than preventing them.",
+      "1": "Sharing service account keys externally introduces severe compromise risk."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/conditions-Delegating-role-grants",
+      "https://cloud.google.com/iam/docs/deny-overview"
+    ]
+  },
+  {
+    "id": "d5-pab-018",
+    "domain": 5,
+    "topic": "Auth Manager Integration with Secret Manager & Key Rotation",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise supply-chain agent connects to a legacy ERP API that supports only static API keys rotated every 30 days by the ERP security system. When the ERP system rotates the key, a webhook notifies Google Cloud. You must ensure the agent's tool integration picks up the new API key with zero downtime, zero container redeployments, and zero plaintext exposure in environment variables. How should you configure this?",
+    "options": [
+      "Hardcode the API key in the agent's Python source code and trigger a full CI/CD rebuild and redeploy whenever the ERP system rotates the key.",
+      "Store the API key in Google Cloud Secret Manager with automatic rotation notifications via Pub/Sub, configure Auth Manager / Agent Gateway to dynamically reference the latest enabled Secret Manager version (`projects/*/secrets/erp-api-key/versions/latest`) at runtime with short-lived memory caching, and grant `roles/secretmanager.secretAccessor` strictly to the Auth Manager / Gateway identity.",
+      "Store the API key in a public GitHub wiki page fetched by the agent on every request.",
+      "Disable API key rotation on the legacy ERP system permanently."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Referencing Secret Manager's `versions/latest` alias via Auth Manager / Agent Gateway allows seamless zero-downtime secret rotation without redeploying containers or exposing secrets in static environment variables.",
+    "whyWrong": {
+      "0": "Hardcoding secrets in source code violates security policy and causes downtime during rebuild/redeploy windows.",
+      "2": "Public wiki pages expose enterprise ERP credentials to the world.",
+      "3": "Disabling credential rotation violates enterprise security compliance standards."
+    },
+    "refs": [
+      "https://cloud.google.com/secret-manager/docs/rotation-recommendations",
+      "https://cloud.google.com/agent-builder/docs/auth-manager"
+    ]
+  },
+  {
+    "id": "d5-pab-019",
+    "domain": 5,
+    "topic": "Isolating Multi-Agent Environments with Principal Access Boundaries",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your company maintains three distinct lifecycle environments for its AI agents: Development (`folder-dev`), Staging (`folder-staging`), and Production (`folder-prod`). Developers frequently test experimental agent prompts in Development that invoke autonomous tool-calling scripts. To prevent an experimental agent in Development from accidentally or maliciously invoking APIs or reading data in Staging or Production (even if a developer mistakenly attaches a shared service account key or misconfigures an IAM role), what organization-wide control should you apply?",
+    "options": [
+      "Use the same Google Cloud project for Dev, Staging, and Prod and prefix table names with `dev_`.",
+      "Ask developers to add `--env=dev` to their Python scripts.",
+      "Bind a Principal Access Boundary (PAB) policy to all principal sets (`principalSet://...`) and service accounts operating within `folder-dev` that restricts their eligible accessible resources strictly to resources residing under `//cloudresourcemanager.googleapis.com/folders/folder-dev`.",
+      "Turn off the internet in the engineering office after 6:00 PM."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Binding an environment-scoped Principal Access Boundary (PAB) policy to all Development principals (`folder-dev`) creates a cryptographic airlock at the IAM layer: no Development service account or workload identity can ever access resources in `folder-staging` or `folder-prod`, regardless of misconfigured IAM Allow policies.",
+    "whyWrong": {
+      "1": "Application-level CLI flags do not enforce infrastructure-level access control.",
+      "0": "Sharing a single project across Dev and Prod destroys blast-radius isolation and compliance boundaries.",
+      "3": "Office internet shutdowns do not stop cloud-hosted agents from making cross-project API calls."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
+      "https://cloud.google.com/resource-manager/docs/cloud-platform-resource-hierarchy"
+    ]
+  },
+  {
+    "id": "d5-pab-020",
+    "domain": 5,
+    "topic": "Fine-Grained MCP Server Authorization with OBO Tokens",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You deploy an internal Model Context Protocol (MCP) server on Cloud Run that exposes database query tools and file management tools to multiple enterprise agents. When an agent invokes the MCP server's `call_tool` JSON-RPC endpoint over HTTPS SSE/streamable HTTP, the MCP server must verify: (1) that the calling agent is an authorized Vertex AI Agent identity, AND (2) the identity and group memberships of the human employee on whose behalf the agent is acting. How should the authentication handshake be designed?",
+    "options": [
+      "Use DNS TXT records to store active user session tokens.",
+      "Configure the MCP Cloud Run service with `--allow-unauthenticated` and trust any JSON string passed in `params.user_email`.",
+      "Share a single hardcoded password across all MCP servers and clients.",
+      "Require dual-identity authentication on the MCP server endpoint: use Cloud Run IAM (`Authorization: Bearer <agent_id_token>`) to authenticate the calling Agent Identity at the ingress layer, and pass a signed OAuth 2.0 On-Behalf-Of (OBO) user assertion in a dedicated MCP protocol extension header (`X-MCP-User-Assertion`) validated by the MCP server against the corporate IdP's JWKS before executing any tool logic."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Dual-identity verification separates transport/caller authentication (Cloud Run IAM verifying the calling Agent Identity's OIDC token) from subject authorization (verifying the signed OBO user assertion JWT against the corporate IdP), ensuring both the agent and the human user are cryptographically verified.",
+    "whyWrong": {
+      "1": "Unauthenticated Cloud Run endpoints trusting raw JSON parameters allow anyone to spoof both agent and user identities.",
+      "2": "Shared static passwords cannot convey per-user identity or group claims.",
+      "0": "DNS TXT records are public, cached globally, and unsuitable for session authentication."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/authenticating/service-to-service",
+      "https://datatracker.ietf.org/doc/html/rfc8693"
+    ]
+  },
+  {
+    "id": "d5-pab-021",
+    "domain": 5,
+    "topic": "Mitigating Cross-Tenant Session Fixation in Conversational Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A multi-tenant healthcare portal embeds a Vertex AI conversational agent widget. When a patient logs in, the web app initializes a conversation session using a client-generated UUID (`session_id`) passed in the URL query string (`?session_id=123e4567...`). A penetration tester demonstrates a session fixation attack: the attacker generates a known `session_id`, tricks a victim patient into clicking a link containing that `session_id`, and after the patient discusses confidential medical history with the agent, the attacker queries the agent API using the same `session_id` to read the transcript. How should you eliminate this vulnerability?",
+    "options": [
+      "Generate cryptographically random `session_id` values exclusively on the server side (Agent Gateway) upon authentication, bind every `session_id` immutably to the authenticated user's `sub` claim in the session store, and verify on every API request that `authenticated_jwt.sub == session_record.owner_sub` before returning or appending state.",
+      "Make the client-generated `session_id` 64 characters long instead of 36 characters.",
+      "Hide the `?session_id=` parameter using URL shorteners like `bit.ly`.",
+      "Clear the chat window UI using JavaScript every 5 minutes."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Preventing session fixation and unauthorized session hijacking requires server-side session ID generation combined with strict ownership binding (`session.owner_sub == request.jwt.sub`) enforced on every read/write operation at the Agent Gateway.",
+    "whyWrong": {
+      "1": "Increasing client-generated ID length does not stop an attacker who generated the ID themselves from knowing it.",
+      "2": "URL shorteners still redirect to the full URL containing the fixed session ID.",
+      "3": "Client-side UI clearing does not prevent direct API queries against the backend session store."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/session",
+      "https://owasp.org/www-community/attacks/Session_fixation"
+    ]
+  },
+  {
+    "id": "d5-pab-022",
+    "domain": 5,
+    "topic": "Using IAM Access Boundary Policies on Cloud Storage Signed URLs",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise document-generation agent creates customized PDF financial statements in a Cloud Storage bucket (`gs://wealth-statements-prod/user_991/statement_2026.pdf`) and provides a download link to the authenticated user in chat. Security policy requires that: (1) the agent must never make the Cloud Storage bucket public, (2) the download link must expire automatically after 10 minutes, and (3) even if the signing service account has access to the entire bucket, the generated credential/URL must be mathematically restricted to `GET` requests on that single specific object path. What should the agent generate?",
+    "options": [
+      "Grant `roles/storage.objectViewer` to `allUsers` on the entire `gs://wealth-statements-prod` bucket for 10 minutes.",
+      "Generate a V4 Cloud Storage Signed URL scoped strictly to the exact object path (`gs://wealth-statements-prod/user_991/statement_2026.pdf`), HTTP method `GET`, and a 10-minute expiration (`X-Goog-Expires=600`), signed using a downscoped service account credential or Cloud KMS signing key.",
+      "Send the raw PDF binary bytes encoded as a 50MB base64 string directly inside the LLM prompt context.",
+      "Email the service account's master JSON private key to the user so they can run `gsutil cp`."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "V4 Cloud Storage Signed URLs cryptographically bind the exact HTTP verb (`GET`), canonical resource path (`/wealth-statements-prod/user_991/statement_2026.pdf`), and expiration timestamp (`X-Goog-Expires=600`) into the HMAC-SHA256 signature, providing time-bounded, single-object read access without exposing bucket permissions.",
+    "whyWrong": {
+      "0": "Making the bucket public (`allUsers`) for even 10 minutes exposes every customer's financial statements to anyone scanning the bucket.",
+      "2": "Passing 50MB base64 binaries through LLM context windows exceeds token limits and wastes massive compute resources.",
+      "3": "Distributing service account JSON keys to end users compromises the entire storage infrastructure."
+    },
+    "refs": [
+      "https://cloud.google.com/storage/docs/access-control/signed-urls",
+      "https://cloud.google.com/iam/docs/downscoping-short-lived-credentials"
+    ]
+  },
+  {
+    "id": "d5-pab-023",
+    "domain": 5,
+    "topic": "Auditing Principal Access Boundary (PAB) Policy Violations",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When an autonomous agent attempts to access a BigQuery table that is permitted by its IAM Allow role (`roles/bigquery.dataViewer`) but blocked by a Principal Access Boundary (PAB) policy bound to the agent's service account, how can a security engineer identify in Cloud Audit Logs that the denial was specifically caused by a PAB policy rather than a missing IAM Allow role?",
+    "options": [
+      "Check if the CPU utilization of the BigQuery server spiked to 100%.",
+      "PAB denials do not generate any Cloud Audit Logs; the request silently disappears.",
+      "Inspect the `authorizationInfo` array in the Cloud Audit Log entry (`protoPayload.authorizationInfo[]`), which records `granted: false` along with specific `policyDelta` / denial metadata indicating a Principal Access Boundary (`PRINCIPAL_ACCESS_BOUNDARY`) evaluation failure.",
+      "Call Google Cloud Billing support to ask why the query failed."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Cloud Audit Logs record detailed `authorizationInfo` diagnostics for every denied API call, explicitly distinguishing whether access was blocked by missing IAM Allow permissions, an IAM Deny policy, or a Principal Access Boundary (`PRINCIPAL_ACCESS_BOUNDARY`) policy.",
+    "whyWrong": {
+      "1": "All IAM and PAB authorization failures on audited APIs generate structured Cloud Audit Log entries.",
+      "0": "CPU utilization metrics do not indicate IAM policy evaluation outcomes.",
+      "3": "Billing support does not debug IAM/PAB authorization logs."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/troubleshoot-access",
+      "https://cloud.google.com/logging/docs/audit/understanding-audit-logs"
+    ]
+  },
+  {
+    "id": "d5-pab-024",
+    "domain": 5,
+    "topic": "Zero-Trust Service Mesh Identity for Micro-Agent Clusters",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A financial institution deploys a mesh of 15 specialized micro-agents on Google Kubernetes Engine (GKE) Enterprise using Cloud Service Mesh (Istio). Security architecture requires zero-trust East-West communication between micro-agents: (1) every pod-to-pod connection must be encrypted with mutual TLS (mTLS) using cryptographic SPIFFE identities, AND (2) only the `Order-Validation-Agent` pod identity is permitted to invoke the `/execute` endpoint on the `Payment-Settlement-Agent` pod. Which TWO Cloud Service Mesh / GKE controls should you configure? (Choose two.)",
+    "options": [
+      "Disable mTLS (`PERMISSIVE` or `DISABLE`) to reduce CPU usage across the service mesh.",
+      "Grant all pods in the cluster access to the Kubernetes cluster-admin role.",
+      "Use unencrypted HTTP over port 80 and rely on Kubernetes pod names for security.",
+      "Configure a Mesh-wide `PeerAuthentication` policy with `mtls.mode: STRICT` so all inter-agent East-West traffic enforces mutual TLS backed by GKE Workload Identity / Mesh CA managed SPIFFE certificates (`spiffe://<project>.svc.id.goog/ns/<namespace>/sa/<service-account>`).",
+      "Create an Istio `AuthorizationPolicy` targeting the `Payment-Settlement-Agent` workload that explicitly allows `POST /execute` requests exclusively from source principal `cluster.local/ns/agents/sa/order-validation-agent` and denies all other principals."
+    ],
+    "answer": [
+      3,
+      4
+    ],
+    "explanation": "Zero-trust East-West micro-agent security on GKE Enterprise combines `PeerAuthentication` in `STRICT` mTLS mode (cryptographically verifying SPIFFE workload identities via Mesh CA) with granular layer-7 `AuthorizationPolicy` rules restricting specific HTTP paths (`/execute`) to exact calling SPIFFE principals.",
+    "whyWrong": {
+      "0": "Disabling mTLS removes transport encryption and cryptographic workload identity verification.",
+      "1": "`cluster-admin` grants full control over the entire Kubernetes cluster, violating least privilege.",
+      "2": "Pod names over plaintext HTTP can be spoofed by any container on the network."
+    },
+    "refs": [
+      "https://cloud.google.com/service-mesh/docs/security/authorization-policy-overview",
+      "https://cloud.google.com/service-mesh/docs/security/mtls-overview"
+    ]
+  },
+  {
+    "id": "d5-pab-025",
+    "domain": 5,
+    "topic": "Preventing Token Confusion in Multi-Audience OAuth Flows",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise platform hosts two distinct agents: a low-privilege `Cafeteria-Menu-Agent` (audience URI `https://cafeteria.corp.internal`) and a high-privilege `Payroll-Admin-Agent` (audience URI `https://payroll.corp.internal`). Both agents validate OIDC JWTs issued by the same corporate Identity Provider (`https://idp.corp.internal`). During a security audit, an engineer discovers a 'Token Confusion' vulnerability: a compromised `Cafeteria-Menu-Agent` takes a valid OIDC token sent by a user to check the lunch menu and forwards that exact same token in an API call to `Payroll-Admin-Agent`. Because `Payroll-Admin-Agent` only checked that the token was signed by `https://idp.corp.internal` and was not expired, it accepted the token and exposed executive payroll records. How should you fix this?",
+    "options": [
+      "Configure strict Audience (`aud`) claim validation on the `Payroll-Admin-Agent` (and Agent Gateway) so it rejects any JWT whose `aud` claim does not exactly match `https://payroll.corp.internal`, and require OAuth 2.0 Token Exchange (RFC 8693) with explicit audience restriction whenever cross-service delegation is legitimately required.",
+      "Use the same `aud` claim (`https://all-agents.corp.internal`) for every agent in the company.",
+      "Remove signature verification on `Payroll-Admin-Agent` so it runs faster.",
+      "Encrypt the cafeteria menu PDF using a password."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The OIDC `aud` (Audience) claim identifies the intended recipient of a token. Enforcing strict `aud` validation ensures a token minted for `Cafeteria-Menu-Agent` is immediately rejected by `Payroll-Admin-Agent`, completely neutralizing confused-deputy token forwarding across services.",
+    "whyWrong": {
+      "1": "Sharing a single global audience claim across low-privilege and high-privilege services perpetuates the exact token confusion vulnerability.",
+      "2": "Removing signature verification allows attackers to forge arbitrary payroll tokens from scratch.",
+      "3": "Encrypting cafeteria menus does not fix the authentication vulnerability on the payroll agent."
+    },
+    "refs": [
+      "https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3",
+      "https://cloud.google.com/iam/docs/workload-identity-federation"
+    ]
+  }
+]

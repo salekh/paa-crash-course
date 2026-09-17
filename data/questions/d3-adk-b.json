@@ -1,0 +1,718 @@
+[
+  {
+    "id": "d3-adk-026",
+    "domain": 3,
+    "topic": "ADK Callbacks & Tool Output Enrichment",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise supply chain agent built with Google Cloud ADK uses an external ERP tool (`fetch_inventory_levels`) that returns raw numeric warehouse codes (e.g., `{'wh_id': 402, 'qty': 1200}`) without human-readable location names or timezones. Because the ERP API is owned by a legacy third-party vendor, you cannot modify its response payload. However, you want the LLM to always see enriched JSON containing the warehouse city and local timezone alongside the raw output whenever `fetch_inventory_levels` completes, without requiring a second LLM tool call. How should you implement this in ADK?",
+    "options": [
+      "Register an `after_tool_callback` on the `LlmAgent` that intercepts the response dict from `fetch_inventory_levels`, looks up the city and timezone from an in-memory reference map, and returns the enriched dictionary.",
+      "Register a `before_model_callback` that strips all tool declarations from the `LlmRequest`.",
+      "Use a `LoopAgent` that calls `fetch_inventory_levels` 10 times until the ERP vendor adds city names.",
+      "Store the warehouse city names in a separate `ParallelAgent` that runs after the user closes the chat session."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In Google Cloud ADK, `after_tool_callback` is invoked immediately after a tool function finishes executing, receiving `(tool, args, tool_context, tool_response)`. If `after_tool_callback` returns a modified dictionary, ADK replaces the original tool output with this returned dictionary before appending the `FunctionResponse` event to the LLM context. This allows deterministic enrichment, sanitization, or normalization of third-party API payloads with zero additional LLM latency.",
+    "whyWrong": {
+      "1": "Stripping tool declarations in `before_model_callback` prevents the agent from calling the inventory tool at all.",
+      "2": "Repeatedly calling a deterministic legacy API in a `LoopAgent` will never change its schema.",
+      "3": "Running a `ParallelAgent` after the session closes cannot enrich the tool response needed during the active turn."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/after-tool-callback/"
+    ]
+  },
+  {
+    "id": "d3-adk-027",
+    "domain": 3,
+    "topic": "ADK Dynamic Instructions & ReadonlyContext",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are building a multinational HR policy agent in Google Cloud ADK. Depending on the employee's country code (`user:country`), union status (`user:is_union`), and current date/time, the agent's system instructions must assemble complex, conditional legal disclaimers and different tone guidelines that cannot be expressed with simple `{variable}` string substitution alone. How should you configure the `instruction` parameter on the `LlmAgent` to compute these instructions dynamically before each LLM call?",
+    "options": [
+      "Create 195 separate `LlmAgent` instances—one for each country in the world—and put them all inside a `ParallelAgent`.",
+      "Pass a Python callable function (e.g., `def build_hr_instruction(ctx: ReadonlyContext) -> str:`) to the `instruction` parameter of `LlmAgent`, inspecting `ctx.state` to conditionally construct and return the exact prompt string.",
+      "Restart the Cloud Run container with new environment variables every time an employee sends a message.",
+      "Use `after_model_callback` to rewrite the system instruction after the LLM has already generated its answer."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In ADK, the `instruction` parameter of an `LlmAgent` accepts either a static string (with optional `{key}` state placeholders) or a Python function/callable that takes `ReadonlyContext` (or `InvocationContext`) and returns a string (or async string). ADK invokes this callable dynamically right before constructing the `LlmRequest` on every turn, enabling arbitrary Python branching logic, date formatting, and state inspection to tailor the system prompt.",
+    "whyWrong": {
+      "0": "Running 195 agents concurrently in a `ParallelAgent` would execute 195 LLM calls per user turn, causing massive cost and latency.",
+      "2": "Restarting containers per message destroys multi-tenant concurrency and adds seconds of cold-start latency.",
+      "3": "`after_model_callback` runs after the model has already generated its output, so changing instructions there has no effect on the completed turn."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/llm-agents/#dynamic-instructions"
+    ]
+  },
+  {
+    "id": "d3-adk-028",
+    "domain": 3,
+    "topic": "ADK State Scoping Prefixes",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A SaaS enterprise uses Google Cloud ADK with a persistent `DatabaseSessionService` to power its multi-tenant customer portal. An agent needs to read a global feature flag (`enable_beta_discount`) that applies to all users across the entire application, read the authenticated user's preferred currency (`preferred_currency`) that persists across all of that user's sessions, and write a scratchpad calculation (`raw_tax_math`) that must be automatically purged as soon as the current turn finishes. Which three state key prefixes in `session.state` correspond to these three scopes?",
+    "options": [
+      "`global:enable_beta_discount`, `session:preferred_currency`, and `delete:raw_tax_math`.",
+      "`root:enable_beta_discount`, `client:preferred_currency`, and `ephemeral:raw_tax_math`.",
+      "`app:enable_beta_discount` for application-wide state, `user:preferred_currency` for cross-session user state, and `temp:raw_tax_math` for single-turn ephemeral state.",
+      "`sys:enable_beta_discount`, `perm:preferred_currency`, and `local:raw_tax_math`."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Google Cloud ADK defines four built-in state scopes determined by key prefixes in `session.state`: (1) `app:` keys are shared across all users and sessions for the application (`app_name`); (2) `user:` keys persist across all sessions belonging to the same `user_id`; (3) unprefixed keys belong to the specific `Session` (`session_id`); and (4) `temp:` keys are transient and automatically cleared at the end of the current agent invocation.",
+    "whyWrong": {
+      "0": "`global:`, `session:`, and `delete:` are not valid ADK state scope prefixes.",
+      "1": "`root:`, `client:`, and `ephemeral:` are unrecognized by ADK's `SessionService` state scoping engine.",
+      "3": "`sys:`, `perm:`, and `local:` are not supported ADK state prefixes."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/state/#state-scopes"
+    ]
+  },
+  {
+    "id": "d3-adk-029",
+    "domain": 3,
+    "topic": "ADK Multi-Agent Handoff Restrictions",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You have built a hierarchical customer service tree in ADK: a `RootTriageAgent` routes requests to either `TechSupportAgent` or `BillingSupportAgent`. `TechSupportAgent` has two child sub-agents: `RouterDiagnosticsAgent` and `FiberLineAgent`. During testing, you observe that when `RouterDiagnosticsAgent` encounters a complex question, it occasionally transfers control directly back up to `RootTriageAgent` or sideways to `BillingSupportAgent`, creating confusing conversational loops. You want `RouterDiagnosticsAgent` to only interact with the user or return control cleanly when finished, without being allowed to initiate transfers to parent or peer agents. How should you configure `RouterDiagnosticsAgent`?",
+    "options": [
+      "Delete `RootTriageAgent` and `BillingSupportAgent` from the codebase.",
+      "Wrap `RouterDiagnosticsAgent` inside a `ParallelAgent` with 0 sub-agents.",
+      "Set `temperature=1.5` on `RouterDiagnosticsAgent` so it forgets the names of peer agents.",
+      "Set `disallow_transfer_to_parent=True` and `disallow_transfer_to_peers=True` on the `RouterDiagnosticsAgent` instance."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In ADK multi-agent hierarchies, `LlmAgent` instances automatically receive transfer tools (`transfer_to_agent`) allowing them to hand off control to their parent agent, peer agents (siblings), or child sub-agents. To enforce strict hierarchical boundaries and prevent leaf specialists from bouncing users back up the tree or sideways to unrelated departments, setting `disallow_transfer_to_parent=True` and `disallow_transfer_to_peers=True` removes those targets from the agent's allowed transfer destinations.",
+    "whyWrong": {
+      "0": "Deleting the root and billing agents destroys the multi-agent system's ability to handle billing and triage.",
+      "1": "An empty `ParallelAgent` does nothing and breaks execution.",
+      "2": "Increasing temperature increases randomness and hallucinations rather than enforcing deterministic routing boundaries."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/multi-agents/#controlling-agent-transfers"
+    ]
+  },
+  {
+    "id": "d3-adk-030",
+    "domain": 3,
+    "topic": "ADK Built-in Code Execution Tool",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A quantitative hedge fund is building an ADK research agent that analyzes CSV financial statements uploaded by analysts. When an analyst asks 'Calculate the rolling 30-day Sharpe ratio and plot a regression chart of revenue vs. R&D spend', standard LLM arithmetic frequently suffers from floating-point hallucinations. You need the agent to dynamically write Python pandas/matplotlib code, execute it in a secure, isolated Google-managed sandbox environment, and return both the exact numerical result and the generated chart artifact. What should you configure on the `LlmAgent`?",
+    "options": [
+      "Enable Gemini's built-in code execution capability by adding `built_in_code_execution` (or `VertexAiCodeExecution` / code execution tool) to the `LlmAgent` tools configuration.",
+      "Write a custom tool that runs `eval(llm_string)` directly inside the production web server root process with root privileges.",
+      "Ask the LLM to perform matrix inversion and standard deviation calculations purely via next-token prediction.",
+      "Deploy a separate manual VM for every math equation and SSH into it using hardcoded passwords."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "ADK integrates natively with Gemini's built-in Code Execution tool (`built_in_code_execution` / `Tool(code_execution=...)`). When enabled on an `LlmAgent`, the Gemini model can iteratively generate Python code snippets, execute them inside Google's secure, sandboxed runtime environment (pre-loaded with libraries like numpy, pandas, matplotlib, and scipy), inspect stdout/stderr, and return exact computations and matplotlib chart files without risking host container RCE vulnerabilities.",
+    "whyWrong": {
+      "1": "Running arbitrary LLM-generated code via Python `eval()` in the host process with root privileges creates a critical Remote Code Execution (RCE) vulnerability.",
+      "2": "Next-token prediction is notoriously unreliable for multi-step floating-point calculations over large datasets.",
+      "3": "Managing manual VMs via hardcoded SSH passwords is slow, insecure, and operationally unmanageable."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/built-in-tools/#code-execution",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/code-execution"
+    ]
+  },
+  {
+    "id": "d3-adk-031",
+    "domain": 3,
+    "topic": "ADK Grounding with Google Search vs Vertex AI Search",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are architecting a corporate competitive intelligence agent in Google Cloud ADK. The agent must answer questions by combining two distinct information sources: (1) real-time public breaking news and stock market announcements from the live public web, and (2) confidential internal M&A strategy decks stored in private SharePoint and Cloud Storage buckets indexed in Vertex AI Search data stores. How should you equip the ADK `LlmAgent` to ground its responses across both sources with verifiable citations?",
+    "options": [
+      "Upload all confidential internal M&A strategy decks to a public Pastebin URL so Google Search can index them.",
+      "Configure the agent with both the built-in `google_search` grounding tool for live public web queries and a `VertexAiSearchTool` pointing to your private enterprise Vertex AI Search data store.",
+      "Disable all tools and rely strictly on the base Gemini model's pre-training cutoff knowledge.",
+      "Use `InMemorySessionService` to scrape the dark web via Tor."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "ADK provides first-class support for both public web grounding via `google_search` (Google Search retrieval) and private enterprise RAG grounding via `VertexAiSearchTool` (or `VertexAiRagRetrieval`). By equipping the agent (or specialized sub-agents wrapped as `AgentTool`s) with both capabilities, the agent can retrieve real-time public news with web citations while securely querying private SharePoint/GCS documents through Vertex AI Search with ACL enforcement.",
+    "whyWrong": {
+      "0": "Exposing confidential M&A documents on public websites causes catastrophic data leakage.",
+      "2": "Pre-training knowledge cannot access breaking news after the cutoff date or private internal enterprise documents.",
+      "3": "`InMemorySessionService` manages conversational state in RAM and has no web or enterprise document retrieval capabilities."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/built-in-tools/#google-search",
+      "https://google.github.io/adk-docs/tools/vertex-ai-search/"
+    ]
+  },
+  {
+    "id": "d3-adk-032",
+    "domain": 3,
+    "topic": "ADK Model Context Protocol (MCP) Integration",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your organization has standardized on the open Model Context Protocol (MCP) to expose internal engineering tools (Jira issue tracking, GitHub PR reviews, and Sentry error logs) via standardized MCP servers running over stdio and SSE (Server-Sent Events). You are building a new Incident Commander agent using Google Cloud ADK and want to reuse these existing MCP servers without rewriting their tool definitions in Python. How should you integrate the MCP servers into your ADK `LlmAgent`?",
+    "options": [
+      "Manually rewrite all 80 Jira, GitHub, and Sentry API endpoints as raw bash scripts embedded inside the system instruction prompt.",
+      "Convert the MCP servers into JPEG images and pass them to Vertex AI Imagen.",
+      "Use ADK's `MCPToolset` (e.g., `MCPToolset.from_server(...)`) to connect to the stdio or SSE MCP servers, automatically discovering and converting the MCP tools into ADK-compatible `BaseTool` instances passed to `LlmAgent(tools=...)`.",
+      "Disable MCP and require engineers to copy-paste JSON payloads manually into the terminal."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Google Cloud ADK includes native Model Context Protocol (MCP) client support via `MCPToolset`. By initializing `MCPToolset` with `StdioServerParameters` or `SseServerParams`, ADK establishes an MCP session with the external server, queries `list_tools()`, dynamically translates each MCP tool schema into an ADK `FunctionDeclaration`, and proxies tool execution calls (`call_tool()`) back to the MCP server seamlessly.",
+    "whyWrong": {
+      "0": "Rewriting 80 APIs in bash prompts duplicates engineering effort, bloats prompt tokens, and bypasses standardized protocol governance.",
+      "1": "Imagen is an image generation service and cannot execute MCP tool calls.",
+      "3": "Manual copy-pasting defeats the purpose of autonomous agentic automation."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/mcp-tools/"
+    ]
+  },
+  {
+    "id": "d3-adk-033",
+    "domain": 3,
+    "topic": "ADK OpenAPI Toolset Integration",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare logistics company has an existing REST microservice for cold-chain shipment tracking documented with a comprehensive OpenAPI 3.0 YAML specification (`shipment_api.yaml`) containing 18 endpoints, request schemas, and OAuth2 security definitions. You want your ADK `LlmAgent` to invoke these REST endpoints as tools without manually writing 18 separate Python wrapper functions with `requests.get/post`. What is the most efficient ADK implementation?",
+    "options": [
+      "Paste the entire 12,000-line `shipment_api.yaml` file into the user's chat input on every turn.",
+      "Train a custom LLM from scratch on the YAML file syntax.",
+      "Use `LoopAgent` to guess random URLs until an HTTP 200 response is returned.",
+      "Load the OpenAPI specification using ADK's `OpenAPIToolset` (e.g., `OpenAPIToolset(spec_str=...)` or `RestApiTool`) and pass the generated tools directly to the `LlmAgent` along with an authentication credential config."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "ADK's `OpenAPIToolset` parses OpenAPI 3.0 specifications (JSON or YAML) and automatically generates strongly typed callable tools for every operation defined in the spec. It handles parameter mapping, request body serialization, URL path interpolation, and authentication header injection (API key, Bearer token, OAuth2), eliminating boilerplate HTTP client code.",
+    "whyWrong": {
+      "0": "Pasting 12,000 lines of YAML into every turn wastes massive token budgets and still provides no execution mechanism for the LLM to make HTTP requests.",
+      "1": "Training an LLM on a YAML spec does not give the model network access to invoke live REST endpoints.",
+      "2": "Guessing random URLs in a loop is non-functional and generates HTTP errors."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/openapi-tools/"
+    ]
+  },
+  {
+    "id": "d3-adk-034",
+    "domain": 3,
+    "topic": "Agents CLI Deployment to Vertex AI Agent Engine",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your team has finalized an ADK multi-agent application locally and verified it with `adk eval`. You now need to deploy the agent to production on Google Cloud as a fully managed, auto-scaling serverless runtime with built-in session persistence, Memory Bank integration, and Cloud Trace telemetry, without manually maintaining Dockerfiles, Kubernetes manifests, or FastAPI HTTP server code. Which deployment target and ADK CLI workflow should you use?",
+    "options": [
+      "Deploy the ADK agent directly to Vertex AI Agent Engine (formerly Reasoning Engine) using `adk deploy agent_engine` or `vertexai.preview.reasoning_engines.ReasoningEngine.create(AdkApp(...))`.",
+      "Copy the Python files via FTP to an unmanaged Windows XP virtual machine.",
+      "Run `adk web --port 80` inside a local developer laptop terminal and expose the laptop to the internet via port forwarding.",
+      "Upload the Python source files to BigQuery as a CSV table."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Vertex AI Agent Engine (Reasoning Engine) is Google Cloud's fully managed serverless runtime specifically optimized for hosting agentic applications built with ADK, LangGraph, or custom frameworks. Using `adk deploy` (or wrapping the root ADK agent in `AdkApp` and calling `ReasoningEngine.create()`), Vertex AI automatically packages dependencies, provisions auto-scaling container infrastructure, exposes secure REST/streaming query endpoints, and integrates natively with managed Sessions, Memory Bank, and Cloud Trace.",
+    "whyWrong": {
+      "1": "Unmanaged legacy VMs lack auto-scaling, managed session persistence, and enterprise security.",
+      "2": "`adk web` is strictly a local development and debugging server and is not hardened or scalable for production traffic.",
+      "3": "BigQuery is an analytical data warehouse and cannot host or execute interactive ADK agent runtimes."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/deploy/agent-engine/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d3-adk-035",
+    "domain": 3,
+    "topic": "ADK Live API & Bidirectional Streaming",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A telehealth provider is building a real-time voice and video physical therapy coach using Google Cloud ADK. Patients stream live webcam video of their exercises and speak naturally to the agent. The agent must process continuous PCM audio and video frames in real time with sub-second conversational latency, support barge-in (interrupting the agent mid-sentence when the patient speaks), and call a `log_rep_count` tool whenever an exercise repetition is completed. How should you execute the ADK agent to support low-latency multimodal bidirectional streaming?",
+    "options": [
+      "Save 5-minute video files to Cloud Storage, transcribe them with batch Speech-to-Text once an hour, and call `runner.run()` synchronously.",
+      "Use `runner.run_live(session=..., live_request_queue=...)` with a Gemini Live API compatible model (such as `gemini-2.0-flash-exp` / Gemini 2.5 Flash Live) to establish a persistent bidirectional WebSocket stream.",
+      "Use `SequentialAgent` with 10 text-only sub-agents and poll every 30 seconds.",
+      "Configure `max_output_tokens=1` on a batch text completion endpoint."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "ADK's `Runner.run_live()` method connects the agent runtime to the Gemini Multimodal Live API over a stateful, low-latency bidirectional stream. By pushing audio chunks and video frames into a `LiveRequestQueue`, the agent receives continuous multimodal input, yields real-time audio/text `Event` streams back to the client, supports native voice activity detection (VAD) for instant barge-in interruption, and seamlessly invokes ADK function tools mid-stream.",
+    "whyWrong": {
+      "0": "Batch hourly processing introduces minutes/hours of delay, failing the sub-second real-time coaching and barge-in requirements.",
+      "2": "Text-only polling every 30 seconds cannot process live video frames or support natural voice interruption.",
+      "3": "Batch text completion endpoints do not support real-time audio/video streaming or barge-in."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/streaming/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/live-api"
+    ]
+  },
+  {
+    "id": "d3-adk-036",
+    "domain": 3,
+    "topic": "ADK Long-Running Tools & Human-in-the-Loop",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise IT provisioning agent built with Google Cloud ADK includes a `request_hardware_laptop` tool. When an employee requests a MacBook Pro, corporate policy requires explicit manager approval via Slack before the procurement order is finalized. Because manager approval may take anywhere from 10 minutes to 2 days, the agent invocation cannot block an active HTTP request thread waiting for the Slack response. How should you design this long-running human-in-the-loop tool pattern in ADK?",
+    "options": [
+      "Execute `time.sleep(172800)` inside the Python tool function to block the Cloud Run HTTP worker thread for 48 hours.",
+      "Use a `LoopAgent` that sends 1,000 Slack messages per second until the manager clicks approve.",
+      "Implement the tool as a `LongRunningFunctionTool` (or return a pending ticket ID and yield control), persist the session state via a durable `SessionService`, and resume the session with the manager's approval payload when the Slack webhook fires.",
+      "Disable session persistence so the agent forgets the laptop request immediately."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "For asynchronous operations or human-in-the-loop (HITL) approvals that span minutes, hours, or days, blocking a synchronous worker thread with `sleep()` will hit HTTP request timeouts and waste compute resources. ADK supports `LongRunningFunctionTool` and asynchronous event resumption: the tool initiates the external workflow (sending the Slack approval message with the `session_id` and `invocation_id`), records the pending state in `SessionService`, and cleanly yields control. When the manager responds, the webhook handler loads the persisted session and resumes the agent execution with the approval result.",
+    "whyWrong": {
+      "0": "Blocking an HTTP thread for 48 hours exceeds Cloud Run / Agent Engine request timeouts (max 60 minutes) and exhausts worker pools.",
+      "1": "Spamming 1,000 Slack messages per second will get rate-limited and consume massive LLM/API quotas.",
+      "3": "Disabling session persistence makes it impossible to resume the workflow once the approval arrives."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/function-tools/#long-running-tools",
+      "https://google.github.io/adk-docs/sessions/"
+    ]
+  },
+  {
+    "id": "d3-adk-037",
+    "domain": 3,
+    "topic": "Model Garden Context Caching Optimization",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A legal discovery firm has built an ADK agent that answers deposition questions based on a fixed 400-page municipal building code regulation document (approximately 180,000 tokens). During a typical 45-minute attorney review session, the attorney asks 60 sequential questions against this exact same 180,000-token document. Sending 180,000 un-cached input tokens on all 60 turns results in 10.8 million input tokens billed per session and high Time-to-First-Token (TTFT). Which Vertex AI feature should you integrate with your ADK model configuration to drastically reduce cost and latency?",
+    "options": [
+      "Truncate the 400-page building code document to only the first 2 paragraphs.",
+      "Deploy a 1-billion parameter model that has a maximum context window of 2,048 tokens.",
+      "Ask the attorney to type their questions in ALL CAPS to compress token counts.",
+      "Enable Vertex AI Context Caching for Gemini 2.5 Pro/Flash to cache the 180,000-token building code prefix once, and reference the `cached_content` resource name across all 60 agent turns."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Vertex AI Context Caching allows you to upload and cache large, repeated input prefixes (such as massive documents, codebases, video files, or extensive system instructions >= 32,768 tokens) in memory on Google's TPU infrastructure with a configurable TTL. Subsequent requests referencing the `cached_content` identifier receive up to a 75-90% discount on cached input tokens and experience significantly lower Time-to-First-Token (TTFT) because the attention KV-cache states are pre-computed.",
+    "whyWrong": {
+      "0": "Truncating the building code to 2 paragraphs destroys the agent's ability to answer questions about the remaining 399 pages.",
+      "1": "A 2,048-token context window cannot fit the 180,000-token document.",
+      "2": "Typing in ALL CAPS actually increases or alters subword tokenization rather than reducing token billing."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview"
+    ]
+  },
+  {
+    "id": "d3-adk-038",
+    "domain": 3,
+    "topic": "ADK ParallelAgent State Isolation & Race Conditions",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You have configured an ADK `ParallelAgent` containing three sub-agents: `FlightSearchAgent`, `HotelSearchAgent`, and `CarRentalSearchAgent`. All three sub-agents execute concurrently to assemble a travel itinerary. Initially, all three developers configured their agents with the exact same `output_key='search_result'`. During testing, you notice that only one agent's output survives in `session.state['search_result']` after the `ParallelAgent` completes. What is the root cause and proper fix?",
+    "options": [
+      "Concurrent sub-agents writing to the exact same `output_key` create a last-write-wins race condition; configure each parallel sub-agent with a distinct `output_key` (e.g., `flight_result`, `hotel_result`, `car_result`) so their state deltas merge cleanly without collision.",
+      "`ParallelAgent` only runs the first sub-agent in the list and ignores all others by design.",
+      "Python dictionaries cannot store more than one key at a time.",
+      "You must replace `ParallelAgent` with `LoopAgent` and set `max_iterations=0`."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "When `ParallelAgent` executes child sub-agents concurrently, each child branch emits events containing an `EventActions.state_delta`. When these deltas are applied to `session.state`, if multiple branches write to the identical key (`search_result`), the final branch to complete overwrites the previous values (last-write-wins collision). Assigning unique `output_key` names (`flight_result`, `hotel_result`, `car_result`) ensures disjoint keys in `state_delta`, allowing all three results to persist cleanly for downstream synthesis.",
+    "whyWrong": {
+      "1": "`ParallelAgent` executes all sub-agents in its `sub_agents` list concurrently via `asyncio.gather`.",
+      "2": "Python dictionaries support millions of distinct keys.",
+      "3": "Setting `max_iterations=0` on a `LoopAgent` prevents any agent from executing."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/parallel-agent/"
+    ]
+  },
+  {
+    "id": "d3-adk-039",
+    "domain": 3,
+    "topic": "ADK Callback Execution Order",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An ADK `LlmAgent` is configured with all six lifecycle callbacks: `before_agent_callback`, `after_agent_callback`, `before_model_callback`, `after_model_callback`, `before_tool_callback`, and `after_tool_callback`. During a single turn where the user asks a question, the LLM decides to call one function tool (`get_weather`), receives the tool output, and then generates a final natural language answer. In what exact chronological order do these callbacks execute during this turn?",
+    "options": [
+      "`before_tool_callback` -> `before_model_callback` -> `before_agent_callback` -> `after_agent_callback` -> `after_model_callback` -> `after_tool_callback`.",
+      "`before_agent_callback` -> `before_model_callback` (1st LLM call) -> `after_model_callback` (tool call emitted) -> `before_tool_callback` -> `after_tool_callback` -> `before_model_callback` (2nd LLM call with tool output) -> `after_model_callback` (final text emitted) -> `after_agent_callback`.",
+      "`after_agent_callback` runs first, followed by `before_agent_callback`.",
+      "`before_model_callback` runs only once per session regardless of how many tool calls occur."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In Google Cloud ADK, `before_agent_callback` runs once when the agent starts its invocation. Next, for the initial LLM call, `before_model_callback` runs before sending the prompt and `after_model_callback` runs when the LLM responds with a `FunctionCall`. Then, for the tool execution, `before_tool_callback` runs before the Python function and `after_tool_callback` runs immediately after. Because the tool result must be sent back to the LLM to generate the final answer, a second LLM call occurs—triggering `before_model_callback` and `after_model_callback` a second time. Finally, once the agent completes its turn, `after_agent_callback` executes.",
+    "whyWrong": {
+      "0": "Tool callbacks cannot run before the agent or model has even been invoked to decide which tool to call.",
+      "2": "`after_agent_callback` always runs at the conclusion of the agent's invocation, never before `before_agent_callback`.",
+      "3": "`before_model_callback` and `after_model_callback` execute on every individual round-trip to the LLM, including post-tool follow-up calls."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/"
+    ]
+  },
+  {
+    "id": "d3-adk-040",
+    "domain": 3,
+    "topic": "Model Garden Self-Hosted GKE vs Vertex AI Serverless",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An AI platform team is evaluating how to host open-weights models (Llama 3.3 70B and Gemma 3 27B) from Vertex AI Model Garden to serve their fleet of ADK agents. They are comparing two deployment options: (Option A) Vertex AI Model Garden MaaS (Model-as-a-Service) / Serverless managed endpoints, and (Option B) Self-deployed vLLM inference containers on Google Kubernetes Engine (GKE) Autopilot/Standard with A100/H100 GPU node pools. Which two statements accurately reflect the architectural trade-offs between these two options? (Choose two.)",
+    "options": [
+      "Vertex AI MaaS / Serverless endpoints eliminate GPU infrastructure management and offer pay-per-token or provisioned throughput billing, making them optimal when engineering teams want zero Kubernetes operational overhead.",
+      "Self-deploying vLLM on GKE GPU node pools gives the platform team granular control over custom quantization kernels (AWQ/FP8), custom LoRA adapter hot-swapping, and custom batching scheduler parameters.",
+      "Self-deploying Llama 3.3 70B on GKE requires zero GPU memory and runs natively on Cloud DNS servers.",
+      "Vertex AI MaaS endpoints require developers to manually compile NVIDIA CUDA drivers from C++ source code on every API request.",
+      "GKE clusters cannot communicate with ADK agents over private IP networks."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Vertex AI Model Garden provides flexible deployment paths: Managed MaaS (Model-as-a-Service) serverless APIs abstract away all underlying GPU infrastructure, vLLM server tuning, and autoscaling, charging per token or scale unit. Conversely, deploying open models onto GKE with vLLM or TGI gives ML engineers low-level control over GPU node pools, custom quantization formats (FP8, INT4 AWQ), prefix caching flags, multi-LoRA serving, and custom ingress routing at the cost of higher DevOps management overhead.",
+    "whyWrong": {
+      "2": "Llama 3.3 70B requires substantial GPU VRAM (e.g., ~140GB in FP16 or ~40GB in INT4) and cannot run on DNS servers.",
+      "3": "Managed MaaS endpoints are fully serverless and require zero CUDA driver management by the user.",
+      "4": "GKE clusters natively support private RFC 1918 VPC networking and Private Service Connect to communicate securely with ADK agents."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models",
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
+    ]
+  },
+  {
+    "id": "d3-adk-041",
+    "domain": 3,
+    "topic": "Agent Platform Memory Bank Retrieval Patterns",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You have integrated `VertexAiMemoryBankService` with your ADK customer concierge agent. You want to optimize how long-term memories are retrieved during a conversation. Specifically, for every new user turn, before the LLM decides how to respond, you want the agent runtime to automatically query the Memory Bank using the user's current message as a semantic search query, retrieve the top 5 most relevant historical user memories, and inject them into the system context without requiring the LLM to spend an extra round-trip calling a `search_memory` tool. How should you implement this in ADK?",
+    "options": [
+      "Wait until the session is closed and deleted before calling `search_memory`.",
+      "Store all memories inside a `ParallelAgent` that never communicates with the root agent.",
+      "Implement a `before_model_callback` (or custom instruction provider) that calls `callback_context.search_memory(query=user_message)` (or `memory_service.search_memory`) and appends the retrieved memory snippets directly into `llm_request.config.system_instruction`.",
+      "Disable `VertexAiMemoryBankService` and force the user to re-type their entire biography at the start of every chat."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "While ADK allows exposing memory search as an explicit tool (`load_memory` / `PreloadMemoryTool`) that the LLM can choose to invoke, calling a tool requires an extra LLM round-trip (increasing latency). By performing the semantic memory lookup inside a `before_model_callback` or dynamic instruction callable before the first LLM call, you can fetch the top-K relevant memories from `VertexAiMemoryBankService` and seamlessly augment the system instruction or context window in a single pass.",
+    "whyWrong": {
+      "0": "Searching memory after the session has closed does not help the agent answer questions during the active session.",
+      "1": "An isolated `ParallelAgent` that does not share state or context with the root agent cannot provide memories to it.",
+      "3": "Forcing users to re-type their biography destroys user experience and defeats the purpose of Memory Bank."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/memory/",
+      "https://google.github.io/adk-docs/callbacks/before-model-callback/"
+    ]
+  },
+  {
+    "id": "d3-adk-042",
+    "domain": 3,
+    "topic": "Agents CLI Evaluation Dataset Schema",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are creating an evaluation test file (`customer_refund.test.json`) to run automated regression testing on your ADK agent using the `adk eval` CLI command. In your test case, you want to simulate a 2-turn conversation where the user first asks 'Can I get a refund for order #9981?', the agent calls `lookup_order(order_id='9981')`, and on turn 2 the user says 'Yes, please process it to my original card', triggering `issue_refund(order_id='9981')`. What key elements must be structured inside the `.test.json` evaluation file for `adk eval` to validate both tool trajectories and final responses?",
+    "options": [
+      "A binary executable `.exe` file compiled for MS-DOS.",
+      "An empty text file containing only the word `PASS`.",
+      "A raw SQL dump of the PostgreSQL system catalog.",
+      "A JSON structure defining `eval_cases` (or conversation turns), where each turn specifies the user `query`, the `expected_tool_use` list (with `tool_name` and `tool_input` arguments), and the `reference` / expected response text."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The `adk eval` command reads structured JSON evaluation sets (`.test.json` or `.evalset.json`). Each test case defines a sequence of conversational turns containing the input `query` (user prompt), `expected_tool_use` (an ordered list of expected tool names and argument dictionaries representing the golden trajectory), and `reference` (the expected final natural language output). `adk eval` runs the agent against each turn and computes trajectory match and response similarity scores.",
+    "whyWrong": {
+      "0": "`adk eval` parses JSON evaluation datasets, not MS-DOS binary executables.",
+      "1": "An empty file with the word `PASS` contains no prompts or expected trajectories to evaluate.",
+      "2": "A PostgreSQL system catalog dump is unrelated to ADK agent evaluation schemas."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "d3-adk-043",
+    "domain": 3,
+    "topic": "ADK Tool Error Handling & Self-Correction",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An ADK `LlmAgent` is equipped with a `run_bigquery_sql` tool that executes SQL queries generated by the model. Occasionally, the LLM generates a SQL query with a syntax error or an invalid column name (e.g., `SELECT user_id FROM orders` instead of `customer_id`). Instead of crashing the entire Python agent runtime with an unhandled `google.api_core.exceptions.BadRequest` exception, you want the agent to automatically observe the BigQuery syntax error message, self-correct its SQL query, and retry the tool call transparently. How should your tool function handle BigQuery exceptions?",
+    "options": [
+      "Catch the BigQuery exception inside the Python tool function (or via an error handler) and return a structured error dictionary such as `{'status': 'ERROR', 'error_message': str(e), 'hint': 'Verify column names against schema'}` so the LLM receives the error in the `FunctionResponse` event and self-corrects.",
+      "Call `os._exit(1)` inside the exception handler to immediately kill the container process.",
+      "Catch the exception and return `{'status': 'SUCCESS', 'rows': []}` so the LLM falsely believes the table is empty.",
+      "Delete the BigQuery dataset whenever a syntax error occurs."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "One of the core strengths of tool-using LLMs in ADK is autonomous self-correction. When a Python function tool catches an execution error (like a SQL syntax error or API validation error) and returns a descriptive JSON dictionary containing the exact error message rather than raising an unhandled crash, ADK sends that dictionary back to the LLM inside a `FunctionResponse` event. The LLM inspects the error message, identifies the invalid column name or syntax mistake, rewrites the SQL query, and invokes the tool again.",
+    "whyWrong": {
+      "1": "Calling `os._exit(1)` crashes the server process and drops the user's connection without allowing self-correction.",
+      "2": "Returning a fake success with empty rows deceives the LLM into reporting inaccurate data to the user.",
+      "3": "Deleting production BigQuery datasets on syntax errors is destructive and absurd."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/function-tools/#error-handling"
+    ]
+  },
+  {
+    "id": "d3-adk-044",
+    "domain": 3,
+    "topic": "Model Garden Gemini 2.5 Thinking Budget Configuration",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are building a multi-agent financial auditing system in ADK using Gemini 2.5 Flash. The system has two distinct `LlmAgent` components: (1) `IntentRouterAgent`, which simply classifies user messages into one of three categories ('Audit', 'Tax', 'General') and must respond in under 300ms; and (2) `ForensicAccountingAgent`, which analyzes complex multi-entity balance sheet reconciliations for subtle off-balance-sheet discrepancies and requires deep multi-step chain-of-thought reasoning. How should you configure `generate_content_config` on these two agents to optimize both latency and reasoning depth?",
+    "options": [
+      "Set `thinking_budget=24576` on `IntentRouterAgent` and `thinking_budget=0` on `ForensicAccountingAgent`.",
+      "On `IntentRouterAgent`, set `thinking_config={'thinking_budget': 0}` (or disable thinking) for minimum latency; on `ForensicAccountingAgent`, set a high `thinking_budget` (e.g., 8,192 to 24,576 tokens) in `thinking_config` to allocate dedicated reasoning tokens.",
+      "Set `max_output_tokens=1` on both agents.",
+      "Use a `ParallelAgent` to run `IntentRouterAgent` 50 times simultaneously."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Gemini 2.5 Flash supports controllable thinking budgets via `thinking_config` (`GenerateContentConfig(thinking_config=ThinkingConfig(thinking_budget=...))`). For simple classification/routing tasks like `IntentRouterAgent` where sub-300ms latency is paramount, setting `thinking_budget=0` disables internal chain-of-thought token generation, minimizing TTFT and cost. Conversely, for complex forensic accounting reconciliations, setting an explicit high `thinking_budget` empowers the model to perform thorough multi-step internal verification before emitting its final answer.",
+    "whyWrong": {
+      "0": "Allocating maximum thinking budget to a trivial router violates the 300ms SLA, while disabling thinking on forensic accounting degrades analytical accuracy.",
+      "2": "Setting `max_output_tokens=1` truncates responses to a single token, breaking both agents.",
+      "3": "Running the router 50 times in parallel wastes 50x quota without improving latency or reasoning."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/thinking",
+      "https://google.github.io/adk-docs/agents/llm-agents/"
+    ]
+  },
+  {
+    "id": "d3-adk-045",
+    "domain": 3,
+    "topic": "ADK Session Lifecycle & Runner Invocation",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are embedding an ADK agent inside a custom FastAPI backend service. When an HTTP POST request arrives at `/chat` containing `user_id`, `session_id`, and `message_text`, your FastAPI endpoint must execute the root agent against the existing conversation session (or create the session if it does not exist yet) and stream the generated text chunks back to the client via Server-Sent Events (SSE). Which ADK runtime class and method orchestrates the interaction between the Agent, `SessionService`, `ArtifactService`, and `MemoryService`?",
+    "options": [
+      "Call `LlmAgent.__init__()` inside a `while True` loop without passing any user message or session service.",
+      "Write raw socket bytes directly to `/dev/null`.",
+      "Instantiate an ADK `Runner` (or `InMemoryRunner`) bound to your root agent and services, and iterate asynchronously over `runner.run_async(user_id=user_id, session_id=session_id, new_message=content)` to stream emitted `Event` objects.",
+      "Use `adk create` inside the FastAPI HTTP handler on every request."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In Google Cloud ADK, `Runner` is the central execution engine that ties together your root `BaseAgent` (or `LlmAgent`), `SessionService`, `ArtifactService`, and `MemoryService`. Calling `runner.run_async(user_id=..., session_id=..., new_message=...)` loads the target `Session`, appends the incoming user message `Content`, executes the agent hierarchy, commits `state_delta` and event logs back to `SessionService`, and yields `Event` objects asynchronously—making it ideal for streaming SSE responses in FastAPI.",
+    "whyWrong": {
+      "0": "Calling `__init__()` only instantiates the class definition in memory and does not run inference or manage sessions.",
+      "1": "Writing to `/dev/null` discards all data and produces no response.",
+      "3": "`adk create` is a project scaffolding CLI command, not a runtime execution engine."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/runtime/"
+    ]
+  },
+  {
+    "id": "d3-adk-046",
+    "domain": 3,
+    "topic": "ADK Callback Authentication & Security Context Propagation",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare insurer deploys an ADK agent that calls downstream FHIR APIs on behalf of logged-in members. When a member sends a chat message, the web frontend passes a short-lived OAuth2 JWT bearer token in the session initialization state (`session.state['temp:user_jwt']`). For zero-trust security, you must ensure that: (1) the JWT is never exposed in the LLM prompt or conversation history, and (2) whenever the agent invokes any FHIR tool, the JWT is automatically extracted from state and injected into the outgoing HTTP `Authorization: Bearer <token>` header. How should you design this in ADK?",
+    "options": [
+      "Include the raw OAuth2 JWT string inside the user's natural language prompt text so the LLM can copy-paste it into tool arguments.",
+      "Hardcode a single super-admin service account key with access to all 10 million patient records into the public Docker image.",
+      "Store the JWT in `app:global_jwt` so all concurrent users share the exact same member token.",
+      "Store the token in `session.state['temp:user_jwt']` (which is excluded from LLM prompts unless explicitly templated), and read `tool_context.state['temp:user_jwt']` inside the Python tool function or `before_tool_callback` to attach the `Authorization` header to the FHIR API client call."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Passing sensitive bearer tokens through the LLM's natural language prompt or expecting the LLM to generate the token as a tool argument exposes credentials in model logs, consumes unnecessary tokens, and risks LLM hallucination/corruption of long base64 strings. By storing the token in `session.state['temp:user_jwt']` and accessing it programmatically via `tool_context.state['temp:user_jwt']` inside the Python tool implementation (or `before_tool_callback`), the credential remains completely invisible to the LLM while being deterministically injected into outbound HTTP headers.",
+    "whyWrong": {
+      "0": "Exposing JWTs in LLM prompts logs sensitive tokens in model telemetry and risks token truncation or hallucination during tool calling.",
+      "1": "Using a single over-privileged super-admin key violates least privilege and creates a massive data breach risk if prompt injection occurs.",
+      "2": "Storing a user-specific token in `app:` state causes cross-tenant session hijacking where User B accesses User A's medical records."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/function-tools/#tool-context",
+      "https://google.github.io/adk-docs/sessions/state/"
+    ]
+  },
+  {
+    "id": "d3-adk-047",
+    "domain": 3,
+    "topic": "Model Garden OSS vs Proprietary Trade-offs",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A media conglomerate is building an ADK content moderation and metadata tagging pipeline that processes 50 million user-generated comments per day. The task is straightforward: detect toxic language and assign up to 3 topic tags from a fixed list of 20 categories. The architecture team wants to minimize long-term unit inference costs at massive scale and run the inference workload on their existing committed-use GKE GPU clusters alongside their other microservices. Which model choice from Vertex AI Model Garden best aligns with these economic and infrastructure requirements?",
+    "options": [
+      "Fine-tune an open-weights Small Language Model (SLM) such as Gemma 3 4B or Llama 3.2 3B from Model Garden and deploy it on the existing GKE GPU cluster using high-throughput vLLM continuous batching.",
+      "Route all 50 million daily comments to Gemini 2.5 Pro with maximum thinking budget enabled via Pay-As-You-Go APIs.",
+      "Use Vertex AI Veo video generation models to generate 1080p videos for every text comment.",
+      "Deploy a 405-billion parameter model on single-core preemptible CPU nodes without GPUs."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "At massive scale (50M requests/day) for narrow, well-defined classification and tagging tasks, deploying a compact open-weights SLM (like Gemma 3 4B or Llama 3.2 3B) on existing committed-use GKE GPU clusters with vLLM continuous batching provides the lowest marginal cost per million requests. SLMs require a fraction of the VRAM and compute FLOPs of frontier models while achieving near-identical accuracy on closed-taxonomy classification after lightweight fine-tuning.",
+    "whyWrong": {
+      "1": "Using a frontier reasoning model like Gemini 2.5 Pro for 50 million simple daily classifications would incur astronomical and unnecessary token costs.",
+      "2": "Veo is a video generation model, not a text classification model.",
+      "3": "A 405B parameter model cannot run on single-core CPUs and would take hours per comment."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
+    ]
+  },
+  {
+    "id": "d3-adk-048",
+    "domain": 3,
+    "topic": "ADK Multi-Agent State Passing & Output Key Chaining",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are building a three-stage marketing campaign generator using an ADK `SequentialAgent`: Stage 1 (`AudienceResearchAgent`) analyzes product specs and identifies the target persona; Stage 2 (`CopywriterAgent`) writes ad copy tailored to that persona; Stage 3 (`LocalizationAgent`) translates the ad copy into Spanish and Japanese. How should you wire state passing between these three sub-agents so each stage seamlessly consumes the exact output of the preceding stage?",
+    "options": [
+      "Configure all three agents with `output_key='temp:delete_me'` and clear `session.state` before each agent runs.",
+      "Configure `AudienceResearchAgent` with `output_key='target_persona'`, reference `{target_persona}` in `CopywriterAgent`'s instruction while setting its `output_key='english_copy'`, and reference `{english_copy}` in `LocalizationAgent`'s instruction.",
+      "Put all three agents in a `ParallelAgent` so translation happens before the English copy is written.",
+      "Require the human user to manually copy-paste text between three separate browser tabs."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In an ADK `SequentialAgent` pipeline, chaining `output_key` declarations with `{state_key}` instruction placeholders is the cleanest declarative dataflow pattern. When `AudienceResearchAgent` finishes, ADK stores its response in `session.state['target_persona']`. When `CopywriterAgent` starts, ADK interpolates `{target_persona}` into its instruction prompt and stores its output in `session.state['english_copy']`, which is then interpolated into `LocalizationAgent`'s prompt.",
+    "whyWrong": {
+      "0": "Clearing state before each agent runs erases the upstream outputs needed by downstream stages.",
+      "2": "Running dependent stages in a `ParallelAgent` causes `LocalizationAgent` to run concurrently before `english_copy` exists.",
+      "3": "Manual copy-pasting across tabs defeats automated multi-agent orchestration."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/sequential-agent/",
+      "https://google.github.io/adk-docs/sessions/state/"
+    ]
+  },
+  {
+    "id": "d3-adk-049",
+    "domain": 3,
+    "topic": "ADK Observability & Cloud Trace Integration",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise SRE team requires deep distributed observability into a production ADK multi-agent system deployed on Google Cloud. When a user experiences high latency or an unexpected answer, engineers need to inspect a waterfall trace showing exact latencies and inputs/outputs for every hierarchical agent invocation, LLM prompt/response round-trip, and external tool execution, correlated by a single trace ID. Which two capabilities or configurations in Google Cloud ADK support this requirement? (Choose two.)",
+    "options": [
+      "ADK's built-in OpenTelemetry instrumentation, which automatically emits structured spans for agent runs (`agent_run`), LLM calls (`call_llm`), and tool executions (`execute_tool`) directly to Google Cloud Trace.",
+      "Enabling Cloud Trace / telemetry export when deploying to Vertex AI Agent Engine (`enable_tracing=True`) or configuring the OpenTelemetry Cloud Trace exporter in your custom ADK runtime container.",
+      "Disabling all logging and stdout output to save disk space.",
+      "Writing trace timestamps onto physical sticky notes attached to server monitors.",
+      "Using `InMemorySessionService` with no external exporters in an air-gapped local process."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Google Cloud ADK is instrumented out-of-the-box with OpenTelemetry. Every agent invocation, sub-agent transfer, LLM call, and tool execution generates hierarchical OpenTelemetry spans containing rich attributes (model name, token counts, tool arguments, latency). When deployed on Vertex AI Agent Engine with tracing enabled or configured with the `CloudTraceSpanExporter`, these traces are automatically ingested into Google Cloud Trace for end-to-end waterfall visualization and latency bottleneck analysis.",
+    "whyWrong": {
+      "2": "Disabling logging and telemetry blinds the SRE team and prevents root-cause analysis.",
+      "3": "Physical sticky notes are obviously not a distributed tracing system.",
+      "4": "An air-gapped local process with no telemetry exporters cannot send spans to Cloud Trace."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/observability/cloud-trace/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/monitor"
+    ]
+  },
+  {
+    "id": "d3-adk-050",
+    "domain": 3,
+    "topic": "Agent Platform Memory Bank Privacy & Deletion Compliance",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A European fintech company operates an ADK personal finance agent backed by `VertexAiMemoryBankService` and `VertexAiSessionService`. Under GDPR Article 17 ('Right to be Forgotten'), when a customer closes their account and submits a data erasure request for their `user_id`, the company must ensure that both their historical conversational transcripts AND all extracted long-term semantic memories stored in Vertex AI are permanently deleted within the statutory window. How should the engineering team fulfill this GDPR erasure request?",
+    "options": [
+      "Set `temperature=0.0` on the `LlmAgent` and ask the LLM to promise never to mention the user again.",
+      "Rename the `LlmAgent` to `GdprCompliantAgent` without deleting any database records.",
+      "Invoke the Vertex AI Session Service API to list and delete all sessions associated with the customer's `user_id`, and invoke the Vertex AI Memory Bank API to delete all stored memory entries scoped to that `user_id`.",
+      "Delete the entire Google Cloud Organization and all other customers' data whenever one user requests erasure."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Both `VertexAiSessionService` and `VertexAiMemoryBankService` partition data by `app_name` and `user_id`. To comply with GDPR Right to Erasure (Article 17), the data controller must programmatically query and delete all `Session` resources belonging to the target `user_id` in the Session Service, as well as purge all extracted memory records associated with that `user_id` in the Memory Bank service, ensuring complete removal of both raw transcripts and derived semantic profiles.",
+    "whyWrong": {
+      "0": "Prompt instructions do not delete underlying stored data at rest and fail GDPR compliance audits.",
+      "1": "Renaming an agent class has zero effect on stored customer data.",
+      "3": "Deleting the entire Google Cloud Organization destroys the business and all other customers' data."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/memory/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank"
+    ]
+  }
+]

@@ -1,0 +1,42 @@
+PROFESSIONAL AGENTIC ARCHITECT
+
+DevVelocity Cloud Case Study
+
+Company Overview
+
+DevVelocity Cloud is a SaaS enterprise software provider with 4,500 software engineers maintaining over 800 microservices written in Go, Python, Java, and TypeScript. DevVelocity delivers mission-critical CI/CD, observability, and cloud security posture tooling to Fortune 500 enterprises.
+
+Solution Concept
+
+To eliminate engineering toil, accelerate legacy codebase migrations, and remediate zero-day CVEs automatically, DevVelocity is rolling out an enterprise-wide Autonomous Software Engineering Platform powered by Antigravity (CLI, SDK, App) and Claude Code on Google Cloud.
+
+Engineering teams will interact with customized coding agents equipped with internal Model Context Protocol (MCP) servers, organization-wide coding rules, and specialized subagents that autonomously refactor code, generate unit/integration tests, optimize SQL/GKE runtimes, and submit verified pull requests from isolated cloud sandboxes.
+
+Existing Technical Environment
+
+Source code is hosted in enterprise Git repositories with CI/CD pipelines running on Cloud Build and Google Kubernetes Engine (GKE). Developer environments are provisioned via Cloud Workstations.
+
+Previously, developers used unconfigured third-party IDE autocomplete plugins that lacked context on DevVelocity internal libraries, resulting in hallucinated imports, violation of internal security standards, and accidental exposure of proprietary snippets to external endpoints.
+
+Business Requirements
+
+   ● Increase engineering feature delivery velocity by 40% while reducing production bug regressions.
+   ● Automate 90% of routine dependency upgrades, CVE vulnerability patching, and Java-to-Go microservice refactoring.
+   ● Ensure zero exfiltration of proprietary source code, customer secrets, or internal architecture specifications.
+   ● Standardize organizational architecture rules, security patterns, and testing requirements across all 4,500 developers.
+   ● Provide platform engineering leadership with centralized governance, usage telemetry, and cost attribution across all coding agents.
+
+Technical Requirements
+
+   ● Deploy and govern Antigravity (CLI, SDK, App) and Claude Code on Google Cloud inside ephemeral, network-isolated sandboxes running on GKE and Cloud Workstations.
+   ● Build and register custom Model Context Protocol (MCP) servers that allow coding agents to safely query internal API schemas, Cloud SQL test instances, Jira tickets, and Cloud Logging error traces.
+   ● Package and distribute standardized enterprise engineering workflows using Antigravity Skills, Plugins, Extension Hooks, Rules, and specialized Subagents (e.g., Security Auditor Subagent, Performance Profiler Subagent) via Skill Registry.
+   ● Utilize the Agents CLI in Agent Platform to build, version, scale, govern, and optimize deployed coding agents across development and staging environments.
+   ● Enforce human-vs-agent execution modes where agents can autonomously run unit tests in sandboxes (`agent mode`) but require explicit developer or CI gate sign-off (`human mode`) before merging to production branches or modifying IAM policies.
+   ● Protect coding agent endpoints and internal MCP tool calls using Agent Gateway, OAuth 2.0 Auth Manager, and Model Armor secret/code-vulnerability filters.
+
+Executive Statement
+
+Giving developers generic coding assistants is no longer enough; true velocity comes from autonomous coding agents deeply integrated into our internal tooling, architecture standards, and security sandboxes. With Antigravity, MCP servers, and the Agents CLI, our engineering organization operates with an autonomous force multiplier.
+
+Siddharth Mehta, VP of Platform Engineering, DevVelocity Cloud

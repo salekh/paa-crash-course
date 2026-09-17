@@ -1,0 +1,731 @@
+[
+  {
+    "id": "d4-evl-001",
+    "domain": 4,
+    "topic": "ADK Evaluation & Trajectory Testing",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "A financial services company has built a multi-step dispute resolution agent using the Google Agent Development Kit (ADK). Before deploying a new prompt revision to production, the engineering team needs to verify in their GitHub Actions CI pipeline that the agent invokes the `verify_identity`, `fetch_transaction_history`, and `create_dispute_ticket` tools in that exact sequential order for a suite of 40 deterministic test cases, without incurring the latency and cost of invoking a separate LLM-as-a-judge model on every commit. What should you do?",
+    "options": [
+      "Configure an ADK EvalSet JSON file with expected `tool_uses` trajectories and execute `AgentEvaluator.evaluate()` in pytest using the `tool_trajectory_avg_score` metric configured with `EXACT` match mode.",
+      "Deploy the agent to Vertex AI Agent Engine and configure an online Vertex AI Model Monitoring job with a 100% sampling rate to inspect tool invocations asynchronously.",
+      "Use the Vertex AI Gen AI Evaluation Service with a custom pairwise LLM-as-a-judge autorater to compare the new commit's tool trace against the previous production baseline.",
+      "Enable Cloud Trace OpenTelemetry instrumentation on the agent and write a Cloud Logging sink filter that alerts when tool latency exceeds 500 milliseconds."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The Agent Development Kit (ADK) provides built-in local and CI trajectory evaluation via `AgentEvaluator.evaluate()` and `adk eval`. By defining an `EvalSet` JSON containing `eval_cases` with expected `intermediate_data.tool_uses`, the computation-based `tool_trajectory_avg_score` metric with `EXACT` match mode deterministically verifies that the exact sequence of tools and arguments was invoked in order, running fast and free of LLM-as-a-judge evaluation overhead in CI.",
+    "whyWrong": {
+      "1": "Vertex AI Model Monitoring is designed for asynchronous production drift monitoring and does not block CI/CD pull requests or enforce deterministic pre-deployment trajectory assertions.",
+      "2": "Pairwise LLM-as-a-judge evaluation adds unnecessary token cost and latency when checking a strict, deterministic sequence of tool invocations that can be validated computationally.",
+      "3": "Cloud Trace and Cloud Logging monitor runtime observability and latency rather than performing pre-deployment functional trajectory assertions in a CI pipeline."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
+    ]
+  },
+  {
+    "id": "d4-evl-002",
+    "domain": 4,
+    "topic": "ADK Evaluation & Trajectory Testing",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "An e-commerce company uses ADK to build a shopping assistant agent that can query inventory across three regional warehouses (`check_west_warehouse`, `check_central_warehouse`, `check_east_warehouse`) before summarizing availability. Because the agent executes these three independent tool calls concurrently, their execution order varies across runs. However, your CI trajectory tests using `tool_trajectory_avg_score` are failing intermittently whenever the warehouse checks complete in a different sequence than recorded in the golden `EvalSet`. How should you configure the ADK trajectory evaluation to eliminate these false-positive test failures while ensuring all three warehouse tools are called?",
+    "options": [
+      "Replace `tool_trajectory_avg_score` with `response_match_score` using ROUGE-1 so that intermediate tool executions are completely ignored during testing.",
+      "Set the trajectory matching strategy for `tool_trajectory_avg_score` to `ANY_ORDER` in the evaluation configuration so that all required tool calls are verified regardless of execution order.",
+      "Set the temperature of the agent's underlying Gemini model to 1.0 so that the model explores more diverse reasoning paths during CI runs.",
+      "Modify the agent architecture to disable parallel tool execution and force synchronous sequential execution through separate subagent handoffs."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "ADK's `tool_trajectory_avg_score` supports three trajectory comparison modes: `EXACT` (identical sequence and count), `IN_ORDER` (expected tools appear in order, allowing extra intermediate tools), and `ANY_ORDER` (all expected tool calls are present with matching arguments regardless of ordering). For independent parallel tool calls whose completion order is non-deterministic, `ANY_ORDER` validates full tool coverage without false positives.",
+    "whyWrong": {
+      "0": "Using only `response_match_score` ignores intermediate tool calls entirely, which fails the requirement to verify that all three warehouse tools were actually invoked.",
+      "2": "Increasing temperature to 1.0 increases non-determinism and will exacerbate test flakiness rather than solving order-independent trajectory validation.",
+      "3": "Forcing sequential execution degrades production latency and user experience solely to work around a misconfigured test assertion."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics"
+    ]
+  },
+  {
+    "id": "d4-evl-003",
+    "domain": 4,
+    "topic": "Gen AI Evaluation Service vs Local ADK Eval",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "Your organization is establishing a two-tier evaluation strategy for an enterprise HR policy agent built with ADK and Gemini 2.5 Pro. Tier 1 runs on every pull request in GitHub Actions and must complete within 45 seconds to catch regressions in tool routing and argument formatting. Tier 2 runs nightly against a curated dataset of 2,500 complex multi-turn employee inquiries stored in BigQuery to evaluate nuanced policy faithfulness, tone, safety, and groundedness. Which architectural combination should you implement?",
+    "options": [
+      "Use Vertex AI Model Monitoring drift detection for Tier 1 PR checks, and deploy a Compute Engine VM running an uncalibrated open-source 7B model for Tier 2 batch scoring.",
+      "Run Vertex AI Gen AI Evaluation Service batch jobs with 5 human raters on every GitHub Actions pull request for Tier 1, and use local pytest ROUGE-L string matching for the nightly Tier 2 run.",
+      "Use `adk eval` with mocked tool responses and computation-based trajectory metrics for Tier 1 PR checks, and schedule a nightly Vertex AI Gen AI Evaluation Service batch `EvalTask` using LLM-as-a-judge metrics (`groundedness`, `safety`, `instruction_following`) reading directly from BigQuery for Tier 2.",
+      "Execute `adk web` manually on developer laptops before merging PRs for Tier 1, and export Cloud Trace spans to Cloud Storage for visual inspection as Tier 2."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "A best-practice agentic evaluation architecture separates fast, deterministic CI checks from large-scale semantic batch evaluation. Tier 1 leverages ADK's local evaluation framework (`adk eval` / `AgentEvaluator`) with mocked tools and fast computation-based trajectory scores to keep PR feedback under 45 seconds. Tier 2 leverages the managed Vertex AI Gen AI Evaluation Service (`EvalTask`) with managed LLM-as-a-judge rubrics (`groundedness`, `safety`, `instruction_following`) at scale over BigQuery datasets.",
+    "whyWrong": {
+      "0": "Model Monitoring detects post-deployment distribution shift rather than pre-merge regressions, and uncalibrated small models produce unreliable evaluation scores.",
+      "1": "Running human raters or heavy batch jobs on every PR violates the 45-second SLA, while ROUGE-L cannot measure nuanced policy faithfulness or safety in Tier 2.",
+      "3": "Manual developer testing via `adk web` and visual trace inspection are unscalable and non-automated, failing enterprise CI/CD governance standards."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "d4-evl-004",
+    "domain": 4,
+    "topic": "Trajectory Precision and Recall Metrics",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "A healthcare payer is evaluating an agent that processes prior authorization requests. For a specific benchmark case, the golden trajectory requires calling exactly 3 tools: `get_patient_eligibility`, `check_clinical_guidelines`, and `submit_auth_decision`. During evaluation of a candidate agent version, the agent calls 5 tools: `get_patient_eligibility`, `search_provider_directory`, `check_clinical_guidelines`, `query_billing_codes`, and `submit_auth_decision`. How are the tool trajectory recall and tool trajectory precision calculated for this evaluation run, and what architectural risk does this profile indicate?",
+    "options": [
+      "Tool recall is 166% (5/3) and tool precision is 100%, indicating optimal speculative execution that reduces end-to-end latency.",
+      "Tool recall is 60% (3/5) and tool precision is 100% (3/3), indicating the agent is missing critical clinical steps and hallucinating authorization decisions.",
+      "Both tool recall and tool precision are 0% because the trajectory length of 5 does not exactly match the golden trajectory length of 3.",
+      "Tool recall is 100% (3/3 required tools called) and tool precision is 60% (3/5 called tools were required), indicating the agent achieves task completion but suffers from over-calling extraneous tools that increase latency and token cost."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In trajectory evaluation, Tool Recall = (Number of correctly invoked golden tools) / (Total golden tools required) = 3 / 3 = 100%. Tool Precision = (Number of correctly invoked golden tools) / (Total tools invoked by the agent) = 3 / 5 = 60%. High recall with low precision indicates the agent fulfills all required actions (especially under `IN_ORDER` matching) but executes redundant or unnecessary tool calls (`search_provider_directory`, `query_billing_codes`), inflating latency, API quotas, and token consumption.",
+    "whyWrong": {
+      "0": "Recall cannot exceed 100%, and calling unnecessary tools adds token and API latency overhead rather than optimizing execution.",
+      "1": "This reverses the mathematical definitions of precision and recall; all 3 required tools were invoked, so recall is 100%, not 60%.",
+      "2": "Precision and recall are continuous set/sequence metrics and do not drop to 0% solely because extraneous tools were called (unlike strict binary `EXACT` match)."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "d4-evl-005",
+    "domain": 4,
+    "topic": "ADK EvalSet Schema & Authoring",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "You are debugging an ADK agent locally using the interactive web UI (`adk web`). During a test session, you discover a complex 4-turn conversation where the user asks about international wire transfer limits, provides a secondary account number, and asks to waive the fee. You want to immediately capture this exact multi-turn interaction—including the intermediate tool calls and final agent responses—as a permanent regression test case for your CI pipeline. What is the most efficient ADK workflow to achieve this?",
+    "options": [
+      "In the `adk web` interface, inspect the completed session trace and click the export/add to EvalSet option to save the multi-turn conversation, tool calls, and responses directly into a `.evalset.json` file.",
+      "Copy the raw text from the browser console and manually write regex parsers in Python to reconstruct the Vertex AI protobuf wire format.",
+      "Query the Vertex AI Model Registry API to download the model weights associated with that specific conversation turn.",
+      "Export VPC Flow Logs from the subnet hosting the local development server and convert the packet captures into a CSV file."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The ADK interactive developer UI (`adk web`) includes native support for inspecting live agent traces and exporting/saving any session directly into an ADK `EvalSet` JSON file (`.evalset.json`). This automatically records the `conversation` array, user inputs, `intermediate_data.tool_uses` (tool names and arguments), and `final_response` fields so it can be replayed via `adk eval` or `AgentEvaluator.evaluate()`.",
+    "whyWrong": {
+      "1": "Manually writing regex parsers from browser console text is error-prone and unnecessary given ADK's built-in session-to-EvalSet export capability.",
+      "2": "Model Registry stores model artifacts and versions, not individual runtime conversation transcripts or agent trajectories.",
+      "3": "VPC Flow Logs capture network-level IP header metadata and do not contain application-layer agent messages or tool invocations."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://google.github.io/adk-docs/get-started/quickstart/"
+    ]
+  },
+  {
+    "id": "d4-evl-006",
+    "domain": 4,
+    "topic": "Gen AI Evaluation Service Metrics",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "A legal technology company is evaluating a contract review agent that retrieves clauses from a corporate repository using Vertex AI Search and summarizes indemnity risks. During pre-production testing, stakeholders report two failure modes: (1) the agent occasionally invents indemnity caps that do not exist in the retrieved contract clauses, and (2) the agent ignores formatting instructions requiring a bulleted risk table at the end of every summary. Which two built-in model-based metrics in the Vertex AI Gen AI Evaluation Service should you configure in your `EvalTask` to systematically quantify these two specific failure modes? (Choose two.)",
+    "options": [
+      "Metric.GROUNDEDNESS",
+      "Metric.INSTRUCTION_FOLLOWING",
+      "Metric.BLEU",
+      "Metric.ROUGE_1",
+      "Metric.LATENCY_MS"
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "In Vertex AI Gen AI Evaluation Service, `GROUNDEDNESS` uses an LLM-as-a-judge autorater to verify whether every claim in the agent's response is strictly supported by the provided retrieval context, directly detecting invented indemnity caps (hallucinations). `INSTRUCTION_FOLLOWING` evaluates whether the response adheres to explicit structural and formatting constraints specified in the prompt (such as outputting a bulleted risk table).",
+    "whyWrong": {
+      "2": "BLEU is an n-gram lexical overlap metric designed for machine translation and cannot detect factual hallucinations against retrieved context or structural table formatting.",
+      "3": "ROUGE-1 measures unigram overlap against a static reference summary and cannot verify whether claims are grounded in retrieved contract clauses.",
+      "4": "LATENCY_MS measures execution duration rather than factual groundedness or adherence to formatting instructions."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
+    ]
+  },
+  {
+    "id": "d4-evl-007",
+    "domain": 4,
+    "topic": "Pairwise vs Pointwise Evaluation",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "Your team is evaluating whether to migrate a customer retention agent from Gemini 1.5 Pro to Gemini 2.5 Flash to reduce inference latency by 40%. Both models achieve an identical mean score of 4.2 out of 5.0 on a pointwise `coherence` metric across 500 golden test prompts. However, product managers want to determine which model produces more persuasive and empathetic retention offers head-to-head on the exact same customer scenarios. How should you configure the Vertex AI Gen AI Evaluation Service to obtain a statistically valid head-to-head comparison while mitigating LLM judge position bias?",
+    "options": [
+      "Use the computation-based `exact_match` metric comparing the Gemini 2.5 Flash output against the Gemini 1.5 Pro output.",
+      "Run two separate `PointwiseMetric` evaluations with temperature set to 2.0 and subtract the median scores manually in a spreadsheet.",
+      "Configure a `PairwiseMetric` in `EvalTask` that passes both baseline (Gemini 1.5 Pro) and candidate (Gemini 2.5 Flash) outputs to the autorater, enabling automatic candidate-baseline order swapping across evaluation passes.",
+      "Increase the pointwise rubric scale from 1-5 to 1-100 so the autorater can assign finer granular scores."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "When two models tie or cluster closely on coarse pointwise Likert scales (e.g., 1-5), `PairwiseMetric` evaluation provides higher discriminative power by asking the LLM-as-a-judge autorater to directly compare Model A vs Model B against specific persuasion/empathy rubrics. Because LLM judges exhibit position bias (favoring the first or second response presented), Vertex AI Gen AI Evaluation Service mitigates this by swapping the presentation order (A vs B, then B vs A) and aggregating win/loss/tie rates.",
+    "whyWrong": {
+      "0": "Exact string matching penalizes valid variations in phrasing and measures lexical identity rather than persuasive quality.",
+      "1": "Pointwise evaluations scored independently suffer from scale compression and high variance when temperature is set to 2.0, failing to provide direct head-to-head discrimination.",
+      "3": "Expanding pointwise Likert scales to 1-100 degrades LLM judge reliability and calibration because LLMs cannot consistently distinguish arbitrary fine-grained numeric increments."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/side-by-side-eval"
+    ]
+  },
+  {
+    "id": "d4-evl-008",
+    "domain": 4,
+    "topic": "Tool Argument Validation in ADK Eval",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "A travel booking agent built with ADK has a tool `book_flight(origin: str, destination: str, departure_date: str, cabin_class: str)`. During CI trajectory evaluation, you notice that tests pass when you only check the sequence of tool names invoked, but in staging the agent occasionally passes dates in `MM/DD/YYYY` format instead of the API's required ISO-8601 `YYYY-MM-DD` format. How should you strengthen your ADK evaluation suite to catch this parameter formatting error before deployment?",
+    "options": [
+      "Add a Cloud Armor WAF rule in front of the agent endpoint to block requests containing slashes.",
+      "Remove `tool_trajectory_avg_score` and rely exclusively on `response_match_score` of the final natural language confirmation message.",
+      "Disable schema validation on the `book_flight` Python function so that the backend API throws a 500 HTTP error in production.",
+      "Include explicit expected `args` key-value pairs inside the `tool_uses` entries of your ADK `EvalSet` and configure `AgentEvaluator` to validate both tool name and argument match."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In ADK `EvalSet` files, each entry under `intermediate_data.tool_uses` specifies both the `name` of the tool and the `args` dictionary (e.g., `{\"origin\": \"SFO\", \"destination\": \"JFK\", \"departure_date\": \"2026-10-15\", \"cabin_class\": \"ECONOMY\"}`). When `AgentEvaluator` evaluates trajectories with argument checking enabled, any discrepancy in parameter values or date formatting lowers the trajectory score and fails the CI test.",
+    "whyWrong": {
+      "0": "Cloud Armor inspects incoming HTTP traffic from users, not internal JSON arguments generated by the LLM during tool calling.",
+      "1": "The final natural language response might state 'October 15, 2026' even if the underlying tool call used the wrong argument format.",
+      "2": "Allowing malformed dates to reach production APIs and cause 500 errors violates pre-deployment quality assurance principles."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://google.github.io/adk-docs/tools/"
+    ]
+  },
+  {
+    "id": "d4-evl-009",
+    "domain": 4,
+    "topic": "ADK Eval CLI & Configuration Thresholds",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "A DevOps engineer is integrating `adk eval` into a Cloud Build CI pipeline for a customer service agent. The team wants the Cloud Build step to fail automatically and return a non-zero exit code if the agent's average tool trajectory score drops below 0.90 or if the final response semantic match score drops below 0.80 across the regression suite. How should this quality gate be configured?",
+    "options": [
+      "Provide a `test_config.json` file specifying `criteria` thresholds (`\"tool_trajectory_avg_score\": 0.90`, `\"response_match_score\": 0.80`) when invoking `adk eval` or `AgentEvaluator.evaluate()`.",
+      "Parse the standard output of `adk web` using a bash script that counts occurrences of the word 'Error'.",
+      "Configure Vertex AI Endpoint autoscaling policies to scale down to zero replicas when CPU utilization exceeds 80%.",
+      "Set the `max_output_tokens` parameter of the Gemini model to 90 in the agent's `agent.py` file."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "ADK evaluation supports passing a `test_config.json` file (via `--config_file_path` in `adk eval` or as a parameter to `AgentEvaluator.evaluate()`). This JSON file defines explicit numeric pass/fail thresholds under `criteria` (such as `tool_trajectory_avg_score: 0.9` and `response_match_score: 0.8`). If any metric falls below its threshold, the evaluator raises an assertion error / returns a non-zero exit code, halting the CI/CD pipeline.",
+    "whyWrong": {
+      "1": "`adk web` is an interactive UI server, not a headless CI runner, and scraping stdout for 'Error' does not evaluate metric thresholds.",
+      "2": "Endpoint autoscaling policies manage compute infrastructure capacity, not pre-deployment evaluation quality gates.",
+      "3": "`max_output_tokens` constrains response length and has no relation to evaluation metric thresholds."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://cloud.google.com/build/docs/configuring-builds/create-basic-configuration"
+    ]
+  },
+  {
+    "id": "d4-evl-010",
+    "domain": 4,
+    "topic": "Experiment Tracking & Evaluation Lineage",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "An AI platform team is evaluating 12 different system prompt variations and 3 retrieval top-k configurations for an enterprise IT helpdesk agent. After running 36 batch evaluation jobs in the Vertex AI Gen AI Evaluation Service, the lead architect needs to compare latency, groundedness, and tool-use accuracy across all 36 runs in a centralized dashboard and maintain auditable lineage linking each evaluation score to the exact prompt template, model version, and dataset URI. Which Google Cloud feature should the team use?",
+    "options": [
+      "Write evaluation metrics to ephemeral container `/tmp` files inside Cloud Run and view them via `gcloud run services logs read`.",
+      "Log each `EvalTask` execution to Vertex AI Experiments by specifying an `experiment` name in `EvalTask()`, and compare parameters and evaluation metrics side-by-side in the Vertex AI Experiments UI.",
+      "Store system prompts in DNS TXT records and use Cloud DNS query logging to track which prompt was evaluated.",
+      "Export each evaluation run as a PNG screenshot and store the images in an unversioned Cloud Storage bucket."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Vertex AI Gen AI Evaluation Service integrates directly with Vertex AI Experiments and Vertex AI Metadata. When you initialize `EvalTask(dataset=..., metrics=..., experiment='it-helpdesk-eval')`, every evaluation run automatically logs hyperparameters (prompt templates, model IDs, top-k settings), dataset lineage, and resulting aggregate/row-level metrics to Vertex AI Experiments for visual side-by-side comparison and governance.",
+    "whyWrong": {
+      "0": "Ephemeral `/tmp` files in Cloud Run are lost when container instances scale down and provide no structured experiment tracking or lineage.",
+      "2": "DNS TXT records are meant for domain verification and routing metadata, not prompt versioning or ML experiment tracking.",
+      "3": "Static PNG screenshots cannot be programmatically queried, filtered, or linked to dataset and model metadata."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/vertex-ai/docs/experiments/intro-vertex-ai-experiments"
+    ]
+  },
+  {
+    "id": "d4-evl-011",
+    "domain": 4,
+    "topic": "ADK Evaluation & Trajectory Testing",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are developing an ADK research agent that answers market intelligence questions. To answer a query, the agent must invoke `search_sec_filings` followed by `summarize_financial_metrics`. However, during exploratory reasoning, the agent occasionally invokes a helper tool `get_company_ticker` before calling `search_sec_filings`. You want your CI trajectory test to pass as long as `search_sec_filings` and `summarize_financial_metrics` are called in that specific relative order, without failing if optional helper tools are invoked before, between, or after them. Which ADK trajectory match mode should you configure?",
+    "options": [
+      "Configure `tool_trajectory_avg_score` with the `ANY_ORDER` match type.",
+      "Configure `tool_trajectory_avg_score` with the `EXACT` match type.",
+      "Configure `tool_trajectory_avg_score` with the `IN_ORDER` match type.",
+      "Disable tool trajectory evaluation and check only token count."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In ADK evaluation, the `IN_ORDER` match strategy verifies that all expected tools defined in the golden trajectory appear in the actual trajectory in the exact relative sequence specified (i.e., `search_sec_filings` precedes `summarize_financial_metrics`), while permitting additional intermediate or helper tool calls (like `get_company_ticker`) to occur without causing a test failure.",
+    "whyWrong": {
+      "0": "`ANY_ORDER` ignores relative sequencing, so it would erroneously pass even if `summarize_financial_metrics` were called before `search_sec_filings`.",
+      "1": "`EXACT` match requires the actual tool calls to match the expected list 1-to-1 in length and position, so calling `get_company_ticker` would fail the test.",
+      "3": "Checking only token count provides no verification that the required SEC filing search and summarization tools were executed."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics"
+    ]
+  },
+  {
+    "id": "d4-evl-012",
+    "domain": 4,
+    "topic": "Mocking Tools in CI Evaluation",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise ERP agent built with ADK executes state-mutating tools against a SAP S/4HANA production instance, including `issue_vendor_payment` and `cancel_purchase_order`. When running automated regression tests via `AgentEvaluator.evaluate()` in Cloud Build, you must verify that the agent reasons correctly over multi-turn prompts and generates the exact tool calls with valid arguments, but you must strictly prevent any real HTTP requests or mutations from reaching the SAP backend. What is the recommended architectural approach?",
+    "options": [
+      "Configure VPC Firewall egress rules to drop TCP packets to SAP, allowing the agent tools to throw unhandled socket timeout exceptions during evaluation.",
+      "Run the CI pipeline directly against the production SAP instance and execute database rollback scripts every night at midnight.",
+      "Remove all tool declarations from the agent definition file before running `adk eval` so the LLM cannot output tool call blocks.",
+      "Inject deterministic mock tool implementations or stubbed tool responses into the ADK agent test harness during `AgentEvaluator.evaluate()` so tool execution returns synthetic payloads without network calls."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "When evaluating agents with side-effecting or state-mutating tools in CI/CD, best practice is to mock or stub the underlying tool implementations (or supply deterministic `tool_outputs` in the evaluation harness). This allows the LLM to see the full tool schemas, generate tool calls, receive realistic synthetic tool responses, and complete multi-turn trajectories deterministically without mutating external enterprise systems.",
+    "whyWrong": {
+      "0": "Dropping packets via firewall rules causes unhandled socket timeouts and tool failure states, breaking the multi-turn conversation flow.",
+      "1": "Executing real vendor payments and purchase order cancellations against production ERP systems creates severe financial and audit risks.",
+      "2": "Removing tool declarations prevents the LLM from generating tool calls altogether, making trajectory evaluation impossible."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://google.github.io/adk-docs/tools/"
+    ]
+  },
+  {
+    "id": "d4-evl-013",
+    "domain": 4,
+    "topic": "Semantic Response Evaluation vs Lexical Overlap",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A wealth management firm evaluates an advisory agent that explains tax-loss harvesting rules. For a test question, the golden reference response is: 'You cannot claim a tax loss if you purchase substantially identical securities within 30 days before or after the sale.' The candidate agent responds: 'Under the IRS wash-sale rule, buying the same or very similar stock within a 61-day window centered on the sale date disqualifies the capital loss deduction.' When evaluated with ROUGE-L, this response scores below 0.25 and fails the build, even though subject-matter experts confirm the candidate answer is accurate and more precise. How should you update the evaluation metric?",
+    "options": [
+      "Replace lexical ROUGE-L scoring with an embedding-based semantic similarity metric or an LLM-as-a-judge `MetricPromptTemplate` that evaluates factual equivalence against the golden reference.",
+      "Force the agent's temperature to 0.0 and append the entire golden dataset into the system prompt as verbatim few-shot examples.",
+      "Switch from ROUGE-L to exact character-by-character string comparison (`exact_match`).",
+      "Lower the ROUGE-L passing threshold to 0.01 so that all responses pass CI regardless of content."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "N-gram overlap metrics like ROUGE-L and BLEU penalize semantically equivalent answers that use different vocabulary or syntactic structures (e.g., '61-day window centered on the sale date' vs '30 days before or after'). Replacing lexical metrics with embedding cosine similarity (e.g., `text-embedding-005`) or an LLM-as-a-judge semantic equivalence rubric accurately validates factual correctness regardless of phrasing.",
+    "whyWrong": {
+      "1": "Stuffing the entire golden dataset into the system prompt causes data leakage (overfitting to test cases) and consumes excessive context window tokens.",
+      "2": "`exact_match` is even stricter than ROUGE-L and will score 0.0 whenever a single character differs.",
+      "3": "Lowering the threshold to 0.01 effectively disables quality assurance and allows hallucinated or irrelevant responses to pass."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "d4-evl-014",
+    "domain": 4,
+    "topic": "Gen AI Evaluation Service Dataset Format",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are preparing a Pandas DataFrame to pass into `EvalTask(dataset=eval_df, metrics=[Metric.GROUNDEDNESS, Metric.RESPONSE_RECALL])` in the Vertex AI SDK for Python. To ensure the Gen AI Evaluation Service can execute both metrics without raising a schema validation error, which columns must be present in `eval_df`?",
+    "options": [
+      "Only `input_tokens` and `output_tokens`.",
+      "`prompt`, `response` (or generated model output), `context` (for groundedness), and `reference` (for response recall).",
+      "`trace_id`, `span_id`, and `vpc_subnet_name`.",
+      "A single column named `raw_bytes` containing base64-encoded pickle objects."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Each metric in the Vertex AI Gen AI Evaluation Service requires specific dataset columns: `GROUNDEDNESS` checks whether claims in the `response` are supported by the retrieved `context`, while reference-based metrics like `RESPONSE_RECALL` or `ROUGE` compare the `response` against the ground-truth `reference` answer given the user `prompt`.",
+    "whyWrong": {
+      "0": "Token counts measure resource utilization and cannot be used to evaluate semantic groundedness or reference recall.",
+      "2": "Trace IDs and VPC subnet names are infrastructure telemetry fields unrelated to semantic evaluation inputs.",
+      "3": "The Evaluation Service requires structured text columns (or JSONL/BigQuery tables with matching field names), not base64 pickled objects."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
+    ]
+  },
+  {
+    "id": "d4-evl-015",
+    "domain": 4,
+    "topic": "Evaluating Multi-Turn Agent Conversations",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A telecommunications company built a multi-turn troubleshooting agent in ADK that helps users reboot routers, check fiber optic signal levels, and schedule technician visits. A single user session often spans 6 to 8 conversational turns. When running regression tests, you discover that evaluating only the final turn's response fails to catch regressions where the agent forgot a constraint mentioned by the user in Turn 2 (e.g., 'I only have availability on Tuesday mornings'). How should you structure your ADK evaluation to verify state retention across multi-turn dialogues?",
+    "options": [
+      "Evaluate only the latency of Turn 1 using Cloud Monitoring uptime checks.",
+      "Split every 8-turn conversation into 8 isolated single-turn evaluation files with empty session history.",
+      "Define multi-turn `conversation` arrays inside each ADK `EvalSet` case containing sequential user turns, expected intermediate tool invocations per turn, and turn-by-turn response assertions.",
+      "Configure the agent to clear its `Session` memory after every user message so each turn is stateless."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "ADK's `EvalSet` schema natively supports full multi-turn conversations (`conversation` list of turns within an `EvalCase`). During evaluation, `AgentEvaluator` replays the user turns sequentially against a stateful session instance, verifying at each turn that the agent maintains conversational memory, executes the appropriate turn-specific tool calls, and respects prior constraints in later turns.",
+    "whyWrong": {
+      "0": "Uptime checks measure network availability on Turn 1 and do not test multi-turn state retention.",
+      "1": "Splitting a stateful dialogue into isolated single-turn prompts without session history destroys context, making it impossible to test whether the agent remembers Turn 2 constraints in Turn 6.",
+      "3": "Clearing session memory after every message breaks multi-turn troubleshooting functionality."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://google.github.io/adk-docs/sessions/"
+    ]
+  },
+  {
+    "id": "d4-evl-016",
+    "domain": 4,
+    "topic": "Gen AI Evaluation Service Batch Execution",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise data science team wants to run a weekly evaluation benchmark of 15,000 customer support transcripts stored in a BigQuery table (`project.dataset.support_eval_set`) using the Vertex AI Gen AI Evaluation Service. Running the evaluation synchronously from a local Jupyter notebook times out due to the volume of LLM-as-a-judge calls and network disconnects. How should you architect this large-scale evaluation workflow?",
+    "options": [
+      "Deploy 15,000 separate Cloud Run services, each hardcoding a single transcript in its environment variables.",
+      "Export the 15,000 rows to a local Excel spreadsheet and run 15,000 sequential `curl` requests over a home VPN connection.",
+      "Reduce the evaluation dataset from 15,000 rows to 3 rows so that it finishes in 2 seconds on a local laptop.",
+      "Configure `EvalTask` with the BigQuery table URI as the input dataset source and execute the evaluation via Vertex AI Pipelines or a managed batch job that writes results directly back to a destination BigQuery table."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "For large-scale batch evaluation (thousands of rows), the Vertex AI Gen AI Evaluation Service supports passing a BigQuery table URI (`bq://project.dataset.table`) or Cloud Storage JSONL URI directly to `EvalTask` and orchestrating execution via Vertex AI Pipelines. Vertex AI handles parallelized batch inference, quota management, and exporting detailed row-level and aggregated metrics back to BigQuery without relying on a persistent client connection.",
+    "whyWrong": {
+      "0": "Deploying 15,000 separate Cloud Run services is an anti-pattern that creates extreme operational overhead and quota exhaustion.",
+      "1": "Running 15,000 sequential requests from a local client over VPN is slow, brittle, and prone to connection drops.",
+      "2": "Reducing a 15,000-row benchmark to 3 rows destroys statistical significance and test coverage."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/vertex-ai/docs/pipelines/introduction"
+    ]
+  },
+  {
+    "id": "d4-evl-017",
+    "domain": 4,
+    "topic": "Tool Selection Precision vs Tool Argument Accuracy",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "During pre-deployment evaluation of an insurance claims agent, your evaluation report shows a Tool Name Match score of 0.98 across 200 test cases, but an overall Trajectory Exact Match score of only 0.42. Upon inspecting the row-level evaluation logs, what is the root cause of this divergence, and how should you remediate the agent?",
+    "options": [
+      "The agent correctly identifies which tool to invoke 98% of the time, but fails to populate valid or accurate JSON arguments in 56% of cases; you should refine the Pydantic parameter descriptions and add few-shot examples demonstrating exact parameter extraction.",
+      "The agent is calling the wrong tools 98% of the time; you should delete all tools and convert the agent into a static FAQ page.",
+      "The evaluation framework is experiencing a CPU clock skew; you should restart the Google Cloud console browser tab.",
+      "The agent is generating responses in French instead of English; you should add a Cloud Translation API proxy in front of the database."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "When Tool Name Match is high (0.98) but Trajectory Exact Match (which validates both tool name and argument dictionary equality) is low (0.42), the agent understands tool selection routing but struggles with entity extraction or argument formatting (e.g., passing `\"$5,000\"` as a string instead of integer `5000`, or omitting optional-looking required fields). Enriching Pydantic field descriptions (`Field(description=...)`) and providing few-shot tool-call examples directly improves argument generation accuracy.",
+    "whyWrong": {
+      "1": "A Tool Name Match score of 0.98 means tool selection is highly accurate, not failing.",
+      "2": "Metric divergence between tool name match and full argument match is a standard diagnostic signal, not a browser or clock bug.",
+      "3": "Language translation differences in natural language output do not explain a specific discrepancy between tool name selection and JSON parameter accuracy."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "d4-evl-018",
+    "domain": 4,
+    "topic": "Pytest Integration with ADK AgentEvaluator",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A software engineering team wants to run ADK agent evaluations alongside their standard Python unit tests using `pytest` in a GitLab CI runner. They have organized their agent module in `src/billing_agent/` and created a test suite directory `tests/evalsets/refund_scenarios.evalset.json`. Which Python code snippet correctly invokes ADK evaluation programmatically inside `tests/test_agent_eval.py`?",
+    "options": [
+      "Execute `os.system('gcloud compute instances delete billing-agent')` inside `conftest.py`.",
+      "Call `await AgentEvaluator.evaluate(agent_module='src.billing_agent', eval_dataset_file_path_or_dir='tests/evalsets/refund_scenarios.evalset.json')` inside an async pytest test function.",
+      "Import `bigquery` and run `SELECT * FROM refund_scenarios` without instantiating the agent module.",
+      "Use `unittest.mock.patch` to replace `pytest.main` with a function that always returns `True`."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "ADK provides the `AgentEvaluator.evaluate()` class method in `google.adk.evaluation`. By calling `await AgentEvaluator.evaluate(agent_module=..., eval_dataset_file_path_or_dir=..., num_runs=...)` inside an async pytest test function (marked with `@pytest.mark.asyncio`), developers can run full trajectory and response evaluations directly within standard `pytest` suites.",
+    "whyWrong": {
+      "0": "Deleting Compute Engine instances destroys infrastructure and has nothing to do with running agent trajectory evaluations.",
+      "2": "Querying a table without running the agent module does not execute or evaluate the agent's reasoning or tool calls.",
+      "3": "Mocking pytest to always return True bypasses all testing and defeats the purpose of CI quality gates."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://docs.pytest.org/en/stable/"
+    ]
+  },
+  {
+    "id": "d4-evl-019",
+    "domain": 4,
+    "topic": "Handling Non-Determinism in Agent Evaluation",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Even with temperature set to 0.0, your multi-agent underwriting workflow exhibits slight non-determinism across runs due to distributed floating-point hardware scheduling and asynchronous subagent tool execution. As a result, a single evaluation pass occasionally exhibits a 2% variance in `response_match_score`. How should you configure `AgentEvaluator.evaluate()` in your nightly regression suite to obtain a statistically stable evaluation score?",
+    "options": [
+      "Delete any test cases from the `EvalSet` that ever score below 1.0.",
+      "Hardcode the agent's output in a Python dictionary lookup table so the LLM is never called during evaluation.",
+      "Set the `num_runs` parameter (e.g., `num_runs=3` or `num_runs=5`) in `AgentEvaluator.evaluate()` so that each test case is executed multiple times and metrics are aggregated across runs.",
+      "Switch the underlying LLM to a random number generator."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Because LLM inference and multi-agent asynchronous tool execution can exhibit minor run-to-run variance even at low temperatures, ADK's `AgentEvaluator.evaluate()` supports the `num_runs` parameter. Setting `num_runs=3` (or higher) executes each evaluation case multiple times and computes the mean trajectory and response scores across iterations, smoothing out stochastic variance.",
+    "whyWrong": {
+      "0": "Deleting challenging test cases artificially inflates scores and hides genuine agent reliability issues.",
+      "1": "Bypassing the LLM with a hardcoded lookup table tests the lookup table rather than the actual agent workflow.",
+      "3": "A random number generator cannot perform natural language reasoning or tool execution."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
+    ]
+  },
+  {
+    "id": "d4-evl-020",
+    "domain": 4,
+    "topic": "Computation-Based vs Model-Based Metrics Trade-offs",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise architect is designing an evaluation framework for a high-frequency order status agent. The architect must decide which metrics to run synchronously in pre-commit git hooks versus asynchronously in post-merge nightly pipelines. Which two statements accurately describe the trade-offs between computation-based metrics and model-based (LLM-as-a-judge) metrics in Google Cloud agent evaluation? (Choose two.)",
+    "options": [
+      "Computation-based metrics (such as `tool_trajectory_avg_score`, `exact_match`, and `ROUGE`) execute deterministically with sub-second latency and zero LLM token cost, making them ideal for fast CI pre-commit and PR gates.",
+      "Model-based LLM-as-a-judge metrics (such as `GROUNDEDNESS`, `COHERENCE`, and custom rubric autoraters) capture semantic nuance and factual faithfulness on open-ended responses, but incur LLM inference latency and token cost.",
+      "Computation-based metrics require provisioning dedicated NVIDIA H100 GPU clusters on GKE, whereas LLM-as-a-judge metrics run entirely on client browser cookies.",
+      "Model-based LLM-as-a-judge metrics can only evaluate single-word outputs and cannot read retrieved context passages.",
+      "Computation-based ROUGE metrics automatically detect subtle factual hallucinations even when the generated text uses completely different synonyms than the reference."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Computation-based metrics compute mathematical formulas (set intersection, sequence matching, n-gram overlap) over strings and JSON structures locally, offering deterministic results, negligible latency, and zero token cost—making them ideal for fast CI checks. Conversely, model-based metrics invoke a judge LLM (e.g., Gemini Pro) to grade semantic qualities like groundedness, tone, and instruction following; they handle open-ended phrasing and semantic equivalence far better than lexical metrics, at the cost of higher latency and API usage.",
+    "whyWrong": {
+      "2": "Computation-based metrics are lightweight CPU string/JSON calculations that require no GPUs, while LLM-as-a-judge runs on Vertex AI managed endpoints, not browser cookies.",
+      "3": "LLM-as-a-judge metrics excel at evaluating long, complex multi-paragraph responses against extensive retrieved context passages.",
+      "4": "ROUGE relies strictly on lexical n-gram overlap and fails to detect factual hallucinations or recognize valid synonyms."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "d4-evl-021",
+    "domain": 4,
+    "topic": "Evaluating Agent Latency and Token Efficiency",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "After upgrading an ADK customer onboarding agent from a single-agent architecture to a hierarchical 4-agent system, your `tool_trajectory_avg_score` and `groundedness` scores remain high at 0.96. However, users complain that onboarding now takes 18 seconds per turn instead of 3 seconds, and monthly Vertex AI billing has tripled. Which operational metrics should you add to your `EvalTask` and CI evaluation reports to prevent latency and cost regressions?",
+    "options": [
+      "Track end-to-end turn latency (`latency_ms` / p95 duration), total input/output token counts per trajectory, and total LLM reasoning steps per turn alongside quality metrics.",
+      "Track only the number of git commits made by the engineering team per week.",
+      "Measure the disk space occupied by the Python virtual environment inside the Docker image.",
+      "Monitor the number of CSS stylesheet rules loaded by the web chat widget."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Comprehensive agent evaluation requires balancing quality metrics (accuracy, groundedness, trajectory match) against operational efficiency metrics: latency (p50/p95 time-to-first-token and end-to-end turn duration), token consumption (input, output, and cached tokens), and step count (number of subagent handoffs and LLM calls per user query). Tracking these in Vertex AI Experiments prevents quality optimizations from causing unacceptable latency or cost regressions.",
+    "whyWrong": {
+      "1": "Git commit frequency is a developer productivity metric unrelated to runtime agent latency or token billing.",
+      "2": "Docker container image disk size does not cause 18-second per-turn LLM reasoning delays or triple token API costs.",
+      "3": "Frontend CSS rules have negligible impact on multi-second backend agentic reasoning latency and token usage."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "d4-evl-022",
+    "domain": 4,
+    "topic": "ADK Eval CLI Execution & Output Analysis",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A developer has modified the system instructions of an ADK agent located in the `./my_support_agent` directory and wants to run a quick local evaluation from their terminal against the test cases stored in `./tests/support_cases.evalset.json` while printing detailed per-case failure diagnostics to the console. Which command should the developer run?",
+    "options": [
+      "`gcloud auth revoke --all`",
+      "`adk eval ./my_support_agent ./tests/support_cases.evalset.json --print_detailed_results`",
+      "`python3 -m http.server 8080`",
+      "`docker rmi -f $(docker images -q)`"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The ADK CLI provides the `adk eval <AGENT_PATH> <EVALSET_PATH>` command for executing trajectory and response evaluations directly from the command line. Passing `--print_detailed_results` outputs turn-by-turn comparison tables showing expected vs actual tool calls, arguments, and scores for rapid local debugging.",
+    "whyWrong": {
+      "0": "`gcloud auth revoke` removes active Google Cloud credentials and breaks API access.",
+      "2": "`python3 -m http.server` starts a static file server and does not execute ADK evaluations.",
+      "3": "`docker rmi` deletes local Docker container images."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://google.github.io/adk-docs/get-started/quickstart/"
+    ]
+  },
+  {
+    "id": "d4-evl-023",
+    "domain": 4,
+    "topic": "Evaluating Error Recovery Trajectories",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An airline rebooking agent built with ADK calls an external GDS flight reservation API via the `reserve_seat` tool. In production, this API intermittently returns a `409 Conflict: Seat Already Taken` error payload. Your system prompt instructs the agent to catch `409 Conflict` responses, call `get_available_seats` to find an adjacent seat, and retry `reserve_seat` once before apologizing to the user. How should you design an ADK evaluation test case to verify this autonomous self-correction trajectory?",
+    "options": [
+      "Configure the mock tool to raise a fatal Python `SystemExit` exception that crashes the test runner process.",
+      "Test only happy-path scenarios where `reserve_seat` succeeds on the first try, assuming LLM error recovery always works automatically.",
+      "Create an `EvalCase` where the mocked first call to `reserve_seat` returns a simulated `409 Conflict` JSON tool output, and assert an expected `IN_ORDER` trajectory of `reserve_seat` -> `get_available_seats` -> `reserve_seat`.",
+      "Delete the `get_available_seats` tool from the agent during testing."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Agentic workflows must be evaluated not only on happy-path trajectories but also on autonomous error recovery and fallback paths. By configuring the test harness / `EvalSet` mock environment to return a structured error payload (`409 Conflict`) on the first `reserve_seat` invocation, you can deterministically test that the agent inspects the tool error output, invokes `get_available_seats`, and retries `reserve_seat` with a new seat assignment.",
+    "whyWrong": {
+      "0": "Raising `SystemExit` terminates the Python process immediately rather than returning a structured error message to the LLM for autonomous recovery.",
+      "1": "Testing only happy paths leaves critical error-handling logic unverified, leading to unhandled failures or infinite loops in production.",
+      "3": "Deleting `get_available_seats` makes it impossible for the agent to execute the required fallback sequence."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/evaluate/",
+      "https://google.github.io/adk-docs/tools/"
+    ]
+  },
+  {
+    "id": "d4-evl-024",
+    "domain": 4,
+    "topic": "Gen AI Evaluation Service Custom Metrics Integration",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A pharmaceutical company uses the Vertex AI Gen AI Evaluation Service to evaluate a medical information agent. In addition to standard `GROUNDEDNESS` and `SAFETY` metrics, compliance officers require a deterministic check verifying that every agent response includes the exact regulatory disclaimer string `'Consult your healthcare provider before changing medication regimens.'` at the end of the text. How should you implement this in `EvalTask`?",
+    "options": [
+      "Disable `GROUNDEDNESS` and `SAFETY` because `EvalTask` can only run one metric at a time.",
+      "Train a new foundational LLM from scratch on 10 trillion tokens solely to check if the last sentence matches the disclaimer.",
+      "Hire 50 full-time compliance officers to manually read every CI test output in real time.",
+      "Register a custom computation-based Python function using `CustomMetric` (or string regex validation) alongside the built-in model-based metrics in the `EvalTask` metrics list."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The Vertex AI Gen AI Evaluation Service allows combining built-in LLM-as-a-judge metrics (`Metric.GROUNDEDNESS`, `Metric.SAFETY`) with custom computation-based Python functions (`CustomMetric`) in a single `EvalTask`. Checking for a mandatory verbatim regulatory disclaimer is a deterministic string/regex check that should be executed via a fast, 100%-accurate custom Python function rather than an expensive LLM judge.",
+    "whyWrong": {
+      "0": "`EvalTask` supports passing a list of multiple heterogeneous metrics (both model-based and custom computation-based) simultaneously.",
+      "1": "Pre-training a foundational LLM from scratch for a simple string suffix check is astronomically expensive and unnecessary.",
+      "2": "Manual human review of automated CI runs is slow, expensive, and unscalable."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
+    ]
+  },
+  {
+    "id": "d4-evl-025",
+    "domain": 4,
+    "topic": "Baseline Comparison & Regression Detection",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your team maintains a production customer service agent running on Gemini 2.5 Pro (`v1.2`). A developer proposes a prompt optimization (`v1.3`) that reduces prompt tokens by 35%. Before approving the pull request, you run both `v1.2` and `v1.3` against your 300-case golden `EvalSet`. While `v1.3` improves overall mean `response_match_score` from 0.84 to 0.86, you need to ensure that `v1.3` did not introduce severe regressions on high-priority billing dispute cases. What analysis should you perform?",
+    "options": [
+      "Perform slice-based (stratified) evaluation analysis on the row-level evaluation outputs grouped by intent/category (`billing_dispute`), and flag any slice where `v1.3` regresses below the minimum SLA threshold even if the global mean improved.",
+      "Look only at the global mean score of 0.86 and deploy `v1.3` immediately without inspecting individual categories.",
+      "Average the global mean score with the percentage of token savings to create a single composite number.",
+      "Delete all `billing_dispute` cases from the dataset so that slice variance is eliminated."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Global mean evaluation metrics often mask critical localized regressions (Simpson's paradox / slice degradation), where an improvement on simple FAQ queries hides a severe drop in high-risk slices like billing disputes or cancellations. Analyzing row-level outputs grouped by metadata tags/slices (`intent=billing_dispute`) ensures every critical business domain meets its specific quality threshold before release.",
+    "whyWrong": {
+      "1": "Relying solely on global averages risks deploying severe regressions in high-impact, low-volume customer journeys.",
+      "2": "Combining token savings with quality scores into an arbitrary average obscures functional regressions.",
+      "3": "Deleting high-priority test cases blinds the team to production failure modes."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  }
+]

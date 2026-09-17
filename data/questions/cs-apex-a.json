@@ -1,0 +1,731 @@
+[
+  {
+    "id": "cs-apx-001",
+    "domain": 1,
+    "topic": "CX Agent Studio & State-Based Workflows",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth is building an interactive conversational assistant in Customer Experience Agent Studio (CX Agent Studio) for clinical safety officers to report and triage adverse events across its 350 global hospital sites. Because patient safety and FDA 21 CFR Part 11 compliance require strict procedural adherence, the assistant must deterministically collect the study protocol ID, verify the safety officer's Institutional Review Board (IRB) authorization via an external API, and obtain explicit confirmation of symptom severity before generating an adverse event ticket. Free-form LLM prompting alone has occasionally skipped the IRB verification step during testing. What should you do?",
+    "options": [
+      "Design a state-based workflow in CX Agent Studio using dedicated Pages for Protocol Collection, IRB Verification, and Severity Confirmation, utilizing conditional transition routes and webhook event handlers to enforce sequential state completion.",
+      "Configure a single generative playbook in Gemini Enterprise Agent Designer with system instructions stating that the agent must never skip IRB verification under any circumstances, and set temperature to 0.1.",
+      "Deploy a custom Python script on Compute Engine that intercepts CX Agent Studio audio streams and uses regular expressions to validate protocol IDs before forwarding text to Gemini.",
+      "Store IRB authorization tables in a public Cloud Storage bucket and instruct the LLM in CX Agent Studio to use grounding with Google Search to verify safety officer credentials."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "CX Agent Studio supports deterministic state-based workflows through Pages, Transition Routes, Form parameters, and Webhook Event Handlers. When strict compliance mandates require multi-step verification (such as collecting protocol IDs, calling an external webhook to verify IRB authorization scope, and obtaining explicit confirmation before proceeding), state-based Pages and conditional transition routes guarantee that the agent cannot transition to ticket creation until all required parameters and webhook validations succeed.",
+    "whyWrong": {
+      "1": "Generative playbooks and system instructions guide LLM behavior probabilistically but cannot guarantee strict deterministic state enforcement required by FDA 21 CFR Part 11.",
+      "2": "Intercepting audio streams on unmanaged Compute Engine VMs adds unnecessary operational complexity and does not enforce conversational state transitions inside CX Agent Studio.",
+      "3": "Storing sensitive IRB authorization data in a public bucket violates HIPAA and security requirements, and Google Search grounding is meant for public web data rather than internal identity verification."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/page",
+      "https://cloud.google.com/dialogflow/cx/docs/concept/handler"
+    ]
+  },
+  {
+    "id": "cs-apx-002",
+    "domain": 1,
+    "topic": "System Instructions & Prompt Templates in Agent Designer",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Clinical researchers using Gemini Enterprise Agent Designer need an assistant that summarizes complex oncology trial protocols and extracts dosing schedules. In early prototypes, the assistant occasionally extrapolated unverified drug dosages when a protocol document contained ambiguous phrasing, violating Apex BioHealth's requirement for zero ungrounded medical claims. You need to configure the low-code agent's system instructions and in-console prompt templates to maximize factual grounding and transparent reasoning. What should you do?",
+    "options": [
+      "Increase the model temperature to 1.0 and top-k to 40 in Agent Designer so the agent explores diverse medical interpretations before selecting the most plausible dosage.",
+      "Configure structured system instructions in Agent Designer that enforce strict chain-of-thought reasoning steps, require explicit verbatim citations for every dosage figure, and instruct the model to output an explicit 'Insufficient Protocol Data' abstain message whenever source text is ambiguous.",
+      "Remove all system instructions and rely exclusively on zero-shot user prompts written ad-hoc by individual hospital site coordinators.",
+      "Configure the prompt template to automatically translate all clinical trial protocols into Python code before summarizing them for the clinical researcher."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In Gemini Enterprise Agent Designer, combining explicit chain-of-thought (CoT) prompting with strict negative constraints (abstaining when source evidence is ambiguous) and mandatory citation formatting directly addresses hallucination risks in high-stakes clinical domains. Instructing the model to verify each claim step-by-step against retrieved context and explicitly abstain rather than guess prevents ungrounded dosage claims.",
+    "whyWrong": {
+      "0": "Increasing temperature to 1.0 increases randomness and creativity, which significantly heightens the risk of hallucinated dosages in clinical summaries.",
+      "2": "Relying on ad-hoc zero-shot user prompts removes standardized guardrails and leads to inconsistent, ungrounded outputs across 350 hospital sites.",
+      "3": "Translating natural language clinical protocols into Python code is irrelevant for summarizing medical dosing schedules and degrades comprehension."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/system-instructions",
+      "https://cloud.google.com/agent-builder/docs/agent-designer"
+    ]
+  },
+  {
+    "id": "cs-apx-003",
+    "domain": 1,
+    "topic": "Connecting Enterprise Data to Gemini Enterprise",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth stores petabytes of clinical trial PDFs, DICOM radiology images, and WAV pathology dictations in Cloud Storage buckets protected by Customer-Managed Encryption Keys (CMEK). You are configuring Gemini Enterprise and Agent Search to index and query these proprietary clinical repositories while maintaining strict HIPAA compliance and cryptographic key control. What should you do?",
+    "options": [
+      "Decrypt the Cloud Storage buckets to Google-managed encryption keys, make the objects publicly readable, and connect them to Agent Search via public HTTP URLs.",
+      "Download all PDFs and WAV files to local workstation hard drives and upload them manually through the consumer Gemini web interface prior to each researcher's query.",
+      "Configure an Agent Search enterprise data store connected to the CMEK-protected Cloud Storage buckets, grant the Agent Search service agent CryptoKey Encrypter/Decrypter permissions on the Cloud KMS key, and enable CMEK encryption on the search data store.",
+      "Copy the clinical trial data into an unencrypted Firestore database and use a public Cloud Function to query the records without authentication."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Agent Search (Vertex AI Search) natively supports CMEK-encrypted Cloud Storage data sources and CMEK-protected data stores. By granting the Vertex AI Search service agent the Cloud KMS CryptoKey Encrypter/Decrypter role (`roles/cloudkms.cryptoKeyEncrypterDecrypter`) on the customer-managed key and configuring the data store with CMEK, Apex BioHealth preserves end-to-end cryptographic control over PHI/GxP data during ingestion, indexing, and retrieval.",
+    "whyWrong": {
+      "0": "Removing CMEK and making buckets public violates HIPAA, GxP, and Apex BioHealth's strict security mandates.",
+      "1": "Manual local downloads and consumer web uploads violate enterprise data governance, HIPAA compliance, and cannot scale to petabytes of data.",
+      "3": "Storing clinical data unencrypted in Firestore with unauthenticated access exposes PHI and violates regulatory compliance."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/cmek",
+      "https://cloud.google.com/storage/docs/encryption/customer-managed-keys"
+    ]
+  },
+  {
+    "id": "cs-apx-004",
+    "domain": 1,
+    "topic": "Multimodal Data Ingestion in Agent Workflows",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Clinical researchers need to run natural-language cross-modal queries that correlate pathology audio dictations (WAV files), radiology medical scans (DICOM images), and unstructured trial protocols (PDFs). Early prototypes failed to retrieve relevant audio notes or parse complex dosing tables embedded in PDFs. You need to architect the ingestion pipeline for Gemini Enterprise and RAG Engine to support high-recall multimodal retrieval. Which two actions should you take? (Choose two.)",
+    "options": [
+      "Configure the ingestion pipeline to transcribe pathology WAV audio dictations using Cloud Speech-to-Text with the medical dictation domain model, preserving timestamps and speaker diarization metadata prior to indexing.",
+      "Enable Document AI Layout Parser integration in RAG Engine and Agent Search to extract structured markdown representations of embedded clinical tables and charts from PDF trial protocols.",
+      "Convert all DICOM radiology images and WAV audio files into plain ASCII text strings using base64 encoding and index the raw base64 characters directly in a standard keyword search engine.",
+      "Strip all tables, charts, and medical imagery from the clinical PDFs before ingestion to reduce storage costs and speed up indexing.",
+      "Require clinical researchers to manually listen to all WAV files and type summaries into a shared spreadsheet before querying Gemini Enterprise."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "To support high-recall cross-modal querying across audio dictations and complex clinical PDFs, pathology WAV files should be transcribed using Cloud Speech-to-Text's specialized medical model (which accurately recognizes clinical terminology and oncology nomenclature) with timestamp metadata preserved for citation grounding. Simultaneously, enabling Document AI Layout Parser in RAG Engine / Agent Search preserves the structural semantics of embedded dosing tables and charts in clinical PDFs rather than flattening them into unreadable text.",
+    "whyWrong": {
+      "2": "Indexing raw base64 strings in a keyword search engine produces meaningless character sequences that cannot be semantically queried or understood by embedding models.",
+      "3": "Stripping tables, charts, and imagery directly violates the technical requirement to parse embedded tables/charts and enable cross-modal querying.",
+      "4": "Manual transcription by researchers defeats the purpose of autonomous multimodal ingestion and cannot scale across 350 hospital sites."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/parse-chunk-documents",
+      "https://cloud.google.com/speech-to-text/docs/medical-models"
+    ]
+  },
+  {
+    "id": "cs-apx-005",
+    "domain": 1,
+    "topic": "Improving Domain-Specific Retrieval Recall in Agent Search",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. During user acceptance testing of the Gemini Enterprise search portal, oncology researchers report that searching for proprietary investigational drug codes (e.g., 'APX-892') or specific rare-disease medical acronyms frequently fails to return clinical trial logs that use the full biochemical compound name or alternative medical synonyms. You need to improve retrieval recall in Agent Search without requiring researchers to rewrite their queries. What should you do?",
+    "options": [
+      "Upload a domain-specific clinical synonym set and custom boost controls in Agent Search that map investigational drug codes and medical acronyms to their canonical compound names and MeSH/MedDRA ontology terms.",
+      "Disable semantic vector search entirely and force Agent Search to use case-sensitive exact substring matching only.",
+      "Instruct researchers to append 50 lines of biochemical definitions to every search query they type into the console.",
+      "Delete all historical adverse event logs that use compound names instead of investigational drug codes."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Agent Search allows administrators to configure custom synonym controls (one-way and two-way synonyms) and boost/bury rules. By importing clinical ontologies (such as MedDRA/MeSH terms and Apex BioHealth's internal investigational drug code mappings) as synonym sets, queries for 'APX-892' automatically expand to match documents containing the canonical biochemical compound name, dramatically improving retrieval recall on domain-specific acronyms.",
+    "whyWrong": {
+      "1": "Disabling semantic search and relying on case-sensitive exact substring matching worsens recall when documents use different terminology than the query.",
+      "2": "Forcing users to manually paste 50 lines of definitions into every query creates terrible user experience and high error rates.",
+      "3": "Deleting historical adverse event logs destroys critical clinical safety data and violates FDA/EMA regulatory retention requirements."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/synonyms",
+      "https://cloud.google.com/generative-ai-app-builder/docs/boost-search-results"
+    ]
+  },
+  {
+    "id": "cs-apx-006",
+    "domain": 2,
+    "topic": "Coding Agents in Secure Sandboxes for Clinical Pipelines",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth's bioinformatics software engineers use Antigravity and Claude Code on Google Cloud to write and refactor Python ingestion pipelines that process genomic sequences and EHR feeds. Because the development team occasionally works with schema samples derived from clinical systems, the Chief Medical Informatics Officer mandates that coding agents must operate in isolated environments with zero risk of exfiltrating proprietary code or PHI to unauthorized external endpoints. What should you do?",
+    "options": [
+      "Allow developers to install unverified third-party coding plugins on their personal laptops over public Wi-Fi networks.",
+      "Provision Cloud Workstations inside a VPC Service Controls (VPC-SC) perimeter with Private Google Access enabled, no public IP addresses, and configure Antigravity to route all LLM inference exclusively through private Vertex AI endpoints.",
+      "Configure Antigravity to upload all local repository files to a public GitHub Gist so external debugging agents can inspect the clinical pipelines.",
+      "Run Claude Code directly on the production Cloud SQL database server using root credentials."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Running Antigravity and Claude Code inside Cloud Workstations deployed within a VPC Service Controls (VPC-SC) perimeter with Private Google Access ensures complete network isolation. Disabling public IPs and routing all coding agent model calls through private Vertex AI endpoints guarantees that source code, clinical schemas, and prompt context never traverse the public internet or leak to unauthorized external endpoints.",
+    "whyWrong": {
+      "0": "Personal laptops on public Wi-Fi with unverified plugins create severe data exfiltration and compliance risks.",
+      "2": "Uploading proprietary code and clinical schemas to public GitHub Gists causes immediate data leakage and violates HIPAA/GxP.",
+      "3": "Running coding agents directly on production database servers with root access violates least privilege, sandbox isolation, and production safety."
+    },
+    "refs": [
+      "https://cloud.google.com/workstations/docs/overview",
+      "https://cloud.google.com/vpc-service-controls/docs/overview"
+    ]
+  },
+  {
+    "id": "cs-apx-007",
+    "domain": 2,
+    "topic": "Configuring Coding Agents with Custom MCP Servers",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Developers building custom ADK clinical agents need their coding assistant (Antigravity) to accurately write BigQuery SQL queries and FHIR data validation routines against Apex BioHealth's complex clinical trial metadata schemas. Previously, coding assistants hallucinated column names and outdated FHIR resource structures. However, security policies strictly prohibit coding agents from accessing raw patient PHI stored in production tables. How should you configure the coding agent's tooling?",
+    "options": [
+      "Grant Antigravity the BigQuery Admin IAM role on production datasets so it can run `SELECT *` queries on live patient EHR tables during code generation.",
+      "Export all production BigQuery tables to CSV files and paste them directly into Antigravity's chat window.",
+      "Build and register a custom Model Context Protocol (MCP) server that connects to BigQuery `INFORMATION_SCHEMA` views and a synthetic, de-identified FHIR sandbox database, exposing read-only schema inspection and dry-run query validation tools to Antigravity.",
+      "Disable all database context in Antigravity and require engineers to manually fix every hallucinated column name after deployment."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "A custom Model Context Protocol (MCP) server allows Antigravity coding agents to dynamically query live structural metadata (via BigQuery `INFORMATION_SCHEMA` and FHIR structure definitions) and execute dry-run validations against synthetic, de-identified test datasets. This eliminates hallucinated column names and schema errors while guaranteeing that the coding agent never accesses or ingests raw production patient PHI.",
+    "whyWrong": {
+      "0": "Granting BigQuery Admin on production patient tables exposes live PHI to the coding agent, violating HIPAA least-privilege rules.",
+      "1": "Exporting production tables to CSV and pasting them into chat prompts exposes massive amounts of PHI and exceeds context limits.",
+      "3": "Forcing manual debugging of hallucinated schemas slows down engineering velocity and fails to leverage MCP capabilities."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/mcp",
+      "https://cloud.google.com/bigquery/docs/information-schema-intro"
+    ]
+  },
+  {
+    "id": "cs-apx-008",
+    "domain": 2,
+    "topic": "Customizing Coding Agents with Antigravity Rules & Skills",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. To comply with FDA 21 CFR Part 11 and GxP software validation standards, every Python module written for the Clinical Trial Intelligence platform must include structured cryptographic audit logging decorators, explicit type annotations, and standardized exception handling that redacts potential PHI before logging. You want all software engineers using Antigravity to automatically adhere to these standards whenever generating or refactoring code. What should you do?",
+    "options": [
+      "Send a monthly email reminder asking developers to manually add audit decorators after merging their pull requests.",
+      "Configure Cloud Logging to delete all application logs every hour so unredacted PHI is eventually removed.",
+      "Turn off automated code generation and require developers to write all code in Notepad without syntax highlighting.",
+      "Define organization-wide Antigravity Rules (`.antigravity/rules.md`) and publish a reusable GxP Audit Logging Skill in the internal Skill Registry that automatically injects validated logging decorators and PHI-safe exception wrappers during code generation."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Antigravity Rules allow organizations to embed mandatory architectural, security, and compliance standards directly into the coding agent's workspace context, while Antigravity Skills in the Skill Registry package reusable code patterns (such as GxP-compliant cryptographic audit decorators and PHI-redacting exception handlers). This ensures every developer's coding agent consistently generates compliant code by default.",
+    "whyWrong": {
+      "0": "Email reminders rely on manual human memory and inevitably lead to compliance drift and audit failures.",
+      "1": "Deleting application logs every hour violates FDA 21 CFR Part 11 requirements for immutable, long-term audit trails.",
+      "2": "Disabling coding agents defeats the purpose of accelerating software delivery and does not prevent human coding errors."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder",
+      "https://cloud.google.com/logging/docs/audit"
+    ]
+  },
+  {
+    "id": "cs-apx-009",
+    "domain": 2,
+    "topic": "Refactoring Legacy Clinical Code in GKE Sandboxes",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth has dozens of legacy statistical analysis scripts written in R and Python 2 that calculate adverse event correlation metrics. Engineering leadership wants to use autonomous coding agents to refactor these scripts into modern, high-performance Python 3 ADK tools and verify that the statistical outputs remain mathematically identical on synthetic benchmark datasets. How should you execute this refactoring workflow safely?",
+    "options": [
+      "Deploy the coding agent inside an ephemeral Google Kubernetes Engine (GKE) sandbox equipped with an automated test execution harness that runs both the legacy script and the refactored ADK tool against synthetic datasets and verifies zero numerical divergence before creating a pull request.",
+      "Run the coding agent directly on the live hospital EHR ingestion servers so it can modify scripts in place during active clinical trials.",
+      "Instruct the coding agent to rewrite the scripts without running any tests and deploy them directly to production Agent Runtime.",
+      "Use a public web browser macro to copy-paste legacy code into free unauthenticated LLM chat websites."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Ephemeral GKE sandboxes provide isolated, reproducible compute environments where coding agents can safely compile, execute, and benchmark refactored code against legacy baselines using synthetic clinical datasets. Automating regression verification inside the sandbox ensures mathematical equivalence and GxP validation before a pull request is submitted for human review.",
+    "whyWrong": {
+      "1": "Modifying scripts in place on live hospital ingestion servers risks corrupting active clinical trial data and causing system outages.",
+      "2": "Deploying unverified statistical code to clinical trial systems risks miscalculating adverse event signals, jeopardizing patient safety.",
+      "3": "Pasting proprietary biopharmaceutical code into unauthenticated public websites leaks intellectual property and violates security governance."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "cs-apx-010",
+    "domain": 3,
+    "topic": "Multi-Agent Orchestration in ADK (Synthesis & Verification)",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. To reduce regulatory dossier preparation cycles from 6 months to 3 weeks while achieving 99.5% citation accuracy and zero ungrounded medical claims, you are designing the core multi-agent workflow using the Agent Development Kit (ADK). A single monolithic agent occasionally hallucinates subtle adverse event correlations when drafting lengthy FDA submission summaries. How should you architect the ADK agent workflow?",
+    "options": [
+      "Configure a single ADK `LlmAgent` with a larger context window and instruct it to check its own work inside a single generation pass.",
+      "Implement a sequential and iterative `LoopAgent` workflow in ADK where a dedicated Synthesis Agent drafts the regulatory dossier section with inline chunk IDs, followed by a separate Verification Agent that cross-checks every factual claim and dosage against the retrieved source chunks in RAG Engine, routing any unsupported claims back to the Synthesis Agent for correction.",
+      "Run ten identical Synthesis Agents in parallel and concatenate all ten drafts into a single 500-page document for FDA submission.",
+      "Replace the LLM agents with a hardcoded SQL script that exports raw adverse event tables without any natural-language synthesis."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In ADK, separating generation from critique using a sequential/iterative orchestration pattern (`SequentialAgent` / `LoopAgent`) with distinct specialized agents (Synthesis Agent + Verification Agent) directly implements the actor-critic / verification design pattern required by the case study. The Verification Agent independently validates every statement and citation against the retrieved ground-truth chunks from RAG Engine, enforcing zero ungrounded claims before the workflow terminates.",
+    "whyWrong": {
+      "0": "A single monolithic agent checking its own work in a single pass suffers from self-confirmation bias and fails to meet the 99.5% citation accuracy mandate.",
+      "2": "Concatenating ten unverified drafts multiplies noise, contradictions, and ungrounded claims rather than verifying accuracy.",
+      "3": "Exporting raw SQL tables fails to meet the business requirement of generating synthesized natural-language regulatory dossiers."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit"
+    ]
+  },
+  {
+    "id": "cs-apx-011",
+    "domain": 3,
+    "topic": "RAG Engine Architecture & Hybrid Reranking",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth's early RAG prototypes suffered from low retrieval recall when clinical researchers queried specific oncology gene mutations (e.g., 'EGFR T790M exon 20') alongside conceptual adverse event descriptions (e.g., 'delayed-onset immune-mediated pneumonitis'). Dense vector embeddings alone missed exact alphanumeric mutation codes, while keyword search missed semantic clinical descriptions. How should you configure the retrieval architecture in RAG Engine and Vector Search?",
+    "options": [
+      "Use only dense text embeddings generated by a generic consumer embedding model and increase the top-k retrieval parameter to 1,000 chunks.",
+      "Store all clinical PDFs in Memorystore for Redis and use random sampling to select 5 chunks per query.",
+      "Configure a hybrid retrieval pipeline in RAG Engine combining dense domain-specific biomedical embeddings with sparse lexical token embeddings (BM25/SPLADE), followed by a cross-encoder reranking step using Vertex AI Ranking API to score semantic and exact alphanumeric relevance.",
+      "Disable vector indexing and run `grep` commands across Cloud Storage buckets whenever a researcher submits a query."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Hybrid search combines the strengths of dense semantic embeddings (which capture conceptual medical relationships like 'immune-mediated pneumonitis') and sparse lexical matching (which captures exact alphanumeric strings like 'EGFR T790M'). Passing the union of hybrid candidates through the Vertex AI Ranking API (cross-encoder reranker) ensures the highest precision and recall chunks are surfaced to the ADK Synthesis Agent.",
+    "whyWrong": {
+      "0": "Increasing top-k to 1,000 with generic embeddings floods the LLM context window with irrelevant noise, increasing latency, cost, and hallucination risk.",
+      "1": "Random sampling from Redis has near-zero probability of retrieving relevant clinical trial evidence.",
+      "3": "Running `grep` over petabytes of Cloud Storage objects is prohibitively slow and misses all semantic medical concepts."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/overview",
+      "https://cloud.google.com/generative-ai-app-builder/docs/ranking"
+    ]
+  },
+  {
+    "id": "cs-apx-012",
+    "domain": 3,
+    "topic": "Verifiable Citation Grounding in Custom Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Regulatory reviewers at the FDA and EMA require that every clinical claim in an automated regulatory submission dossier includes a verifiable citation pointing to the exact trial protocol document, page number, and patient cohort ID. How should you design the ADK Synthesis Agent and RAG Engine response pipeline to guarantee verifiable source citations?",
+    "options": [
+      "Instruct the LLM to invent plausible-looking academic citations at the end of each paragraph using standard AMA citation format.",
+      "Remove all specific dosage numbers and adverse event statistics from the dossier so citations are no longer legally required.",
+      "Append a single disclaimer at the bottom of the dossier stating that all information was generated by artificial intelligence.",
+      "Ingest clinical documents into RAG Engine with rich chunk-level metadata (`document_uri`, `page_number`, `cohort_id`), enable Vertex AI Grounding with custom data stores to return structured `groundingMetadata` and `groundingChunks`, and configure the ADK agent to programmatically validate and render inline clickable source citations."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Preserving chunk-level structural metadata (`document_uri`, `page_number`, `cohort_id`) during RAG Engine ingestion allows Vertex AI's grounding service to return structured `groundingMetadata` containing exact segment attributions and supporting `groundingChunks`. Programmatically mapping these citations in the ADK post-processing layer ensures 100% verifiable traceability back to the CMEK-protected source PDF or EHR record.",
+    "whyWrong": {
+      "0": "Inventing plausible citations is a severe hallucination that violates FDA 21 CFR Part 11 and results in immediate regulatory rejection.",
+      "1": "Removing quantitative dosages and adverse event statistics renders a regulatory submission dossier completely useless.",
+      "2": "A generic AI disclaimer does not satisfy FDA/EMA evidentiary standards or Apex BioHealth's 99.5% citation accuracy mandate."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/use-rag-engine"
+    ]
+  },
+  {
+    "id": "cs-apx-013",
+    "domain": 3,
+    "topic": "Session & Memory Management in Agent Platform",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Preparing a regulatory dossier takes clinical researchers up to 3 weeks of iterative investigation across multiple sessions. Researchers expect the ADK agent to remember previously established study hypotheses, excluded patient cohorts, and verified adverse event correlations from earlier in the week without re-explaining context at the start of every session. How should you configure session and memory management?",
+    "options": [
+      "Configure ADK managed sessions backed by Agent Platform Memory Bank to persist long-term semantic memories (verified hypotheses, cohort filters) scoped strictly to the authenticated researcher's identity and study authorization scope.",
+      "Store all user conversation transcripts in browser cookies on the researcher's local computer.",
+      "Append the entire 3-week raw transcript of all 350 hospital sites into a single shared global system prompt.",
+      "Configure the agent as completely stateless so researchers must re-upload their protocol filters every 5 minutes."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Agent Platform Memory Bank works alongside ADK managed sessions to extract, consolidate, and persist long-term semantic memories (such as researcher preferences, study hypotheses, and verified clinical findings) across multi-session interactions. Scoping these memories to the authenticated researcher's identity and IRB study authorization preserves context across the 3-week dossier cycle while maintaining strict tenant and study isolation.",
+    "whyWrong": {
+      "1": "Browser cookies have strict size limits (4 KB), lack enterprise encryption controls, and are lost if the researcher switches workstations.",
+      "2": "Combining transcripts from 350 sites into a shared global prompt leaks confidential trial data across studies and exceeds context limits.",
+      "3": "A completely stateless agent creates severe researcher friction and fails to support complex multi-week regulatory workflows."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/memory/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/sessions"
+    ]
+  },
+  {
+    "id": "cs-apx-014",
+    "domain": 3,
+    "topic": "Model Selection Strategy (LLM vs SLM & Multimodal)",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. The Clinical Trial Intelligence platform processes two distinct workload types: (1) high-volume, low-latency entity extraction of ICD-10 and MedDRA medical codes from millions of incoming structured EHR lab logs, and (2) deep cross-modal synthesis combining radiology DICOM imagery, pathology audio transcripts, and 500-page trial protocols to draft regulatory dossiers. How should you select and configure the language models to optimize cost, latency, and clinical accuracy?",
+    "options": [
+      "Use a single self-hosted 70B open-source text-only LLM on un-managed Compute Engine VMs for both workloads.",
+      "Implement a tiered model routing architecture in ADK that routes high-volume ICD-10/MedDRA entity extraction to a fine-tuned, low-latency Small Language Model (SLM) or Gemini Flash, while routing complex multimodal regulatory synthesis to Gemini Pro with native multimodal inputs.",
+      "Route all high-volume entity extraction to the most expensive frontier reasoning model with maximum thinking budget, and use a basic regular expression script for multimodal radiology image synthesis.",
+      "Use consumer-tier free trial API endpoints for all clinical trial processing to minimize cloud billing."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "A tiered model architecture aligns model capabilities with workload requirements: high-volume, repetitive entity extraction (ICD-10/MedDRA tagging) achieves lower latency and up to 10x lower cost using a specialized Small Language Model (SLM) or Gemini Flash, whereas complex cross-modal reasoning over DICOM images, audio transcripts, and long protocols requires Gemini Pro's native multimodal long-context reasoning capabilities.",
+    "whyWrong": {
+      "0": "A text-only OSS LLM cannot natively process multimodal radiology images or audio, and self-hosting on unmanaged VMs introduces high operational overhead.",
+      "2": "Using frontier reasoning models for simple entity extraction wastes budget and increases latency, while regex cannot interpret radiology imagery.",
+      "3": "Consumer free-tier endpoints lack HIPAA BAA coverage, CMEK support, and enterprise SLA guarantees required for clinical data."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
+    ]
+  },
+  {
+    "id": "cs-apx-015",
+    "domain": 3,
+    "topic": "Multi-Agent Interoperability with Agent2Agent (A2A) Protocol",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth's engineering teams have built specialized autonomous agents deployed across different Google Cloud projects: an EHR Clinical Data Agent (built with ADK), a Radiology DICOM Analysis Agent (running custom Med-PaLM/Gemini multimodal models on GKE), and a Regulatory Dossier Coordinator Agent. You need these heterogeneous agents to dynamically discover each other's capabilities, negotiate task handoffs, and exchange structured clinical findings securely. What should you do?",
+    "options": [
+      "Configure each agent to write unstructured text files to a shared FTP server and poll the directory every 10 minutes.",
+      "Merge all source code from all teams into a single monolithic Python file deployed on a single Cloud Function.",
+      "Register each specialized agent in Agent Registry with standardized Agent Cards and orchestrate inter-agent task delegation and structured artifact exchange using the Agent2Agent (A2A) protocol secured by Agent Identity.",
+      "Require human clinical researchers to manually copy JSON outputs from the Radiology Agent UI and paste them into the EHR Agent UI."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The Agent2Agent (A2A) protocol enables standardized, asynchronous task delegation, capability negotiation, and structured artifact exchange across heterogeneous multi-agent ecosystems. Registering each agent's metadata and capabilities via Agent Cards in Google Cloud's Agent Registry allows the Regulatory Dossier Coordinator Agent to dynamically discover and securely invoke the Radiology and EHR agents using cryptographic Agent Identity.",
+    "whyWrong": {
+      "0": "FTP polling is insecure, unencrypted, lacks schema validation, and introduces severe latency.",
+      "1": "Merging independent team codebases into a single Cloud Function creates tight coupling, deployment bottlenecks, and hits Cloud Functions resource limits.",
+      "3": "Manual copy-pasting by researchers introduces human error and defeats the goal of autonomous multi-agent orchestration."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/a2a/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "cs-apx-016",
+    "domain": 3,
+    "topic": "Integrating Structured BigQuery & Unstructured Literature via MCP",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. When investigating a potential adverse drug reaction, an ADK agent must simultaneously query structured patient adverse event logs stored in BigQuery (e.g., filtering by laboratory liver enzyme elevation levels) and retrieve unstructured historical medical literature from RAG Engine to assess whether similar hepatotoxicity signals were reported in prior trials. How should you configure the ADK agent's tool integration layer?",
+    "options": [
+      "Export all unstructured medical literature PDFs into BigQuery `STRING` columns and use SQL `LIKE '%hepatotoxicity%'` queries for both structured and unstructured data.",
+      "Instruct the agent to ignore BigQuery lab values and rely solely on public Wikipedia articles.",
+      "Convert all structured BigQuery numerical lab tables into MP3 audio files and ingest them into Speech-to-Text.",
+      "Equip the ADK agent with both a Google Cloud BigQuery MCP Server tool (for parameterized, type-safe SQL aggregation over structured adverse event tables) and a RAG Engine Retrieval tool (for semantic vector search over unstructured clinical literature), allowing the agent's planner to synthesize both results."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Structured numerical filtering/aggregation and unstructured semantic retrieval require distinct, specialized tools. Using a Google Cloud BigQuery MCP Server provides the ADK agent with governed, parameterized SQL execution for exact quantitative queries on structured adverse event tables, while the RAG Engine Retrieval tool performs semantic search over unstructured clinical literature. The ADK agent orchestrates both tools in parallel or sequence and synthesizes the combined evidence.",
+    "whyWrong": {
+      "0": "SQL `LIKE` queries over raw PDF text in BigQuery fail to capture semantic medical concepts and perform poorly on unstructured literature.",
+      "1": "Ignoring clinical trial lab data and using Wikipedia violates regulatory standards and GxP compliance.",
+      "2": "Converting structured numerical tables into MP3 audio files is nonsensical and destroys numerical precision."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/mcp-tools/",
+      "https://cloud.google.com/bigquery/docs/reference/mcp"
+    ]
+  },
+  {
+    "id": "cs-apx-017",
+    "domain": 3,
+    "topic": "Agent Registry for Governance & Discovery",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Across its 350 hospital sites and multiple therapeutic divisions (oncology, rare diseases, neurology), Apex BioHealth teams have developed over 40 specialized clinical subagents and MCP tools. Research leads report duplicate development efforts and difficulty discovering which validated subagents are approved for FDA regulatory dossier workflows. What should you implement to centralize discovery and version governance?",
+    "options": [
+      "Register all validated clinical agents, subagents, and MCP servers in Google Cloud Agent Registry with structured metadata tags (therapeutic area, GxP validation status, IRB scope, version) and enforce policy-based discovery.",
+      "Maintain a shared text file on a local network drive listing agent names and IP addresses.",
+      "Create a separate Google Cloud organization for every individual clinical subagent.",
+      "Delete all subagents except one general-purpose chatbot."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google Cloud Agent Registry serves as the centralized catalog and governance plane for enterprise agents and MCP servers. By registering agents with rich metadata (such as GxP validation status, version, owner, and IRB scope), research teams and orchestrator agents can programmatically discover approved, compliant subagents without duplicating development work.",
+    "whyWrong": {
+      "1": "A manually maintained text file on a network drive lacks version control, automated discovery, access governance, and health checking.",
+      "2": "Creating 40 separate Google Cloud organizations creates massive administrative overhead and breaks cross-agent orchestration.",
+      "3": "Deleting specialized clinical subagents eliminates domain-specific capabilities needed for oncology and rare-disease analysis."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
+      "https://google.github.io/adk-docs/"
+    ]
+  },
+  {
+    "id": "cs-apx-018",
+    "domain": 4,
+    "topic": "Continuous Evaluation with Gen AI Evaluation Service & Autoraters",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Before deploying any update to the Clinical Trial Intelligence platform, Apex BioHealth must verify that the Synthesis and Verification agents maintain at least 99.5% citation accuracy, high clinical completeness, and zero ungrounded medical claims against a curated golden dataset of 2,000 oncology and rare-disease QA pairs. Manual review of 2,000 responses by physicians takes weeks per release. How should you automate this evaluation pipeline?",
+    "options": [
+      "Use standard BLEU and ROUGE-L string matching metrics in a Python script to compare agent outputs against the golden dataset.",
+      "Configure a continuous evaluation pipeline using the Vertex AI Gen AI Evaluation Service paired with custom medical LLM-as-a-judge autoraters calibrated with physician-authored rubrics to evaluate groundedness, citation attribution accuracy, and clinical factual precision.",
+      "Select 5 random questions from the golden dataset and ask a software engineer to eyeball the answers before deploying to production.",
+      "Measure only the HTTP response time of the agent endpoint; if latency is under 500 ms, mark the clinical accuracy as 100%."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Vertex AI Gen AI Evaluation Service supports automated, scalable evaluation against golden datasets using customizable LLM-as-a-judge autoraters. In medical and regulatory domains where surface phrasing varies but factual precision and citation grounding are paramount, custom autoraters configured with explicit clinical rubrics accurately measure groundedness (whether every claim is supported by retrieved context), citation accuracy, and clinical completeness.",
+    "whyWrong": {
+      "0": "Lexical n-gram metrics like BLEU and ROUGE fail to detect clinical hallucinations or negated medical statements (e.g., 'patient did not exhibit toxicity' vs 'patient exhibited toxicity').",
+      "2": "Reviewing only 5 random questions by a non-physician software engineer lacks statistical rigor and clinical validity.",
+      "3": "HTTP response latency measures infrastructure speed, not clinical accuracy or citation groundedness."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
+    ]
+  },
+  {
+    "id": "cs-apx-019",
+    "domain": 4,
+    "topic": "Custom Autorater Rubrics for Zero Hallucinated Dosages",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. As emphasized by the Chief Medical Informatics Officer, a single hallucinated drug dosage or misattributed adverse event can jeopardize patient safety. When configuring your custom LLM-as-a-judge autorater in the Gen AI Evaluation Service to evaluate regulatory dossier drafts, how should you structure the evaluation rubric and scoring logic?",
+    "options": [
+      "Configure a single holistic score from 1 to 10 based on how polite and grammatically fluent the agent's summary sounds.",
+      "Instruct the autorater to give a passing score as long as the agent response contains at least 500 words.",
+      "Define a decomposed pointwise evaluation rubric that separately scores (1) Dosage Numerical Fidelity (strictly verifying exact mg/kg units against source chunks), (2) Adverse Event Attribution Groundedness, and (3) Citation Traceability, applying a critical fail threshold if any single dosage or adverse event claim is ungrounded.",
+      "Configure the autorater to evaluate only the user prompt and ignore the retrieved source chunks and agent response."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "For high-stakes clinical safety evaluation, holistic fluency scores mask critical factual errors. Decomposing the LLM-as-a-judge autorater rubric into granular, verifiable criteria\u2014specifically checking numerical dosage fidelity (`mg/kg`), adverse event causality attribution against retrieved ground-truth chunks, and citation accuracy\u2014with a strict zero-tolerance fail condition ensures any hallucinated dosage immediately fails the evaluation gate.",
+    "whyWrong": {
+      "0": "Politeness and grammatical fluency do not protect against dangerous medical hallucinations.",
+      "1": "Response length has no correlation with factual accuracy or clinical safety.",
+      "3": "Evaluating only the user prompt without inspecting the retrieved context or agent response cannot measure groundedness or accuracy."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "cs-apx-020",
+    "domain": 4,
+    "topic": "Deploying Production Workloads on Agent Runtime with VPC-SC",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. You are ready to deploy the production multi-agent clinical review workflow (built with ADK) to serve researchers across 350 hospital sites. The deployment must scale automatically during peak regulatory submission windows, maintain managed session state, and operate strictly inside a VPC Service Controls (VPC-SC) security perimeter to prevent data exfiltration. What is the optimal deployment architecture?",
+    "options": [
+      "Run the production agents inside a free Google Colab notebook shared via a public link.",
+      "Deploy the ADK agents on unmanaged preemptible Compute Engine VMs with public IP addresses and disable all VPC firewall rules.",
+      "Package the ADK agents into a desktop electron app and require hospital IT staff to manually install Python dependencies on every doctor's workstation.",
+      "Deploy the ADK agents directly to managed Agent Runtime (formerly Vertex AI Agent Engine) configured inside the VPC Service Controls perimeter with Private Service Connect interface endpoints."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Agent Runtime (Vertex AI Agent Engine) provides a fully managed, autoscaling execution environment specifically engineered for ADK and multi-agent workloads. It natively integrates with managed sessions, Memory Bank, Cloud Trace, and VPC Service Controls (VPC-SC) via Private Service Connect, fulfilling Apex BioHealth's technical requirements for enterprise scalability, zero infrastructure management, and strict perimeter security.",
+    "whyWrong": {
+      "0": "Public Google Colab notebooks lack HIPAA compliance, uptime SLAs, and VPC-SC security boundaries.",
+      "1": "Preemptible VMs with public IPs and disabled firewalls violate HIPAA security mandates and cause frequent service interruptions.",
+      "2": "Distributing desktop apps across 350 hospitals creates severe version drift, credential exposure risks, and maintenance overhead."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy",
+      "https://cloud.google.com/vpc-service-controls/docs/supported-products"
+    ]
+  },
+  {
+    "id": "cs-apx-021",
+    "domain": 4,
+    "topic": "Troubleshooting Agent Reasoning Loops & Tool Latency",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. In staging tests, you observe that when a clinical researcher queries a rare oncology adverse event with conflicting hospital notes, the ADK Verification Agent rejects the Synthesis Agent's draft, triggering an infinite reasoning loop between the two agents that consumes excessive tokens and eventually times out after 120 seconds. You need to troubleshoot and resolve this issue while maintaining clinical transparency. What should you do?",
+    "options": [
+      "Inspect the distributed agent execution spans in Cloud Trace to pinpoint the conflicting chunk evaluations, configure a deterministic `max_iterations` limit (e.g., 3 cycles) on the ADK `LoopAgent`, and implement a graceful fallback route that surfaces both conflicting clinical sources with a 'Clinical Discrepancy Flag' for human safety officer review.",
+      "Remove the Verification Agent entirely so the first draft is always returned regardless of accuracy.",
+      "Increase the HTTP timeout to 24 hours and allow the agents to loop indefinitely until they randomly agree.",
+      "Configure the Synthesis Agent to delete any retrieved source chunk that contradicts its initial draft."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "When multi-agent actor-critic loops encounter genuinely contradictory source evidence in clinical records, infinite reasoning loops can occur. Using Cloud Trace to inspect the agent spans identifies the exact conflict, while setting a strict `max_iterations` cap on the ADK `LoopAgent` prevents runaway token consumption. Routing unresolved conflicts to a structured 'Clinical Discrepancy Flag' satisfies the business requirement to provide clinical safety officers with transparent explainability into conflicting signals.",
+    "whyWrong": {
+      "1": "Removing the Verification Agent violates the core technical requirement for cross-checking claims and jeopardizes the 99.5% accuracy target.",
+      "2": "Allowing 24-hour infinite loops wastes massive compute budget and leaves researchers waiting indefinitely.",
+      "3": "Deleting contradictory clinical evidence constitutes scientific fraud and violates FDA/EMA regulatory integrity."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/overview",
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agents/"
+    ]
+  },
+  {
+    "id": "cs-apx-022",
+    "domain": 5,
+    "topic": "PHI De-identification with Sensitive Data Protection (DLP)",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Clinical trial documents and adverse event logs ingested from 350 hospital sites contain Protected Health Information (PHI) such as patient names, Social Security numbers, medical record numbers (MRNs), and dates of birth. HIPAA mandates that raw PHI must be redacted before inference or logging, but clinical researchers still need to track longitudinal adverse events for the same individual patient across multiple hospital visits. How should you configure Sensitive Data Protection (DLP) in the ingestion and Agent Gateway pipelines?",
+    "options": [
+      "Replace all patient names, MRNs, and dates with the static string `[REDACTED]`, making it impossible to tell if two adverse event logs belong to the same patient.",
+      "Configure Sensitive Data Protection de-identification templates using cryptographic deterministic surrogate replacement (CryptoReplaceFfxFpeConfig or CryptoDeterministicConfig with a Cloud KMS wrapped key) for MRNs/names and date-shifting for clinical dates, preserving longitudinal referential integrity across patient records without exposing raw PHI.",
+      "Disable Sensitive Data Protection during ingestion and rely on the LLM to promise not to memorize patient names.",
+      "Store raw patient SSNs and names in plain text inside Cloud Logging so engineers can debug agent prompts."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Sensitive Data Protection (Cloud DLP) supports cryptographic deterministic replacement (such as Format-Preserving Encryption or cryptographic surrogate tokens protected by Cloud KMS) and date-shifting. This replaces real patient names and MRNs with consistent pseudonymous tokens (e.g., `PATIENT-84920`) and shifts dates by a patient-specific secret offset, allowing ADK clinical agents to accurately correlate longitudinal adverse event signals across visits while ensuring zero raw PHI exposure.",
+    "whyWrong": {
+      "0": "Replacing all identifiers with a static `[REDACTED]` string destroys longitudinal linkability, preventing researchers from correlating multi-visit adverse events for a patient.",
+      "2": "Relying on LLM instructions instead of deterministic DLP inspection violates HIPAA compliance and technical requirements.",
+      "3": "Logging raw SSNs and patient names in Cloud Logging is a severe HIPAA violation."
+    },
+    "refs": [
+      "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
+      "https://cloud.google.com/sensitive-data-protection/docs/concepts-date-shifting"
+    ]
+  },
+  {
+    "id": "cs-apx-023",
+    "domain": 5,
+    "topic": "Agent Identity & Principal Access Boundary (PAB) Policies",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth coordinates Phase I\u2013III trials across multiple therapeutic divisions. An oncology researcher authorized by an Institutional Review Board (IRB) solely for Study ONC-402 must never be able to use the Clinical Trial Intelligence agent to retrieve or synthesize patient data from Rare Disease Study RRD-109, even if both datasets reside in the same Google Cloud organization. How should you enforce this cryptographic access boundary?",
+    "options": [
+      "Include a sentence in the agent's system prompt asking the researcher to voluntarily state their IRB study code.",
+      "Create 350 separate copies of the Gemini model and give each hospital a different password written on a sticky note.",
+      "Configure Agent Identity with Principal Access Boundary (PAB) policies and IAM Attribute-Based Access Control (ABAC) conditions that bind the authenticated researcher's IRB authorization claims (propagated via OAuth 2.0 token exchange) to study-scoped Cloud Storage prefixes and RAG Engine metadata filters.",
+      "Allow all researchers access to all clinical trials and run a quarterly script to send warning emails if unauthorized queries are detected."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Enforcing strict IRB study isolation requires cryptographic identity propagation and Principal Access Boundary (PAB) enforcement. By propagating the authenticated researcher's OAuth 2.0 identity claims through Agent Gateway and binding Agent Identity with PAB policies and IAM resource attributes (`resource.matchTag('study_id', principal.claims.irb_study)`), downstream retrieval tools in RAG Engine and Cloud Storage cryptographically restrict data access to authorized studies only.",
+    "whyWrong": {
+      "0": "System prompt instructions can be trivially bypassed via prompt injection and provide zero cryptographic security.",
+      "1": "Duplicating models and sharing sticky-note passwords violates enterprise IAM governance and is unmanageable.",
+      "3": "Reactive quarterly emails do not prevent unauthorized PHI exposure and violate HIPAA access control mandates."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
+    ]
+  },
+  {
+    "id": "cs-apx-024",
+    "domain": 5,
+    "topic": "Immutable Audit Trails for FDA 21 CFR Part 11 Compliance",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Under FDA 21 CFR Part 11 and GxP regulations, Apex BioHealth must maintain tamper-evident, immutable audit trails recording every clinical researcher query, agent tool invocation, retrieved source chunk ID, verification pass/fail decision, and final regulatory dossier generation step for at least 15 years. How should you architect this audit logging pipeline?",
+    "options": [
+      "Write agent execution logs to local temporary files inside the Agent Runtime container filesystem.",
+      "Disable logging entirely to save Cloud Storage costs.",
+      "Store logs in a standard Cloud SQL table where developers have `DELETE` and `UPDATE` permissions to clean up formatting errors.",
+      "Configure Agent Gateway and ADK telemetry to emit structured Data Access and Agent Execution audit logs to a dedicated Cloud Logging log bucket configured with CMEK encryption and a locked retention policy (`retentionDays` set to 15 years with Bucket Lock enabled)."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Cloud Logging log buckets support Customer-Managed Encryption Keys (CMEK) and locked retention policies (Bucket Lock). Locking a log bucket with a 15-year retention policy guarantees WORM (Write-Once-Read-Many) immutability: not even project owners or organization admins can modify or delete audit records before the retention period expires, satisfying FDA 21 CFR Part 11 regulatory requirements.",
+    "whyWrong": {
+      "0": "Container local filesystems are ephemeral and lost whenever containers scale down or restart.",
+      "1": "Disabling logging directly violates legal and regulatory compliance requirements.",
+      "2": "Allowing `DELETE` or `UPDATE` permissions on audit records violates FDA 21 CFR Part 11 tamper-evidence mandates."
+    },
+    "refs": [
+      "https://cloud.google.com/logging/docs/buckets#lock-bucket",
+      "https://cloud.google.com/logging/docs/audit"
+    ]
+  },
+  {
+    "id": "cs-apx-025",
+    "domain": 5,
+    "topic": "Agent Gateway & Model Armor Guardrails",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": "apex",
+    "officialSample": false,
+    "question": "For this question, refer to the Apex BioHealth case study. Security testing reveals two threats to the Clinical Trial Intelligence platform: (1) external PDF documents uploaded from partner hospital sites occasionally contain adversarial text designed to hijack agent instructions (indirect prompt injection), and (2) malicious users may attempt jailbreak prompts to extract raw de-identification keys or bypass study boundaries. You need to implement defense-in-depth guardrails at the ingress and model layers. Which two actions should you take? (Choose two.)",
+    "options": [
+      "Configure Model Armor policies attached to Agent Gateway to inspect both user prompts and retrieved RAG document chunks in real time for prompt injection, jailbreak attempts, and sensitive data leakage.",
+      "Enforce strict schema validation and structural separation between system instructions and untrusted external document context within ADK tool responses.",
+      "Disable HTTPS encryption on Agent Gateway so network firewalls can inspect plaintext packets.",
+      "Grant the ADK Synthesis Agent Organization Admin permissions so it can override security blocks when processing urgent clinical trials.",
+      "Turn off all safety filters in Gemini Enterprise to prevent false-positive blocks on medical terminology."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Model Armor integrated with Agent Gateway provides real-time inspection and filtering of both direct user inputs (jailbreaks) and indirect inputs retrieved from external data sources (indirect prompt injection hidden in clinical PDFs). Combining Model Armor with strict structural separation of untrusted tool outputs in ADK prevents malicious document text from overriding system instructions or exfiltrating restricted data.",
+    "whyWrong": {
+      "2": "Disabling HTTPS exposes clinical data in transit and does not prevent prompt injection.",
+      "3": "Granting Organization Admin to an LLM agent creates catastrophic privilege escalation risk if the agent is compromised.",
+      "4": "Turning off all safety filters leaves the platform vulnerable to adversarial attacks and toxic outputs."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
+    ]
+  }
+]

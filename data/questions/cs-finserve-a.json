@@ -1,0 +1,731 @@
+[
+  {
+    "id": "cs-fin-001",
+    "domain": 3,
+    "topic": "Hierarchical Multi-Agent Orchestration with ADK",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global is designing the core orchestration layer for its autonomous wealth management platform using the Agent Development Kit (ADK). When a retail client submits a complex financial request that requires market analysis, tax-loss harvesting calculations, and regulatory compliance verification, the system must coordinate specialized subagents while ensuring the client receives a unified, coherent advisory response within the sub-2-second latency target for interactive chat. How should you architect the ADK agent hierarchy to meet these requirements?",
+    "options": [
+      "Implement a Supervisor Agent pattern in ADK using a central orchestrator agent that decomposes the client query, delegates sub-tasks in parallel to specialized Portfolio, Tax, and Compliance subagents, and synthesizes their structured outputs into a final response.",
+      "Configure a single monolithic ADK agent loaded with all market research, tax simulation, and SEC/FINRA compliance tools in one system prompt to avoid inter-agent network hops.",
+      "Deploy three independent CX Agent Studio conversational bots and require the client to switch chat windows when moving from portfolio analysis to tax simulation.",
+      "Chain the Portfolio, Tax, and Compliance agents in a strict sequential circular loop where each agent continuously re-evaluates the previous agent's output until token limits are reached."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "FinServe Global's technical requirements explicitly mandate a hierarchical multi-agent architecture using ADK where a Supervisor Agent delegates tasks to specialized Portfolio, Tax, and Compliance subagents. By having the Supervisor Agent decompose complex multi-part queries and invoke independent subagents concurrently (parallel execution where dependencies allow), FinServe achieves modular separation of concerns, high tool selection accuracy, and low end-to-end latency.",
+    "whyWrong": {
+      "1": "A single monolithic agent with dozens of financial and compliance tools suffers from context bloat, degraded tool selection accuracy, and higher risk of hallucinations.",
+      "2": "Requiring clients to manually switch chat windows destroys the seamless multi-turn user experience and violates the unified advisory platform requirement.",
+      "3": "An unbounded circular loop introduces severe latency spikes, reasoning loops, and high token costs, violating the sub-2-second interactive response SLA."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview",
+      "https://cloud.google.com/architecture/ai-ml"
+    ]
+  },
+  {
+    "id": "cs-fin-002",
+    "domain": 5,
+    "topic": "Deterministic Human-in-the-Loop (HITL) Governance",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. During portfolio rebalancing, the Portfolio Subagent frequently recommends equity and derivative trades. According to FinServe Global's business and technical requirements, any trade execution exceeding $50,000 or involving high-risk derivatives must require explicit human wealth advisor authorization before the transaction is submitted to the core banking ledger. How should you implement this safeguard?",
+    "options": [
+      "Instruct the Portfolio Subagent via few-shot examples in its system prompt to ask the client for confirmation before executing trades over $50,000.",
+      "Implement a deterministic Human-in-the-Loop (HITL) interrupt in the ADK trade execution tool wrapper and Agent Runtime workflow that suspends execution when `trade_value > 50000` or `instrument_type == 'DERIVATIVE'`, persists the state, and emits an approval request event to the wealth advisor portal.",
+      "Configure Model Armor to block any response containing dollar amounts greater than $50,000.",
+      "Use Cloud Logging log-based alerts to notify wealth advisors after a high-value trade is executed so they can manually reverse unauthorized transactions."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Regulatory precision and preventing unauthorized autonomous trade execution are non-negotiable for FinServe Global. Prompt-based instructions are probabilistic and susceptible to prompt injection or LLM hallucination. Enforcing a deterministic check within the ADK tool execution layer/workflow state machine guarantees that any trade meeting the high-value or derivative criteria pauses execution, saves session state, and awaits cryptographic human advisor approval before invoking the core ledger API.",
+    "whyWrong": {
+      "0": "System prompts are probabilistic and cannot provide 100% deterministic enforcement required by SEC/FINRA compliance mandates; also, approval must come from a wealth advisor, not just client chat confirmation.",
+      "2": "Model Armor is designed for content safety, PII protection, and prompt injection defense, not stateful business logic branching or financial workflow approval.",
+      "3": "Post-execution alerting is reactive rather than preventive, violating the requirement to prevent unauthorized autonomous trade execution before it occurs."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
+      "https://cloud.google.com/dialogflow/cx/docs/concept/human-agent-handoff"
+    ]
+  },
+  {
+    "id": "cs-fin-003",
+    "domain": 5,
+    "topic": "Zero-Trust Identity Propagation & Principal Access Boundary",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global security auditors identified that early agent prototypes used a single shared service account with broad read/write permissions on Cloud SQL for PostgreSQL to query client banking ledgers. If a malicious user performs a prompt injection attack, the agent could be tricked into retrieving portfolio records belonging to other clients. How should you re-architect data access to enforce zero-trust identity propagation?",
+    "options": [
+      "Deploy a read replica of Cloud SQL for PostgreSQL and grant the shared agent service account `roles/cloudsql.viewer` on the replica.",
+      "Append a `WHERE client_id = '<user_id>'` clause inside the LLM's system instructions and set the model temperature to 0.0.",
+      "Configure Agent Identity with Auth Manager (OAuth 2.0) token exchange and Principal Access Boundary (PAB) policies so that every agent-to-tool call propagates the authenticated end-user's cryptographic identity and restricts ledger queries strictly to that user's authorized scope.",
+      "Store all client banking ledgers in a single BigQuery table and use Model Armor to redact account numbers from the final chat output."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "FinServe Global explicitly requires zero-trust identity propagation using Agent Identity, Auth Manager (OAuth 2.0), and Principal Access Boundary (PAB) policies so agents can never query client accounts outside the authenticated user scope. Propagating the user's OAuth 2.0 identity and enforcing PAB policies at the IAM/resource boundary ensures that even if an LLM is compromised via prompt injection, the underlying tool/API call is cryptographically restricted from accessing unauthorized records.",
+    "whyWrong": {
+      "0": "Using a read replica with a shared viewer role still allows the agent to read any client's records across the entire database.",
+      "1": "Prompt-level SQL filtering is vulnerable to prompt injection attacks where an attacker manipulates the LLM into omitting or altering the WHERE clause.",
+      "3": "Output redaction does not prevent unauthorized data retrieval or cross-client data reasoning during the agent's internal thought process."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
+    ]
+  },
+  {
+    "id": "cs-fin-004",
+    "domain": 5,
+    "topic": "Inline Prompt Injection & PII Protection with Model Armor",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global's security team flagged unauthorized prompt injection attempts and potential PII/PCI leakage (such as Social Security Numbers and credit card numbers) in early LLM prototypes. You need to implement a centralized, inline security layer that inspects all user inputs, agent prompts, and tool outputs across the multi-agent platform without requiring developers to write custom regex filters in every subagent. Which two actions should you take? (Choose two.)",
+    "options": [
+      "Route all agent ingress, egress, and inter-agent traffic through Agent Gateway configured with centralized security and telemetry policies.",
+      "Disable all tool execution capabilities on the Compliance Subagent so it cannot access external databases.",
+      "Enable Model Armor integrated with Cloud Sensitive Data Protection templates inline within the Agent Gateway pipeline to automatically detect and block prompt injections, jailbreaks, and sensitive PII/PCI data.",
+      "Export daily Cloud Logging sinks to BigQuery and run a scheduled nightly SQL query to delete leaked SSNs from historical logs.",
+      "Replace Gemini models with unauthenticated open-source models running on unmanaged Compute Engine VMs."
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "FinServe Global's technical requirements specify routing all agent ingress, egress, and inter-agent traffic through Agent Gateway for centralized telemetry and control, and deploying Model Armor alongside Sensitive Data Protection inline to block prompt injection, jailbreaks, and PII/PCI leakage across both prompts and tool outputs. Combining Agent Gateway with inline Model Armor and Sensitive Data Protection provides defense-in-depth at the infrastructure layer.",
+    "whyWrong": {
+      "1": "Disabling tool execution breaks the core functionality of the Compliance Subagent, which must audit transactions against regulatory rules.",
+      "3": "Nightly batch log cleanup is a reactive remediation measure that does not prevent real-time PII leakage to clients or third-party endpoints.",
+      "4": "Unmanaged open-source models on Compute Engine lack built-in enterprise guardrails and increase security and operational risk."
+    },
+    "refs": [
+      "https://cloud.google.com/security-command-center/docs/model-armor-overview",
+      "https://cloud.google.com/dlp/docs/concepts-templates"
+    ]
+  },
+  {
+    "id": "cs-fin-005",
+    "domain": 3,
+    "topic": "Session State vs. Long-Term Memory Bank Architecture",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. A retail client interacts with FinServe Global's financial advisory agent over several years. During an active 15-minute chat session, the client discusses rebalancing their tech holdings to fund a home purchase next summer. Six months later, the client returns to review their portfolio. The agent must recall the client's long-term risk tolerance and home-purchase goal without loading thousands of raw historical chat turns into the active context window. How should you configure memory management?",
+    "options": [
+      "Set the Gemini context window to 2 million tokens and replay all 5 years of raw audio and text transcripts on every single turn.",
+      "Store the entire raw transcript of every historical chat session in a single browser localStorage object and pass it in every HTTP request payload.",
+      "Write custom Python code to append every user utterance to the ADK agent's static system instructions file stored in Cloud Storage.",
+      "Use Agent Platform managed sessions to store ephemeral multi-turn conversational context during active chats, and configure Agent Platform Memory Bank to asynchronously extract, consolidate, and persist long-term client financial goals and risk profiles across sessions."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "FinServe Global's technical requirements state that the platform must persist long-term client financial goals and risk profiles using Agent Platform Memory Bank while maintaining ephemeral multi-turn conversation state in managed sessions. Managed sessions efficiently handle short-term working memory (active dialogue state), while Memory Bank distills and indexes semantic facts (e.g., risk tolerance, life goals) for low-latency retrieval across future sessions.",
+    "whyWrong": {
+      "0": "Replaying years of raw transcripts on every turn violates the sub-2-second response latency SLA and incurs extreme token costs.",
+      "1": "Browser localStorage is insecure, device-specific, easily tampered with, and cannot scale to multi-year enterprise wealth management histories.",
+      "2": "Modifying static system instruction files per user utterance creates concurrency conflicts and bloats prompts across all users."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/sessions"
+    ]
+  },
+  {
+    "id": "cs-fin-006",
+    "domain": 4,
+    "topic": "Pre-Production Agent Evaluation with ADK Evalset & Autoraters",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. Before promoting a new version of the Tax Simulation Subagent to production, FinServe Global's risk committee requires quantitative proof that the agent accurately selects tax-loss harvesting tools, follows multi-step reasoning trajectories, and adheres to SEC/FINRA compliance guidelines across 500 complex historical scenarios. How should you automate this validation in your CI/CD pipeline?",
+    "options": [
+      "Use the ADK evaluation framework (`evalset`) integrated with Vertex AI Gen AI Evaluation Service to run the subagent against a curated golden dataset, evaluating both intermediate tool-call trajectories and final response compliance using custom financial compliance LLM autoraters.",
+      "Deploy the new subagent directly to 100% of retail clients and monitor customer support ticket volume over a 30-day period.",
+      "Use standard unit test mocks that only verify whether the Python code compiles without syntax errors.",
+      "Calculate BLEU and ROUGE lexical overlap scores between the agent's output and the SEC regulatory handbook text."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "FinServe Global's technical requirements specify evaluating all agent trajectories and tool execution accuracy continuously against a curated golden dataset using ADK `evalset` and custom financial compliance autoraters prior to production promotion. Trajectory evaluation verifies that the agent called the right tools in the right sequence with valid arguments, while custom autoraters assess nuanced regulatory compliance and financial accuracy.",
+    "whyWrong": {
+      "1": "Testing unverified financial agents on 100% of live production clients violates SEC/FINRA compliance mandates and exposes the firm to severe financial liability.",
+      "2": "Syntax unit tests cannot verify stochastic LLM reasoning, tool selection accuracy, or regulatory compliance.",
+      "3": "Lexical overlap metrics like BLEU/ROUGE fail to capture semantic correctness, numerical accuracy, or multi-step tool trajectories in financial planning."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluate"
+    ]
+  },
+  {
+    "id": "cs-fin-007",
+    "domain": 1,
+    "topic": "Migrating Static Intent Bots to CX Agent Studio Hybrid Workflows",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global's existing customer service chatbots rely on rigid, static intent-based Dialogflow flows that frequently fail when retail clients ask multi-turn financial planning questions (e.g., combining IRA contribution rules with mortgage refinancing scenarios). However, when a client requests a wire transfer address change, the system must still follow a strict, deterministic identity verification sequence. How should you modernize the client-facing chat experience?",
+    "options": [
+      "Delete all state-based verification flows and rely entirely on an unconstrained open-ended prompt in a raw LLM API call.",
+      "Migrate to Customer Experience Agent Studio (CX Agent Studio) combining generative playbooks/agents for flexible multi-turn financial planning queries with deterministic state-based pages, transition routes, and webhook event handlers for identity verification workflows.",
+      "Add 50,000 additional static training phrases to the legacy intent-based Dialogflow bot to cover every possible combination of financial questions.",
+      "Disable multi-turn conversations and restrict clients to selecting predefined options from a static HTML dropdown menu."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "CX Agent Studio enables hybrid agent design: generative playbooks/LLM-powered agents handle complex, open-ended multi-turn conversations (like financial planning and tax inquiries grounded in enterprise knowledge), while state-based pages and conditional transition routes enforce deterministic step-by-step compliance flows (such as multi-factor identity verification before address changes).",
+    "whyWrong": {
+      "0": "Relying solely on an unconstrained prompt for sensitive account modifications risks bypassing mandatory KYC/AML verification steps.",
+      "2": "Manually authoring tens of thousands of static intents is unmaintainable and still fails on novel multi-turn conversational combinations.",
+      "3": "Static HTML dropdowns fail to deliver personalized conversational advisory and violate FinServe's goal of scaling autonomous wealth management."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/generative-agent",
+      "https://cloud.google.com/dialogflow/cx/docs/concept/handler"
+    ]
+  },
+  {
+    "id": "cs-fin-008",
+    "domain": 2,
+    "topic": "Modernizing Legacy Java Microservices with Coding Agents in Secure Sandboxes",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global's engineering team needs to refactor legacy monolithic Java wealth advisory microservices running on Google Kubernetes Engine (GKE) to expose clean, well-documented REST APIs and Model Context Protocol (MCP) endpoints for the new ADK subagents. Because the source code contains proprietary trading algorithms, security policy prohibits source code from leaving FinServe's VPC perimeter or executing untrusted generated code on production clusters. How should you configure the developer environment?",
+    "options": [
+      "Grant an external third-party SaaS coding bot cluster-admin privileges directly on the production GKE wealth advisory cluster.",
+      "Instruct developers to copy and paste proprietary Java classes into public consumer web chat interfaces from their personal laptops.",
+      "Deploy coding agents (such as Antigravity or Claude Code on Google Cloud) inside Cloud Workstations or isolated GKE sandbox namespaces configured with VPC Service Controls, private MCP servers for internal code search, and automated test execution hooks.",
+      "Manually rewrite all 2 million lines of Java code without AI assistance to avoid any security compliance review."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Using coding agents inside isolated, VPC-secured sandboxes (Cloud Workstations or dedicated GKE sandbox environments) allows developers to accelerate code refactoring, vulnerability patching, and MCP wrapper generation while strictly enforcing enterprise data exfiltration controls (VPC Service Controls) and preventing unverified code from impacting production workloads.",
+    "whyWrong": {
+      "0": "Granting an external bot cluster-admin access to production GKE creates catastrophic security and availability risks.",
+      "1": "Pasting proprietary financial source code into public consumer web interfaces violates enterprise security, IP protection, and data sovereignty mandates.",
+      "3": "Refusing to use secure enterprise coding agents delays modernization and ignores Google Cloud's compliant sandboxed tooling."
+    },
+    "refs": [
+      "https://cloud.google.com/workstations/docs/overview",
+      "https://cloud.google.com/vpc-service-controls/docs/overview"
+    ]
+  },
+  {
+    "id": "cs-fin-009",
+    "domain": 5,
+    "topic": "Cryptographic Lineage & Audit Trails for SEC/FINRA Compliance",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. During an SEC and FINRA regulatory audit, FinServe Global must produce tamper-evident, end-to-end cryptographic lineage of a specific portfolio rebalancing recommendation made six months ago. The audit trail must show the exact client prompt, the Supervisor Agent's delegation steps, the Tax Subagent's tool call parameters, the retrieved BigQuery market data snapshot, and the human advisor's approval signature. How should you architect observability and audit logging to meet this requirement?",
+    "options": [
+      "Store agent conversation summaries in an unencrypted Memorystore for Redis cache instance with a 7-day TTL.",
+      "Rely on client-side browser console logs submitted voluntarily by users when they dispute a financial transaction.",
+      "Enable ephemeral debug logging in the GKE pods with a 24-hour local disk rotation policy.",
+      "Configure Agent Gateway and Agent Runtime to emit structured OpenTelemetry traces and audit logs containing cryptographic hashes of prompts, tool payloads, identity tokens, and HITL signatures into Cloud Logging, and route them via a Log Sink to an immutable BigQuery dataset and Cloud Storage bucket with Object Retention Lock enabled."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "FinServe Global's business requirements mandate 100% compliance with SEC, FINRA, and GDPR auditability mandates, including full cryptographic lineage and audit trails of every agent reasoning step, tool call, and data retrieval event. Capturing structured traces via Agent Gateway/Cloud Trace and exporting them to immutable storage (Cloud Storage with Retention Lock and append-only BigQuery audit tables) guarantees WORM (Write-Once-Read-Many) regulatory compliance.",
+    "whyWrong": {
+      "0": "Redis with a 7-day TTL is volatile in-memory storage and cannot serve as a long-term tamper-evident regulatory audit trail.",
+      "1": "Client-side logs are untrusted, incomplete, and easily fabricated or lost.",
+      "2": "A 24-hour local pod log rotation deletes historical records required for multi-year SEC/FINRA audits."
+    },
+    "refs": [
+      "https://cloud.google.com/storage/docs/bucket-lock",
+      "https://cloud.google.com/logging/docs/export/configure_export_v2"
+    ]
+  },
+  {
+    "id": "cs-fin-010",
+    "domain": 3,
+    "topic": "Cross-Region Data Sovereignty for Multinational Operations",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global operates across North America, Europe, and APAC and must maintain 100% compliance with GDPR and regional financial data sovereignty mandates. When a European retail banking client interacts with the financial advisory platform, neither their personally identifiable financial data nor their embeddings and session memory may leave European Union Google Cloud regions. How should you architect the deployment of the ADK agents and data stores?",
+    "options": [
+      "Deploy regionalized stacks of Agent Runtime, Agent Platform Memory Bank, Vector Search indexes, and Gemini regional endpoints within EU regions (e.g., `europe-west4`), enforced by Organization Policy constraints (`gcp.resourceLocations`) and regional Agent Gateway routing.",
+      "Deploy a single global Agent Runtime cluster in `us-central1` and use a prompt instruction telling the LLM to respect European privacy laws.",
+      "Replicate all European client Cloud SQL databases to a global multi-region bucket covering US, EU, and Asia.",
+      "Encrypt European client names using Base64 encoding before sending them to US-based model endpoints."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Data sovereignty under GDPR and financial regulations requires that data storage, memory persistence, vector indexing, and LLM inference occur strictly within authorized jurisdictional boundaries. By pinning Agent Runtime, Memory Bank, Vector Search, and Gemini endpoints to EU regions and enforcing `gcp.resourceLocations` via Organization Policy, FinServe guarantees strict regional data residency.",
+    "whyWrong": {
+      "1": "Processing European client financial data in `us-central1` violates strict regional data residency mandates regardless of prompt instructions.",
+      "2": "Global multi-region storage replicates data outside the EU, violating GDPR data sovereignty constraints.",
+      "3": "Base64 is a reversible encoding scheme, not encryption or anonymization, and transferring raw financial records to US endpoints still violates residency rules."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/locations",
+      "https://cloud.google.com/resource-manager/docs/organization-policy/defining-locations"
+    ]
+  },
+  {
+    "id": "cs-fin-011",
+    "domain": 3,
+    "topic": "MCP Server Integration for Core Banking Ledgers",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. The Portfolio and Tax Subagents need to query real-time account balances and historical transaction ledgers stored in Cloud SQL for PostgreSQL and BigQuery. Previously, developers embedded raw database connection strings and arbitrary SQL generation logic inside each agent's codebase, resulting in schema mismatches and security audit failures. How should you standardize tool access across all subagents?",
+    "options": [
+      "Give every subagent direct root credentials to Cloud SQL and allow the LLM to execute arbitrary `DROP` and `ALTER` DDL statements.",
+      "Deploy dedicated Google Cloud Model Context Protocol (MCP) servers that expose strongly typed, parameterized financial query tools backed by Cloud SQL and BigQuery, register them in Agent Registry, and configure subagents to invoke them via MCP.",
+      "Export the entire Cloud SQL database to CSV files every hour and attach them to the agent's prompt context.",
+      "Hardcode static JSON account balances inside the ADK Python source files."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Model Context Protocol (MCP) servers provide a standardized, secure abstraction layer between agents and enterprise data sources. By exposing parameterized, read-only or governed transactional tools via MCP servers registered in Agent Registry, FinServe eliminates arbitrary SQL injection risks, centralizes database connection pooling, and decouples agent reasoning from underlying database schema changes.",
+    "whyWrong": {
+      "0": "Allowing an LLM to run arbitrary DDL/DML queries with root credentials exposes the core banking ledger to catastrophic data corruption and SQL injection.",
+      "2": "Exporting databases to CSVs and injecting them into prompts is impossible for millions of clients and violates latency, cost, and security requirements.",
+      "3": "Hardcoding static balances prevents real-time portfolio analysis."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/mcp",
+      "https://modelcontextprotocol.io/introduction"
+    ]
+  },
+  {
+    "id": "cs-fin-012",
+    "domain": 4,
+    "topic": "Achieving Sub-2-Second Latency for Interactive Client Chat",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global's business requirements mandate reducing wealth advisor manual research time by 70% while maintaining sub-2-second response latency for client chat interactions. During load testing, complex queries that trigger sequential calls across the Supervisor, Portfolio, Tax, and Compliance subagents take over 6.5 seconds to return the first token. Which two architectural optimizations should you implement to meet the latency SLA? (Choose two.)",
+    "options": [
+      "Force all subagents to execute strictly one after another in a single-threaded synchronous queue even when their tasks are independent.",
+      "Implement server-sent events (SSE) or bidirectional streaming in Agent Runtime and Agent Gateway so the Supervisor Agent streams immediate acknowledgment and intermediate reasoning updates to the client UI while parallel subagent tool calls execute.",
+      "Disable all database indexes on Cloud SQL for PostgreSQL so writes complete faster.",
+      "Use dynamic model routing to handle routine intent classification, greeting, and simple balance lookups with Gemini 1.5 Flash, reserving heavier reasoning models only for complex multi-step portfolio/tax simulations.",
+      "Increase the LLM output token minimum length to 4,000 tokens for every chat turn."
+    ],
+    "answer": [
+      1,
+      3
+    ],
+    "explanation": "To achieve sub-2-second perceived and actual response times in multi-agent systems, architects use streaming responses (SSE/WebSockets) to deliver immediate time-to-first-token (TTFT) feedback, execute independent subagents in parallel rather than sequentially, and apply dynamic model routing so fast, low-latency models (Gemini 1.5 Flash) handle routine queries while reserving frontier models for heavy analytical tasks.",
+    "whyWrong": {
+      "0": "Forcing independent subagents to run sequentially adds cumulative network and inference latency, worsening the 6.5-second delay.",
+      "2": "Disabling database indexes causes full table scans on read queries, drastically increasing tool execution latency.",
+      "4": "Forcing verbose 4,000-token outputs increases generation time and latency significantly."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/streaming"
+    ]
+  },
+  {
+    "id": "cs-fin-013",
+    "domain": 5,
+    "topic": "Agent Gateway Rate Limiting & Anomaly Detection",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. A compromised retail client account begins sending automated, high-frequency requests to the wealth management chat interface, attempting to exhaust FinServe Global's Vertex AI quota and scrape proprietary market research generated by the Market Research Subagent. How should you protect the platform infrastructure and control costs?",
+    "options": [
+      "Remove authentication from the chat portal so requests cannot be traced to specific users.",
+      "Shut down the entire FinServe Global wealth advisory platform whenever traffic increases by more than 10%.",
+      "Configure Agent Gateway with per-principal token bucket rate limiting, quota enforcement policies, and real-time traffic anomaly detection to throttle abusive client sessions before they reach Agent Runtime or downstream LLM endpoints.",
+      "Ask the Market Research Subagent to politely request that the attacker slow down their queries."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "FinServe Global's technical requirements explicitly mandate routing all agent ingress, egress, and inter-agent traffic through Agent Gateway for centralized telemetry, rate limiting, and anomaly detection. Enforcing per-authenticated-principal rate limits and token quotas at the gateway layer stops volumetric abuse, scraping, and Denial-of-Wallet (DoW) attacks at the edge.",
+    "whyWrong": {
+      "0": "Removing authentication worsens security and violates zero-trust identity requirements.",
+      "1": "Shutting down the platform causes a self-inflicted denial of service for all 5 million legitimate retail clients.",
+      "3": "Conversational persuasion is completely ineffective against automated bot scraping scripts and consumes tokens on every turn."
+    },
+    "refs": [
+      "https://cloud.google.com/api-gateway/docs/quotas",
+      "https://cloud.google.com/architecture/rate-limiting-strategies-techniques"
+    ]
+  },
+  {
+    "id": "cs-fin-014",
+    "domain": 3,
+    "topic": "Grounding Compliance Subagent on Regulatory Rules via RAG",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. The Compliance Subagent must verify every proposed portfolio rebalancing strategy against thousands of pages of frequently updated SEC, FINRA, and European MiFID II regulatory bulletins. Early tests showed that relying solely on the LLM's pre-trained weights resulted in outdated regulatory citations and hallucinated rule numbers. How should you architect the Compliance Subagent's knowledge retrieval?",
+    "options": [
+      "Store the regulatory bulletins in a local text file on the developer's workstation.",
+      "Fine-tune the base LLM weights every morning on PDF scans of the Federal Register.",
+      "Disable compliance checking whenever a rule has been updated within the last 12 months.",
+      "Build a managed Retrieval-Augmented Generation (RAG) pipeline using Vertex AI RAG Engine and Vector Search 1.0 with hybrid lexical-semantic search and cross-encoder reranking over ingested regulatory bulletins, requiring the Compliance Subagent to cite exact retrieved chunks."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Regulatory documents contain dense legal terminology, exact rule numbers (e.g., SEC Rule 15c3-1), and frequent amendments. A hybrid RAG pipeline combining dense vector embeddings (semantic meaning) with sparse/keyword matching (exact rule citations) and cross-encoder reranking ensures high-precision retrieval of current regulatory text, eliminating pre-training cutoff hallucinations.",
+    "whyWrong": {
+      "0": "Files on a developer workstation are inaccessible to cloud-deployed production agents.",
+      "1": "Daily full-weight fine-tuning is prohibitively expensive, slow, and notorious for failing to guarantee exact factual recall or citations compared to RAG.",
+      "2": "Skipping compliance checks on recent rules violates FinServe's mandatory 100% regulatory compliance requirement."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview",
+      "https://cloud.google.com/vertex-ai/docs/vector-search/overview"
+    ]
+  },
+  {
+    "id": "cs-fin-015",
+    "domain": 2,
+    "topic": "Using Agents CLI & Antigravity to Govern Custom Skills",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global's quantitative engineering teams are building dozens of reusable financial calculation skills (such as Monte Carlo retirement simulations and Black-Scholes option pricing tools) using Antigravity and the Agents CLI. To maintain institutional governance, all skills must undergo automated security scanning, schema validation, and version pinning before any ADK subagent can discover or invoke them in production. How should you manage this lifecycle?",
+    "options": [
+      "Use the Agents CLI in CI/CD pipelines to package, validate, and publish approved skills with versioned schemas and IAM access policies into Google Cloud Skill Registry and Agent Registry.",
+      "Allow developers to email Python `.py` script attachments directly to wealth advisors to run locally.",
+      "Store unversioned Python scripts in a public GitHub repository with anonymous write access.",
+      "Embed raw Python `eval()` strings inside client chat messages."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The Agents CLI and Skill Registry / Agent Registry provide centralized enterprise lifecycle governance for agent capabilities. Publishing validated, version-pinned skills to the registry ensures that production ADK agents only discover and invoke cryptographically verified, schema-compliant financial tools.",
+    "whyWrong": {
+      "1": "Emailing Python scripts bypasses all security controls, audit trails, and autonomous agent execution.",
+      "2": "Public unversioned repositories with anonymous write access introduce severe supply-chain injection vulnerabilities.",
+      "3": "Executing raw `eval()` strings from chat messages is a critical remote code execution (RCE) vulnerability."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview",
+      "https://cloud.google.com/sdk/gcloud/reference/alpha/ai"
+    ]
+  },
+  {
+    "id": "cs-fin-016",
+    "domain": 4,
+    "topic": "Detecting & Mitigating Multi-Agent Reasoning Loops",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. During staging tests of the hierarchical ADK platform, you observe an edge case: when a client requests a portfolio optimization that conflicts with both tax-loss harvesting wash-sale rules and SEC concentration limits, the Portfolio Subagent and Tax Subagent enter a cyclic debate, repeatedly passing the task back and forth until the request times out after 60 seconds. How should you prevent this failure mode in production?",
+    "options": [
+      "Set the request timeout on Agent Gateway to 24 hours so the agents can debate indefinitely.",
+      "Configure a maximum step/turn budget (`max_iterations`) and cycle-detection guardrails in the Supervisor Agent's ADK workflow graph, instrumented with Cloud Trace span monitoring, so that unresolved conflicts after N iterations trigger a deterministic fallback summary or human advisor escalation.",
+      "Delete the Compliance and Tax Subagents so conflicts can never arise.",
+      "Configure Cloud Logging to discard all error traces generated by the Portfolio Subagent."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In multi-agent orchestration, competing optimization objectives can cause infinite delegation loops. Setting explicit iteration budgets (`max_iterations`), state-graph cycle detection, and Cloud Trace instrumentation ensures that when subagents cannot converge within a bounded number of steps (e.g., 3 iterations), the Supervisor gracefully terminates the loop, explains the trade-off to the user, or escalates to a human wealth advisor.",
+    "whyWrong": {
+      "0": "Allowing 24-hour infinite loops violates the sub-2-second interactive SLA and causes severe token cost overruns.",
+      "2": "Deleting the Tax and Compliance subagents violates core business and regulatory requirements.",
+      "3": "Suppressing error logs hides operational failures without fixing the underlying reasoning loop."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview"
+    ]
+  },
+  {
+    "id": "cs-fin-017",
+    "domain": 3,
+    "topic": "Automated Tax-Loss Harvesting Wash-Sale Verification",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global's Tax Subagent automates tax-loss harvesting across client portfolios. Under IRS wash-sale rules, a client cannot claim a tax loss if they purchase a 'substantially identical' security within 30 days before or after the sale across any of their accounts (including external spousal IRAs linked in BigQuery). Because LLMs can make arithmetic and date-comparison errors, how should the Tax Subagent perform wash-sale eligibility checks?",
+    "options": [
+      "Ignore wash-sale rules for retail clients with portfolios under $100,000.",
+      "Ask the LLM to mentally calculate 30-day calendar windows and check ticker symbols using pure chain-of-thought text generation.",
+      "Equip the Tax Subagent with a deterministic Python/SQL calculation tool exposed via an MCP server that queries the client's full 61-day transaction window in Cloud SQL/BigQuery, performs exact date and CUSIP/ticker matching, and returns a structured boolean eligibility result to the agent.",
+      "Use an image generation model to draw a calendar for the client."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Financial arithmetic, exact date window calculations (30 days prior and 30 days post sale), and cross-account CUSIP matching require 100% deterministic accuracy. By offloading mathematical and temporal logic to a deterministic code tool (via MCP) rather than relying on probabilistic token prediction, the Tax Subagent achieves institutional precision while using the LLM for high-level planning and client explanation.",
+    "whyWrong": {
+      "0": "Ignoring IRS tax regulations violates FinServe's 100% compliance mandate and exposes clients to IRS penalties.",
+      "1": "LLMs frequently hallucinate calendar arithmetic, leap years, and multi-account transaction lookups when relying solely on text generation.",
+      "3": "Image generation models do not perform deterministic financial compliance calculations."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling",
+      "https://cloud.google.com/bigquery/docs/reference/standard-sql/date_functions"
+    ]
+  },
+  {
+    "id": "cs-fin-018",
+    "domain": 1,
+    "topic": "Few-Shot & Chain-of-Thought Prompt Templates for Wealth Advisors",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. Wealth advisors use an internal assistant built with Gemini Enterprise Agent Designer to generate client-ready executive summaries of quarterly portfolio performance. Compliance requires that every summary strictly follow a 4-part structure: (1) Macroeconomic Overview, (2) Asset Allocation Attribution, (3) Tax-Loss Harvesting Impact, and (4) Required Risk Disclaimers, without speculating on guaranteed future returns. How should you configure the agent's prompt design?",
+    "options": [
+      "Remove all disclaimers from the prompt template to save input tokens.",
+      "Set the model temperature to 2.0 and provide a single-word prompt: 'Summarize.'",
+      "Allow each wealth advisor to write their own ad-hoc system prompt without any compliance template.",
+      "Configure structured system instructions in Gemini Enterprise Agent Designer incorporating explicit negative constraints (no return guarantees), chain-of-thought reasoning steps for performance attribution, and 3-5 curated few-shot examples of compliant quarterly summaries."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In Gemini Enterprise Agent Designer and CX Agent Studio, combining structured system instructions, explicit negative constraints (guardrails against promissory financial language), chain-of-thought instructions, and high-quality few-shot exemplars ensures consistent formatting, tone, and regulatory compliance across generated reports.",
+    "whyWrong": {
+      "0": "Removing required risk disclaimers violates SEC/FINRA advertising and communication compliance rules.",
+      "1": "High temperature (2.0) and vague prompts produce erratic, unformatted, and non-compliant financial text.",
+      "2": "Ad-hoc advisor prompts lead to inconsistent formatting and potential omission of mandatory regulatory disclaimers."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/few-shot-examples"
+    ]
+  },
+  {
+    "id": "cs-fin-019",
+    "domain": 4,
+    "topic": "Selecting Deployment Runtime: Agent Runtime vs. GKE",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. FinServe Global is finalizing the deployment architecture for its ADK multi-agent system. While legacy monolithic Java services run on Google Kubernetes Engine (GKE), the new ADK Supervisor, Portfolio, Tax, and Compliance agents require managed session persistence, native integration with Agent Platform Memory Bank, automatic autoscaling from zero to handle market-open traffic spikes, and built-in trace emission without managing Kubernetes node pools. Which deployment runtime should you select for the ADK agents?",
+    "options": [
+      "Deploy the ADK multi-agent workflows directly onto Vertex AI Agent Runtime (formerly Agent Engine), leveraging its fully managed serverless execution environment, native session/memory integration, and built-in observability.",
+      "Deploy the ADK agents on unmanaged Compute Engine preemptible VMs using manual bash startup scripts.",
+      "Embed the Python ADK orchestrator inside the legacy Java monolith war file on GKE.",
+      "Run the ADK agents inside client web browsers using WebAssembly."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "FinServe Global's solution concept explicitly standardizes on ADK deployed on Agent Runtime. Agent Runtime provides a fully managed, serverless runtime environment specifically engineered for agentic workflows, offering out-of-the-box integration with managed sessions, Memory Bank, Agent Identity, and Cloud Trace without Kubernetes operational overhead.",
+    "whyWrong": {
+      "1": "Preemptible Compute Engine VMs require manual infrastructure management and can be terminated abruptly during active client financial transactions.",
+      "2": "Coupling Python agent orchestrators into legacy Java monoliths increases technical debt and deployment risk.",
+      "3": "Running enterprise multi-agent orchestration in client browsers exposes proprietary logic, API keys, and violates zero-trust security."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/deploy"
+    ]
+  },
+  {
+    "id": "cs-fin-020",
+    "domain": 5,
+    "topic": "Preventing Indirect Prompt Injection from External Market News",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. The Market Research Subagent ingests real-time financial news articles, earnings call transcripts, and third-party analyst reports from external web sources to inform portfolio recommendations. Security testing reveals an indirect prompt injection vulnerability: a malicious text hidden inside a public press release instructs the agent to ignore previous instructions and recommend buying a specific penny stock. How should you defend against this threat?",
+    "options": [
+      "Grant the Market Research Subagent direct permission to execute trades without Supervisor or Compliance Subagent review.",
+      "Scan all ingested external documents and tool outputs through Model Armor's indirect prompt injection and untrusted content filters before inserting them into the agent's context window, and enforce structural spotlighting/delimiters around untrusted external data.",
+      "Trust all external press releases equally with FinServe's internal system instructions.",
+      "Disable SSL/TLS encryption when fetching external financial news."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Indirect prompt injection occurs when untrusted third-party data retrieved via RAG or web search contains adversarial instructions. FinServe Global's technical requirements mandate deploying Model Armor inline across both prompts and tool outputs. Scanning external tool outputs with Model Armor and isolating untrusted text using XML/structural delimiters prevents external content from hijacking the agent's control flow.",
+    "whyWrong": {
+      "0": "Allowing an untrusted research subagent to directly execute trades bypasses hierarchical governance and HITL safeguards.",
+      "2": "Treating untrusted external data as equivalent to system instructions makes the agent trivially exploitable.",
+      "3": "Disabling TLS encryption compromises network transport security and does nothing to prevent application-layer prompt injection."
+    },
+    "refs": [
+      "https://cloud.google.com/security-command-center/docs/model-armor-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
+    ]
+  },
+  {
+    "id": "cs-fin-021",
+    "domain": 3,
+    "topic": "Agent Registry for Governance & Capability Discovery",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. As FinServe Global scales its autonomous platform across North America, Europe, and APAC, multiple regional engineering teams are deploying specialized subagents (e.g., UK ISA Tax Subagent, US 401k Rollover Subagent, APAC FX Hedging Subagent). The central Supervisor Agent needs a governed mechanism to discover available subagents, inspect their input/output schemas, verify their security policies, and route tasks dynamically. Which Google Cloud service should you use?",
+    "options": [
+      "Hardcode every regional subagent's endpoint URL inside a single global environment variable.",
+      "Maintain a shared Microsoft Excel spreadsheet on a local file server listing IP addresses of subagents.",
+      "Register all internal subagents, their capability descriptions, interface schemas, and IAM security policies in Google Cloud Agent Registry.",
+      "Use Cloud DNS TXT records to store agent system prompts."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Agent Registry serves as the central catalog and governance plane for enterprise agentic ecosystems on Google Cloud. Registering subagents in Agent Registry enables dynamic service discovery, schema validation, version management, and policy enforcement across multi-agent workflows.",
+    "whyWrong": {
+      "0": "Hardcoding URLs in environment variables requires redeploying the Supervisor Agent whenever a regional subagent is updated or added.",
+      "1": "Manual spreadsheets cannot be queried dynamically at runtime by autonomous orchestrators and lack security governance.",
+      "3": "DNS TXT records have strict character limits and are not designed for agent schema discovery or IAM policy enforcement."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
+      "https://cloud.google.com/architecture/ai-ml"
+    ]
+  },
+  {
+    "id": "cs-fin-022",
+    "domain": 4,
+    "topic": "Monitoring & Troubleshooting Context Drift in Production",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. Six months after launching the wealth advisory platform, operations engineers notice that during sudden market volatility events, the Portfolio Subagent's recommendations gradually deviate from FinServe Global's house investment philosophy, exhibiting context drift and higher tool invocation failure rates. How should you detect and diagnose this issue systematically?",
+    "options": [
+      "Delete all historical traces from Cloud Trace to free up observability quota.",
+      "Wait for retail clients to file formal complaints with FINRA before investigating.",
+      "Restart the Cloud SQL database every 15 minutes during market hours.",
+      "Implement continuous production monitoring using Vertex AI Gen AI Evaluation Service and Cloud Logging/Trace to sample live agent trajectories, evaluate alignment against house investment rubrics using online autoraters, and alert on statistical drift in tool error rates or semantic scores."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Production agentic systems require continuous observability and online evaluation to catch data drift, market regime shifts, and context degradation. Sampling live production interactions and scoring them asynchronously with custom autoraters in Vertex AI Gen AI Evaluation Service alongside Cloud Trace latency/error metrics enables proactive detection before client impact escalates.",
+    "whyWrong": {
+      "0": "Deleting traces destroys the diagnostic telemetry needed to identify root causes.",
+      "1": "Waiting for regulatory complaints violates proactive risk management and exposes FinServe to regulatory fines.",
+      "2": "Restarting the database disrupts active banking transactions and does not address LLM semantic drift."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/trace/docs/overview"
+    ]
+  },
+  {
+    "id": "cs-fin-023",
+    "domain": 1,
+    "topic": "Multimodal Document Ingestion for Client Onboarding",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. When high-net-worth clients onboard with FinServe Global, they upload scanned PDF brokerage statements from external institutions, smartphone photos of tax returns (Form 1040), and recorded voice memos describing their estate planning wishes. The onboarding workflow must extract structured holdings, cost basis data, and qualitative goals to populate the client's profile in Cloud SQL and Memory Bank. How should you design this ingestion pipeline?",
+    "options": [
+      "Use Gemini 1.5 Pro's native multimodal capabilities within the agentic onboarding workflow to directly process uploaded PDFs, images, and audio files, extracting structured JSON schemas validated by Pydantic before persisting to Cloud SQL and Memory Bank.",
+      "Require human wealth advisors to manually transcribe every external brokerage PDF and audio memo into CSV files before the agent can assist the client.",
+      "Convert all PDFs and audio files into plain ASCII text using a legacy OCR tool that strips table formatting and ignores audio.",
+      "Reject any client who does not submit their portfolio data as a pre-formatted SQL dump."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Gemini 1.5 Pro natively supports multimodal inputs\u2014including high-resolution PDF pages with complex financial tables, images, and audio recordings\u2014within a single context window. By combining native multimodal understanding with structured outputs (JSON schema enforcement), FinServe automates onboarding data extraction while reducing manual advisor research time by 70%.",
+    "whyWrong": {
+      "1": "Manual transcription defeats the business requirement to reduce wealth advisor manual work by 70%.",
+      "2": "Legacy OCR loses spatial table relationships (matching tickers to cost basis columns) and cannot process voice memos.",
+      "3": "Requiring retail clients to provide SQL dumps is completely unrealistic."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output"
+    ]
+  },
+  {
+    "id": "cs-fin-024",
+    "domain": 5,
+    "topic": "Securing Inter-Agent Communication via Agent Gateway",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. In FinServe Global's hierarchical architecture, the Supervisor Agent communicates with the Portfolio, Tax, and Compliance Subagents. Security architects require that no subagent can be invoked directly from the public internet or by unauthorized internal services, and every inter-agent message must be mutually authenticated, encrypted, and inspected for policy compliance. How should you configure inter-agent networking?",
+    "options": [
+      "Expose every subagent on a public unauthenticated HTTP endpoint with CORS set to `*`.",
+      "Deploy all subagents with private ingress restricted to Agent Gateway and VPC internal traffic, enforce mutual TLS (mTLS) and IAM service-to-service authentication via Agent Identity, and route all inter-agent calls through Agent Gateway.",
+      "Share a single static API key across all internal microservices and hardcode it in client-side JavaScript.",
+      "Use unencrypted UDP broadcast packets across the public internet for subagent coordination."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "FinServe Global's technical requirements state that all agent ingress, egress, and inter-agent traffic must route through Agent Gateway for centralized telemetry, rate limiting, and anomaly detection. Combining private VPC ingress, Agent Identity IAM authentication, and Agent Gateway inspection ensures zero-trust security for east-west (inter-agent) traffic.",
+    "whyWrong": {
+      "0": "Public unauthenticated endpoints allow attackers to invoke subagents directly, bypassing Supervisor governance.",
+      "2": "Hardcoding shared keys in client JavaScript exposes credentials to anyone inspecting browser network traffic.",
+      "3": "Unencrypted UDP broadcast over the public internet is insecure and unreliable."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security",
+      "https://cloud.google.com/vpc/docs/private-service-connect"
+    ]
+  },
+  {
+    "id": "cs-fin-025",
+    "domain": 3,
+    "topic": "Handling Partial Subagent Failures Gracefully in ADK",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "finserve",
+    "officialSample": false,
+    "question": "For this question, refer to the FinServe Global case study. A retail client asks the FinServe Global advisory agent for an immediate portfolio summary and tax-loss harvesting estimate. The Portfolio Subagent successfully retrieves real-time asset allocations in 400 ms, but the Tax Subagent encounters a transient connection timeout querying a BigQuery analytical view. How should the Supervisor Agent handle this partial failure while maintaining high reliability and user trust?",
+    "options": [
+      "Return an unhandled HTTP 500 stack trace containing internal BigQuery table names and SQL syntax to the client's chat window.",
+      "Fabricate a plausible tax-loss harvesting dollar amount using the LLM's imagination so the client does not notice the database outage.",
+      "Configure the ADK Supervisor Agent workflow with bounded retry logic (exponential backoff) for transient tool errors, and if the Tax Subagent remains unavailable within the latency budget, synthesize a partial response delivering the verified portfolio summary while transparently informing the client that tax estimates are temporarily recalculating.",
+      "Silently drop the entire user session and log the user out of the banking portal."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In FinServe Global's executive statement, trust and regulatory precision are non-negotiable\u2014agents must never hallucinate financial advice. Implementing bounded retries with graceful degradation allows the Supervisor to deliver verified available data (the portfolio summary) within the sub-2-second SLA while explicitly and transparently disclosing that the tax simulation component is pending retry.",
+    "whyWrong": {
+      "0": "Exposing raw stack traces and internal schema names leaks sensitive infrastructure details and degrades user experience.",
+      "1": "Fabricating financial or tax figures is a severe compliance violation and directly contradicts the executive mandate against hallucinated advice.",
+      "3": "Silently dropping the session frustrates the client and discards successfully retrieved portfolio data."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview",
+      "https://cloud.google.com/architecture/framework/reliability"
+    ]
+  }
+]

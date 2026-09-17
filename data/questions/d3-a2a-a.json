@@ -1,0 +1,710 @@
+[
+  {
+    "id": "d3-a2a-001",
+    "domain": 3,
+    "topic": "Agent2Agent (A2A) Protocol Fundamentals",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise architecture board is establishing standards for their next-generation AI platform on Google Cloud. Engineers are confused about when to use the Model Context Protocol (MCP) versus the Agent2Agent (A2A) protocol. A supply chain orchestrator agent needs to: (1) query a deterministic PostgreSQL database schema directly, and (2) delegate a complex multi-turn freight customs clearance negotiation to an autonomous external customs brokerage agent that maintains its own private memory, reasoning loop, and toolset. How should you position MCP and A2A for these two requirements?",
+    "options": [
+      "Use MCP for Requirement 1 (connecting the agent to deterministic tools, database resources, and context primitives) and use A2A for Requirement 2 (horizontal peer-to-peer task delegation, capability discovery, and multi-turn state negotiation between autonomous, opaque reasoning agents).",
+      "Use A2A for querying raw SQL database tables directly and use MCP exclusively for cross-company autonomous agent negotiation.",
+      "Replace both MCP and A2A with FTP file transfers because neither protocol supports JSON schemas.",
+      "MCP and A2A are mutually exclusive protocols that cannot be used within the same Vertex AI Agent Engine runtime."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "MCP (Model Context Protocol) and A2A (Agent2Agent Protocol) are complementary open standards operating at different architectural layers. MCP addresses vertical integration (Agent-to-Tool / Agent-to-Resource), providing structured access to deterministic functions, database schemas, and context templates. A2A addresses horizontal integration (Agent-to-Agent), enabling autonomous agents with private internal state, proprietary models, and independent reasoning loops to discover capabilities via Agent Cards (`/.well-known/agent.json`) and collaborate via stateful asynchronous/streaming tasks.",
+    "whyWrong": {
+      "1": "This reverses the protocols: MCP is designed for tool/resource access, whereas A2A is designed for inter-agent task orchestration.",
+      "2": "Both MCP and A2A natively use JSON-RPC 2.0 and rich JSON schemas over modern HTTP/SSE transports.",
+      "3": "MCP and A2A are designed to work together harmoniously (an A2A agent frequently uses MCP internally to invoke its own tools)."
+    },
+    "refs": [
+      "https://google.github.io/A2A/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d3-a2a-002",
+    "domain": 3,
+    "topic": "Agent Cards & Discovery",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A client agent running on Vertex AI Agent Engine needs to dynamically discover the capabilities, supported authentication schemes, JSON-RPC service endpoint URL, and available skills of a remote partner agent hosted at `https://logistics-agent.partner.example.com`. According to the Agent2Agent (A2A) specification, which well-known URI path should the client agent query via an HTTP GET request to retrieve the remote agent's metadata card?",
+    "options": [
+      "https://logistics-agent.partner.example.com/robots.txt",
+      "https://logistics-agent.partner.example.com/.well-known/agent.json",
+      "https://logistics-agent.partner.example.com/swagger/v1/openapi.yaml",
+      "https://logistics-agent.partner.example.com/.env"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Agent2Agent (A2A) specification standardizes agent capability discovery via RFC 8615 well-known URIs at `/.well-known/agent.json`. Performing an HTTP GET request to this endpoint returns the machine-readable JSON `AgentCard` describing the agent's identity, `url` endpoint, `capabilities` (e.g., `streaming`, `pushNotifications`), `authentication` schemes, input/output MIME types, and `skills` catalog.",
+    "whyWrong": {
+      "0": "`/robots.txt` controls web crawler indexing rules and does not contain A2A agent skill schemas or JSON-RPC endpoints.",
+      "2": "`/swagger/v1/openapi.yaml` describes REST API paths rather than an A2A Agent Card with autonomous skill definitions and task capabilities.",
+      "3": "`/.env` is a local environment configuration file that should never be exposed publicly."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-card"
+    ]
+  },
+  {
+    "id": "d3-a2a-003",
+    "domain": 3,
+    "topic": "Agent Cards & Discovery",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are designing an A2A client orchestrator on Vertex AI Agent Engine that interacts with 15 external partner agents. Before submitting a long-running financial audit task to a partner agent, your orchestrator needs to determine whether the partner agent supports real-time Server-Sent Events (SSE) streaming updates or asynchronous webhook callbacks, or if it only supports synchronous blocking calls. Which specific object within the partner's `/.well-known/agent.json` Agent Card should your orchestrator inspect to make this transport decision?",
+    "options": [
+      "The `version` string field.",
+      "The `provider.organization` string field.",
+      "The `capabilities` object (specifically checking the boolean flags `capabilities.streaming` and `capabilities.pushNotifications`).",
+      "The HTTP response `Server` header returned by the load balancer."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In the A2A Agent Card schema, the `capabilities` object explicitly declares protocol-level features supported by the remote agent server: `streaming` (boolean indicating support for `tasks/sendSubscribe` via Server-Sent Events), `pushNotifications` (boolean indicating support for `tasks/pushNotification/set` webhook notifications), and `stateTransitionHistory` (boolean indicating whether full state history is returned). Inspecting `capabilities` allows dynamic transport negotiation prior to task invocation.",
+    "whyWrong": {
+      "0": "`version` indicates the release version of the agent implementation, not whether SSE or push notifications are enabled.",
+      "1": "`provider.organization` identifies the vendor name and conveys no protocol transport capabilities.",
+      "3": "HTTP `Server` headers identify reverse proxies (like Envoy or Nginx), not A2A application protocol capabilities."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-card"
+    ]
+  },
+  {
+    "id": "d3-a2a-004",
+    "domain": 3,
+    "topic": "Agent Cards & Discovery",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are publishing a specialized Medical Imaging Diagnostic Agent on Vertex AI Agent Engine as an A2A-compliant server. The agent accepts DICOM/PNG chest X-ray files alongside structured JSON patient vitals as input, and outputs a structured JSON diagnostic report along with an annotated PNG image. It does NOT accept or generate raw audio streams. How should you configure the `AgentCard` at `/.well-known/agent.json` to accurately advertise these multimodal constraints to client agents? (Choose two.)",
+    "options": [
+      "Configure `defaultInputModes` (or skill-level `inputModes`) to include `['image/png', 'application/dicom', 'application/json', 'text/plain']`.",
+      "Configure `defaultOutputModes` (or skill-level `outputModes`) to include `['application/json', 'image/png', 'text/plain']`.",
+      "Set `capabilities.streaming = False` because A2A protocol only supports ASCII text over SSE.",
+      "Leave `inputModes` and `outputModes` completely empty so client agents send MP3 audio files by default.",
+      "Embed the entire 50 GB model weights inside the `AgentCard` JSON payload."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "In the A2A Agent Card specification, `defaultInputModes` and `defaultOutputModes` (as well as per-skill overrides `skills[].inputModes` and `skills[].outputModes`) specify arrays of standard MIME types that the agent accepts and produces. Declaring `['image/png', 'application/dicom', 'application/json', 'text/plain']` for inputs and `['application/json', 'image/png', 'text/plain']` for outputs allows client orchestrators to validate multimodal payload compatibility (`FilePart` and `DataPart`) before dispatching tasks.",
+    "whyWrong": {
+      "2": "A2A streaming (`tasks/sendSubscribe`) fully supports multimodal parts (`FilePart`, `DataPart`, `TextPart`) serialized as JSON over SSE.",
+      "3": "Omitting or misconfiguring MIME types leads client agents to send unsupported modalities (like audio) that cause runtime task failures.",
+      "4": "Agent Cards are lightweight JSON metadata descriptors (typically a few kilobytes), never containers for model weights."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-card"
+    ]
+  },
+  {
+    "id": "d3-a2a-005",
+    "domain": 3,
+    "topic": "A2A Task Lifecycle & States",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An A2A client orchestrator sends a task via `tasks/send` to a remote Corporate Travel Booking Agent to book a business class flight from SFO to LHR. While processing the request, the remote agent discovers that the traveler's corporate profile has two valid passports (US and UK) and requires confirmation on which passport nationality to use for Advance Passenger Information (API) before finalizing the airline ticket. According to the A2A Task state machine specification, which `TaskState` should the remote agent transition the task into, and how should the client respond?",
+    "options": [
+      "Transition the task state to `input-required` with a `TaskStatus.message` specifying the passport question; the client agent then sends a follow-up `tasks/send` request using the exact same task `id` and `sessionId` containing the user's selected passport answer.",
+      "Transition the task state to `failed`, forcing the client agent to create a brand-new task ID and re-submit all flight search details from scratch.",
+      "Transition the task state to `completed` and randomly guess which passport to use.",
+      "Transition the task state to `canceled` and delete the user's travel profile."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The A2A Task lifecycle defines the `input-required` state specifically for multi-turn human-in-the-loop or client clarification pauses. When an agent cannot proceed without additional information or explicit authorization, it returns `status.state = 'input-required'` along with a prompt in `status.message`. To resume execution, the client submits a subsequent `tasks/send` (or `tasks/sendSubscribe`) invocation targeting the **same task `id`** (and `sessionId`), providing the clarifying input message so the remote agent continues from its suspended state.",
+    "whyWrong": {
+      "1": "Marking the task as `failed` destroys the in-progress booking context and forces redundant re-execution.",
+      "2": "Transitioning to `completed` with a guessed passport violates travel compliance and misleads the caller into thinking the task finished properly.",
+      "3": "`canceled` is a terminal state indicating task termination by user/client request, not a request for clarification."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=task-lifecycle"
+    ]
+  },
+  {
+    "id": "d3-a2a-006",
+    "domain": 3,
+    "topic": "A2A Task Lifecycle & States",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Which of the following represents the complete set of standard task states defined in the Agent2Agent (A2A) protocol `TaskState` enumeration?",
+    "options": [
+      "starting, running, sleeping, zombie, terminated",
+      "submitted, working, input-required, completed, canceled, failed, unknown",
+      "open, in_progress, pull_request, merged, closed",
+      "init, map, shuffle, reduce, finalize"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The A2A specification defines seven standard states in the `TaskState` enum: `submitted` (task received/queued), `working` (agent actively processing), `input-required` (paused awaiting additional client/user input), `completed` (successfully finished terminal state), `canceled` (terminated by client request terminal state), `failed` (unrecoverable error terminal state), and `unknown` (fallback/indeterminate state).",
+    "whyWrong": {
+      "0": "These are Linux operating system process states (`ps`), not A2A Task states.",
+      "2": "These are GitHub issue/PR workflow states, not A2A protocol states.",
+      "3": "These are MapReduce data processing stages, not A2A Task states."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=task-state"
+    ]
+  },
+  {
+    "id": "d3-a2a-007",
+    "domain": 3,
+    "topic": "A2A Message & Part Structure",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An A2A client agent on Vertex AI Agent Engine needs to send a task request to an external ERP Invoice Processing Agent. The request must include both a natural language instruction ('Verify line items against PO #9941'), a structured JSON dictionary containing the purchase order metadata (`{'po_number': 9941, 'currency': 'USD', 'limit': 50000}`), and a 4 MB PDF invoice stored in Cloud Storage (`gs://corp-invoices/inv-882.pdf` or signed HTTPS URI). How should the client structure the `message.parts` array in the A2A `tasks/send` payload?",
+    "options": [
+      "Send three separate unrelated task IDs via `tasks/send` and hope the remote agent correlates them.",
+      "Convert the 4 MB PDF binary and JSON dictionary into a single giant ASCII string and place everything inside one `TextPart`.",
+      "Construct a single `Message` whose `parts` array contains three typed part objects: a `TextPart` (`type: 'text'`) for the instruction, a `DataPart` (`type: 'data'`) containing the structured JSON PO dictionary, and a `FilePart` (`type: 'file'`) referencing the PDF invoice via `file.uri` and `file.mimeType: 'application/pdf'`.",
+      "A2A messages only allow a maximum of one single `TextPart` per message."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In the A2A protocol, a `Message` consists of a `role` (`user` or `agent`) and an ordered list of multimodal `parts` (`list[Part]`). The `Part` union supports three distinct structured types: `TextPart` (for natural language text), `DataPart` (for arbitrary machine-readable JSON objects/schemas), and `FilePart` (for binary files transferred either inline via base64 `bytes` or by URI reference `uri` with `mimeType`). Combining all three in a single message's `parts` array preserves atomic multimodal context.",
+    "whyWrong": {
+      "0": "Sending separate tasks with distinct task IDs breaks transactional context and prevents the remote agent from associating the PDF with the PO metadata.",
+      "1": "Stuffing binary PDF bytes and JSON into raw text strings corrupts binary encoding and wastes LLM tokens.",
+      "3": "A2A explicitly supports an array of multiple heterogeneous `Part` objects per `Message`."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=message-and-parts"
+    ]
+  },
+  {
+    "id": "d3-a2a-008",
+    "domain": 3,
+    "topic": "A2A Message & Part Structure",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When transferring a 150 MB genomic sequence FASTQ file from a client orchestrator agent to a remote Bioinformatics A2A Agent via a `FilePart` inside `tasks/send`, you want to avoid JSON-RPC payload bloat, base64 encoding overhead (+33% memory expansion), and HTTP gateway request body size limits (e.g., 32 MB limit on Cloud Run / Apigee). Which `FileContent` representation within the A2A `FilePart` specification should you use?",
+    "options": [
+      "Use `DataPart` to encode every byte as a JSON integer array `[71, 65, 84, 67, ...]`.",
+      "Populate `file.bytes` with a 200 MB base64-encoded string inline inside the JSON-RPC POST body.",
+      "Split the 150 MB file into 150,000 separate `TextPart` objects inside a single JSON array.",
+      "Populate `file.uri` with a short-lived, cryptographically signed HTTPS URL (e.g., Google Cloud Storage V4 Signed URL or pre-authenticated object URI) along with `file.mimeType` and `file.name`, leaving `file.bytes` null."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The A2A `FileContent` object inside a `FilePart` supports two mutually exclusive delivery modes: inline base64 content (`bytes`) for small payloads, or out-of-band URI reference (`uri`) for large files. For a 150 MB file, passing a pre-signed Cloud Storage HTTPS URL in `file.uri` keeps the JSON-RPC message payload under 1 KB, avoids base64 serialization CPU/memory overhead, bypasses API gateway body limits, and allows the remote agent to stream the binary directly from object storage.",
+    "whyWrong": {
+      "0": "Encoding binary files as JSON integer arrays expands payload size by 400-500%.",
+      "1": "Inline base64 encoding of a 150 MB file creates a ~200 MB JSON string that exceeds API gateway limits and causes out-of-memory errors during JSON parsing.",
+      "2": "150,000 `TextPart` objects create massive JSON structural overhead and fail JSON parser depth/size limits."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=filepart"
+    ]
+  },
+  {
+    "id": "d3-a2a-009",
+    "domain": 3,
+    "topic": "A2A JSON-RPC Methods & Protocol",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An A2A client agent initiates a complex software security audit task on a remote A2A server using `tasks/send`. Two minutes into execution, the user cancels the security request in the parent UI. The client orchestrator must instruct the remote A2A agent server to immediately abort its ongoing computation and release allocated sandbox resources. Which standard A2A JSON-RPC method and parameters must the client send?",
+    "options": [
+      "Send a JSON-RPC 2.0 request with `method: 'tasks/cancel'` and `params: {'id': '<task_id>'}`.",
+      "Send a JSON-RPC 2.0 request with `method: 'tasks/delete_server'` and `params: {'force': True}`.",
+      "Send an HTTP DELETE request to `/.well-known/agent.json`.",
+      "Send a `tasks/send` request with the text string `'STOP PLEASE'` and a brand-new random `id`."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The A2A protocol provides the explicit `tasks/cancel` JSON-RPC 2.0 method (`params: {'id': '<task_id>'}`) to request cancellation of an active task (`submitted`, `working`, or `input-required`). Upon receiving `tasks/cancel`, the remote agent server aborts underlying worker threads/containers, transitions the task state to `canceled`, and returns the updated `Task` object.",
+    "whyWrong": {
+      "1": "`tasks/delete_server` is not a valid A2A method.",
+      "2": "Sending HTTP DELETE to the static discovery endpoint `/.well-known/agent.json` does not cancel an active runtime task.",
+      "3": "Sending a new task ID creates a second independent task rather than canceling the existing in-flight task."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=cancel-a-task"
+    ]
+  },
+  {
+    "id": "d3-a2a-010",
+    "domain": 3,
+    "topic": "A2A Artifacts & Output Delivery",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When a remote A2A Code Generation Agent completes a task, it produces two distinct deliverables: (1) a conversational summary explaining its architectural choices, and (2) a downloadable, immutable zip archive or structured source code bundle representing the generated microservice. In the A2A `Task` object returned to the client, how does the protocol structurally distinguish conversational status updates from tangible task deliverables?",
+    "options": [
+      "All deliverables and chat messages are concatenated into a single unformatted string inside `task.id`.",
+      "Conversational updates are placed in `task.status.message` (or `task.history`), whereas tangible, structured, or file-based deliverables produced by the task are returned in the `task.artifacts` array (`list[Artifact]`), where each `Artifact` has its own `name`, `description`, `parts`, and `index`.",
+      "A2A agents cannot return files or code deliverables; they can only return single-line boolean flags.",
+      "Deliverables are written into the HTTP response status code (e.g., HTTP 299)."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The A2A specification cleanly separates conversational interaction (`Task.status.message` and `Task.history`) from formal work products (`Task.artifacts`). An `Artifact` object represents an immutable or incrementally constructed output deliverable (such as generated code files, structured JSON reports, or generated images) composed of typed `parts` (`TextPart`, `FilePart`, `DataPart`), metadata, `name`, and `index`. This allows client orchestrators to directly extract and persist formal deliverables into ADK `ArtifactService` without parsing chat prose.",
+    "whyWrong": {
+      "0": "`task.id` is a unique UUID/identifier string, not a container for output payloads.",
+      "2": "A2A is specifically designed for rich multimodal and structured artifact delivery via `Task.artifacts`.",
+      "3": "HTTP status codes are 3-digit transport integers and cannot carry application artifacts."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=artifacts"
+    ]
+  },
+  {
+    "id": "d3-a2a-011",
+    "domain": 3,
+    "topic": "Agent Cards & Skill Selection",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise A2A Registry contains 40 registered corporate agents across Finance, HR, Legal, and IT. When a user asks an orchestrator agent: 'Calculate the Black-Scholes implied volatility surface for ticker GOOG', the orchestrator inspects the cached `AgentCard` documents of registered agents. Which specific section of each `AgentCard` provides semantic descriptions, tags, and few-shot usage examples that enable the orchestrator's semantic router to select the exact right agent and skill?",
+    "options": [
+      "The `capabilities.stateTransitionHistory` boolean.",
+      "The `authentication.schemes` array.",
+      "The `skills` array (`list[AgentSkill]`), where each skill object defines `id`, `name`, `description`, `tags` (e.g., `['options', 'quant', 'volatility']`), and `examples` (sample prompts/tasks).",
+      "The SSL certificate serial number of the remote server."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Each A2A `AgentCard` contains a `skills` array (`list[AgentSkill]`) describing the specific functional capabilities the agent offers. Each `AgentSkill` includes an `id`, human- and LLM-readable `name` and `description`, keyword `tags` for fast filtering, and concrete `examples` (e.g., `['Calculate implied volatility for AAPL options chain']`). Client orchestrators index these fields in a vector store or pass them to a semantic router to match incoming intents to the optimal remote agent skill.",
+    "whyWrong": {
+      "0": "`stateTransitionHistory` is a protocol capability boolean unrelated to quantitative finance skills.",
+      "1": "`authentication.schemes` specifies security protocols (like OAuth2 or Bearer tokens), not functional domain skills.",
+      "3": "SSL certificate serial numbers provide cryptographic identity, not semantic skill descriptions."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-skill"
+    ]
+  },
+  {
+    "id": "d3-a2a-012",
+    "domain": 3,
+    "topic": "A2A Session & Multi-Turn Continuity",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A client orchestrator on Vertex AI Agent Engine delegates a series of three sequential tasks to a remote Legal Contract Drafting A2A Agent over a 20-minute user session: Task 1 drafts an NDA, Task 2 adds a California governing law addendum to that NDA, and Task 3 formats the NDA for signature. Although Task 1, Task 2, and Task 3 have distinct unique Task IDs (`id: 'task-101'`, `'task-102'`, `'task-103'`), how does the A2A protocol allow the remote Legal Agent to maintain shared conversational memory and access the NDA drafted in Task 1 when executing Task 2 and Task 3?",
+    "options": [
+      "The client must restart the remote A2A server container between Task 1 and Task 2.",
+      "The client orchestrator must reuse the exact same `task.id` (`'task-101'`) forever, even after `'task-101'` has transitioned to the terminal `completed` state.",
+      "A2A agents are strictly stateless across tasks and require the client to re-upload the entire conversation history of the internet in every request.",
+      "The client orchestrator passes the exact same `sessionId` parameter across all three `tasks/send` requests (`params.sessionId = 'session-legal-abc'`), instructing the remote A2A server to bind all three tasks to a shared multi-turn session context."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The A2A protocol explicitly distinguishes between a `Task` (`id`) and a `Session` (`sessionId`). Once a `Task` reaches a terminal state (`completed`, `canceled`, or `failed`), its lifecycle is finished. However, multiple related tasks executed over a multi-turn collaboration share a common `sessionId` in `TaskSendParams`. The remote A2A server uses `sessionId` to map incoming tasks to its underlying persistent session store (such as Vertex AI Agent Engine `SessionService`), preserving shared memory, state, and artifacts across sequential tasks.",
+    "whyWrong": {
+      "0": "Restarting containers wipes memory and disrupts active service availability.",
+      "1": "Once a task reaches a terminal state (`completed`), submitting new work under the same completed task ID violates the A2A state machine; new work items should be new tasks within the same `sessionId`.",
+      "2": "A2A explicitly supports stateful sessions via `sessionId` so clients do not have to manually re-transmit massive historical states on every turn."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=send-a-task"
+    ]
+  },
+  {
+    "id": "d3-a2a-013",
+    "domain": 3,
+    "topic": "A2A Error Handling & JSON-RPC Codes",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An A2A client orchestrator calls `tasks/get` with `params: {'id': 'task-nonexistent-999'}` on a remote A2A server to check the status of a task that either never existed or was purged after retention expiry. According to the A2A JSON-RPC error specification, how should the remote A2A server respond?",
+    "options": [
+      "Return a JSON-RPC 2.0 error response object containing an explicit A2A error code such as `-32001` (`TaskNotFoundError`) with a descriptive message (`'Task not found'`).",
+      "Return an HTTP 200 response with a fabricated `completed` task containing empty strings.",
+      "Close the TCP socket without sending any HTTP response headers.",
+      "Return an HTML 404 page with a cartoon mascot image."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "A2A builds on JSON-RPC 2.0 error handling conventions, defining domain-specific server error codes in the `-32000` to `-32099` range. Specifically, when a client references an unknown task ID in `tasks/get`, `tasks/cancel`, or `tasks/resubscribe`, the server returns a structured JSON-RPC error object with code `-32001` (`TaskNotFoundError`), enabling the client orchestrator to programmatically catch and handle missing task state.",
+    "whyWrong": {
+      "1": "Returning a fabricated `completed` status misleads the client orchestrator into believing nonexistent work succeeded.",
+      "2": "Dropping TCP connections causes client network retry storms rather than clean semantic error handling.",
+      "3": "HTML error pages break JSON-RPC client parsers expecting `application/json` payloads."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=error-codes"
+    ]
+  },
+  {
+    "id": "d3-a2a-014",
+    "domain": 3,
+    "topic": "A2A Error Handling & JSON-RPC Codes",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An A2A client orchestrator attempts to call `tasks/sendSubscribe` (SSE streaming) on a remote legacy ERP agent whose `AgentCard` explicitly declares `capabilities.streaming: false`. What standard A2A JSON-RPC error response should the remote agent return to reject the unsupported streaming call?",
+    "options": [
+      "Accept the request and hang the connection open indefinitely without sending any SSE events.",
+      "Return a JSON-RPC error response with code `-32004` (`UnsupportedOperationError` / streaming not supported by this agent) or `-32601` (`Method not found`), prompting the client to fall back to `tasks/send`.",
+      "Return an HTTP 500 Internal Server Error with a raw Python stack trace exposing database passwords.",
+      "Automatically upgrade the remote server hardware."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "When an A2A client invokes a protocol feature that the server explicitly declared as unsupported in its `AgentCard` (such as invoking `tasks/sendSubscribe` when `capabilities.streaming` is `false`, or invoking push notification methods when `capabilities.pushNotifications` is `false`), the server returns a structured JSON-RPC error (`-32004` `UnsupportedOperationError` / `PushNotificationNotSupportedError` or `-32601` `Method not found`). Well-behaved clients inspect `capabilities` first or catch this error code to fall back to synchronous `tasks/send` polling (`tasks/get`).",
+    "whyWrong": {
+      "0": "Hanging connections indefinitely causes client timeouts and thread pool exhaustion.",
+      "2": "Exposing raw stack traces and credentials in HTTP 500 responses is a critical security vulnerability.",
+      "3": "Hardware upgrades do not implement missing software SSE streaming endpoints."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=error-codes"
+    ]
+  },
+  {
+    "id": "d3-a2a-015",
+    "domain": 3,
+    "topic": "A2A State Transition History",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A compliance auditor wants an A2A client agent to retrieve not only the final completed output of a remote Financial Underwriting Agent task, but also the chronological history of all intermediate messages exchanged during the task's execution (`submitted` -> `working` -> `input-required` -> `working` -> `completed`). When calling `tasks/get`, which parameter should the client specify, and what Agent Card capability indicates support for this feature?",
+    "options": [
+      "Inspect the HTTP `ETag` header of the response.",
+      "Pass `deleteHistory: true` in `tasks/cancel`.",
+      "Check that `capabilities.stateTransitionHistory` is `true` in the Agent Card, and pass `historyLength` (e.g., `params: {'id': '<task_id>', 'historyLength': 50}`) in the `tasks/get` request to retrieve the `task.history` array of `Message` objects.",
+      "A2A protocol strictly forbids storing or returning more than one single message per task."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In the A2A specification, servers that support retaining multi-turn task message transcripts advertise `capabilities.stateTransitionHistory: true` in their `AgentCard`. When a client queries `tasks/get` (or receives a `Task` response), specifying `historyLength: N` instructs the server to populate the `task.history` array (`list[Message]`) with up to the last `N` messages exchanged during the task's lifecycle, enabling full auditability and context reconstruction.",
+    "whyWrong": {
+      "0": "HTTP `ETag` headers provide cache validation hashes, not multi-turn message transcripts.",
+      "1": "`deleteHistory` is not a valid parameter for retrieving audit logs.",
+      "3": "A2A explicitly supports `task.history` arrays containing the chronological sequence of `user` and `agent` messages."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=get-a-task"
+    ]
+  },
+  {
+    "id": "d3-a2a-016",
+    "domain": 3,
+    "topic": "ADK & A2A Integration Architecture",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are building a hierarchical supervisor agent in Google ADK deployed on Vertex AI Agent Engine (`RootSupervisor`). You want `RootSupervisor` to seamlessly delegate tasks to three local ADK sub-agents running in the same process AND two remote external partner agents exposed via the Agent2Agent (A2A) protocol. How should you represent the remote A2A partner agents inside your ADK `RootSupervisor` architecture?",
+    "options": [
+      "Local ADK agents and remote A2A agents cannot coexist in the same supervisor hierarchy.",
+      "Force the external partners to give you SSH root access to their servers so you can copy their Python files into your local container.",
+      "Write a separate frontend web app for each partner agent and ask the human end-user to copy and paste JSON payloads between 3 browser tabs.",
+      "Wrap each remote A2A partner endpoint using an ADK `RemoteA2AAgent` proxy (or an A2A client tool adapter) initialized with the partner's Agent Card URL (`/.well-known/agent.json`), and register those proxy instances alongside local sub-agents in `RootSupervisor.sub_agents` (or `tools`)."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Google ADK is designed to bridge local multi-agent orchestration and distributed A2A federation transparently. By wrapping a remote A2A endpoint in an ADK client proxy (`RemoteA2AAgent` or A2A tool wrapper that ingests the remote `AgentCard` metadata `name`, `description`, and `skills` and translates ADK `InvocationContext` events into A2A `tasks/send` or `tasks/sendSubscribe` calls), the `RootSupervisor` treats remote A2A agents identically to local `sub_agents` during LLM routing and planning.",
+    "whyWrong": {
+      "0": "ADK explicitly supports hybrid hierarchies combining local in-process sub-agents with remote network A2A agents.",
+      "1": "Requiring root SSH access to external partner servers violates enterprise security and organizational boundaries.",
+      "2": "Forcing human users to manually copy-paste JSON across browser tabs defeats autonomous orchestration."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/multi-agent-systems/",
+      "https://google.github.io/A2A/"
+    ]
+  },
+  {
+    "id": "d3-a2a-017",
+    "domain": 3,
+    "topic": "A2A Protocol Idempotency & Reliability",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An A2A client orchestrator submits a high-value financial trade execution task via `tasks/send` with `id: 'task-trade-88412'` to a remote Brokerage A2A Agent. Due to a transient network timeout at the API gateway after 10 seconds, the client does not receive the HTTP response and retries the exact same `tasks/send` request with `id: 'task-trade-88412'`. How must a compliant A2A server handle this duplicate `tasks/send` request for an already-existing task ID to prevent executing the financial trade twice?",
+    "options": [
+      "Enforce task-level idempotency keyed on `params.id` (`'task-trade-88412'`): if the task ID already exists and the message payload matches the initial submission, return the current status/result of the existing task (or attach the client to the in-flight execution) rather than spawning a duplicate trade execution.",
+      "Execute the trade a second time and append `_duplicate` to the stock ticker.",
+      "Delete the first trade from the database without canceling it at the stock exchange.",
+      "Ignore `params.id` completely and generate a random UUID on every POST request."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In distributed systems and the A2A protocol, client-generated task IDs (`params.id`) serve as idempotency keys for task creation. When a client retries `tasks/send` with an existing `id` after a network drop, the A2A server inspects its task store: if `'task-trade-88412'` is already `working` or `completed` with the same initial input message, the server must not re-execute side-effecting operations. Instead, it returns the current `Task` state/artifacts idempotently.",
+    "whyWrong": {
+      "1": "Executing duplicate financial trades on network retries causes severe financial loss.",
+      "2": "Deleting local records while leaving an active order on the exchange causes unhedged orphan positions.",
+      "3": "Ignoring client-supplied task IDs breaks A2A task tracking, cancellation, and idempotency guarantees."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=send-a-task"
+    ]
+  },
+  {
+    "id": "d3-a2a-018",
+    "domain": 3,
+    "topic": "Agent Cards & Discovery Caching",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise orchestrator on Vertex AI Agent Engine routes 500 tasks per second across 20 internal and external A2A agents. Initially, engineers coded the orchestrator to perform a live synchronous `GET /.well-known/agent.json` HTTP request before every single `tasks/send` invocation, adding 150ms of network overhead and causing 500 redundant discovery calls per second. What discovery caching strategy should you implement?",
+    "options": [
+      "Fetch `/.well-known/agent.json` 10 times per task just to be extra sure it hasn't changed.",
+      "Cache parsed `AgentCard` documents in memory / Memorystore for Redis with a configurable TTL honoring standard HTTP cache-control headers (`Cache-Control: max-age`, `ETag` / `If-None-Match`), and refresh the cached card asynchronously or immediately upon receiving a schema/method mismatch error (`-32601` / `-32602`).",
+      "Hard-code the IP addresses and skills of all external partner agents permanently into compiled C binaries so they can never be updated without a OS kernel patch.",
+      "Disable HTTPS TLS verification on `tasks/send` to save 150ms."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Agent Cards (`/.well-known/agent.json`) represent relatively slowly changing metadata (skills, capabilities, authentication schemes). Performing synchronous discovery on every task invocation is an anti-pattern. Caching `AgentCard` descriptors using standard HTTP caching semantics (`Cache-Control`, `ETag` conditional requests) reduces discovery latency to <1ms while allowing reactive cache invalidation if a remote agent returns a method/parameter error after a version upgrade.",
+    "whyWrong": {
+      "0": "Fetching the Agent Card 10 times per task multiplies network latency by 10x.",
+      "2": "Hard-coding skills into C binaries destroys dynamic discovery and breaks whenever partners add or update skills.",
+      "3": "Disabling TLS verification creates severe man-in-the-middle (MitM) security vulnerabilities."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-card"
+    ]
+  },
+  {
+    "id": "d3-a2a-019",
+    "domain": 3,
+    "topic": "A2A Structured Data Exchange",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A Supply Chain Orchestrator Agent communicates with a Warehouse Inventory A2A Agent. To avoid ambiguous natural language parsing errors when requesting stock levels for 50 specific SKUs, the orchestrator wants to send a strictly typed JSON request array (`[{'sku': 'SKU-101', 'warehouse': 'US-WEST'}, ...]`) and receive back a strictly typed JSON response array (`[{'sku': 'SKU-101', 'available_qty': 420, 'reserved_qty': 15}, ...]`). How does the A2A protocol support structured schema-driven machine-to-machine payloads alongside or instead of natural language?",
+    "options": [
+      "A2A only allows poetry and natural language prose; structured JSON objects are rejected by the protocol parser.",
+      "By converting the JSON into a BMP image screenshot and sending it as an image.",
+      "By encapsulating the JSON payload inside a `DataPart` (`type: 'data'`, `data: {...}`) within the A2A `Message` or `Artifact` parts, and optionally advertising JSON schema metadata in `part.metadata` and `skill.inputModes: ['application/json']`.",
+      "By encoding the JSON into Morse code audio files."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "While A2A supports natural language interaction via `TextPart`, enterprise multi-agent integration frequently requires exact, deterministic data contracts. The `DataPart` (`type: 'data'`) allows agents to pass arbitrary structured JSON dictionaries/arrays natively inside `Message.parts` and `Artifact.parts` without string-escaping or LLM text parsing overhead. Skills can declare `'application/json'` in `inputModes`/`outputModes` and attach JSON Schema URIs in `metadata`.",
+    "whyWrong": {
+      "0": "A2A explicitly includes `DataPart` as a first-class primitive for structured JSON data exchange.",
+      "1": "Rendering JSON text into bitmap images requires OCR on the receiving end, introducing latency and character recognition errors.",
+      "3": "Morse code audio encoding is absurd and inefficient."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=datapart"
+    ]
+  },
+  {
+    "id": "d3-a2a-020",
+    "domain": 3,
+    "topic": "A2A Protocol & Metadata Propagation",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise bank orchestrates a cross-department loan approval workflow involving three A2A agents: `RetailBranchAgent` -> `CreditUnderwritingAgent` -> `ComplianceAuditAgent`. For end-to-end distributed tracing (Cloud Trace / OpenTelemetry) and cost center chargeback attribution, every A2A task request across these agents must propagate a W3C Trace Context (`traceparent`), a corporate `cost_center_id`, and an immutable `initiator_employee_id`. Where in the A2A protocol request structure should this operational telemetry and governance context be carried?",
+    "options": [
+      "A2A strips all HTTP headers and forbids any metadata fields.",
+      "Append the `cost_center_id` and `traceparent` string directly to the end of the user's natural language chat prompt so the LLM has to read and repeat the hex trace ID in every sentence.",
+      "Create a separate Google Cloud project for every single loan application.",
+      "Pass W3C trace headers (`traceparent`, `tracestate`) in standard HTTP request headers, and pass application-level governance attributes (`cost_center_id`, `initiator_employee_id`) inside the extensible `metadata` dictionary field (`params.metadata` on `TaskSendParams` and `Message.metadata`)."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The A2A specification is designed for enterprise observability and governance: (1) Transport-level distributed tracing uses standard HTTP headers (`traceparent`, `tracestate` per W3C Trace Context) so API gateways, Service Mesh, and Cloud Trace automatically link spans across A2A network hops; and (2) Protocol objects (`TaskSendParams`, `Task`, `Message`, `Part`, `Artifact`) include an open `metadata: dict[str, Any]` field specifically designed for propagating out-of-band governance context (like `cost_center_id`, tenant IDs, or security labels) without polluting the LLM's natural language prompt context.",
+    "whyWrong": {
+      "0": "A2A fully preserves HTTP headers and provides rich `metadata` maps on all core protocol objects.",
+      "1": "Injecting hex trace IDs and chargeback codes into natural language prompts wastes tokens and causes LLMs to hallucinate or corrupt trace IDs.",
+      "2": "Creating a GCP project per loan application hits cloud resource quotas immediately."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=send-a-task",
+      "https://cloud.google.com/trace/docs/setup"
+    ]
+  },
+  {
+    "id": "d3-a2a-021",
+    "domain": 3,
+    "topic": "A2A Task Lifecycle & Polling",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An A2A client agent submits a batch data migration task to a remote A2A server that does NOT support SSE streaming (`capabilities.streaming: false`) or push notifications (`capabilities.pushNotifications: false`). When `tasks/send` returns immediately with `status.state: 'working'`, which standard A2A JSON-RPC method should the client invoke periodically to check whether the task has reached `completed` or `failed`?",
+    "options": [
+      "tasks/get (passing `params: {'id': '<task_id>'}`)",
+      "tasks/sendSubscribe",
+      "tasks/cancel",
+      "agent/restart"
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "When interacting with an A2A server that does not support streaming or push notifications (or when a client prefers polling), the client submits the task via `tasks/send` and subsequently polls `tasks/get` passing the task `id`. The server returns the current `Task` object including its updated `status.state` (`working`, `input-required`, `completed`, `failed`) and any generated `artifacts`.",
+    "whyWrong": {
+      "1": "`tasks/sendSubscribe` requires `capabilities.streaming: true` and fails if the server does not support SSE.",
+      "2": "`tasks/cancel` aborts the task rather than checking its status.",
+      "3": "`agent/restart` is not a valid A2A protocol method."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=get-a-task"
+    ]
+  },
+  {
+    "id": "d3-a2a-022",
+    "domain": 3,
+    "topic": "Agent Cards & Authentication",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare provider publishes an A2A Patient Scheduling Agent. Because the agent accesses protected health information (PHI), it requires all calling client agents to authenticate using OAuth 2.0 Bearer tokens issued by the hospital's identity provider. How does the A2A server advertise this requirement in its `/.well-known/agent.json` Agent Card?",
+    "options": [
+      "Publish the hospital's root database password inside the public `/.well-known/agent.json` file.",
+      "Include an `authentication` object in the `AgentCard` specifying `schemes: ['Bearer']` (or `['OAuth2']`) along with optional identity metadata/issuer instructions so client orchestrators know to attach an `Authorization: Bearer <access_token>` HTTP header on A2A JSON-RPC requests.",
+      "Require client agents to send unencrypted credentials inside the natural language chat prompt.",
+      "A2A protocol only supports unauthenticated anonymous HTTP traffic."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The A2A `AgentCard` schema includes an `authentication` field (`AgentAuthentication`) that declares required authentication `schemes` (e.g., `['Bearer']`, `['OAuth2']`, `['ApiKey']`, `['mTLS']`) and optional credential acquisition metadata. Client orchestrators inspect `agentCard.authentication` during discovery, obtain the appropriate token (via OAuth2 client credentials or token exchange), and attach it in standard HTTP `Authorization` headers when invoking JSON-RPC endpoints.",
+    "whyWrong": {
+      "0": "Publishing secrets inside a publicly readable discovery file is a catastrophic security breach.",
+      "2": "Sending credentials inside LLM prompts exposes secrets in logs, traces, and model contexts.",
+      "3": "Enterprise A2A deployments mandate strong authentication and authorization at the HTTP/TLS layer."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-card"
+    ]
+  },
+  {
+    "id": "d3-a2a-023",
+    "domain": 3,
+    "topic": "A2A Protocol & Multi-Agent Topologies",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global financial institution is building a federated multi-agent architecture across three regional cloud environments (Americas on Google Cloud Vertex AI Agent Engine, EMEA on Azure, APAC on AWS). A Global Risk Orchestrator agent on Vertex AI needs to run a Parallel Scatter-Gather stress test across all three regional risk agents using the A2A protocol. Which two architectural capabilities of A2A make this cross-cloud scatter-gather orchestration seamless? (Choose two.)",
+    "options": [
+      "Framework and runtime agnosticism: each regional risk agent can be implemented in any internal framework (ADK, LangGraph, Semantic Kernel, Bedrock Agents) as long as it exposes the standardized A2A JSON-RPC interface and Agent Card.",
+      "Concurrent asynchronous invocation: the Global Risk Orchestrator can dispatch three concurrent `tasks/sendSubscribe` or `tasks/send` HTTP/JSON-RPC requests to the Americas, EMEA, and APAC A2A endpoints in parallel and aggregate their structured `Artifact` responses upon completion.",
+      "A2A automatically migrates AWS and Azure virtual machines into Google Cloud Compute Engine without human intervention.",
+      "A2A requires all participating agents to share a single local SQLite database file over NFS.",
+      "A2A forces all regional agents to use the exact same LLM temperature and system prompt."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "A2A is specifically engineered for heterogeneous, multi-cloud, cross-framework agent ecosystems: (1) Because A2A standardizes wire-level discovery (`/.well-known/agent.json`) and task messaging (JSON-RPC 2.0 over HTTPS), the internal implementation of each regional agent remains completely opaque and independent (ADK on GCP, LangGraph on AWS, etc.); and (2) Standard asynchronous HTTP/SSE transports allow an orchestrator to execute fan-out scatter-gather patterns concurrently across distributed A2A endpoints.",
+    "whyWrong": {
+      "2": "A2A is an application-layer inter-agent communication protocol, not a cloud VM migration tool.",
+      "3": "A2A agents are loosely coupled over HTTPS/JSON-RPC and never share local SQLite files across clouds.",
+      "4": "Each A2A agent encapsulates its own private model choice, prompts, and temperature independently."
+    },
+    "refs": [
+      "https://google.github.io/A2A/",
+      "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
+    ]
+  },
+  {
+    "id": "d3-a2a-024",
+    "domain": 3,
+    "topic": "A2A Task Lifecycle & States",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "During a multi-turn A2A task interaction, a client orchestrator sends a task to a remote Tax Filing Agent. The Tax Filing Agent returns `status.state: 'input-required'` asking for the user's 1099-DIV form. The client orchestrator prompts the user, obtains the 1099-DIV PDF, and sends a follow-up `tasks/send` request with the `FilePart`. While processing the PDF, the remote Tax Filing Agent encounters a corrupted, unreadable PDF file structure and cannot proceed. Which `TaskState` should the remote agent return, and how should it communicate the reason?",
+    "options": [
+      "Delete the client orchestrator's Agent Card.",
+      "Return `status.state: 'completed'` and file a blank tax return with the IRS.",
+      "Return `status.state: 'submitted'` and freeze the thread forever.",
+      "Return `status.state: 'failed'` (or return `input-required` again if the user can upload a clean PDF) with a detailed `status.message` containing a `TextPart` explaining that the uploaded PDF file is corrupted and unreadable."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "When an agent encounters an unrecoverable input error or execution failure, it transitions the task to `failed` (or if recoverable via user re-upload, re-enters `input-required`) and populates `status.message` with a clear diagnostic `Message` explaining the exact failure reason ('Uploaded 1099-DIV PDF is corrupted/unreadable'). This allows the client orchestrator to either prompt the user for a valid file or handle the failure cleanly.",
+    "whyWrong": {
+      "0": "Servers cannot delete client Agent Cards.",
+      "1": "Returning `completed` and filing false/blank tax returns is illegal and catastrophic.",
+      "2": "Leaving a task stuck in `submitted` forever causes silent hangs."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=task-lifecycle"
+    ]
+  },
+  {
+    "id": "d3-a2a-025",
+    "domain": 3,
+    "topic": "Agent Cards & Versioning",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A FinTech company operates a Payment Fraud A2A Agent (`version: '1.2.0'`) used by 30 internal client orchestrators. The team is releasing a major upgrade (`version: '2.0.0'`) that changes the required `DataPart` JSON schema for the `evaluate_transaction` skill from flat fields to a nested ISO-20022 structure. How should you manage this breaking skill schema evolution in your A2A deployment on Google Cloud?",
+    "options": [
+      "Deploy the v2.0.0 agent on a versioned endpoint URL (e.g., `https://fraud-agent.internal/v2` with its own `/.well-known/agent.json` or versioned skill ID `evaluate_transaction_v2`), maintain backward compatibility on `/v1` during the deprecation window, and update `version: '2.0.0'` in the new Agent Card.",
+      "Overwrite the v1 endpoint in-place at midnight without changing the Agent Card or notifying client orchestrators.",
+      "Remove the `version` field from `/.well-known/agent.json` so clients never know which version is running.",
+      "Force all 30 client orchestrators to shut down for 2 weeks while rewriting code."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Just like REST and gRPC microservices, A2A agents undergoing breaking changes to skill input/output data schemas (`DataPart` contracts) must follow API versioning best practices. Publishing distinct versioned endpoints (`/v1` and `/v2`) or adding a new skill ID (`evaluate_transaction_v2`) while keeping `evaluate_transaction_v1` active allows client orchestrators to discover the `2.0.0` Agent Card and migrate gracefully with zero downtime.",
+    "whyWrong": {
+      "1": "Silent in-place breaking schema changes cause immediate runtime parsing failures across all 30 client orchestrators.",
+      "2": "`version` is a core field of `AgentCard` specifically intended to track agent release versions.",
+      "3": "Two weeks of downtime is unacceptable in enterprise financial systems."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-card"
+    ]
+  }
+]

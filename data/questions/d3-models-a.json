@@ -1,0 +1,723 @@
+[
+  {
+    "id": "d3-mod-001",
+    "domain": 3,
+    "topic": "Model Garden OSS Integration with ADK via LiteLlm",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your enterprise has deployed a fine-tuned Llama 3.3 70B Instruct model onto a dedicated Vertex AI Model Garden endpoint (exposing an OpenAI-compatible chat completions API) to satisfy strict internal model governance. Now, your agent engineering team wants to build a multi-agent workflow using Google Cloud ADK (`SequentialAgent` and `LlmAgent`), but they need one of the specialist `LlmAgent` instances to use this self-deployed Llama 3.3 70B endpoint instead of Gemini. How should you configure the `model` parameter on that ADK `LlmAgent`?",
+    "options": [
+      "Wrap the endpoint using ADK's `LiteLlm` model adapter (e.g., `model=LiteLlm(model='vertex_ai/meta/llama-3.3-70b-instruct', ...)` or OpenAI-compatible endpoint config) and pass it to `LlmAgent(model=...)`.",
+      "Rewrite the entire ADK framework in Fortran because ADK only supports Gemini 1.0.",
+      "Pass the raw URL string of the endpoint into `agent.name`.",
+      "Use `InMemorySessionService` to convert Llama weights into Gemini weights at runtime."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google Cloud ADK is designed to be model-agnostic through its `BaseLlm` abstraction. While it supports `Gemini` natively, ADK provides first-class integration with `LiteLlm` (`from google.adk.models.lite_llm import LiteLlm`), allowing any model hosted on Vertex AI Model Garden (Llama, Mistral, Claude, Gemma), vLLM endpoints, or third-party providers to be plugged directly into `LlmAgent(model=LiteLlm(...))` with full support for tool calling and structured state passing.",
+    "whyWrong": {
+      "1": "ADK natively supports third-party and open-weights models via `BaseLlm` and `LiteLlm`; rewriting in Fortran is absurd.",
+      "2": "`agent.name` is an identifier for routing and cannot configure model endpoints.",
+      "3": "`InMemorySessionService` stores conversation state and cannot convert neural network weights."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/models/#using-litellm",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models"
+    ]
+  },
+  {
+    "id": "d3-mod-002",
+    "domain": 3,
+    "topic": "Model Selection: Gemini 2.5 Pro vs Flash vs Flash-Lite",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An e-commerce marketplace is architecting a 3-tier customer support agent hierarchy in Google Cloud ADK: Tier 1 (`SpamAndLanguageDetector`) screens 80,000 incoming chat messages per minute to filter spam and detect language; Tier 2 (`OrderSupportAgent`) handles standard order tracking, returns, and FAQ tool calls; Tier 3 (`ComplexDisputeArbitrator`) handles multi-party legal chargeback disputes involving 50-page merchant contracts and ambiguous policy edge cases. To optimize the overall cost-to-performance ratio across all three tiers, which Gemini 2.5 model assignment should you select?",
+    "options": [
+      "Assign `gemini-2.5-pro` with maximum thinking budget to Tier 1 spam detection, and `gemini-2.5-flash-lite` to Tier 3 legal arbitration.",
+      "Assign `gemini-2.5-flash-lite` to Tier 1 for ultra-low-cost, sub-200ms high-volume screening; `gemini-2.5-flash` to Tier 2 for balanced tool-calling latency and accuracy; and `gemini-2.5-pro` to Tier 3 for deep multi-document reasoning.",
+      "Use Vertex AI Imagen 3 for all three tiers.",
+      "Deploy a single unquantized 405B model on CPU nodes for Tier 1."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Gemini 2.5 model family offers distinct Pareto-optimal operating points: `gemini-2.5-flash-lite` is engineered for massive-scale, ultra-low-cost classification, spam filtering, and simple routing at minimal latency (Tier 1). `gemini-2.5-flash` provides fast multimodal tool calling and strong general reasoning for standard customer support workflows (Tier 2). `gemini-2.5-pro` excels at complex, multi-document legal synthesis, nuance, and deep chain-of-thought reasoning required for high-stakes dispute arbitration (Tier 3).",
+    "whyWrong": {
+      "0": "Using Gemini 2.5 Pro on 80,000 RPM spam filtering wastes millions of dollars, while using Flash-Lite on complex legal arbitration risks reasoning failures.",
+      "2": "Imagen 3 is a text-to-image model and cannot perform text routing or legal analysis.",
+      "3": "Running a 405B model on CPUs for 80,000 RPM would result in catastrophic queue backlogs and timeouts."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models"
+    ]
+  },
+  {
+    "id": "d3-mod-003",
+    "domain": 3,
+    "topic": "Model Garden GPU VRAM & Quantization Sizing",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your infrastructure team is deploying the open-weights `Llama-3.3-70B-Instruct` model from Vertex AI Model Garden onto a dedicated Google Cloud GPU instance using vLLM. In full 16-bit precision (FP16/BF16), storing the 70 billion weights alone requires approximately 140 GB of GPU VRAM (plus additional memory for the KV cache and activation buffers), which exceeds the 80 GB VRAM capacity of a single NVIDIA A100-80GB or H100-80GB GPU. If your budget restricts you to a single 80 GB GPU node per replica while preserving >98% of baseline model perplexity, what should you do?",
+    "options": [
+      "Delete half of the transformer layers from the model checkpoint randomly.",
+      "Run the 140 GB FP16 model on a GPU with 16 GB VRAM by enabling Linux swap onto a standard HDD disk.",
+      "Deploy the model using 8-bit floating point (FP8) or 4-bit Activation-aware Weight Quantization (AWQ / GPTQ INT4), reducing weight memory footprint to ~70 GB (FP8) or ~38 GB (INT4) so both weights and KV cache fit comfortably on a single 80 GB GPU.",
+      "Reduce the vocabulary size of the tokenizer to 10 words."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Quantization is the standard technique for fitting large open-weights LLMs onto single-GPU memory footprints. Reducing weight precision from 16-bit (2 bytes/param = ~140 GB) to 8-bit FP8 (~70 GB) or 4-bit AWQ/GPTQ (~35-40 GB) cuts VRAM consumption by 50% to 75% with negligible accuracy degradation (<1-2% perplexity shift), allowing a 70B parameter model plus generous KV cache to run at high token/sec throughput on a single 80 GB A100/H100 GPU.",
+    "whyWrong": {
+      "0": "Randomly deleting transformer layers destroys neural network representations and produces gibberish.",
+      "1": "Swapping GPU VRAM to a mechanical HDD over PCIe reduces inference speed by 10,000x (minutes per token).",
+      "3": "Reducing tokenizer vocabulary breaks pretrained embedding matrices."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/deploy-models",
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
+    ]
+  },
+  {
+    "id": "d3-mod-004",
+    "domain": 3,
+    "topic": "Long Context Window vs Memory Bank vs RAG",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are architecting an executive healthcare coach agent in Google Cloud ADK. You must manage three distinct types of information: (1) A patient's lifelong preference profile and key medical facts accumulated over 2 years of weekly chats (e.g., 'allergic to penicillin', 'prefers morning appointments'); (2) A library of 50,000 peer-reviewed medical journals totaling 400 million tokens; and (3) A single 120-page lab report PDF uploaded by the patient during the current session for immediate holistic cross-referencing. How should you map these three information needs across ADK and Vertex AI capabilities?",
+    "options": [
+      "Put all 400 million tokens of medical journals into `session.state['temp:journals']` on every turn.",
+      "Use Gemini's 2-million-token context window to hold 400 million tokens without RAG.",
+      "Store the active 120-page lab report in `agent.name`.",
+      "Use `VertexAiMemoryBankService` for lifelong semantic user facts (1), Vertex AI Search / RAG Engine for the 400-million-token medical journal library (2), and Gemini 2.5 Pro's 2-million-token long context window (with Context Caching if multi-turn) for the active 120-page lab report PDF (3)."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Modern agentic architectures combine three complementary memory tiers: (1) `VertexAiMemoryBankService` is purpose-built for extracting, consolidating, and retrieving compact, personalized user facts across multi-year sessions; (2) Enterprise RAG (Vertex AI Search / RAG Engine) handles massive corpora (hundreds of millions or billions of tokens) that far exceed any context window by retrieving only relevant chunks; and (3) Gemini 2.5's 1M-2M long context window excels at in-context holistic reasoning over a specific multi-hundred-page document or video uploaded in the active session.",
+    "whyWrong": {
+      "0": "400 million tokens cannot fit in memory or state dictionaries and would crash any API call.",
+      "1": "A 2-million-token context window physically cannot hold a 400-million-token corpus.",
+      "2": "`agent.name` is a short identifier string and cannot hold a 120-page PDF."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/long-context",
+      "https://google.github.io/adk-docs/sessions/memory/"
+    ]
+  },
+  {
+    "id": "d3-mod-005",
+    "domain": 3,
+    "topic": "Model Garden vLLM Serving Optimizations on GKE",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An AI infrastructure team is self-hosting `Gemma-3-27B-IT` on a Google Kubernetes Engine (GKE) GPU node pool to serve 15 internal ADK agents. Under high concurrent load (200 simultaneous agent requests), GPU memory fragmentation causes Out-Of-Memory (OOM) errors and request queuing spikes. Which two serving engine technologies built into vLLM / Vertex AI Model Garden containers specifically resolve KV-cache memory fragmentation and maximize concurrent token throughput? (Choose two.)",
+    "options": [
+      "PagedAttention, which partitions the attention Key-Value (KV) cache into non-contiguous memory blocks (similar to OS virtual memory paging), eliminating internal and external GPU memory fragmentation.",
+      "Continuous Batching (iteration-level scheduling), which dynamically inserts new incoming requests into the running batch as soon as completed sequences finish generating, rather than waiting for the longest sequence in a static batch.",
+      "Disabling GPU acceleration and running all matrix multiplications on a single CPU thread.",
+      "Setting `max_concurrent_requests=1` so 199 requests fail immediately with HTTP 500.",
+      "Re-downloading the 54 GB model weights from Cloud Storage on every single token generation step."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "High-performance LLM serving engines like vLLM (used in Vertex AI Model Garden containers and GKE deployments) achieve 10-24x higher throughput than naive HuggingFace pipelines through two core innovations: (1) PagedAttention allocates KV-cache memory in fixed-size non-contiguous blocks, reducing KV memory waste from ~60% to under 4% and enabling larger batch sizes without OOMs; (2) Continuous Batching schedules execution at the token/iteration level, immediately freeing GPU slots when a sequence emits `<eos>` and slotting in new waiting requests.",
+    "whyWrong": {
+      "2": "Running a 27B model on a single CPU thread reduces throughput to a fraction of a token per second.",
+      "3": "Setting concurrency to 1 causes 99.5% of concurrent agent requests to fail.",
+      "4": "Re-downloading 54 GB weights per token would take minutes per token."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
+    ]
+  },
+  {
+    "id": "d3-mod-006",
+    "domain": 3,
+    "topic": "Model Garden Fine-Tuning: LoRA Adapter Hot-Swapping",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A multinational legal tech SaaS provider serves 40 distinct corporate clients using Google Cloud ADK. Each corporate client has a custom Low-Rank Adaptation (LoRA) adapter fine-tuned on top of the exact same base model (`Gemma-3-12B-IT`) to reflect their proprietary contract style and clause library. Provisioning 40 separate dedicated GPU endpoints—one for each client's fine-tuned model—would cost over $120,000/month with low average GPU utilization. How can you serve all 40 client-specific fine-tuned adapters cost-effectively on a single shared GPU pool?",
+    "options": [
+      "Deploy a single base `Gemma-3-12B-IT` model pool using multi-LoRA serving (supported by vLLM / Vertex AI Model Garden), dynamically passing the client's specific `lora_id` in each ADK model request so adapters are hot-swapped in GPU memory per request.",
+      "Train a separate 500-billion parameter model from scratch for each of the 40 clients.",
+      "Merge all 40 client adapters by averaging their weights together into one single adapter, causing Client A's confidential clauses to leak into Client B's contracts.",
+      "Require each client to wait 4 hours while their dedicated VM boots up from cold storage."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Because LoRA (Low-Rank Adaptation) freezes the base model weights (which consume >95% of VRAM) and trains only tiny low-rank adapter matrices (typically 10-100 MB each), modern inference engines like vLLM on Vertex AI / GKE support dynamic Multi-LoRA serving. A single GPU pool holds one copy of the base `Gemma-3-12B-IT` weights in VRAM and caches dozens of lightweight LoRA adapters in memory/NVMe, applying the requested client-specific adapter (`lora_id`) dynamically per request within a single batch.",
+    "whyWrong": {
+      "1": "Training and hosting 40 massive models from scratch is financially ruinous and operationally unnecessary.",
+      "2": "Averaging distinct client adapters degrades accuracy and risks cross-tenant data/style leakage.",
+      "3": "A 4-hour cold-start boot time destroys interactive agent usability."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/fine-tuning",
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
+    ]
+  },
+  {
+    "id": "d3-mod-007",
+    "domain": 3,
+    "topic": "Model Garden Audio & Speech Models (Chirp vs Gemini Multimodal)",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A customer contact center is building an ADK quality assurance pipeline that processes recordings of phone calls. The pipeline has two distinct requirements: Requirement A is to generate verbatim, word-level timestamped transcripts with speaker diarization across 100+ regional languages for compliance archiving; Requirement B is for an ADK agent to listen directly to a 3-minute audio clip and detect subtle emotional sarcasm, tone shifts, and background acoustic events (e.g., a siren or crying child) that pure text transcripts lose. How should you select Google Cloud models for Requirement A and Requirement B?",
+    "options": [
+      "Use Vertex AI Imagen 3 for both audio transcription and tone analysis.",
+      "Use Google Cloud Speech-to-Text with the `Chirp 2` foundation model for Requirement A (verbatim timestamped transcription & diarization), and pass native audio `Part` inputs directly to `Gemini 2.5 Pro/Flash` for Requirement B (native acoustic tone, sarcasm, and non-speech audio understanding).",
+      "Use a text-only Llama 2 7B model without any speech encoder for both requirements.",
+      "Manually type transcripts by hiring 5,000 stenographers."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Google Cloud offers specialized audio capabilities: `Chirp 2` (Universal Speech Model) in Cloud Speech-to-Text is specifically optimized for high-accuracy verbatim transcription, word-level timestamps, and speaker diarization across 100+ languages. Conversely, `Gemini 2.5 Pro/Flash` features native multimodal audio encoders that process raw audio tokens directly without intermediate text conversion—allowing the model to perceive vocal inflection, sarcasm, hesitation, and environmental sounds.",
+    "whyWrong": {
+      "0": "Imagen 3 generates images from text and cannot process audio files.",
+      "2": "Text-only models cannot ingest audio waveforms or detect vocal sarcasm.",
+      "3": "Manual stenography is unscalable and does not leverage Google Cloud AI models."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/audio-understanding",
+      "https://cloud.google.com/speech-to-text/docs/chirp-2-model"
+    ]
+  },
+  {
+    "id": "d3-mod-008",
+    "domain": 3,
+    "topic": "Model Garden Document AI vs Gemini Native PDF Understanding",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An engineering procurement team is building an ADK agent that reviews complex 80-page industrial equipment manuals in PDF format. These manuals contain dense electrical circuit diagrams, multi-column tables with merged cells, handwritten margin annotations, and flowcharts. When the team previously used a basic open-source Python PDF-to-text extractor (`pypdf`), all circuit diagrams and spatial table layouts were lost, causing the LLM to hallucinate pin configurations. How should you ingest these 80-page PDF manuals into your ADK `LlmAgent` using Gemini 2.5 Pro?",
+    "options": [
+      "Convert the PDF into a single plain-text `.txt` file by stripping all images, diagrams, and table borders.",
+      "Rename the `.pdf` file extension to `.mp3` and pass it to an audio transcription tool.",
+      "Pass the raw PDF file directly as a multimodal `Part` (`application/pdf` via `Part.from_uri` or `Part.from_bytes`) to Gemini 2.5 Pro, leveraging Gemini's native visual-spatial document understanding over every page image and embedded text layer.",
+      "Split the 80-page PDF into 80,000 single-word text files and run 80,000 separate SequentialAgents."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Gemini 2.5 Pro and Flash natively process PDF documents (`application/pdf`) up to thousands of pages by rendering each page visually alongside its text tokens. This allows the model to natively read complex circuit diagrams, charts, spatial table alignments, and handwritten notes without requiring brittle external OCR/layout pipelines or losing visual context.",
+    "whyWrong": {
+      "0": "Stripping images and spatial layout destroys circuit diagram pinouts and table structure, repeating the exact failure mode.",
+      "1": "Renaming a PDF to MP3 creates a corrupt audio file.",
+      "3": "Running 80,000 single-word agents destroys all sentence and visual context."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/document-understanding"
+    ]
+  },
+  {
+    "id": "d3-mod-009",
+    "domain": 3,
+    "topic": "Model Garden Controlled Generation & Response Schema",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When configuring an ADK `LlmAgent` backed by Gemini 2.5 Flash to extract structured invoice data, you define a Pydantic model `InvoiceExtraction` and pass it to `output_schema=InvoiceExtraction`. Under the hood, what mechanism does Vertex AI Gemini use to guarantee that the generated tokens strictly adhere to your JSON schema without syntax errors or hallucinated keys?",
+    "options": [
+      "Post-processing regex that deletes random characters after the model finishes generating free-form poetry.",
+      "Asking a human crowdworker to fix the JSON syntax in real time before returning the API response.",
+      "Retrying the LLM call 10,000 times until valid JSON is produced by pure chance.",
+      "Constrained decoding (Controlled Generation), which constructs a finite-state grammar mask from your JSON schema and zeroes out the logits/probabilities of any invalid token at every generation step."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Vertex AI Controlled Generation (`response_schema` with `response_mime_type='application/json'`) compiles the provided OpenAPI/Pydantic JSON schema into a context-free grammar / finite state machine during decoding. At each token sampling step, the inference engine masks out any vocabulary token that would violate the JSON syntax or schema types, mathematically guaranteeing 100% valid, schema-compliant JSON output on the first pass.",
+    "whyWrong": {
+      "0": "Regex post-processing cannot reliably repair structurally broken or missing JSON fields.",
+      "1": "Vertex AI inference is fully automated on TPUs/GPUs and never uses human crowdworkers.",
+      "2": "Retrying 10,000 times would take hours and is not how controlled generation works."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output"
+    ]
+  },
+  {
+    "id": "d3-mod-010",
+    "domain": 3,
+    "topic": "Model Garden Open-Weights Licensing & Commercial Governance",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A commercial enterprise software vendor is building an on-premises deployable appliance that embeds an ADK agent and an open-weights language model. The vendor's legal team requires a model family with permissive commercial licensing terms, strong multilingual and coding capabilities, and native availability in Vertex AI Model Garden across 4B, 12B, and 27B parameter sizes so customers with different hardware tiers can run the exact same model family. Which Google-developed open-weights model family in Model Garden fulfills these requirements?",
+    "options": [
+      "Google Gemma 3 (available in 1B, 4B, 12B, and 27B parameter sizes with commercial-friendly terms and multimodal/long-context support in 4B+).",
+      "Gemini 2.5 Pro (which is proprietary closed-weights and cannot be downloaded onto an air-gapped customer appliance).",
+      "OpenAI GPT-4o (proprietary closed SaaS API).",
+      "Word2Vec static 300-dimensional word embeddings from 2013."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Gemma 3 is Google's state-of-the-art family of open-weights models built from the same research and technology as Gemini. Available in 1B, 4B, 12B, and 27B parameter scales in Vertex AI Model Garden, Gemma 3 permits commercial redistribution and self-hosted/on-premises deployment while offering 128K context windows, vision-language multimodal input (in 4B/12B/27B), and strong tool-calling performance.",
+    "whyWrong": {
+      "1": "Gemini 2.5 Pro is a proprietary Google Cloud hosted model whose weights cannot be exported to third-party on-prem appliances.",
+      "2": "GPT-4o is a closed proprietary API not available as downloadable open weights.",
+      "3": "Word2Vec is a static word vector lookup table from 2013, not a generative language model capable of agentic tool use."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models",
+      "https://ai.google.dev/gemma"
+    ]
+  },
+  {
+    "id": "d3-mod-011",
+    "domain": 3,
+    "topic": "Model Garden Speculative Decoding Latency Optimization",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are serving an open-weights `Llama-3.3-70B-Instruct` model on a Vertex AI dedicated multi-GPU endpoint for an interactive ADK coding assistant. While the 70B model's code quality is outstanding, its autoregressive generation speed is limited by memory bandwidth during token-by-token decoding (~25 tokens/sec per stream). You want to accelerate output token generation speed by 2x to 3x without altering the exact mathematical output distribution or degrading the 70B model's quality. Which inference optimization technique should you enable?",
+    "options": [
+      "Replace the 70B model completely with the 1B model and accept degraded code quality.",
+      "Enable Speculative Decoding (using a small draft model such as `Llama-3.2-1B` or an ngram/medusa draft head to propose K candidate tokens in parallel, which the target 70B model verifies in a single forward pass).",
+      "Set `temperature=5.0` so the model outputs random tokens faster.",
+      "Insert a 100ms `time.sleep()` between every generated token."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Speculative decoding is a mathematically lossless inference acceleration technique. Because memory bandwidth bottlenecks make verifying K tokens in parallel on a 70B model almost as fast as generating 1 token, a lightweight draft model (e.g., Llama 1B) rapidly drafts K candidate tokens, and the target 70B model verifies all K tokens in one single forward pass. Accepted tokens are emitted immediately, achieving 2-3x lower inter-token latency while guaranteeing the exact same output distribution as standard 70B decoding.",
+    "whyWrong": {
+      "0": "Replacing the 70B model with a 1B model severely degrades complex code generation quality.",
+      "2": "Increasing temperature does not speed up GPU matrix memory bandwidth and causes gibberish.",
+      "3": "Adding `time.sleep()` slows down generation rather than accelerating it."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
+    ]
+  },
+  {
+    "id": "d3-mod-012",
+    "domain": 3,
+    "topic": "Model Selection: Data Residency & Zero Data Retention",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A Swiss wealth management bank is building an ADK portfolio advisor that processes confidential client tax returns using Gemini 2.5 Pro on Vertex AI. To comply with Swiss FINMA banking regulations and corporate data governance, the bank's Chief Information Security Officer (CISO) requires two guarantees: (1) all LLM inference processing and session storage must remain strictly within the `europe-west6` (Zurich) Google Cloud region, and (2) Google must never use the bank's prompts or responses to train foundation models or cache them on disk outside customer-controlled resources. How should you configure Vertex AI and ADK to satisfy the CISO?",
+    "options": [
+      "Use the free public consumer Gemini API key (`ai.google.dev` free tier) which logs prompts for human review.",
+      "Route all traffic through a US-based proxy server before sending it to Zurich.",
+      "Configure the ADK Vertex AI client with `location='europe-west6'`, enforce a GCP Organization Policy restricting resource locations (`constraints/gcp.resourceLocations`) to `europe-west6`, and rely on Vertex AI's enterprise data governance terms (zero training on customer data) with optional Abuse Monitoring zero-data-retention / CMEK settings.",
+      "Disable TLS encryption on all API calls."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Vertex AI provides enterprise-grade data residency and privacy guarantees: by specifying a regional endpoint (`location='europe-west6'`) and enforcing `constraints/gcp.resourceLocations`, all inference compute runs strictly in Zurich. Furthermore, under Google Cloud's Enterprise Service Terms for Vertex AI, customer prompts and model outputs are never used to train Google foundation models, and customers can apply for zero-data-retention abuse monitoring exemptions and configure CMEK.",
+    "whyWrong": {
+      "0": "Free-tier consumer APIs outside Google Cloud Vertex AI do not provide regional data residency SLAs or enterprise zero-training contractual guarantees.",
+      "1": "Routing Swiss banking data through a US proxy violates strict Swiss data residency mandates.",
+      "3": "Disabling TLS exposes sensitive tax data in cleartext over the network."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/data-governance",
+      "https://cloud.google.com/vertex-ai/docs/general/locations"
+    ]
+  },
+  {
+    "id": "d3-mod-013",
+    "domain": 3,
+    "topic": "Agent Platform Memory Bank vs Session State Lifespan",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are explaining Google Cloud ADK's memory architecture to a new team of enterprise architects. They want a clear summary of how short-term `Session` state (`session.state`) differs from long-term `VertexAiMemoryBankService` across conversation lifecycles. Which statement accurately contrasts these two components?",
+    "options": [
+      "`session.state` can only hold floating-point numbers, whereas `VertexAiMemoryBankService` can only hold audio files.",
+      "`VertexAiMemoryBankService` automatically deletes all data after 3 seconds, whereas `temp:` state keys in `session.state` last for 100 years.",
+      "Both components are identical aliases for a local `.csv` file.",
+      "`session.state` stores exact key-value variables (like `cart_id` or `step_count`) for deterministic workflow orchestration within a session (or scoped to `user:`/`app:`), whereas `VertexAiMemoryBankService` asynchronously extracts, consolidates, and semantically indexes natural language facts across historical sessions for vector similarity retrieval."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In ADK, `session.state` is a deterministic key-value dictionary used for programmatic control flow, state templating (`{key}`), and passing structured data between sub-agents and tools within or across sessions via explicit keys. In contrast, `VertexAiMemoryBankService` is a semantic long-term memory system that ingests raw session transcripts, uses LLMs to extract salient facts/preferences, consolidates contradictions over time, and retrieves memories via semantic similarity search (`search_memory`) when relevant to future conversations.",
+    "whyWrong": {
+      "0": "`session.state` supports arbitrary JSON-serializable Python types (dicts, lists, strings, ints), while Memory Bank indexes semantic text memories.",
+      "1": "Memory Bank persists long-term user memories across months/years, whereas `temp:` keys expire at the end of a single turn.",
+      "2": "Neither component uses local `.csv` files in production cloud deployments."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/memory/",
+      "https://google.github.io/adk-docs/sessions/state/"
+    ]
+  },
+  {
+    "id": "d3-mod-014",
+    "domain": 3,
+    "topic": "Model Garden Batch Prediction vs Online Inference for Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A financial research firm runs an overnight batch pipeline at 2:00 AM every night that processes 250,000 SEC 10-K and 10-Q filings stored in BigQuery and Cloud Storage to generate standardized ESG risk summaries. The results are loaded back into BigQuery before analysts arrive at 8:00 AM. Because this workload is not interactive and has a 6-hour completion window, the firm wants to achieve a 50% cost discount compared to standard online real-time Gemini API pricing without consuming their daytime online Provisioned Throughput quota. Which Vertex AI capability should they use?",
+    "options": [
+      "Use Vertex AI Batch Prediction for Gemini 2.5 Flash/Pro (reading inputs from BigQuery or JSONL in Cloud Storage and writing outputs directly back to BigQuery/GCS at a 50% cost discount compared to online inference).",
+      "Spawn 250,000 concurrent interactive `adk web` browser sessions at 2:00 AM.",
+      "Use Gemini Multimodal Live API WebSockets for offline batch text processing.",
+      "Print all 250,000 filings and mail them to a data entry vendor."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Vertex AI Batch Prediction for Gemini models is specifically engineered for high-volume, non-interactive asynchronous workloads (such as overnight document summarization, backfilling, or large-scale dataset labeling). Batch Prediction reads directly from BigQuery tables or Cloud Storage JSONL files, executes asynchronously without consuming online real-time RPM/TPM quotas, and offers a 50% cost discount compared to standard synchronous online generation.",
+    "whyWrong": {
+      "1": "`adk web` is an interactive local developer UI, not a batch processing engine.",
+      "2": "The Live API is designed for real-time low-latency voice/video streaming and carries higher overhead than batch prediction.",
+      "3": "Printing and mailing paper filings is slow, expensive, and non-automated."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/batch-prediction-gemini"
+    ]
+  },
+  {
+    "id": "d3-mod-015",
+    "domain": 3,
+    "topic": "Model Selection: Specialized Code Generation & Reasoning",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise DevSecOps team is building an autonomous ADK vulnerability remediation agent. When a static application security testing (SAST) scanner flags a SQL injection or buffer overflow vulnerability in a 50,000-line C++ / Rust repository, the agent must inspect the full multi-file call graph, reason through pointer lifetimes and concurrency locks, generate a minimal git diff patch, and verify that the patch compiles. Which model configuration in Vertex AI Model Garden provides the strongest multi-file code reasoning and patch accuracy for this agent?",
+    "options": [
+      "Select a 1-billion parameter text classification model with a 512-token context window.",
+      "Select `Gemini 2.5 Pro` (or a frontier reasoning model like `Claude 3.7 Sonnet` / `DeepSeek-R1` in Model Garden) with thinking mode enabled to handle deep multi-file code dependencies and formal verification reasoning.",
+      "Select Vertex AI Chirp 2 speech model.",
+      "Use an un-tuned BERT base model from 2018."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Complex software engineering tasks—such as cross-file static analysis, C++/Rust memory safety reasoning, and generating valid multi-hunk git diffs across 50,000-line repositories—require frontier-class reasoning models with large context windows and explicit thinking/chain-of-thought capabilities. Gemini 2.5 Pro (with thinking enabled) and Partner/Open reasoning models in Vertex AI Model Garden (like Claude 3.7 Sonnet or DeepSeek-R1) achieve top-tier SWE-bench scores suited for autonomous code patching.",
+    "whyWrong": {
+      "0": "A 1B model with a 512-token context window cannot even fit a single C++ header file, let alone reason across a repository.",
+      "2": "Chirp 2 is an audio speech-to-text model.",
+      "3": "BERT is an encoder-only masked language model from 2018 incapable of generative code synthesis."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
+    ]
+  },
+  {
+    "id": "d3-mod-016",
+    "domain": 3,
+    "topic": "Model Garden Partner Models (Anthropic Claude on Vertex AI)",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A financial services company wants to build a multi-model ensemble agent system in Google Cloud ADK. For regulatory diversity, their architecture mandates that primary contract drafting is performed by `Gemini 2.5 Pro`, while an independent adversarial review sub-agent is powered by Anthropic's `Claude 3.7 Sonnet`. The company refuses to sign separate procurement contracts or send data outside their Google Cloud VPC-SC perimeter to external third-party clouds. Which two advantages does Vertex AI Model Garden provide for hosting partner models like Anthropic Claude? (Choose two.)",
+    "options": [
+      "Claude models on Vertex AI run directly inside Google Cloud's infrastructure, allowing the enterprise to enforce existing Google Cloud IAM, VPC Service Controls (VPC-SC), and Private Service Connect without data leaving their Google Cloud security boundary.",
+      "Billing for partner models deployed via Vertex AI Model Garden is consolidated directly onto the organization's existing Google Cloud billing invoice and can draw down committed Google Cloud spend.",
+      "Partner models on Vertex AI require no authentication and are open to anonymous public internet traffic by default.",
+      "Claude models on Vertex AI can only process requests written in Morse code.",
+      "Using partner models on Vertex AI automatically deletes all Gemini models from your project."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Vertex AI Model Garden offers first-party managed access to leading partner models (including Anthropic Claude 3.5/3.7 Sonnet and Haiku). Because Google Cloud hosts and serves these model weights on dedicated Google Cloud infrastructure, enterprises get: (1) unified security governance (IAM, VPC-SC perimeters, Private Service Connect, Cloud Audit Logs) without data egress to external vendor clouds, and (2) unified commercial procurement under existing Google Cloud billing agreements and enterprise spend commitments.",
+    "whyWrong": {
+      "2": "All Vertex AI endpoints strictly enforce IAM authentication (`roles/aiplatform.user`) by default.",
+      "3": "Claude models process standard text and multimodal inputs, not Morse code.",
+      "4": "Partner models and Gemini models coexist seamlessly within the same project and ADK application."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude"
+    ]
+  },
+  {
+    "id": "d3-mod-017",
+    "domain": 3,
+    "topic": "Agents CLI Structured JSON Output Mode in Automation",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You have built an ADK security log analyzer agent that inspects Cloud Audit Logs and outputs a structured threat assessment. You want to invoke this agent inside a headless bash automation pipeline where downstream `jq` scripts parse the agent's final output. If the agent outputs conversational markdown prose or interactive prompts, the `jq` parser fails. How should you design the ADK agent and invocation for deterministic JSON pipeline parsing?",
+    "options": [
+      "Use `adk web` and use a webcam pointed at the monitor to OCR the browser screen into `jq`.",
+      "Set `temperature=2.0` and hope the agent outputs JSON without markdown backticks.",
+      "Configure the root `LlmAgent` with a strict `output_schema` (Pydantic model) so its final response is guaranteed to be valid JSON, and invoke it programmatically via `Runner.run_async` (or headless CLI wrapper) writing only the final event content text to stdout.",
+      "Pipe the output of `gcloud compute instances list` into the agent's `name` field."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "For headless automation pipelines where downstream tools (`jq`, Python scripts, or pub/sub consumers) expect machine-readable JSON, configuring `output_schema=ThreatAssessmentSchema` on the root `LlmAgent` enforces Vertex AI Controlled Generation (`application/json`). When invoked headlessly via `Runner` or CLI automation capturing the final `Event` text payload, stdout receives pure, schema-validated JSON without markdown code blocks or conversational filler.",
+    "whyWrong": {
+      "0": "Pointing a webcam at a monitor to OCR browser output is absurd and fragile.",
+      "1": "High temperature increases randomness and frequently introduces conversational prefixes or markdown wrappers that break `jq`.",
+      "3": "Piping gcloud output into `agent.name` is invalid syntax and does not run the agent."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/llm-agents/#structured-outputs",
+      "https://google.github.io/adk-docs/runtime/"
+    ]
+  },
+  {
+    "id": "d3-mod-018",
+    "domain": 3,
+    "topic": "Model Garden Distillation: Frontier Teacher to SLM Student",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An insurance carrier built a prototype claims classification agent in ADK using `Gemini 2.5 Pro`. While stakeholders are thrilled with its 96% accuracy on complex medical claim narratives, scaling `Gemini 2.5 Pro` to 100 million claims per month exceeds their inference budget by 8x and exceeds their 200ms latency target. When they tested an out-of-the-box `Gemini 2.5 Flash-Lite` (or `Gemma 3 4B`) zero-shot, accuracy dropped to 79%. What is the recommended Google Cloud Model Garden workflow to achieve near-Pro accuracy (~94-95%) at Flash-Lite/Gemma latency and cost?",
+    "options": [
+      "Keep using `Gemini 2.5 Pro` and simply stop paying the Google Cloud bill.",
+      "Delete 80% of incoming insurance claims so volume drops to 20 million.",
+      "Use an image generation model to classify medical text claims.",
+      "Perform Step-by-Step Model Distillation: use `Gemini 2.5 Pro` as a Teacher model to generate high-quality synthetic labels and chain-of-thought rationales over 50,000 unlabeled historical claims, and then supervised fine-tune `Gemini 2.5 Flash-Lite` or `Gemma 3 4B` (Student model) on that distilled dataset."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Model Distillation (Teacher-Student distillation) is a core enterprise pattern on Vertex AI: a large frontier reasoning model (`Gemini 2.5 Pro`) acts as the Teacher to label a golden dataset of domain examples along with step-by-step reasoning traces. That high-quality synthetic dataset is then used to supervised fine-tune a compact Student model (`Gemini 2.5 Flash-Lite` or `Gemma 3 4B`). The distilled Student model absorbs the domain-specific decision boundaries of the Teacher, achieving 94-95% accuracy while running at 10x lower cost and sub-200ms latency.",
+    "whyWrong": {
+      "0": "Refusing to pay cloud bills leads to account suspension.",
+      "1": "Deleting 80% of customer insurance claims violates legal and business obligations.",
+      "2": "Image generation models cannot classify medical text."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini-distillation",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini-supervised-tuning"
+    ]
+  },
+  {
+    "id": "d3-mod-019",
+    "domain": 3,
+    "topic": "Model Garden Tensor Parallelism across Multi-GPU Nodes",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are deploying the open-weights `DeepSeek-R1-671B` (or `Llama-3.1-405B`) model from Vertex AI Model Garden onto a dedicated Google Cloud `a3-highgpu-8g` instance equipped with 8 NVIDIA H100 GPUs (8 x 80 GB = 640 GB total VRAM connected via NVLink). Because the model weights exceed the memory of any single GPU, how must the serving container (vLLM / TGI) shard the model across all 8 GPUs to minimize single-request latency?",
+    "options": [
+      "Configure Tensor Parallelism (`--tensor-parallel-size 8`), which splits individual weight matrices across all 8 GPUs and uses high-speed NVLink all-reduce synchronization during every layer's forward pass.",
+      "Run 8 separate independent copies of the full 671B model—one on each 80 GB GPU—causing immediate Out-Of-Memory crashes on all 8 GPUs.",
+      "Use only GPU #0 and leave GPUs #1 through #7 completely idle.",
+      "Store 90% of the model weights on an external USB 2.0 flash drive."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "When a model's parameter memory exceeds a single GPU's VRAM, Tensor Parallelism (`tensor_parallel_size=8` in vLLM) shards each transformer layer's attention and MLP weight matrices column-wise/row-wise across all 8 GPUs within the node. During inference, all 8 GPUs compute their matrix slice concurrently and synchronize activations via ultra-fast NVLink interconnects, enabling both memory capacity scaling (fitting 640 GB) and high single-stream token generation speed.",
+    "whyWrong": {
+      "1": "Data parallelism (running 8 full copies) is impossible when a single copy exceeds 80 GB VRAM.",
+      "2": "Using only 1 GPU fails with an immediate CUDA Out-Of-Memory error.",
+      "3": "USB 2.0 transfer speeds (~35 MB/s) would take hours to load weights for a single token."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/deploy-models",
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
+    ]
+  },
+  {
+    "id": "d3-mod-020",
+    "domain": 3,
+    "topic": "Agent Platform Memory Bank Scoped Access Control",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In a multi-tenant wealth management platform built with Google Cloud ADK and `VertexAiMemoryBankService`, Advisor Alice logs in to assist Client Bob (`user_id='client_bob_102'`), while concurrently Advisor Carol assists Client Dave (`user_id='client_dave_994'`). When the ADK agent queries `memory_service.search_memory()`, how does ADK guarantee strict tenant isolation so that Client Bob's private financial memories are never retrieved during Client Dave's session?",
+    "options": [
+      "Memory Bank puts all memories from all global users into a single flat unindexed text file and relies on the LLM to ignore other people's secrets.",
+      "`VertexAiMemoryBankService` strictly scopes all memory storage (`add_session_to_memory`) and retrieval (`search_memory`) by the combination of `app_name` and `user_id` derived from the active `Session` / `InvocationContext`.",
+      "Advisors must manually restart the Vertex AI server between every client meeting.",
+      "Memory Bank only works for one single user per Google Cloud project."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In ADK, every `Session` is cryptographically and logically bound to an `(app_name, user_id, session_id)` tuple. When `VertexAiMemoryBankService.add_session_to_memory(session)` is called, extracted memories are stored under the partition `(app_name, session.user_id)`. When `search_memory(app_name=..., user_id=..., query=...)` is invoked (or called via `ToolContext`), the underlying query enforces an exact metadata filter on `app_name` and `user_id`, guaranteeing zero cross-user memory leakage.",
+    "whyWrong": {
+      "0": "Relying on an LLM to ignore other tenants' data in a shared prompt violates zero-trust security and invites data leakage.",
+      "2": "Restarting cloud servers between meetings is operationally absurd and unnecessary.",
+      "3": "Memory Bank supports millions of distinct `user_id` partitions within a single project."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/memory/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank"
+    ]
+  },
+  {
+    "id": "d3-mod-021",
+    "domain": 3,
+    "topic": "Model Garden Grounding & Dynamic Retrieval Thresholds",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You have configured an ADK `LlmAgent` with Google Search grounding (`google_search`). You notice that when users ask conversational small-talk questions like 'Hello, how are you today?' or basic math like 'What is 12 * 12?', invoking a live Google Search adds 800ms of latency and incurs unnecessary search grounding charges. However, when users ask 'What was Alphabet's Q4 revenue reported yesterday?', the agent must execute Google Search. How can you optimize Gemini's grounding configuration to avoid unnecessary searches on static queries?",
+    "options": [
+      "Disable Google Search permanently and guess Alphabet's Q4 revenue.",
+      "Write a 5,000-line regex list of all possible English greetings inside a bash script.",
+      "Configure Dynamic Retrieval on the Google Search grounding tool with a `dynamic_threshold` (e.g., `0.7`), so Gemini predicts a grounding necessity score first and only invokes Google Search when the score exceeds the threshold.",
+      "Set `max_output_tokens=0` on greeting turns."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Vertex AI Grounding with Google Search supports Dynamic Retrieval (`DynamicRetrievalConfig`). When enabled with a `dynamic_threshold` (between 0.0 and 1.0), the model first evaluates whether the prompt requires fresh/external factual knowledge beyond its parametric weights. If the predicted dynamic retrieval score is below the threshold (e.g., greetings, creative writing, math), the model skips Google Search and responds immediately; if above the threshold, it executes grounded search with citations.",
+    "whyWrong": {
+      "0": "Disabling search permanently causes hallucinations on recent events like yesterday's earnings report.",
+      "1": "Maintaining a 5,000-line regex list is brittle and fails on general knowledge or math queries.",
+      "3": "Setting `max_output_tokens=0` produces an empty response."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/grounding-with-google-search#dynamic-retrieval"
+    ]
+  },
+  {
+    "id": "d3-mod-022",
+    "domain": 3,
+    "topic": "Model Selection: Multimodal Video Generation with Veo",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An advertising agency is building a creative director agent in Google Cloud ADK. After the `CopywriterAgent` generates a storyboard script and `ImagenAgent` creates reference character frames, the final sub-agent (`VideoProducerAgent`) needs to generate a high-definition 1080p cinematic 8-second video clip with smooth motion physics directly from the text prompt and reference image. Which foundation model in Vertex AI Model Garden should `VideoProducerAgent` invoke?",
+    "options": [
+      "Google `Chirp 2` speech recognition model.",
+      "`text-embedding-005` vector embedding model.",
+      "Cloud SQL for PostgreSQL.",
+      "Google `Veo` (such as `veo-2.0-generate-001` on Vertex AI), Google's state-of-the-art text-to-video and image-to-video generation model."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "`Veo` is Google's flagship generative video model available in Vertex AI Model Garden. It supports generating high-definition (1080p+) cinematic video sequences from text prompts (`text-to-video`) or animating reference images (`image-to-video`) with realistic temporal consistency, camera motion controls, and physics adherence.",
+    "whyWrong": {
+      "0": "Chirp 2 transcribes speech audio to text and cannot generate videos.",
+      "1": "`text-embedding-005` generates dense numerical vector arrays for search, not video files.",
+      "2": "Cloud SQL is a relational database engine."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/video/overview"
+    ]
+  },
+  {
+    "id": "d3-mod-023",
+    "domain": 3,
+    "topic": "Model Garden Embeddings Selection & Matryoshka Representation",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are building a custom semantic memory retrieval tool for an ADK agent that indexes 100 million technical support tickets in Vertex AI Vector Search. Using full 768-dimensional float32 embeddings (`text-embedding-005`) requires 300+ GB of high-cost RAM in the vector index. You want to reduce vector index RAM consumption and search latency by 66% by truncating embeddings to 256 dimensions, WITHOUT having to re-train a custom embedding model or suffering severe retrieval recall degradation. Which capability of Google's `text-embedding-005` (and `gemini-embedding-001`) models makes this possible?",
+    "options": [
+      "Matryoshka Representation Learning (MRL) support via the `output_dimensionality` parameter (e.g., setting `output_dimensionality=256`), which front-loads the most critical semantic information into the earliest vector dimensions.",
+      "Deleting every third word from the support tickets before embedding them.",
+      "Converting float32 numbers into ASCII text strings and storing them in Cloud DNS.",
+      "Setting `temperature=0.0` on the vector database."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google's `text-embedding-005` and `gemini-embedding-001` models are trained using Matryoshka Representation Learning (MRL). Unlike traditional embeddings where semantic information is diffused uniformly across all 768 dimensions (making truncation catastrophic), MRL explicitly optimizes nested prefixes (e.g., first 128, 256, 512, 768 dimensions) to be independently high-performing embeddings. Setting `output_dimensionality=256` at API call time returns a normalized 256-dim vector that cuts Vector Search RAM by 66% while preserving ~98% of full-dimensional retrieval recall.",
+    "whyWrong": {
+      "1": "Deleting every third word degrades semantic meaning and still produces a 768-dimensional vector.",
+      "2": "ASCII strings in Cloud DNS cannot perform fast inner-product vector similarity search.",
+      "3": "Vector databases do not have a `temperature` parameter."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#output-dimensionality"
+    ]
+  },
+  {
+    "id": "d3-mod-024",
+    "domain": 3,
+    "topic": "ADK & Model Garden Cost Control: Token Budgeting & Safety Limits",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A SaaS startup is launching a freemium public ADK agent powered by Gemini 2.5 Flash. To protect against denial-of-wallet (DoW) attacks where malicious users send giant prompts or trigger infinite tool loops that consume thousands of dollars of API quota, which two technical safeguards should you implement across your ADK agent and model configuration? (Choose two.)",
+    "options": [
+      "Configure explicit `max_output_tokens` in `generate_content_config` and enforce a maximum input character/token limit inside a `before_model_callback` to reject oversized prompts before calling the LLM API.",
+      "Enforce per-user rate limiting and maximum turn/tool-call ceilings (e.g., tracking `session.state['user:daily_token_usage']` or limiting `LoopAgent(max_iterations=3)`).",
+      "Share a single unrestricted Billing Account Admin IAM role with all public website visitors.",
+      "Set `max_output_tokens=1000000` and remove all loop termination conditions.",
+      "Disable Cloud Billing budget alerts so engineers are not bothered by emails."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Protecting public-facing agentic applications from Denial-of-Wallet (DoW) attacks requires defense-in-depth: (1) Capping input payload length in `before_model_callback` and setting a reasonable `max_output_tokens` ceiling bounds the cost of any single LLM call; (2) Tracking cumulative per-user token/turn quotas in persistent state (`user:daily_token_usage`) and setting strict `max_iterations` bounds on `LoopAgent` prevents runaway recursive tool loops.",
+    "whyWrong": {
+      "2": "Granting Billing Account Admin to public visitors allows attackers to compromise the entire cloud billing account.",
+      "3": "Uncapped output tokens and unbounded loops maximize financial vulnerability to DoW attacks.",
+      "4": "Disabling budget alerts blinds the organization to cost anomalies until the monthly invoice arrives."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/before-model-callback/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/quotas"
+    ]
+  },
+  {
+    "id": "d3-mod-025",
+    "domain": 3,
+    "topic": "Model Garden OSS Deployment: GKE Autopilot vs Standard GPU Scaling",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your ML platform team is deploying an open-weights `Mistral-Small-24B` model from Vertex AI Model Garden onto Google Kubernetes Engine (GKE) to serve an internal ADK agent. Traffic is highly diurnal: 500 RPM during US business hours (8 AM - 6 PM EST) and near zero traffic overnight and on weekends. The team wants Kubernetes to automatically provision GPU nodes (NVIDIA L4 GPUs) when agent traffic increases and scale the GPU nodes down to zero overnight to save 65% on compute costs, without manually managing node groups or OS patches. What GKE configuration should they use?",
+    "options": [
+      "Provision 50 bare-metal servers on-premises with 3-year non-cancellable leases that sit 100% idle overnight.",
+      "Deploy the vLLM inference workload on GKE Autopilot (or GKE Standard with Cluster Autoscaler / Node Auto-Provisioning) configured with Horizontal Pod Autoscaler (HPA) scaling on custom vLLM queue/token metrics and `minReplicas: 0` (or KEDA scale-to-zero).",
+      "Use a manual cron job that deletes the Kubernetes cluster every evening at 6 PM and requires a human engineer to re-create it from scratch at 8 AM.",
+      "Run the 24B model inside a browser JavaScript tab on the client's iPhone."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "GKE Autopilot (or Standard with Node Auto-Provisioning) natively manages GPU node lifecycles and driver installation. When paired with KEDA (Kubernetes Event-driven Autoscaling) or Horizontal Pod Autoscaler (HPA) monitoring Prometheus metrics exposed by vLLM (such as `vllm:num_requests_waiting`), GKE automatically scales inference pods and underlying L4 GPU nodes up during business hours and scales pods/nodes down to zero during off-peak hours, eliminating idle GPU charges.",
+    "whyWrong": {
+      "0": "Fixed bare-metal servers incur 100% cost during idle nights and weekends.",
+      "2": "Deleting and manually recreating clusters daily is error-prone and operationally slow.",
+      "3": "A 24B parameter model (~48GB FP16 / ~14GB INT4) cannot run inside an iPhone browser tab."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm",
+      "https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview"
+    ]
+  }
+]

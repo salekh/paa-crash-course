@@ -1,0 +1,40 @@
+PROFESSIONAL AGENTIC ARCHITECT
+
+AeroLogistics Fleet Case Study
+
+Company Overview
+
+AeroLogistics Fleet operates an autonomous global cargo drone, maritime shipping, and ground freight network delivering time-critical medical supplies, semiconductor components, and industrial freight across 90 countries. Their operations depend on real-time routing decisions across thousands of autonomous vehicles and regional dispatch hubs.
+
+Solution Concept
+
+AeroLogistics is replacing static heuristic routing software with a real-time Graph Multi-Agent Dispatch & Fleet Optimization System on Google Cloud. When weather disruptions, airspace closures, or port congestion occur, a graph workflow of specialized agents (Weather Forecaster, Airspace Compliance, Fuel/Battery Optimizer, and Customs Clearance Agent) collaborates asynchronously to recompute global fleet trajectories within seconds.
+
+Existing Technical Environment
+
+Fleet telemetry (GPS, battery health, cargo temperature) streams at 500,000 events/second into Pub/Sub and BigQuery. Real-time operational state is cached in Memorystore for Redis, while regional dispatch microservices run on GKE and Cloud Run.
+
+During severe weather events, legacy routing systems experience cascading timeouts and fail to coordinate cross-modal handoffs (e.g., transferring cargo from an autonomous drone to a ground EV courier). Unbounded LLM agent loops in early prototypes caused runaway token costs and 15-second latency spikes that violated real-time dispatch SLAs.
+
+Business Requirements
+
+   ● Maintain 99.99% on-time delivery for critical cold-chain medical freight despite weather or supply chain disruptions.
+   ● Keep p99 dispatch decision latency under 800 milliseconds for real-time edge rerouting.
+   ● Prevent runaway cloud compute and LLM token spending during global storm events that trigger millions of concurrent re-planning events.
+   ● Ensure autonomous dispatch decisions strictly obey FAA/EASA aviation rules and international customs regulations.
+   ● Provide fleet operations directors with real-time observability into multi-agent consensus and fallback behavior.
+
+Technical Requirements
+
+   ● Architect cyclic and directed acyclic graph (DAG) multi-agent workflows in ADK, combining parallel agent execution (simultaneous weather, fuel, and airspace checks) with sequential safety verification.
+   ● Optimize latency and cost by deploying fine-tuned Small Language Models (SLMs) on GKE with GPUs/TPUs for sub-second edge routing decisions, escalating to Gemini 1.5 Pro only for complex multi-hub conflict resolution.
+   ● Manage high-frequency agent session state and shared scratchpad memory using Memorystore for Redis and Agent Platform Memory Bank.
+   ● Configure hard execution guardrails including maximum reasoning step limits, tool timeout circuit breakers, and deterministic fallback heuristics to prevent infinite agent reasoning loops.
+   ● Instrument full OpenTelemetry and Cloud Trace trajectory tracking across all agent handoffs to pinpoint latency bottlenecks, token consumption spikes, and tool invocation failures in real time.
+   ● Deploy mission-critical dispatch agents across multi-region Cloud Run and GKE clusters with Agent Gateway managing global load shedding and rate limiting.
+
+Executive Statement
+
+When routing autonomous cargo aircraft and cold-chain freight, latency and reliability are life-and-death metrics. We engineered our Google Cloud graph agent architecture with strict step budgets, SLM/LLM hybrid routing, and deep Cloud Trace observability so our fleet adapts instantly without ever getting trapped in a reasoning loop.
+
+Captain Sofia Lindqvist, Chief Autonomous Operations Officer, AeroLogistics Fleet

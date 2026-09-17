@@ -1,0 +1,42 @@
+PROFESSIONAL AGENTIC ARCHITECT
+
+FinServe Global Case Study
+
+Company Overview
+
+FinServe Global is a multinational wealth management, retail banking, and institutional advisory firm managing over $450 billion in client assets. Operating across North America, Europe, and APAC, FinServe provides personalized portfolio management, automated tax-loss harvesting, and real-time regulatory compliance auditing to millions of retail and institutional clients.
+
+Solution Concept
+
+To scale personalized financial advisory without linearly increasing human advisor headcount, FinServe Global is building an autonomous multi-agent financial advisory and compliance platform on Google Cloud. The platform will orchestrate specialized subagents for market research, portfolio rebalancing, tax simulation, and real-time regulatory compliance checking using the Agent Development Kit (ADK) and Agent Runtime.
+
+High-value trade executions exceeding $50,000 or involving high-risk derivatives must enforce deterministic Human-in-the-Loop (HITL) approval workflows before execution. All agent-to-tool API calls against core banking ledgers must propagate end-user cryptographic identity and enforce strict Principal Access Boundary (PAB) policies.
+
+Existing Technical Environment
+
+FinServe currently operates a hybrid infrastructure with core banking transactional ledgers hosted in Cloud SQL for PostgreSQL and BigQuery as the enterprise data warehouse. Legacy wealth advisory portals use monolithic Java microservices deployed on Google Kubernetes Engine (GKE).
+
+Customer service chatbots currently rely on static intent-based Dialogflow flows that frequently fail on multi-turn financial planning queries. Security teams have flagged unauthorized prompt injection attempts and PII leakage risks in early LLM prototypes that lacked centralized traffic inspection or input/output guardrails.
+
+Business Requirements
+
+   ● Scale personalized wealth advisory to 5 million retail clients with 24/7 autonomous portfolio analysis.
+   ● Maintain 100% compliance with SEC, FINRA, and GDPR financial data sovereignty and auditability mandates.
+   ● Prevent unauthorized autonomous trade execution through mandatory human advisor approval thresholds.
+   ● Reduce wealth advisor manual research time by 70% while maintaining sub-2-second response latency for client chat interactions.
+   ● Provide full cryptographic lineage and audit trails of every agent reasoning step, tool call, and data retrieval event.
+
+Technical Requirements
+
+   ● Implement a hierarchical multi-agent architecture using ADK where a Supervisor Agent delegates tasks to specialized Portfolio, Tax, and Compliance subagents.
+   ● Enforce zero-trust identity propagation using Agent Identity, Auth Manager (OAuth 2.0), and Principal Access Boundary (PAB) policies so agents can never query client accounts outside the authenticated user scope.
+   ● Route all agent ingress, egress, and inter-agent traffic through Agent Gateway for centralized telemetry, rate limiting, and anomaly detection.
+   ● Deploy Model Armor and Sensitive Data Protection in-line to block prompt injection, jailbreaks, and PII/PCI leakage across all prompts and tool outputs.
+   ● Persist long-term client financial goals and risk profiles using Agent Platform Memory Bank while maintaining ephemeral multi-turn conversation state in managed sessions.
+   ● Evaluate all agent trajectories and tool execution accuracy continuously against a curated golden dataset using ADK evalset and custom financial compliance autoraters prior to production promotion.
+
+Executive Statement
+
+In wealth management, trust and regulatory precision are non-negotiable. We cannot deploy black-box agents that hallucinate financial advice or execute unauthorized trades. By standardizing on Google Cloud Agent Development Kit, Agent Identity, and Model Armor, we are building an autonomous advisory workforce that combines institutional-grade governance with personalized client intelligence.
+
+Elena Rostova, Chief Technology & Risk Officer, FinServe Global

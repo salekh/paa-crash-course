@@ -1,0 +1,729 @@
+[
+  {
+    "id": "d3-mcp-001",
+    "domain": 3,
+    "topic": "MCP Primitives: Resources vs Tools vs Prompts",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are architecting a Google Cloud Model Context Protocol (MCP) server for an enterprise BigQuery data warehouse. The MCP server needs to expose three capabilities to an ADK-based financial analyst agent: (1) static read-only access to table DDL schemas and data dictionary markdown files identified by URIs like `bigquery://fin-prod/analytics/tables/revenue/schema`, (2) executable actions that run parameterized SQL queries with side-effect/cost validation and return result sets, and (3) reusable structured analytical templates that pre-fill system context for quarterly variance reviews. According to the MCP specification, how should you map these three capabilities to MCP primitives?",
+    "options": [
+      "Map table DDL schemas and data dictionaries to MCP Resources (`resources/list`, `resources/read`), parameterized SQL query execution to MCP Tools (`tools/list`, `tools/call`), and structured analytical templates to MCP Prompts (`prompts/list`, `prompts/get`).",
+      "Map all three capabilities exclusively to MCP Prompts and disable JSON-RPC validation.",
+      "Map executable SQL queries to MCP Resources and static markdown files to MCP Tools.",
+      "Store all schemas and SQL queries inside HTTP cookies."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "The Model Context Protocol (MCP) defines three core primitives: Resources (application-controlled, URI-addressable read-only context data like file contents, database schemas, or logs), Tools (model-controlled executable functions with JSON Schema input validation that perform computations or side effects like running SQL queries), and Prompts (user/application-controlled templates that structure interactions and workflows).",
+    "whyWrong": {
+      "1": "MCP Prompts cannot execute dynamic model-driven function calls or expose URI-addressable data streams.",
+      "2": "Reversing Resources and Tools violates MCP semantics: Resources are passive read-only data streams, whereas Tools represent active model-invoked operations.",
+      "3": "HTTP cookies are transport headers, not MCP protocol primitives."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/architecture",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d3-mcp-002",
+    "domain": 3,
+    "topic": "MCP Transport Protocols: stdio vs SSE / Streamable HTTP on Cloud Run",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A platform engineering team has developed a custom MCP server in Python that wraps internal Cloud Spanner inventory APIs. Initially, developers tested the MCP server locally on their laptops using the `stdio` transport (spawning the MCP server as a local child process). Now, they need to deploy this MCP server as a centralized, autoscaling microservice on Google Cloud Run so that multiple remote agent instances running in Vertex AI Agent Engine across different VPCs can invoke it concurrently over HTTPS with IAM authentication. Which MCP transport mechanism should they configure for the Cloud Run deployment?",
+    "options": [
+      "Keep using the `stdio` transport and ask Vertex AI Agent Engine to SSH into the Cloud Run container's standard input stream.",
+      "Configure the MCP server to use the HTTP with Server-Sent Events (SSE) transport or Streamable HTTP transport exposed over HTTPS on the Cloud Run container port, protected by Cloud Run IAM invoker authentication.",
+      "Use raw unencrypted Telnet over port 23.",
+      "Configure the MCP server to communicate exclusively via local UNIX domain sockets on `/tmp/mcp.sock` across separate Cloud Run projects."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "While `stdio` transport is designed for local process-to-process communication on the same machine, remote cloud-hosted MCP servers deployed on serverless platforms like Cloud Run require network-capable transports—specifically HTTP with Server-Sent Events (SSE) or Streamable HTTP—allowing remote MCP clients to send JSON-RPC requests via HTTP POST and receive streaming responses/notifications over HTTPS.",
+    "whyWrong": {
+      "0": "Cloud Run does not allow external services to attach to container `stdin`/`stdout` via SSH.",
+      "2": "Telnet is unencrypted and unsupported by Cloud Run HTTP ingress or MCP specifications.",
+      "3": "UNIX domain sockets on `/tmp` are isolated to a single container instance and cannot be accessed across network boundaries."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/transports",
+      "https://cloud.google.com/run/docs/triggering/https-request"
+    ]
+  },
+  {
+    "id": "d3-mcp-003",
+    "domain": 3,
+    "topic": "BigQuery MCP Server Cost Guardrails & Read-Only Safety",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An e-commerce company deploys a BigQuery MCP server that allows marketing agents to execute ad-hoc SQL queries against a 500 TB clickstream dataset (`analytics.clickstream_events`). During the first week, an agent enters an infinite self-correction loop and executes 40 unpartitioned `SELECT *` full-table scans, incurring $10,000 in unexpected BigQuery on-demand analysis charges and accidentally attempting to run a `DROP TABLE` statement when a query fails. How should you harden the BigQuery MCP server tool implementation to enforce strict cost and data safety guardrails?",
+    "options": [
+      "Instruct the agent via a system prompt to 'please write cheap SQL queries and never use DROP TABLE'.",
+      "Grant the BigQuery MCP server service account `roles/bigquery.admin` and disable query dry runs to save 50ms of latency.",
+      "In the MCP server's `execute_sql` tool handler, parse/validate the SQL AST (or enforce a read-only IAM service account with only `roles/bigquery.dataViewer` and `roles/bigquery.jobUser`), execute a BigQuery dry run (`JobConfig(dry_run=True)`) before execution to reject queries exceeding a strict byte threshold, and set `maximum_bytes_billed` (e.g., 10 GB) on all query jobs.",
+      "Export the 500 TB dataset to CSV files on local disk."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Production BigQuery MCP servers must enforce deterministic server-side guardrails: (1) Least-privilege IAM (`bigquery.dataViewer` + `bigquery.jobUser` prevents any DDL/DML `DROP`, `DELETE`, `UPDATE`, or `INSERT` at the IAM layer), (2) executing a BigQuery `dry_run` to inspect `total_bytes_processed` and return a helpful error message prompting the agent to add partition filters if too large, and (3) setting `maximum_bytes_billed` on the `QueryJobConfig` as a hard server-side circuit breaker.",
+    "whyWrong": {
+      "0": "System prompts are soft instructions that fail under adversarial input or model reasoning errors.",
+      "1": "Granting `bigquery.admin` allows destructive table deletion and unlimited query spend.",
+      "3": "Exporting 500 TB to local disk is infeasible and does not provide SQL execution guardrails."
+    },
+    "refs": [
+      "https://cloud.google.com/bigquery/docs/best-practices-costs#limit_query_costs_by_restricting_the_number_of_bytes_billed",
+      "https://cloud.google.com/bigquery/docs/dry-run-queries"
+    ]
+  },
+  {
+    "id": "d3-mcp-004",
+    "domain": 3,
+    "topic": "Cloud SQL MCP Server IAM Database Authentication & Auth Proxy",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are deploying a Google Cloud MCP server on Cloud Run that executes operational diagnostic queries against a Cloud SQL for PostgreSQL instance. Security policy prohibits storing static database passwords in environment variables, Secret Manager, or source code, and mandates that all database connections use automatic short-lived IAM OAuth tokens with mTLS encryption. How should you configure the Cloud SQL MCP server's database connection layer?",
+    "options": [
+      "Write SQL queries to a public Cloud Storage bucket and wait for a DBA to run them manually.",
+      "Create a PostgreSQL user `postgres` with password `password123` and hardcode it in the `Dockerfile`.",
+      "Open port 5432 on the Cloud SQL public IP to `0.0.0.0/0` and disable SSL.",
+      "Configure the Cloud SQL instance with `cloudsql.iam_authentication=on`, grant the Cloud Run MCP server's service account `roles/cloudsql.instanceUser` and `roles/cloudsql.client`, and initialize the Python SQLAlchemy connection pool inside the MCP server using the `cloud-sql-python-connector` with `enable_iam_auth=True`."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The Cloud SQL Python Connector (`cloud-sql-python-connector`) with `enable_iam_auth=True` automatically fetches ephemeral IAM OAuth2 access tokens for the Cloud Run service account (`roles/cloudsql.instanceUser`) and establishes mTLS-encrypted connections (`roles/cloudsql.client`) to Cloud SQL without managing static database passwords or sidecar proxy binaries.",
+    "whyWrong": {
+      "0": "Manual DBA execution destroys real-time agent tool-calling capabilities.",
+      "1": "Hardcoding static passwords in a Dockerfile directly violates the zero-static-password security mandate.",
+      "2": "Opening port 5432 to `0.0.0.0/0` without SSL exposes the database to brute-force and man-in-the-middle attacks."
+    },
+    "refs": [
+      "https://cloud.google.com/sql/docs/postgres/iam-authentication",
+      "https://github.com/GoogleCloudPlatform/cloud-sql-python-connector"
+    ]
+  },
+  {
+    "id": "d3-mcp-005",
+    "domain": 3,
+    "topic": "MCP Schema Bloat & Dynamic Tool/Resource Discovery",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise ERP database contains 1,800 tables averaging 60 columns each. When your team connects an MCP server to this database and injects the full DDL schema of all 1,800 tables into the `tools/list` description of the `run_sql_query` tool, the initial handshake payload exceeds 450,000 tokens. This causes severe time-to-first-token latency, hits context window limits, and confuses the LLM when generating SQL queries. What MCP architectural pattern should you implement to eliminate schema context bloat?",
+    "options": [
+      "Pass all 450,000 tokens in every single turn and set `max_output_tokens=10`.",
+      "Implement progressive schema discovery: keep the `tools/list` descriptions concise, expose a `search_tables` tool (using semantic or keyword search over table/column descriptions) that returns relevant table names, and expose individual table DDL schemas on demand via parameterized MCP Resource templates (`db://erp/schemas/{table_name}`) or a `get_table_schema` tool.",
+      "Delete 1,790 tables from the production ERP database so only 10 tables remain.",
+      "Rename all 1,800 tables to single letters like `a`, `b`, `c` without column descriptions."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Progressive disclosure (hierarchical tool/resource discovery) is essential for large-scale enterprise MCP servers. Instead of stuffing thousands of schemas into the static `tools/list` payload, the agent first invokes a lightweight search tool (`search_tables`) to find candidate tables, and then reads the specific MCP Resource (`db://erp/schemas/{table_name}`) or calls `get_table_schema` for only the 2–4 tables needed for the query.",
+    "whyWrong": {
+      "0": "Sending 450,000 tokens per turn incurs massive cost and latency and degrades LLM attention over irrelevant schemas.",
+      "2": "Deleting production ERP tables destroys critical enterprise business operations.",
+      "3": "Cryptic single-letter table names without descriptions make it impossible for the LLM to write accurate SQL."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/resources#resource-templates",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling"
+    ]
+  },
+  {
+    "id": "d3-mcp-006",
+    "domain": 3,
+    "topic": "Spanner Graph MCP Server for Multi-Hop Fraud Detection",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A financial crime investigation agent uses an MCP server connected to Google Cloud Spanner to investigate money laundering rings. The database models accounts, wire transfers, device fingerprints, and IP addresses using Spanner Graph (`CREATE PROPERTY GRAPH`). Investigators ask the agent to find circular money transfers spanning 3 to 6 hops between accounts sharing the same device fingerprint. Writing standard relational SQL with 6-way self-joins in the MCP tool is error-prone and slow. How should the Spanner MCP server expose graph traversal capabilities to the agent?",
+    "options": [
+      "Limit the agent to checking only 1 hop using `SELECT * FROM transfers LIMIT 1`.",
+      "Export all Spanner tables to flat text files and use `grep` inside the MCP server.",
+      "Expose a dedicated `query_spanner_graph` MCP tool that accepts ISO GQL (Graph Query Language) patterns (e.g., `GRAPH FinGraph MATCH (a:Account)-[t:Transfer]->{3,6}(a) WHERE ...`) inside Spanner's `GRAPH_TABLE` operator, allowing native multi-hop path matching.",
+      "Use Cloud DNS TXT records to store wire transfer graphs."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Cloud Spanner Graph natively supports ISO GQL syntax within SQL queries via `GRAPH_TABLE`. Exposing a specialized graph query tool (with schema guidance on node/edge labels like `Account`, `Transfer`, `Device`) allows the agent to express variable-length path traversals (`->{3,6}`) cleanly without generating brittle multi-level SQL self-joins.",
+    "whyWrong": {
+      "0": "Limiting queries to 1 hop misses circular money laundering rings that intentionally span 3+ intermediaries.",
+      "1": "Grep over flat text files cannot evaluate variable-length cyclic graph topologies at scale.",
+      "3": "Cloud DNS is a domain name resolution service, not a graph database."
+    },
+    "refs": [
+      "https://cloud.google.com/spanner/docs/graph/overview",
+      "https://cloud.google.com/spanner/docs/graph/queries-overview"
+    ]
+  },
+  {
+    "id": "d3-mcp-007",
+    "domain": 3,
+    "topic": "Spanner MCP Server Read-Only Stale Reads for Hot Tables",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global airline's customer service agent uses a Spanner MCP server to check flight seat availability and baggage tracking status. The underlying Spanner database handles 50,000 write transactions per second from global booking engines. When 10,000 customer service agents concurrently invoke the MCP server using default strong read-write transactions, they acquire shared read locks that contend with high-priority booking writes, increasing p99 booking latency. Baggage and seat status displayed to customers can tolerate being up to 5 seconds old. How should you optimize the Spanner MCP server's read transactions?",
+    "options": [
+      "Migrate the airline database from Spanner to local CSV files.",
+      "Use `READ_WRITE` transactions with `LOCK_SCANNED_RANGES` on every MCP query.",
+      "Shut down the booking engine whenever an agent queries seat availability.",
+      "Configure the Spanner MCP server's read tool to execute single-use read-only transactions with bounded staleness (`exact_staleness` or `max_staleness=datetime.timedelta(seconds=5)`), which read from local Paxos replicas without acquiring locks or blocking concurrent write transactions."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In Cloud Spanner, read-only transactions with bounded staleness (`exact_staleness` or `max_staleness`) execute entirely lock-free against historical MVCC timestamps on the nearest replica. They never block or conflict with concurrent read-write transactions, eliminating lock contention while providing sub-10ms local read latency.",
+    "whyWrong": {
+      "0": "CSV files cannot support 50,000 global distributed writes per second.",
+      "1": "`READ_WRITE` transactions with exclusive locks serialize access and severely degrade write throughput on hot rows.",
+      "2": "Shutting down the booking engine halts airline revenue generation."
+    },
+    "refs": [
+      "https://cloud.google.com/spanner/docs/timestamp-bounds",
+      "https://cloud.google.com/spanner/docs/reads"
+    ]
+  },
+  {
+    "id": "d3-mcp-008",
+    "domain": 3,
+    "topic": "3P SaaS MCP Servers with Apigee & Integration Connectors",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise wants its sales operations agent to interact with third-party SaaS applications including Salesforce, HubSpot, and SAP ERP via the Model Context Protocol (MCP). Rather than building and maintaining custom OAuth token refresh loops, rate-limiting proxies, and schema adapters for each SaaS API from scratch, the architecture team wants to leverage managed Google Cloud enterprise integration services as the backend for their MCP server. Which Google Cloud architecture should they implement?",
+    "options": [
+      "Deploy an MCP server on Cloud Run that invokes Google Cloud Integration Connectors (Application Integration) and Apigee API Management, leveraging Integration Connectors for managed SaaS authentication/schema normalization and Apigee for enterprise rate limiting, quota enforcement, and auditing.",
+      "Ask sales reps to paste their personal Salesforce session cookies into the public chat window every 15 minutes.",
+      "Write custom scraping bots using headless browsers on Compute Engine to click buttons in the Salesforce UI.",
+      "Store third-party SaaS credentials unencrypted in a public Cloud Storage bucket."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google Cloud Integration Connectors provides pre-built, managed connectors for 100+ SaaS/ERP systems (Salesforce, SAP, ServiceNow, HubSpot) with built-in Secret Manager OAuth lifecycle management and normalized entity operations. Wrapping these connectors behind an MCP server bridged through Apigee gives agents standardized MCP tools with enterprise API governance.",
+    "whyWrong": {
+      "1": "Pasting session cookies into chat transcripts is a severe security anti-pattern and breaks automation.",
+      "2": "UI scraping with headless browsers is brittle, slow, and violates SaaS API terms of service.",
+      "3": "Storing credentials in public buckets leads to immediate account compromise."
+    },
+    "refs": [
+      "https://cloud.google.com/integration-connectors/docs/overview",
+      "https://cloud.google.com/apigee/docs/api-platform/get-started/what-apigee"
+    ]
+  },
+  {
+    "id": "d3-mcp-009",
+    "domain": 3,
+    "topic": "Connection Pooling in Cloud SQL MCP Servers",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your team deployed a Cloud SQL for PostgreSQL MCP server on Cloud Run configured to autoscale up to 200 container instances during peak traffic. Each container instance opens a new PostgreSQL connection on every `tools/call` invocation and closes it afterward. During peak load, the Cloud SQL instance hits `FATAL: remaining connection slots are reserved for non-replication superuser connections` (`max_connections=500`), and connection establishment latency spikes to 400ms due to repeated TLS/IAM handshakes. How should you re-architect the MCP server's database connectivity?",
+    "options": [
+      "Open a new connection for every SQL row returned and never close connections.",
+      "Increase `max_connections` on a small db-f1-micro instance to 1,000,000.",
+      "Initialize a persistent SQLAlchemy connection pool (`QueuePool`, e.g., `pool_size=5`, `max_overflow=2`) at the module/server lifecycle scope inside each Cloud Run container, cap Cloud Run `max-instances` (or deploy Cloud SQL Enterprise Plus built-in PgBouncer / managed connection pooling) so total pooled connections stay strictly below `max_connections`.",
+      "Switch from PostgreSQL to unindexed text files."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Opening and closing a database connection per MCP tool call exhausts TCP ports, CPU (from repeated TLS/IAM auth handshakes), and PostgreSQL `max_connections`. Reusing connections via a lifecycle-scoped connection pool (`QueuePool`) combined with Cloud SQL built-in PgBouncer or bounded Cloud Run concurrency ensures sub-millisecond connection checkout and prevents connection exhaustion.",
+    "whyWrong": {
+      "0": "Leaking unclosed connections per row immediately exhausts all connection slots.",
+      "1": "Setting `max_connections` to 1,000,000 exhausts PostgreSQL shared memory and crashes the database.",
+      "3": "Unindexed text files cannot support concurrent transactional SQL queries."
+    },
+    "refs": [
+      "https://cloud.google.com/sql/docs/postgres/manage-connections",
+      "https://cloud.google.com/sql/docs/postgres/connection-pooling"
+    ]
+  },
+  {
+    "id": "d3-mcp-010",
+    "domain": 3,
+    "topic": "MCP JSON-RPC 2.0 Error Handling & Self-Correction Feedback",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When an ADK agent calls a BigQuery MCP server tool (`execute_sql`) with a malformed SQL query (e.g., referencing a column `cust_id` that is actually named `customer_id`), the BigQuery API raises a `400 Bad Request: Unrecognized name: cust_id; Did you mean customer_id?`. If the MCP server simply crashes with an unhandled Python exception or returns a generic `500 Internal Server Error`, the agent cannot self-correct. How should the MCP tool handler format and return this error according to MCP best practices?",
+    "options": [
+      "Reboot the Google Cloud project.",
+      "Terminate the MCP server process using `os._exit(1)` whenever a SQL syntax error occurs.",
+      "Return `isError: false` with empty results so the agent thinks the table has zero rows.",
+      "Catch the BigQuery exception inside the tool handler and return a valid MCP `CallToolResult` with `isError: true` and a `TextContent` payload containing the exact BigQuery diagnostic message (`Unrecognized name: cust_id; Did you mean customer_id?`) so the LLM can inspect the error and rewrite the SQL query on its next turn."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In the Model Context Protocol, tool execution failures that the LLM can recover from (such as SQL syntax errors, invalid parameter values, or missing column names) should return a structured `CallToolResult` with `isError: true` and descriptive diagnostic text in `content`. This feeds the compiler/database hint back into the LLM's observation window, enabling autonomous self-correction.",
+    "whyWrong": {
+      "0": "Rebooting infrastructure does not fix an LLM SQL syntax error.",
+      "1": "Crashing the MCP server process breaks the JSON-RPC transport session and causes agent failure.",
+      "2": "Returning `isError: false` with empty rows misleads the agent into reporting that no matching data exists (silent data corruption)."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/tools#error-handling",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling"
+    ]
+  },
+  {
+    "id": "d3-mcp-011",
+    "domain": 3,
+    "topic": "Per-User Identity Propagation (On-Behalf-Of OAuth) in 3P MCP Servers",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise deploys a Jira & Confluence MCP server used by a company-wide engineering assistant agent. When a junior contractor asks the agent 'Show me the post-mortem notes for Project Titan', the MCP server must query Confluence using the authenticated contractor's own Confluence permissions rather than a shared admin service account token that has access to confidential executive board notes. How should you architect identity propagation from the agent host to the 3P SaaS MCP server?",
+    "options": [
+      "Implement OAuth 2.0 On-Behalf-Of (OBO) or per-user token exchange: pass the end-user's verified identity assertion / session context in the MCP request metadata, retrieve or exchange the user's scoped Confluence OAuth access token from a secure token vault (e.g., Secret Manager / Identity Platform token broker), and execute the Confluence REST call under the user's security context.",
+      "Use a single global Confluence Super-Admin API key for all requests and ask the LLM not to read confidential pages.",
+      "Share the CEO's Confluence username and password with all employees.",
+      "Disable Confluence permissions so all pages are public."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Zero-trust enterprise agents must never elevate a user's privileges via confused deputy attacks (where a low-privilege user queries a high-privilege shared service account). Propagating the authenticated user's identity token (via OAuth 2.0 On-Behalf-Of token exchange or per-user scoped OAuth credentials) ensures the downstream SaaS API enforces native row- and page-level ACLs.",
+    "whyWrong": {
+      "1": "Using a global Super-Admin token creates a classic 'Confused Deputy' vulnerability where any user can exfiltrate restricted executive documents via prompt injection.",
+      "2": "Sharing executive credentials violates corporate security and audit compliance.",
+      "3": "Making confidential pages public violates enterprise data governance."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/security",
+      "https://cloud.google.com/iam/docs/workload-identity-federation"
+    ]
+  },
+  {
+    "id": "d3-mcp-012",
+    "domain": 3,
+    "topic": "MCP Resource Subscriptions & Real-Time Notifications",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A trading desk agent monitors live risk threshold configurations stored as an MCP Resource (`risk://desk-alpha/limits`) exposed by a risk management MCP server. Whenever a chief risk officer updates the desk's Value-at-Risk (VaR) limits in the backend database, the connected MCP client/agent needs to be notified immediately so it refreshes its cached resource context without polling `resources/read` every 100ms. Which native MCP capability supports this reactive pattern?",
+    "options": [
+      "Have the agent call `resources/read` 1,000 times per second in a tight `while` loop.",
+      "Enable the `resources.subscribe` capability during MCP server initialization; the client sends a `resources/subscribe` request for `risk://desk-alpha/limits`, and the server pushes a `notifications/resources/updated` JSON-RPC notification whenever the underlying resource changes.",
+      "Send a physical fax message to the data center whenever limits change.",
+      "Restart the LLM container every 5 seconds."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Model Context Protocol natively supports reactive resource updates via Resource Subscriptions (`capabilities.resources.subscribe = true`). Once a client subscribes to a specific resource URI via `resources/subscribe`, the server emits lightweight asynchronous `notifications/resources/updated` notifications over the persistent transport connection whenever state changes.",
+    "whyWrong": {
+      "0": "High-frequency polling wastes network and compute resources and introduces unnecessary load.",
+      "2": "Physical faxes are irrelevant to software agent communication.",
+      "3": "Restarting containers every 5 seconds drops active user sessions and adds cold-start latency."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/resources#subscriptions",
+      "https://modelcontextprotocol.io/specification/2024-11-05/server/resources"
+    ]
+  },
+  {
+    "id": "d3-mcp-013",
+    "domain": 3,
+    "topic": "Securing MCP Servers Against SQL Injection via Parameterized Queries",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are reviewing the code of a custom Cloud SQL MCP server written by a junior developer. The server exposes a tool named `get_customer_orders` that accepts a `customer_email` string parameter from the LLM and executes: `cursor.execute(f\"SELECT * FROM orders WHERE email = '{customer_email}'\")`. Why is this implementation dangerous even if only an internal LLM invokes the tool, and how should you fix it?",
+    "options": [
+      "Replace PostgreSQL with Microsoft Word documents.",
+      "String formatting in Python is too slow; replace it with `eval()` to execute faster.",
+      "The LLM automatically sanitizes all SQL strings with 100% mathematical certainty.",
+      "An attacker can craft a prompt or email containing SQL injection payloads (e.g., `' OR 1=1; DROP TABLE orders; --`) that the LLM extracts and passes verbatim into the tool argument; fix it by using strictly parameterized queries (`cursor.execute('SELECT * FROM orders WHERE email = %s', (customer_email,))` or BigQuery `ScalarQueryParameter`)."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "LLMs frequently extract strings verbatim from untrusted user inputs, emails, or web pages when populating tool arguments. Concatenating LLM-generated arguments directly into SQL strings via Python f-strings creates a severe SQL injection vulnerability. Using parameterized queries (`%s` bind variables or `ScalarQueryParameter`) separates query structure from data literals at the database driver protocol level.",
+    "whyWrong": {
+      "0": "Microsoft Word is not a relational database.",
+      "1": "Using `eval()` introduces Remote Code Execution (RCE) in addition to SQL injection.",
+      "2": "LLMs are probabilistic token generators and do NOT guarantee cryptographic or syntactic sanitization against adversarial SQL injection."
+    },
+    "refs": [
+      "https://cloud.google.com/bigquery/docs/parameterized-queries",
+      "https://modelcontextprotocol.io/docs/concepts/security"
+    ]
+  },
+  {
+    "id": "d3-mcp-014",
+    "domain": 3,
+    "topic": "BigQuery MCP Server Result Set Truncation & Pagination",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A data analyst agent invokes an MCP tool (`run_bigquery_sql`) to analyze customer churn trends. The LLM generates a query without a `LIMIT` clause (`SELECT customer_id, churn_reason, transcript FROM analytics.churn_events`), which matches 250,000 rows totaling 800 MB of text. Attempting to serialize all 250,000 rows into the MCP `CallToolResult` JSON payload crashes the MCP client and exceeds Gemini's context window. How should you design the BigQuery MCP server's result serialization logic?",
+    "options": [
+      "Enforce a server-side row and byte cap (e.g., fetch at most 100 rows or 50 KB via `query_job.result(max_results=100)`), include a clear metadata header in the tool output (`Showing rows 1-100 of 250,000 total rows. Refine your query with aggregations or use pagination page_token to view more`), and encourage SQL-level `GROUP BY` aggregations.",
+      "Stream all 800 MB of JSON directly into the LLM prompt and disable context window checks.",
+      "Throw away all query results and return a random number.",
+      "Delete the BigQuery table whenever a query returns more than 10 rows."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "MCP tool responses must be bounded to protect the host agent's memory and LLM context window. By capping `max_results` (e.g., 100 rows) on the BigQuery RowIterator and appending truncation metadata (`total_rows=250000, truncated=True`), the MCP server informs the agent that the dataset is large, prompting the agent to rewrite the query using `COUNT(*)`, `GROUP BY`, or targeted `WHERE` filters.",
+    "whyWrong": {
+      "1": "800 MB of text (~200 million tokens) exceeds all current LLM context windows and causes Out-Of-Memory crashes.",
+      "2": "Returning random numbers destroys analytical accuracy.",
+      "3": "Deleting production tables on large queries is destructive."
+    },
+    "refs": [
+      "https://cloud.google.com/bigquery/docs/paging-results",
+      "https://modelcontextprotocol.io/docs/concepts/tools"
+    ]
+  },
+  {
+    "id": "d3-mcp-015",
+    "domain": 3,
+    "topic": "Human-in-the-Loop Approval for Mutating MCP Tools",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An IT automation agent connects to a Google Cloud & ServiceNow MCP server that exposes both read-only tools (`get_vm_status`, `list_open_tickets`) and high-impact mutating tools (`terminate_production_instance`, `issue_customer_refund`, `update_firewall_rule`). Corporate governance requires that read-only tools execute autonomously, but any mutating tool call must be paused and explicitly approved by a human SRE supervisor in Slack before the MCP server executes the underlying API call. How should you architect this approval workflow?",
+    "options": [
+      "Allow all destructive tools to run immediately without confirmation and send a summary email at the end of the month.",
+      "Tag mutating tools with metadata/annotations (e.g., `destructiveHint: true` / `requiresApproval: true`); configure the ADK/Agent Host interceptor or MCP gateway to intercept calls to flagged tools, persist the pending tool invocation state, send an interactive approval request to Slack via Pub/Sub/Webhook, and execute the MCP `tools/call` only after receiving a cryptographically signed supervisor approval callback.",
+      "Remove all read-only tools so the agent can only guess system state.",
+      "Give every end-user root SSH access to production VMs."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The Model Context Protocol tool specification supports tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`). An enterprise agent host or MCP proxy inspects these annotations (or maintains an explicit policy policy engine), automatically executing `readOnlyHint: true` tools while suspending execution (`Human-in-the-Loop` interrupt) for `destructiveHint: true` tools until an authorized human supervisor approves the exact parameters.",
+    "whyWrong": {
+      "0": "Allowing autonomous termination of production VMs without human verification violates enterprise change management and safety controls.",
+      "2": "Removing read-only tools blinds the agent and prevents diagnostics.",
+      "3": "Granting root SSH access to end users violates least-privilege security."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/tools#tool-annotations",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d3-mcp-016",
+    "domain": 3,
+    "topic": "MCP Server Observability & Cloud Trace Context Propagation",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A retail enterprise runs a multi-agent system on Vertex AI Agent Engine that calls three separate MCP servers (BigQuery MCP, Spanner Inventory MCP, and Stripe Payments MCP) deployed on Cloud Run. When a customer checkout request takes 4.5 seconds, SREs cannot tell whether the latency occurred inside the LLM reasoning step, the network hop to Cloud Run, or a slow SQL query inside the Spanner MCP server. How should you instrument the MCP client and MCP servers for end-to-end distributed tracing?",
+    "options": [
+      "Disable all logging to reduce disk I/O.",
+      "Add `time.sleep(5)` to every function so all traces look uniform.",
+      "Instrument both the ADK Agent Host (MCP Client) and the Cloud Run MCP Servers with OpenTelemetry SDKs configured to export spans to Google Cloud Trace, propagating the W3C Trace Context (`traceparent` header / `_meta` field in MCP JSON-RPC requests) across every `tools/call` invocation and database query.",
+      "Print timestamps to `stdout` without request IDs or correlation headers."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Propagating W3C Trace Context (`traceparent`) across MCP JSON-RPC calls (via HTTP headers on SSE/HTTP transports or the `_meta` object in JSON-RPC params) allows OpenTelemetry to stitch together a single unified waterfall trace in Google Cloud Trace spanning the Agent Host -> LLM invocation -> MCP Client -> Cloud Run MCP Server -> Spanner/BigQuery execution.",
+    "whyWrong": {
+      "0": "Disabling logging leaves SREs completely blind to production bottlenecks.",
+      "1": "Adding artificial sleep degrades performance without providing diagnostic visibility.",
+      "3": "Uncorrelated `stdout` timestamps cannot link concurrent requests across distributed microservices."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/setup/python-ot",
+      "https://modelcontextprotocol.io/specification/2024-11-05/basic/utilities/cancellation#meta"
+    ]
+  },
+  {
+    "id": "d3-mcp-017",
+    "domain": 3,
+    "topic": "MCP Dynamic Tool Registration & `notifications/tools/list_changed`",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise integration platform hosts a multi-tenant MCP server. When a tenant administrator enables a new integration plugin (e.g., enabling the 'Workday HR' connector) in their admin dashboard, the MCP server dynamically loads new tools (`workday_get_employee`, `workday_request_pto`) into memory without restarting the server. How does the MCP server inform already-connected MCP clients/agents that new tools are available for invocation?",
+    "options": [
+      "The MCP server declares `capabilities.tools.listChanged = true` during initialization and sends an asynchronous `notifications/tools/list_changed` JSON-RPC notification to connected clients, prompting the client to call `tools/list` to refresh its active tool registry.",
+      "The MCP server must forcibly crash and delete the client's TCP socket.",
+      "Connected clients can never discover new tools without re-installing the operating system.",
+      "The server sends an email to the user asking them to clear their browser cookies."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "When an MCP server advertises `capabilities.tools.listChanged: true`, it can dynamically emit `notifications/tools/list_changed` whenever tools are added, modified, or removed at runtime. Upon receiving this notification, the MCP client re-fetches `tools/list` and updates the LLM's available function declarations seamlessly.",
+    "whyWrong": {
+      "1": "Crashing sockets disrupts in-flight operations and violates protocol graceful state updates.",
+      "2": "MCP explicitly supports dynamic runtime tool list updates without restarts.",
+      "3": "Browser cookies have no effect on backend JSON-RPC tool registries."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/specification/2024-11-05/server/tools#list-changed-notification",
+      "https://modelcontextprotocol.io/docs/concepts/tools"
+    ]
+  },
+  {
+    "id": "d3-mcp-018",
+    "domain": 3,
+    "topic": "Deploying Stateless vs Stateful MCP Servers on Cloud Run",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are deploying an MCP server on Google Cloud Run behind a global external Application Load Balancer. The MCP server uses the legacy HTTP+SSE transport where a client first opens a long-lived `GET /sse` stream (which lands on Container Instance A) and subsequently sends JSON-RPC requests via `POST /messages?sessionId=xyz` (which might be load-balanced to Container Instance B if stateless round-robin routing is used). When `POST /messages` lands on Instance B, it fails with `404 Session Not Found` because the SSE connection state lives in memory on Instance A. How should you architect the Cloud Run MCP deployment to solve this?",
+    "options": [
+      "Restrict Cloud Run to `max-instances=1` forever so all global traffic hits a single container.",
+      "Use the modern MCP Streamable HTTP transport (where each HTTP POST request can directly stream back responses or operate statelessly via shared Redis session state) or enable Session Affinity (`sessionAffinity: GENERATED_COOKIE` / header affinity) on Cloud Run / Load Balancer backed by Memorystore for Redis pub/sub routing.",
+      "Disable HTTPS and use UDP broadcast packets.",
+      "Tell users only one person can use the agent at a time."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Horizontally scaled cloud deployments require either the modern MCP Streamable HTTP transport (designed for serverless/stateless cloud environments where POST requests return direct responses or SSE streams on the same HTTP exchange) or externalizing session pub/sub routing to Memorystore for Redis paired with Cloud Run session affinity so any instance can route messages to the active stream.",
+    "whyWrong": {
+      "0": "Setting `max-instances=1` creates a single point of failure and bottlenecks concurrency for an enterprise deployment.",
+      "2": "UDP broadcast is unsupported on Cloud Run.",
+      "3": "Restricting enterprise software to a single user at a time is commercially unacceptable."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http",
+      "https://cloud.google.com/run/docs/configuring/session-affinity"
+    ]
+  },
+  {
+    "id": "d3-mcp-019",
+    "domain": 3,
+    "topic": "VPC Service Controls & Private Connectivity for Cloud SQL/Spanner MCP Servers",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare payer deploys a Cloud Run MCP server that queries protected health information (PHI) stored in a private-IP Cloud SQL instance inside a VPC network protected by VPC Service Controls (VPC-SC). The Cloud Run MCP server needs to reach the Cloud SQL private IP (`10.12.0.5`) without traversing the public internet. How should you configure network egress on the Cloud Run MCP service?",
+    "options": [
+      "Use a public webhook relay hosted on a free third-party tunneling service.",
+      "Assign a public IP to the Cloud SQL instance and whitelist `0.0.0.0/0`.",
+      "Configure Direct VPC Egress (or Serverless VPC Access connector) on the Cloud Run service attached to the authorized VPC subnet, and set egress settings to `private-ranges-only` (or `all-traffic`).",
+      "Disable VPC Service Controls across the entire healthcare organization."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Direct VPC Egress allows Cloud Run services to send traffic directly into a VPC network over internal RFC 1918 IP addresses without requiring a public IP on the Cloud SQL instance, satisfying HIPAA and VPC Service Controls isolation requirements with low latency.",
+    "whyWrong": {
+      "0": "Routing PHI through unverified third-party public tunnels violates HIPAA compliance.",
+      "1": "Whitelisting `0.0.0.0/0` on a public IP exposes PHI database endpoints to the internet.",
+      "3": "Disabling VPC Service Controls removes critical data exfiltration protection."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/configuring/vpc-direct-vpc",
+      "https://cloud.google.com/sql/docs/postgres/configure-private-ip"
+    ]
+  },
+  {
+    "id": "d3-mcp-020",
+    "domain": 3,
+    "topic": "MCP Sampling Primitive (`sampling/createMessage`)",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are building a specialized Code Security Analysis MCP server that inspects Terraform files stored in Cloud Storage. When the MCP server detects a complex IAM policy condition inside a Terraform file, it wants to ask an LLM to summarize the blast radius of that specific policy snippet. However, to maintain centralized model governance, billing, and API key management, the enterprise architecture prohibits individual MCP servers from holding their own Vertex AI / LLM API credentials. Which native MCP protocol mechanism allows the MCP server to request an LLM completion from the connected Agent Host/Client?",
+    "options": [
+      "Return raw binary memory dumps to the user.",
+      "Hardcode a personal OpenAI API key inside the open-source MCP server code.",
+      "Have the MCP server scrape a public web chat interface.",
+      "Use the MCP Sampling primitive: the MCP server sends a `sampling/createMessage` JSON-RPC request back to the MCP Client/Host (which holds the Vertex AI Gemini credentials and user safety policies), allowing the Host to approve, execute the Gemini call, and return the completion to the MCP server."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "MCP Sampling (`sampling/createMessage`) allows an MCP Server to request an LLM completion from the MCP Client/Host in a reverse-RPC flow. This preserves centralized security and governance: the Host controls model selection, token quotas, safety filtering, and human-in-the-loop approval without exposing LLM API keys to third-party or isolated MCP servers.",
+    "whyWrong": {
+      "0": "Raw binary dumps do not provide semantic policy analysis.",
+      "1": "Hardcoding external LLM keys in MCP servers bypasses enterprise billing, governance, and data privacy controls.",
+      "2": "Scraping web chat interfaces is unreliable and violates enterprise security."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/sampling",
+      "https://modelcontextprotocol.io/specification/2024-11-05/client/sampling"
+    ]
+  },
+  {
+    "id": "d3-mcp-021",
+    "domain": 3,
+    "topic": "BigQuery MCP Server Information Schema Metadata Filtering",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A data governance agent uses a BigQuery MCP server to help data stewards audit personally identifiable information (PII) across 50 BigQuery datasets. Data stewards ask: 'Which tables in the `retail_prod` dataset contain columns tagged with the `pii_email` or `pii_ssn` Data Catalog policy tags?' How should the BigQuery MCP server implement a tool to answer metadata and lineage questions efficiently without scanning petabytes of table data?",
+    "options": [
+      "Run `SELECT * FROM table` on every table in all 50 datasets and use regex in Python to look for `@` symbols.",
+      "Expose a metadata inspection tool that queries BigQuery's zero-data-scan `INFORMATION_SCHEMA` views (e.g., `region-us.INFORMATION_SCHEMA.COLUMN_FIELD_PATHS` and `INFORMATION_SCHEMA.COLUMNS`) combined with Data Catalog / Dataplex Policy Tag APIs.",
+      "Download all 50 datasets to a local USB drive.",
+      "Ask the LLM to guess which columns contain SSNs based only on dataset names."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "BigQuery `INFORMATION_SCHEMA` views (`COLUMNS`, `COLUMN_FIELD_PATHS`, `TABLES`, `PARTITIONS`) and Dataplex/Data Catalog APIs provide complete structural metadata, column descriptions, and policy tag assignments at zero table-scan cost and sub-second latency.",
+    "whyWrong": {
+      "0": "Full-table scans across petabytes of data incur massive financial costs and take hours.",
+      "2": "Downloading petabytes to a USB drive is physically impossible and violates data security.",
+      "3": "Guessing PII columns from dataset names misses undocumented or misnamed sensitive fields."
+    },
+    "refs": [
+      "https://cloud.google.com/bigquery/docs/information-schema-columns",
+      "https://cloud.google.com/bigquery/docs/column-level-security-intro"
+    ]
+  },
+  {
+    "id": "d3-mcp-022",
+    "domain": 3,
+    "topic": "MCP Roots Capability (`roots/list`) for Workspace Sandboxing",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A cloud developer workspace agent runs alongside a multi-project Google Cloud & File System MCP server. A developer working on Project Alpha (`gs://alpha-dev-workspace` and `/workspace/project-alpha`) invokes the agent. To prevent the MCP server from accidentally reading or modifying files in Project Beta (`/workspace/project-beta`), how does the MCP Client inform the MCP Server about the specific URI boundaries the server is permitted to operate within for the current session?",
+    "options": [
+      "The MCP Server formats the entire disk before each request.",
+      "The MCP Client sends the root password of the Linux server in plain text.",
+      "The MCP Client advertises the `roots` capability (`capabilities.roots`) and responds to `roots/list` with the allowed root URIs (`file:///workspace/project-alpha`, `gs://alpha-dev-workspace`), which the MCP Server enforces as a strict directory/bucket chroot sandbox.",
+      "The agent relies on the honor system without path validation."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In MCP, Roots (`roots/list` and `notifications/roots/list_changed`) define the workspace boundaries (filesystem paths, Cloud Storage bucket prefixes, or repository URLs) that the client exposes to the server. Well-behaved MCP servers validate that all requested file/object paths resolve strictly inside one of the authorized root URIs.",
+    "whyWrong": {
+      "0": "Formatting disks destroys developer work.",
+      "1": "Sending root OS passwords is a severe security vulnerability.",
+      "3": "Relying on the honor system without path canonicalization allows directory traversal (`../../project-beta`)."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/roots",
+      "https://modelcontextprotocol.io/specification/2024-11-05/client/roots"
+    ]
+  },
+  {
+    "id": "d3-mcp-023",
+    "domain": 3,
+    "topic": "MCP Tool Input Schema Validation & JSON Schema Descriptions",
+    "difficulty": "easy",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are designing the `inputSchema` for a Cloud Spanner MCP tool named `get_transaction_history`. You notice that Gemini occasionally passes dates in `MM/DD/YYYY` format instead of ISO-8601 `YYYY-MM-DD`, and sometimes passes negative numbers for `limit`. Which two JSON Schema practices in the MCP Tool definition will maximize first-shot parameter accuracy from the LLM? (Choose two.)",
+    "options": [
+      "Include detailed semantic `description` fields and `format` / `pattern` constraints on string properties (e.g., `\"description\": \"Start date in strict ISO-8601 format YYYY-MM-DD (e.g., 2026-03-15)\", \"pattern\": \"^\\\\d{4}-\\\\d{2}-\\\\d{2}$\"`).",
+      "Specify numeric bounds (`\"minimum\": 1, \"maximum\": 100, \"default\": 20`) on integer properties like `limit`.",
+      "Leave `inputSchema` completely empty (`{}`) so the LLM can pass any arbitrary JSON structure.",
+      "Name the parameters `arg1`, `arg2`, and `arg3` with no descriptions.",
+      "Set all property types to `null`."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "LLMs rely heavily on the JSON Schema `description`, property names, `enum` values, `pattern` regular expressions, and numeric bounds (`minimum`/`maximum`) provided in the MCP `tools/list` response to construct valid tool call arguments, while the MCP server uses the same JSON Schema to deterministically validate inputs before execution.",
+    "whyWrong": {
+      "2": "An empty schema provides zero guidance to the LLM and disables structural validation.",
+      "3": "Opaque parameter names like `arg1` force the LLM to guess argument order and formatting.",
+      "4": "Setting types to `null` prevents passing string or integer values."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/docs/concepts/tools#tool-definition-structure",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#best-practices"
+    ]
+  },
+  {
+    "id": "d3-mcp-024",
+    "domain": 3,
+    "topic": "Handling Long-Running Operations (LROs) in MCP Servers",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A data engineering agent uses an MCP server to trigger BigQuery ML model training jobs (`CREATE OR REPLACE MODEL ...`) or Dataproc Spark batch jobs that take 8 to 15 minutes to complete. If the MCP server blocks synchronously inside `tools/call` for 15 minutes, HTTP gateways and MCP client timeouts (typically 30–60 seconds) terminate the connection. What is the recommended MCP pattern for handling Long-Running Operations (LROs)?",
+    "options": [
+      "Run the 15-minute Spark job directly inside the LLM tokenizer.",
+      "Set HTTP client timeouts to 999 hours and hold an active thread blocked on the Cloud Run instance.",
+      "Cancel the job automatically after 5 seconds and report fake success.",
+      "Implement an asynchronous job pattern: the `start_training_job` tool submits the BigQuery/Dataproc job asynchronously and immediately returns a `job_id` and status URI (`bigquery://jobs/{job_id}`); the server optionally emits MCP progress notifications (`notifications/progress`) and provides a `get_job_status` tool or subscribable Resource for the agent to check completion."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Long-Running Operations (LROs) exceeding standard RPC timeouts should be decoupled into asynchronous initiation (returning a `job_id` immediately) paired with MCP progress notifications (`notifications/progress` using the request `progressToken`) and status polling/subscription tools (`get_job_status`).",
+    "whyWrong": {
+      "0": "LLM tokenizers cannot execute distributed Spark jobs.",
+      "1": "Holding open idle HTTP requests for hours violates Cloud Run max request timeout limits (60 minutes max) and is vulnerable to transient network drops.",
+      "2": "Canceling jobs prematurely and reporting fake success corrupts workflows."
+    },
+    "refs": [
+      "https://modelcontextprotocol.io/specification/2024-11-05/basic/utilities/progress",
+      "https://cloud.google.com/bigquery/docs/managing-jobs"
+    ]
+  },
+  {
+    "id": "d3-mcp-025",
+    "domain": 3,
+    "topic": "Secret Management for 3P SaaS MCP Servers on Cloud Run",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are deploying an MCP server on Cloud Run that integrates with Slack and PagerDuty REST APIs. The MCP server requires API signing secrets and bot tokens at runtime. How should you securely provision and inject these secrets into the Cloud Run MCP service according to Google Cloud security best practices?",
+    "options": [
+      "Store the secrets in Google Cloud Secret Manager, grant the Cloud Run service's dedicated IAM service account `roles/secretmanager.secretAccessor` on those specific secrets, and mount them as volume files or environment variables referenced directly from Secret Manager in the Cloud Run revision spec.",
+      "Commit a `.env` file containing the production tokens to the public Git repository.",
+      "Pass the API keys as plain-text URL query parameters in every user browser request.",
+      "Store the secrets in a public Google Sheet."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google Cloud Secret Manager natively integrates with Cloud Run. Mounting secrets directly from Secret Manager into the Cloud Run container using a dedicated least-privilege service account (`roles/secretmanager.secretAccessor`) ensures secrets are encrypted at rest, audited via Cloud Audit Logs, and never exposed in source control or container image layers.",
+    "whyWrong": {
+      "1": "Committing secrets to Git exposes credentials to anyone with repo access.",
+      "2": "URL query parameters are logged in plain text across proxies, browser histories, and access logs.",
+      "3": "Public Google Sheets expose sensitive credentials to unauthorized users."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/configuring/secrets",
+      "https://cloud.google.com/secret-manager/docs/overview"
+    ]
+  }
+]

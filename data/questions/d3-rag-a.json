@@ -1,0 +1,731 @@
+[
+  {
+    "id": "d3-rag-001",
+    "domain": 3,
+    "topic": "RAG Engine Ingestion & Chunking",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "A global investment bank is building a financial research agent using Vertex AI RAG Engine. The agent ingests thousands of 10-K filings, earnings transcripts, and scanned regulatory PDFs containing dense multi-column financial tables and embedded charts. During testing, financial analysts report that when asking questions about specific quarterly revenue breakdowns, the agent hallucinates figures or misses rows because standard fixed-size token chunking splits tables across multiple chunks and loses column headers. You need to redesign the ingestion pipeline in Vertex AI RAG Engine to preserve table structures and layout context while minimizing custom OCR maintenance. What should you do?",
+    "options": [
+      "Configure Vertex AI RAG Engine to use fixed-size chunking with a chunk size of 2048 tokens and a 50% token overlap.",
+      "Configure the Vertex AI RAG Engine import files API to use the Document AI Layout Parser integration so documents are parsed into layout-aware semantic chunks that preserve tables and headers.",
+      "Convert all PDF documents into plain text files using an open-source Python library on Cloud Functions before importing them into the RAG Corpus.",
+      "Store the raw PDFs directly in Cloud Storage and instruct the Gemini 1.5 Flash model to use Grounding with Google Search instead of Vertex AI RAG Engine."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Vertex AI RAG Engine natively integrates with Document AI Layout Parser during document ingestion (`ImportRagFiles`). Layout Parser extracts structural elements such as headings, paragraphs, lists, and complex multi-column tables, keeping table headers bound to their rows and preventing mid-table splitting that degrades retrieval accuracy.",
+    "whyWrong": {
+      "0": "Increasing chunk size and overlap with standard token splitters still splits tables arbitrarily across token boundaries and does not preserve structural column-to-row semantics.",
+      "2": "Converting PDFs to plain text strips out table formatting, column alignment, and hierarchical layout metadata.",
+      "3": "Grounding with Google Search searches the public web and cannot query private, internal 10-K filings stored in a private Cloud Storage bucket."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/layout-parser",
+      "https://cloud.google.com/document-ai/docs/layout-parser-overview"
+    ]
+  },
+  {
+    "id": "d3-rag-002",
+    "domain": 3,
+    "topic": "Vector Search 1.0 Hybrid Search",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "An aerospace manufacturer uses Vertex AI Vector Search 1.0 to power a maintenance troubleshooting agent for aircraft mechanics. Mechanics frequently search using a combination of natural language descriptions of symptoms (e.g., 'hydraulic pressure fluctuation during landing gear retraction') and exact alphanumeric part numbers or fault codes (e.g., 'PART-8842-REV-B' or 'ERR_HYD_092'). Pure dense vector embeddings (`text-embedding-004`) capture conceptual symptoms well but frequently fail to rank documents containing the exact fault code or part number at the top. You need to configure Vector Search 1.0 to optimize retrieval for both semantic meaning and exact part/code matching within a single query. What should you do?",
+    "options": [
+      "Increase the dimensionality of the dense embedding model from 768 to 3072 and disable approximate nearest neighbor search.",
+      "Create a separate Cloud SQL database using LIKE queries for part numbers and build a client-side Python script to run sequential queries.",
+      "Configure Hybrid Search in Vertex AI Vector Search 1.0 by indexing both dense embeddings (`text-embedding-004`) and sparse embeddings (BM25/SPLADE) and combining results using Reciprocal Rank Fusion (RRF).",
+      "Lower the temperature of the Gemini generation model to 0.0 and pass all maintenance manuals into the system prompt."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Vertex AI Vector Search 1.0 supports Hybrid Search by storing both dense vector embeddings (for semantic understanding) and sparse embeddings (token-level frequency representations like BM25 or SPLADE for exact keyword, SKU, and fault code matching) within the same index datapoint. Queries execute against both representations simultaneously and merge ranks using Reciprocal Rank Fusion (RRF).",
+    "whyWrong": {
+      "0": "Higher dense dimensionality still compresses alphanumeric strings into continuous vector space, which cannot guarantee exact lexical matching for out-of-vocabulary part numbers.",
+      "1": "Running separate Cloud SQL LIKE queries adds network hops, operational complexity, and lacks unified relevance ranking between semantic and lexical matches.",
+      "3": "Passing an entire corpus of aircraft maintenance manuals into every prompt exceeds context limits, introduces extreme latency, and violates cost constraints."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/hybrid-search",
+      "https://cloud.google.com/vertex-ai/docs/vector-search/overview"
+    ]
+  },
+  {
+    "id": "d3-rag-003",
+    "domain": 3,
+    "topic": "Vector Search 1.0 Metadata Filtering",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "A multi-tenant SaaS legal platform uses a single Vertex AI Vector Search 1.0 index to store millions of contract clauses across 4,000 enterprise customers. Each contract clause datapoint must strictly be accessible only to the tenant that owns it (`tenant_id`), and lawyers frequently filter searches by contract execution year (`execution_year` between 2021 and 2025) and status (`status` = 'ACTIVE'). You need to configure the Vector Search index schema and query structure to enforce strict pre-filtering before vector similarity scoring occurs, ensuring zero cross-tenant data leakage and sub-20ms query latency. How should you configure the index datapoints?",
+    "options": [
+      "Store `tenant_id`, `status`, and `execution_year` inside the raw text chunk before generating the dense vector embedding.",
+      "Define `tenant_id` and `status` as string `restricts` (namespaces) and `execution_year` as a `numeric_restricts` attribute on each Vector Search datapoint.",
+      "Run an unfiltered k-NN vector search for top-10,000 neighbors and filter the returned results in the application backend using Python.",
+      "Create 4,000 separate Vector Search Index Endpoints—one dedicated endpoint per enterprise customer."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Vertex AI Vector Search 1.0 supports token-based boolean filtering via `restricts` (string namespaces for categorical exact matches like `tenant_id` and `status`) and range comparisons via `numeric_restricts` (for integers/floats like `execution_year`). Filtering is evaluated inside the ScaNN index traversal engine prior to distance scoring, guaranteeing tenant isolation and high recall.",
+    "whyWrong": {
+      "0": "Embedding metadata into dense vectors does not provide deterministic filtering; vectors from other tenants could still have high cosine similarity.",
+      "2": "Post-filtering top-K results in the application suffers from 'filter starvation' when a tenant owns a small percentage of total vectors, returning zero results even when matching documents exist.",
+      "3": "Provisioning 4,000 separate Index Endpoints is prohibitively expensive and hits Google Cloud project quota limits."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/filtering",
+      "https://cloud.google.com/vertex-ai/docs/vector-search/create-manage-index"
+    ]
+  },
+  {
+    "id": "d3-rag-004",
+    "domain": 3,
+    "topic": "Agent Retrieval Semantic Routing",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "A healthcare enterprise is deploying a unified employee assistant agent. Employees ask questions spanning three distinct domains: (1) Clinical Standard Operating Procedures stored in a Vertex AI RAG Engine corpus, (2) Real-time shift schedules and payroll balances stored in Cloud SQL, and (3) IT helpdesk ticket creation handled via a ServiceNow REST API. Routing every user prompt to all three systems simultaneously causes high latency, unnecessary token costs, and conflicting context. You need to implement a fast, deterministic Agent Retrieval semantic routing layer that directs queries to the right retrieval tool or sub-agent with minimal latency. What architecture should you implement?",
+    "options": [
+      "Fine-tune a 70B parameter open-source LLM on Compute Engine GPUs to rewrite every user prompt into SQL queries.",
+      "Require employees to manually type JSON metadata headers at the start of every chat message to specify the target backend.",
+      "Disable tool calling and concatenate all clinical SOPs and payroll tables into a single BigQuery table queried via full-table scans.",
+      "Implement a semantic router using fast embedding similarity (`text-embedding-004`) against pre-computed canonical intent exemplars, combined with Gemini Flash structured outputs (`response_schema`) for multi-intent decomposition when confidence scores overlap."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "A hybrid semantic router uses fast vector similarity against canonical route exemplars for low-latency single-intent routing, and falls back to Gemini Flash structured output (`response_schema`) when a query spans multiple domains or falls below similarity thresholds, decomposing multi-part queries into targeted sub-queries.",
+    "whyWrong": {
+      "0": "A 70B fine-tuned model on GPUs is expensive, adds significant inference latency, and cannot route non-SQL tasks like Clinical SOP retrieval or ServiceNow REST calls.",
+      "1": "Forcing end users to type raw JSON metadata headers destroys user experience and violates conversational agent design principles.",
+      "2": "Full-table scans across unstructured SOPs and structured payroll tables in BigQuery are slow, expensive, and fail to handle transactional API actions."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
+    ]
+  },
+  {
+    "id": "d3-rag-005",
+    "domain": 3,
+    "topic": "RAG Engine Reranking & Grounded Generation",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": true,
+    "question": "A pharmaceutical compliance team uses Vertex AI RAG Engine to retrieve relevant FDA regulatory guidelines before generating compliance audit summaries with Gemini 1.5 Pro. While initial vector retrieval fetches the top 40 candidate chunks (`similarity_top_k=40`), the compliance officers notice two issues: (1) highly relevant chunks are sometimes ranked at positions 15-30 and diluted by less relevant chunks in the prompt context, and (2) the generated summary occasionally makes assertions without citing the exact regulatory document and section. You need to optimize the RAG pipeline to improve precision of the top context chunks and enforce verifiable citations. Which two actions should you take? (Choose two.)",
+    "options": [
+      "Enable the Vertex AI Ranking API (`RankService`) or RAG Engine reranker config (`ranking_config`) to re-score the top 40 retrieved chunks using a cross-encoder model and pass only the top 5 highest-scoring chunks to Gemini.",
+      "Decrease `similarity_top_k` from 40 to 1 and disable dense embeddings in favor of random sampling.",
+      "Configure the Gemini `GenerateContent` call with Vertex AI Grounding (`retrieval` tool pointing to the RAG Corpus) so the response includes structured `groundingMetadata` with `groundingChunks` and inline segment citations.",
+      "Set the model temperature to 2.0 to encourage more creative synthesis of regulatory rules.",
+      "Delete all metadata fields from the ingested RAG files to reduce index storage size."
+    ],
+    "answer": [
+      0,
+      2
+    ],
+    "explanation": "Two-stage retrieval (bi-encoder vector search retrieving `top_k=40` followed by a cross-encoder reranker via Vertex AI Ranking API / `ranking_config`) dramatically improves precision in the final top-K chunks passed to the LLM. Using Vertex AI Grounding with the RAG Corpus automatically populates `groundingMetadata`, mapping generated claims directly to source documents and character offsets.",
+    "whyWrong": {
+      "1": "Reducing `similarity_top_k` to 1 without reranking drastically lowers recall, missing multi-chunk regulatory context.",
+      "3": "Setting temperature to 2.0 maximizes randomness and hallucination risk, which is unacceptable for pharmaceutical compliance.",
+      "4": "Deleting metadata removes document titles, section numbers, and URIs needed to render verifiable citations."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/ranking",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview"
+    ]
+  },
+  {
+    "id": "d3-rag-006",
+    "domain": 3,
+    "topic": "Vector Search 1.0 Streaming vs Batch Index Updates",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An e-commerce marketplace operates a shopping assistant agent backed by Vertex AI Vector Search 1.0. Merchants update product pricing, inventory status, and promotional descriptions thousands of times per minute. Customers complain that the shopping assistant recommends items that went out of stock 30 minutes ago or quotes outdated prices because the engineering team currently rebuilds the Vector Search index once every night using batch jobs. You need to update the Vector Search architecture so product embedding and metadata changes are reflected in search results within seconds. What should you do?",
+    "options": [
+      "Recreate the Vector Search index with `indexUpdateMethod` set to `STREAM_UPDATE` and use the `UpsertDatapoints` API to push real-time changes as Pub/Sub events arrive.",
+      "Trigger a full `BatchUpdateIndex` job every 60 seconds using Cloud Scheduler.",
+      "Export all embeddings to CSV files in Cloud Storage and re-deploy the Index Endpoint every 5 minutes.",
+      "Switch from ScaNN indexing to brute-force linear scan across raw JSON files stored in Cloud Filestore."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Vertex AI Vector Search 1.0 supports two update methods: `BATCH_UPDATE` and `STREAM_UPDATE`. Configuring `STREAM_UPDATE` allows real-time insertion, update, and deletion of vector datapoints and their metadata/restricts via `UpsertDatapoints` and `RemoveDatapoints` RPCs with sub-second to few-second visibility.",
+    "whyWrong": {
+      "1": "`BatchUpdateIndex` is designed for large periodic rebuilds (taking minutes to hours) and cannot run every 60 seconds.",
+      "2": "Redeploying Index Endpoints takes significant provisioning time and causes service disruption or high cost.",
+      "3": "Brute-force linear scan over Filestore JSON files cannot scale to millions of e-commerce products within acceptable latency."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/update-rebuild-index",
+      "https://cloud.google.com/vertex-ai/docs/vector-search/create-manage-index"
+    ]
+  },
+  {
+    "id": "d3-rag-007",
+    "domain": 3,
+    "topic": "Vector Search 1.0 ScaNN Tuning Parameters",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A media streaming service uses Vertex AI Vector Search 1.0 with the Tree-AH (Asymmetric Hashing) ScaNN algorithm to retrieve personalized content embeddings across 50 million catalog items. During load testing at 5,000 queries per second (QPS), p99 latency exceeds the 15ms SLA (currently at 42ms), while recall@10 is 99.2%. The business team confirms that a recall@10 of 94% is sufficient if p99 latency drops below 15ms without adding more machine replicas. Which index configuration adjustment should you make to reduce query latency while trading off a small amount of recall?",
+    "options": [
+      "Decrease `leafNodeEmbeddingCount` from 1000 to 10 so the tree has 100x more leaf nodes to maintain.",
+      "Change the distance measure type from `DOT_PRODUCT_DISTANCE` to `COSINE_DISTANCE` without normalizing vectors.",
+      "Decrease `leafNodesToSearchPercent` in the index configuration (or query-time `per_crowding_attribute_num_neighbors` / search parameters) so fewer tree partitions are probed per query.",
+      "Switch from `Tree-AH` to `Brute Force` index configuration."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In ScaNN Tree-AH indices, `leafNodesToSearchPercent` controls the percentage of leaf partitions searched during a query. Lowering `leafNodesToSearchPercent` directly reduces the number of candidate vectors scored per query, significantly decreasing CPU usage and p99 latency at the cost of a slight reduction in recall.",
+    "whyWrong": {
+      "0": "Decreasing `leafNodeEmbeddingCount` to 10 creates an excessively large coarse tree, increasing tree traversal overhead.",
+      "1": "`COSINE_DISTANCE` requires runtime vector normalization if vectors are not pre-normalized, which increases rather than decreases CPU overhead compared to `DOT_PRODUCT_DISTANCE` on unit-normalized vectors.",
+      "3": "Brute Force computes exact distance against all 50 million vectors, increasing latency by orders of magnitude."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/configure-index",
+      "https://cloud.google.com/vertex-ai/docs/vector-search/scann-explained"
+    ]
+  },
+  {
+    "id": "d3-rag-008",
+    "domain": 3,
+    "topic": "RAG Engine Vector DB Backends",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare analytics startup is prototyping an internal clinical knowledge agent using Vertex AI RAG Engine. For their initial pilot with 500 documents, they used the default RagManagedDb vector store. Now, they are transitioning to enterprise production with 15 million documents, strict VPC Service Controls (VPC-SC), Customer-Managed Encryption Keys (CMEK), and high-throughput streaming updates. Which backing vector store should you configure for the production Vertex AI RAG Engine Corpus to satisfy these enterprise security and scale requirements?",
+    "options": [
+      "Keep using the default tier of RagManagedDb without any configuration changes.",
+      "Use Firebase Realtime Database as the vector backend for RAG Engine.",
+      "Store embeddings in local SQLite files inside the Cloud Run container ephemeral disk.",
+      "Configure the RAG Corpus `vector_db` backend to use a dedicated Vertex AI Vector Search 1.0 Index and Index Endpoint deployed in a private VPC with CMEK enabled."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "While `RagManagedDb` is ideal for rapid prototyping and moderate workloads, enterprise production workloads requiring tens of millions of vectors, custom ScaNN shard sizing, Private Service Connect / VPC peering, and CMEK should configure the Vertex AI RAG Engine Corpus to use an enterprise Vertex AI Vector Search 1.0 Index or Feature Store / AlloyDB / Cloud SQL pgvector backend.",
+    "whyWrong": {
+      "0": "The default basic RagManagedDb tier does not support custom ScaNN index sharding or fine-grained VPC-SC private endpoint controls required for 15M enterprise documents.",
+      "1": "Firebase Realtime Database is not a supported vector database backend for Vertex AI RAG Engine.",
+      "2": "Ephemeral SQLite inside Cloud Run containers loses state on container restart and cannot scale to 15 million vectors."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/choose-vector-db",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
+    ]
+  },
+  {
+    "id": "d3-rag-009",
+    "domain": 3,
+    "topic": "Multimodal RAG Ingestion & Retrieval",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An automotive engineering firm is building a design review agent that answers questions about CAD assembly manuals containing high-resolution wiring diagrams, exploded mechanical drawings, and accompanying text specifications. Engineers ask questions like 'Which relay pin connects to the starter solenoid in Diagram 4.2?' Standard text-only embedding models miss visual wiring paths shown only in the diagrams. You need to design a multimodal RAG pipeline on Google Cloud that accurately retrieves and interprets both text and complex engineering diagrams. What architecture should you implement?",
+    "options": [
+      "Extract only text captions using regex and discard all images during ingestion.",
+      "Use Document AI or PDF rendering to extract page/diagram images, generate multimodal embeddings (`multimodalembedding@001`) or detailed visual descriptions using Gemini 1.5 Pro during ingestion, index both the text summary and GCS image URI in Vector Search, and pass the retrieved image files directly to Gemini 1.5 Pro at query time.",
+      "Convert all wiring diagrams into base64 strings and feed the raw base64 characters into a text-only `text-embedding-004` model.",
+      "Use Cloud Translation API to convert diagrams into Spanish before indexing."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "For complex technical diagrams (like wiring schematics), a dual-indexing multimodal RAG pattern works best: Gemini 1.5 Pro generates rich textual descriptions of the visual diagram (capturing pin numbers, connections, and labels for high lexical/semantic recall) alongside multimodal embeddings (`multimodalembedding@001`). Crucially, the GCS URI of the original high-resolution diagram image is stored in the chunk metadata so that at query time, the actual visual diagram is passed into Gemini 1.5 Pro's multimodal context window for precise visual inspection.",
+    "whyWrong": {
+      "0": "Discarding diagrams loses the visual wiring connections that are not fully written out in text captions.",
+      "2": "Feeding raw base64 strings into a text embedding model produces meaningless token noise and exceeds token limits.",
+      "3": "Cloud Translation API translates text between human languages and has no capability to process visual engineering schematics."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-multimodal-embeddings",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/design-multimodal-prompts"
+    ]
+  },
+  {
+    "id": "d3-rag-010",
+    "domain": 3,
+    "topic": "Vector Search 1.0 Private Networking",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A defense contractor is deploying a RAG agent running on Google Kubernetes Engine (GKE) in a Shared VPC architecture. Security compliance mandates that all vector similarity queries from GKE pods to Vertex AI Vector Search 1.0 must traverse private RFC 1918 IP addresses without traversing the public internet, and without requiring complex VPC Network Peering CIDR management across dozens of spoke projects. Which Vector Search Index Endpoint networking configuration should you implement?",
+    "options": [
+      "Deploy a Public Index Endpoint and restrict access using Cloud Armor IP allowlists.",
+      "Use Legacy VPC Network Peering with public IP addresses enabled on all GKE nodes.",
+      "Deploy the Vector Search Index Endpoint with Private Service Connect (PSC) enabled, and create a PSC endpoint (forwarding rule) with an internal IP address in the Shared VPC subnet accessible to the GKE cluster.",
+      "Configure an external HTTP proxy on Compute Engine with a public static IP to forward traffic to the public Vector Search endpoint."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Private Service Connect (PSC) is the recommended enterprise networking architecture for Vertex AI Vector Search Index Endpoints in Shared VPC and multi-project environments. It exposes the Index Endpoint via a private internal IP address in the consumer VPC without requiring transitive VPC peering or overlapping CIDR management.",
+    "whyWrong": {
+      "0": "Public endpoints traverse public Google IP space and do not satisfy strict private RFC 1918 network isolation mandates.",
+      "1": "VPC Network Peering does not support transitive peering across complex hub-and-spoke Shared VPC topologies as cleanly as PSC, and public IPs violate the security mandate.",
+      "3": "An external proxy with a public IP still sends vector traffic over public endpoints."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/setup-private-service-connect",
+      "https://cloud.google.com/vpc/docs/private-service-connect"
+    ]
+  },
+  {
+    "id": "d3-rag-011",
+    "domain": 3,
+    "topic": "RAG Engine Access Control & Document ACLs",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global consulting firm uses Vertex AI RAG Engine to index internal project deliverables stored in Google Drive and SharePoint. Different consultants have access to different client folders based on Google Groups memberships (e.g., `project-alpha-team@firm.com`, `mna-advisory@firm.com`). When a consultant asks the agent a question, the agent must only retrieve and synthesize chunks from documents that the authenticated consultant is explicitly authorized to view. How should you design the ingestion and retrieval pipeline to enforce document-level Access Control Lists (ACLs)?",
+    "options": [
+      "Ingest all documents without metadata, retrieve the top 20 chunks for any user, and instruct Gemini in the system prompt to ignore confidential information if the user is junior.",
+      "Rely on client-side JavaScript in the browser to hide unauthorized citations after the LLM generates the complete answer.",
+      "Create a separate Google Cloud project and Vertex AI RAG Corpus for every individual employee in the consulting firm.",
+      "Extract the allowed user emails and group principals from Google Drive/SharePoint permissions during ingestion, store them as a multi-value string array in the chunk metadata (`allowed_principals`), and apply a metadata filter (`allowed_principals` IN user's active identity groups) during the `RetrieveContexts` call."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Document-level security in RAG requires propagating source ACLs (user IDs and group principals) into the vector index metadata during ingestion and applying deterministic pre-filtering at retrieval time based on the authenticated user's verified IAM/OIDC identity and group memberships.",
+    "whyWrong": {
+      "0": "Prompt instructions cannot prevent unauthorized data from entering the LLM context window, making it vulnerable to prompt injection and data leakage.",
+      "1": "Client-side filtering after LLM synthesis is fatally flawed because unauthorized facts are already synthesized into the generated text response and sent over the network.",
+      "2": "Creating thousands of separate projects and RAG Corpora per employee causes massive storage duplication when documents are shared across teams."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview",
+      "https://cloud.google.com/generative-ai-app-builder/docs/configure-access-control"
+    ]
+  },
+  {
+    "id": "d3-rag-012",
+    "domain": 3,
+    "topic": "Embedding Task Types & Dimensionality",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A legal tech company is building a RAG system using Vertex AI `text-embedding-004`. They want to maximize retrieval accuracy for asymmetric question-answering (where short user questions are matched against long legal statutes) while also reducing their Vector Search memory footprint by 50% with minimal loss in retrieval quality. Which combination of `task_type` and `outputDimensionality` parameters should they configure when generating embeddings?",
+    "options": [
+      "Use `task_type='RETRIEVAL_DOCUMENT'` when indexing legal statutes, `task_type='RETRIEVAL_QUERY'` when embedding user questions, and set `outputDimensionality=384` (or `256`/`512`) leveraging Matryoshka Representation Learning.",
+      "Use `task_type='SEMANTIC_SIMILARITY'` for both indexing and querying, and manually truncate the last 384 floats from a standard 768-dimensional vector without re-normalizing.",
+      "Use `task_type='CLASSIFICATION'` for indexing statutes and `task_type='CLUSTERING'` for user queries.",
+      "Generate 768-dimensional embeddings and compress them using GZIP before passing them to Vector Search."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Vertex AI `text-embedding-004` uses asymmetric task types (`RETRIEVAL_DOCUMENT` for corpus documents and `RETRIEVAL_QUERY` for search queries) to align query and document vector spaces. Furthermore, `text-embedding-004` is trained with Matryoshka Representation Learning (MRL), allowing `outputDimensionality` to be set to lower dimensions (e.g., 256 or 512 instead of 768) with built-in normalization, cutting memory usage while retaining almost full retrieval performance.",
+    "whyWrong": {
+      "1": "`SEMANTIC_SIMILARITY` is designed for symmetric comparisons (sentence-to-sentence), not asymmetric question-to-passage retrieval, and naive truncation without re-normalization degrades dot-product/cosine scoring.",
+      "2": "`CLASSIFICATION` and `CLUSTERING` optimize embedding spaces for label separation and grouping rather than document retrieval.",
+      "3": "Vector Search requires raw float arrays, not GZIP-compressed binary blobs."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/task-types"
+    ]
+  },
+  {
+    "id": "d3-rag-013",
+    "domain": 3,
+    "topic": "Vector Search 1.0 Shard Sizing & Machine Types",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are sizing a Vertex AI Vector Search 1.0 index for a global retail catalog containing 100 million vectors, each with 768 float dimensions and 150 bytes of metadata. You need to select the appropriate shard size during index creation and configure the Index Endpoint deployment so that each shard fits comfortably in memory with high availability across zones. What should you do?",
+    "options": [
+      "Select `SHARD_SIZE_SMALL` (2GB RAM limit) so all 100 million vectors are forced onto a single `e2-micro` VM.",
+      "Select `SHARD_SIZE_SMALL` and set `minReplicaCount` to 0 so the index scales to zero during business hours.",
+      "Select `SHARD_SIZE_LARGE` (or calculate total vector memory ~300GB+ and partition into multiple `SHARD_SIZE_MEDIUM` / `SHARD_SIZE_LARGE` shards), deploy using memory-optimized machine types (e.g., `e2-highmem-16` or `n2d-highmem-32`), and set `minReplicaCount` >= 2 per shard for high availability.",
+      "Store all 100 million vectors in a single unsharded index deployed on an `n1-standard-1` machine."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "100 million 768-dimensional vectors require roughly 307 GB of raw vector data plus index overhead and metadata. Vertex AI Vector Search partitions large indices into shards (`SHARD_SIZE_SMALL`, `SHARD_SIZE_MEDIUM`, `SHARD_SIZE_LARGE`). Choosing `SHARD_SIZE_LARGE` (or appropriately sized medium/large shards) paired with `highmem` machine types ensures each shard fits in RAM, while `minReplicaCount >= 2` provides load balancing and multi-zone failover.",
+    "whyWrong": {
+      "0": "100 million vectors cannot fit into a single `SHARD_SIZE_SMALL` (designed for small datasets up to ~2GB) or an `e2-micro` VM.",
+      "1": "Vector Search Index Endpoints do not scale to zero (`minReplicaCount` must be at least 1, and >=2 for production HA), and `SHARD_SIZE_SMALL` would create excessive shard fragmentation.",
+      "3": "An `n1-standard-1` has only 3.75 GB of RAM and cannot host a 300+ GB vector index."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/create-manage-index#shard-size",
+      "https://cloud.google.com/vertex-ai/docs/vector-search/deploy-index-public"
+    ]
+  },
+  {
+    "id": "d3-rag-014",
+    "domain": 3,
+    "topic": "Agent Retrieval Query Decomposition & Multi-Hop RAG",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An M&A advisory firm uses an agent connected to a Vertex AI RAG Engine corpus of corporate filings. Analysts frequently ask complex comparative multi-hop questions such as: 'How did Acme Corp's R&D spend as a percentage of revenue in 2024 compare to its primary competitor mentioned in the Risk Factors section of Acme's 2024 10-K?' When passing this raw query directly to `RetrieveContexts`, the vector search retrieves general chunks about Acme's R&D but fails to identify the competitor first or retrieve the competitor's 2024 financials. How should you architect the Agent Retrieval layer to solve this?",
+    "options": [
+      "Increase `similarity_top_k` from 10 to 1,000 and pass all 1,000 chunks into Gemini 1.0 Pro.",
+      "Set `temperature=1.5` so the model guesses the competitor's R&D percentage from pre-training knowledge.",
+      "Disable vector search and use regex matching on document filenames.",
+      "Implement an iterative Agentic Retrieval (multi-hop query decomposition) loop where the agent first generates a sub-query to retrieve Acme's Risk Factors to identify the competitor name, and then dynamically executes parallel targeted retrieval calls for both Acme's 2024 R&D/revenue and the identified competitor's 2024 R&D/revenue before synthesizing the final answer."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Multi-hop questions where the second entity is unknown until the first hop is resolved cannot be answered by single-shot similarity search. An Agentic Retrieval workflow uses an LLM planner/tool-calling loop to decompose dependencies: Step 1 retrieves the unknown entity ('Who is Acme's primary competitor in 2024 Risk Factors?'), and Step 2 spawns parallel retrieval calls for the financial metrics of both entities.",
+    "whyWrong": {
+      "0": "A single vector embedding of the complex query will still cluster around 'Acme Corp R&D' and will not surface a competitor whose name is not even present in the query vector.",
+      "1": "Relying on pre-training memory with high temperature causes severe hallucinations on private or recent financial filings.",
+      "2": "Regex on filenames cannot resolve multi-hop entity relationships buried inside document text."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
+    ]
+  },
+  {
+    "id": "d3-rag-015",
+    "domain": 3,
+    "topic": "Contextual Retrieval & Parent-Child Chunking",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A telecommunications company ingests 500-page service level agreement (SLA) contracts into a RAG system. When chunking documents into 300-token child chunks for precise vector matching, individual chunks often read like: 'If the outage exceeds 4 hours, the credit shall be 15% of monthly recurring charges.' Because the chunk lacks the header context ('Section 8.2: Platinum Tier Fiber Enterprise SLA'), the agent frequently applies Platinum Tier credits to Bronze Tier customer inquiries. How should you enhance the chunking and indexing pipeline to prevent this context loss?",
+    "options": [
+      "Delete all section headers from the PDF before ingestion so all chunks look uniform.",
+      "Implement Contextual Chunking (or Parent-Child retrieval) where each 300-token chunk is prepended with its hierarchical document breadcrumb/summary (e.g., `[Doc: Master SLA | Section 8.2: Platinum Tier Fiber]`) prior to embedding generation, or index small child chunks that reference and return their full parent section at retrieval time.",
+      "Reduce the chunk size to 10 tokens so only numbers are indexed.",
+      "Use random shuffling of sentences across different contracts before generating embeddings."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Contextual Chunking (prepending hierarchical breadcrumbs or LLM-generated document context headers to every chunk before embedding) and Parent-Child Chunking (searching over small granular child chunks for high vector similarity, but returning the parent section/window to the LLM) are industry-standard agentic RAG architectures that eliminate orphan pronouns and scope ambiguity.",
+    "whyWrong": {
+      "0": "Deleting section headers worsens the exact problem of losing tier and section context.",
+      "2": "10-token chunks destroy sentence meaning and make retrieval worse.",
+      "3": "Shuffling sentences across contracts corrupts the factual integrity of legal agreements."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/layout-parser",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
+    ]
+  },
+  {
+    "id": "d3-rag-016",
+    "domain": 3,
+    "topic": "Vector Search 1.0 Crowding Attribute",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A news aggregation agent uses Vertex AI Vector Search 1.0 to retrieve top-10 background articles when a journalist researches a breaking news event. Currently, if a single news publisher (e.g., `publisher_id='wire_service_a'`) publishes 15 slightly reworded versions of the same syndicated article, all 10 top neighbors returned by Vector Search come from that single publisher, starving the agent of diverse perspectives from other sources. How should you configure Vector Search 1.0 to ensure no single publisher dominates the top-K retrieved results?",
+    "options": [
+      "Set `similarity_top_k=1` so only a single article is ever retrieved.",
+      "Delete 90% of articles from `wire_service_a` randomly using a daily cron job.",
+      "Set the `crowding_tag` attribute on each datapoint to `publisher_id`, and specify `per_crowding_attribute_num_neighbors=2` in the `FindNeighbors` query request.",
+      "Add random Gaussian noise to the embeddings of `wire_service_a`."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Vertex AI Vector Search 1.0 natively supports result diversity via Crowding. By assigning a `crowding_tag` (such as `publisher_id` or `document_id`) to each vector datapoint and specifying `per_crowding_attribute_num_neighbors` (e.g., 2) at query time, Vector Search guarantees that at most 2 results share the same crowding attribute value in the final top-K set.",
+    "whyWrong": {
+      "0": "Setting `top_k=1` prevents synthesizing multiple viewpoints across sources.",
+      "1": "Randomly deleting articles destroys valid unique reporting from that publisher on other topics.",
+      "3": "Adding random noise degrades vector accuracy and does not deterministically cap results per publisher."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/filtering#crowding",
+      "https://cloud.google.com/vertex-ai/docs/vector-search/query-index"
+    ]
+  },
+  {
+    "id": "d3-rag-017",
+    "domain": 3,
+    "topic": "RAG Engine Ingestion Data Sources & Sync",
+    "difficulty": "easy",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise knowledge management team is setting up an automated ingestion pipeline into a Vertex AI RAG Engine Corpus. They want to ingest documents directly from supported cloud repositories without writing custom web scrapers or manual file downloaders. Which two native data sources are directly supported by the Vertex AI RAG Engine `ImportRagFiles` API? (Choose two.)",
+    "options": [
+      "Google Cloud Storage (`GcsSource`) buckets containing PDFs, DOCX, TXT, and HTML files.",
+      "Google Drive (`GoogleDriveSource`) folders and files shared with the Vertex AI RAG Engine service agent.",
+      "Direct SSH connections to on-premises mainframe tape drives.",
+      "Unauthenticated BitTorrent peer-to-peer magnet links.",
+      "Local browser `localStorage` caches on end-user mobile devices."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Vertex AI RAG Engine `ImportRagFiles` natively supports ingesting files from Google Cloud Storage (`GcsSource`), Google Drive (`GoogleDriveSource`), Slack (`SlackSource`), and Jira (`JiraSource`), handling parsing, chunking, and embedding generation automatically.",
+    "whyWrong": {
+      "2": "On-premises mainframe tape drives are not directly accessible via `ImportRagFiles` without staging to Cloud Storage.",
+      "3": "BitTorrent magnet links are not a supported enterprise data source.",
+      "4": "Client-side browser `localStorage` cannot be directly read by cloud-side `ImportRagFiles` jobs."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/import-files",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
+    ]
+  },
+  {
+    "id": "d3-rag-018",
+    "domain": 3,
+    "topic": "Evaluating RAG Quality with Vertex AI Gen AI Evaluation Service",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Your team has built a customer support RAG agent using Vertex AI RAG Engine and Gemini 1.5 Flash. Before promoting a new chunking strategy to production, you want to run an automated evaluation pipeline using Vertex AI Gen AI Evaluation Service (`EvalTask`) over a golden dataset of 200 user questions. You need to independently measure: (1) whether the retrieval step fetched relevant context chunks, and (2) whether the LLM answer stayed faithful to the retrieved chunks without hallucinating. Which pair of evaluation metrics should you configure?",
+    "options": [
+      "BLEU score and ROUGE-L score against random Wikipedia articles.",
+      "Perplexity of the system prompt and total character count of the response.",
+      "CPU utilization and Cloud Run memory consumption.",
+      "Context Relevance (or Retrieval Recall/Precision) to evaluate the retrieved chunks against the query, and Groundedness (Faithfulness) to evaluate whether the generated response is supported solely by the retrieved context."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The RAG Triad evaluation framework supported by Vertex AI Gen AI Evaluation Service decouples retrieval quality from generation quality: Context Relevance (and Context Recall) measures whether the retriever fetched the right chunks for the question, while Groundedness (Faithfulness) measures whether the LLM's generated answer contains any unverified claims outside the retrieved context.",
+    "whyWrong": {
+      "0": "BLEU and ROUGE measure n-gram overlap against reference strings and fail to evaluate semantic faithfulness or retrieval quality.",
+      "1": "Prompt perplexity and character count do not measure factual accuracy or retrieval relevance.",
+      "2": "Infrastructure metrics measure compute efficiency, not RAG retrieval or hallucination quality."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluate-rag"
+    ]
+  },
+  {
+    "id": "d3-rag-019",
+    "domain": 3,
+    "topic": "Handling Stale Documents & Lifecycle in RAG Engine",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A retail bank maintains its compliance policies in a Vertex AI RAG Engine Corpus. Whenever a policy PDF in Cloud Storage is superseded by a new version (e.g., `aml_policy_v2.pdf` replaces `aml_policy_v1.pdf`), the bank's ingestion script imports the new PDF into the RAG Corpus. However, compliance officers discover that the agent still occasionally cites rules from `aml_policy_v1.pdf` because both versions exist in the corpus with high vector similarity. What is the correct lifecycle management pattern in Vertex AI RAG Engine to prevent stale document retrieval?",
+    "options": [
+      "Track the `RagFile` resource names (`projects/.../ragCorpora/.../ragFiles/...`) mapped to source document identifiers, and call `DeleteRagFile` for the superseded `aml_policy_v1.pdf` (or use metadata filtering on `is_latest=true`) whenever a new version is imported.",
+      "Delete the entire Google Cloud project and recreate it every time a PDF is updated.",
+      "Instruct the Gemini model in the system prompt to 'only read files with v2 in the name'.",
+      "Disable vector search and use random file selection."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Importing a new file into a RAG Corpus adds new vector chunks without automatically deleting older files with different names. Maintaining a mapping between logical document IDs and `RagFile` IDs allows calling `DeleteRagFile` to purge obsolete chunks immediately upon importing the new version, or filtering on `is_latest=true` metadata.",
+    "whyWrong": {
+      "1": "Deleting and recreating the entire Google Cloud project for document updates is operationally destructive and causes downtime.",
+      "2": "System prompt instructions operate after retrieval; if `v1` chunks fill the top-K retrieval slots, `v2` chunks may be crowded out before the LLM ever sees them.",
+      "3": "Random file selection defeats the purpose of semantic retrieval."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/manage-rag-files",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1beta1/projects.locations.ragCorpora.ragFiles/delete"
+    ]
+  },
+  {
+    "id": "d3-rag-020",
+    "domain": 3,
+    "topic": "Vector Search 1.0 Distance Metrics & Normalization",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are configuring a new Vertex AI Vector Search 1.0 index to store 20 million embeddings generated by `text-embedding-004`. You want to maximize query throughput (QPS) and minimize CPU cycles spent calculating vector similarity scores during ScaNN search. Given that Vertex AI `text-embedding-004` outputs unit-normalized vectors (L2 norm = 1.0), which `distanceMeasureType` should you configure on the Vector Search index?",
+    "options": [
+      "Configure `COSINE_DISTANCE` and explicitly un-normalize all vectors prior to upload.",
+      "Configure `SQUARED_L2_DISTANCE` and multiply every vector by a random scalar before indexing.",
+      "Configure `DOT_PRODUCT_DISTANCE`, because for unit-normalized vectors, dot product is mathematically equivalent to cosine similarity but avoids redundant L2 norm division calculations at query time.",
+      "Configure `MANHATTAN_DISTANCE` and convert all float32 values to strings."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "When vectors are unit-normalized (L2 norm = 1.0), the cosine similarity between two vectors is identical to their dot product ($u \\cdot v$). Configuring `DOT_PRODUCT_DISTANCE` in Vertex AI Vector Search allows hardware-accelerated SIMD/AVX dot-product instructions without calculating square roots or vector magnitudes at query time, maximizing QPS and minimizing latency.",
+    "whyWrong": {
+      "0": "`COSINE_DISTANCE` computes vector magnitudes on the fly; un-normalizing vectors adds unnecessary computation.",
+      "1": "Multiplying vectors by random scalars destroys unit normalization and corrupts L2 distance rankings.",
+      "3": "Converting float embeddings to strings breaks numerical vector search."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/configure-index#distance-measure-type",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings"
+    ]
+  },
+  {
+    "id": "d3-rag-021",
+    "domain": 3,
+    "topic": "Hybrid RAG over Unstructured Docs and Knowledge Graphs",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A cybersecurity threat intelligence platform uses an agent to investigate complex attack campaigns. Analysts ask questions like: 'Which threat actor groups share command-and-control (C2) infrastructure with the malware family described in Incident Report #409, and what MITRE ATT&CK techniques do those groups use?' Dense vector search over incident reports retrieves text mentioning Incident #409, but struggles to traverse multi-degree entity relationships (Incident -> Malware -> C2 IP -> Threat Group -> MITRE Technique). How should you architect the retrieval system on Google Cloud?",
+    "options": [
+      "Store all incident reports as MP3 audio files in Cloud Storage.",
+      "Rely exclusively on BM25 sparse keyword search over raw CSV log files.",
+      "Increase the chunk overlap in RAG Engine to 99%.",
+      "Use GraphRAG by combining Vertex AI RAG Engine / Vector Search (for unstructured report chunk retrieval) with Spanner Graph (or Neo4j on GCP) to extract entity-relationship subgraphs via Cypher/GQL queries, feeding both unstructured text chunks and structured graph paths into Gemini."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "GraphRAG combines vector similarity search (ideal for semantic passage discovery) with knowledge graph traversal (using Spanner Graph or graph databases to deterministically traverse multi-hop relationships like Malware -> C2 -> Threat Actor). Passing both retrieved text passages and structured graph paths to the LLM provides complete relational and contextual grounding.",
+    "whyWrong": {
+      "0": "Storing text reports as MP3 audio files adds unnecessary transcription overhead and does not solve relational graph queries.",
+      "1": "BM25 keyword search cannot traverse multi-hop entity relationships across separate documents where keywords do not co-occur.",
+      "2": "99% chunk overlap creates massive index bloat without solving multi-document entity graph traversal."
+    },
+    "refs": [
+      "https://cloud.google.com/spanner/docs/graph/overview",
+      "https://cloud.google.com/blog/products/databases/using-spanner-graph-with-langchain-for-graphrag"
+    ]
+  },
+  {
+    "id": "d3-rag-022",
+    "domain": 3,
+    "topic": "Agentic Query Rewriting & HyDE (Hypothetical Document Embeddings)",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A software company's developer documentation agent struggles when junior developers ask vague, conversational questions using non-standard terminology (e.g., 'How do I stop my app from crashing when too many people click the buy button at once?'). The official documentation uses formal architectural terms ('Configuring Cloud Armor rate limiting and Cloud Run concurrency limits'). Direct embedding similarity between the vague user query and the formal documentation chunks yields low cosine similarity. What retrieval enhancement pattern should you implement?",
+    "options": [
+      "Block users from asking questions unless they use exact documentation titles.",
+      "Implement an LLM Query Rewriting / Hypothetical Document Embeddings (HyDE) step using Gemini 1.5 Flash before vector search, translating the user's colloquial question into technical search queries or a hypothetical documentation snippet containing standard Google Cloud architectural terminology.",
+      "Replace `text-embedding-004` with MD5 cryptographic hashes of the user's string.",
+      "Set `similarity_top_k=0`."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Query Rewriting and Hypothetical Document Embeddings (HyDE) use a fast LLM call (e.g., Gemini 1.5 Flash) to bridge the lexical and semantic gap between novice user vocabulary and expert corpus terminology before generating the retrieval embedding, dramatically improving recall.",
+    "whyWrong": {
+      "0": "Blocking users who don't know formal terminology defeats the purpose of an AI assistant.",
+      "2": "MD5 hashes destroy all semantic relationships; changing a single character produces a completely orthogonal hash.",
+      "3": "Setting `similarity_top_k=0` disables retrieval entirely."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/prompt-design-strategies"
+    ]
+  },
+  {
+    "id": "d3-rag-023",
+    "domain": 3,
+    "topic": "RAG Engine Grounding Threshold & Fallback Handling",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A municipal government deploys a citizen services agent grounded in a Vertex AI RAG Engine Corpus containing city ordinances and permit rules. Citizens occasionally ask questions about federal tax law or celebrity gossip that are completely outside the city corpus. Currently, when no relevant city ordinance exists, `RetrieveContexts` still returns the top 5 least-distant city chunks (with low similarity scores around 0.25), and the LLM attempts to fabricate an answer blending city trash pickup rules with federal taxes. How should you prevent the agent from answering out-of-domain queries?",
+    "options": [
+      "Fine-tune the embedding model to output all zeros for tax questions.",
+      "Set the threshold to -1.0 so every chunk in the database is always returned.",
+      "Configure a `vector_distance_threshold` (or `vector_similarity_threshold`, e.g., >= 0.65) in the Vertex AI RAG Engine retrieval configuration so irrelevant chunks below the threshold are discarded, and instruct the agent to politely decline or trigger a fallback route when zero grounded contexts are returned.",
+      "Disable HTTPS on the agent endpoint."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Vertex AI RAG Engine `RagRetrievalConfig` supports specifying a `vector_distance_threshold` / `vector_similarity_threshold`. When all candidate chunks fall below the minimum similarity threshold, RAG Engine returns an empty context list, allowing the orchestration layer or system prompt to deterministically respond that the information is not available in official city records.",
+    "whyWrong": {
+      "0": "Outputting all-zero vectors causes division-by-zero errors in cosine similarity and is an anti-pattern.",
+      "1": "Setting a threshold of -1.0 accepts all low-similarity noise, exacerbating hallucination.",
+      "3": "Disabling HTTPS is a security vulnerability unrelated to retrieval relevance."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/retrieve-contexts",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1beta1/RetrieveContextsRequest"
+    ]
+  },
+  {
+    "id": "d3-rag-024",
+    "domain": 3,
+    "topic": "Enterprise Search vs Custom RAG Engine Tradeoffs",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A retail conglomerate wants to deploy an internal HR portal search bar and Q&A widget within two weeks. They have 50,000 HR PDFs and intranet HTML pages in Cloud Storage, no dedicated ML engineering team to tune chunk sizes or ScaNN parameters, and require out-of-the-box web UI widgets, automatic website crawling, and zero-maintenance extractive answers with citations. Which Google Cloud service best fits their requirements?",
+    "options": [
+      "Using BigQuery ML k-means clustering over raw HTML strings.",
+      "Building a custom ScaNN C++ library from scratch on bare-metal Compute Engine VMs.",
+      "Deploying a custom Kubernetes cluster running raw open-source Milvus with manual Python chunking scripts.",
+      "Vertex AI Search (formerly Enterprise Search in Generative AI App Builder), which provides fully managed out-of-the-box ingestion, automatic chunking, search tuning, and pre-built web widgets."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Vertex AI Search provides a turnkey, fully managed search and RAG experience with out-of-the-box data connectors, automated document parsing/chunking, built-in ranking, and embeddable UI widgets—ideal when rapid time-to-market and minimal ML engineering overhead are prioritized over low-level custom RAG pipeline control.",
+    "whyWrong": {
+      "0": "K-means clustering in BigQuery ML is an unsupervised grouping algorithm, not a turnkey semantic Q&A search engine.",
+      "1": "Building custom C++ ScaNN libraries on bare metal requires high ML engineering effort and months of development.",
+      "2": "Managing self-hosted Milvus on GKE introduces significant operational and tuning overhead that violates the two-week timeline."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/enterprise-search-introduction",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
+    ]
+  },
+  {
+    "id": "d3-rag-025",
+    "domain": 3,
+    "topic": "Long-Context Gemini vs RAG Engine Cost & Latency Optimization",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A legal discovery platform analyzes a fixed set of 400 core regulatory statutes (totaling 1.2 million tokens) that are queried 50,000 times per day by compliance agents. Previously, the team passed all 1.2 million tokens into Gemini 1.5 Pro's 2M token context window on every single request without RAG or caching, resulting in high token costs and 18-second time-to-first-token (TTFT). You need to architect a solution that minimizes cost and latency while preserving cross-document synthesis across frequently referenced statutes. What combination of Google Cloud features should you implement?",
+    "options": [
+      "Use Vertex AI RAG Engine to retrieve the top 15 relevant statutory sections for dynamic query-specific grounding, and use Vertex AI Context Caching for the core immutable statutory framework definitions shared across all queries.",
+      "Continue sending 1.2 million uncached tokens on every query and upgrade to 100 parallel GPU VMs.",
+      "Truncate the 1.2 million tokens down to the first 500 tokens of the first document.",
+      "Convert all 400 statutes into a single PNG image and pass it to an image generation model."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Combining Vertex AI Context Caching (for high-frequency, shared static background instructions/definitions at a steep token discount and near-instant TTFT) with Vertex AI RAG Engine (to dynamically fetch the specific statutory clauses relevant to each user query) achieves the optimal balance of sub-second retrieval latency, low token cost, and high accuracy.",
+    "whyWrong": {
+      "1": "Sending 1.2M uncached tokens 50,000 times a day incurs massive input token charges and high prefill latency.",
+      "2": "Truncating to 500 tokens discards 99.95% of the regulatory corpus.",
+      "3": "Converting text into a giant PNG image degrades OCR readability and cannot be processed by image generation models for Q&A."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
+    ]
+  }
+]

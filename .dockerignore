@@ -1,0 +1,9 @@
+/.git/
+/.agents/
+/data/
+/brand_kit/
+/tools/
+__pycache__/
+*.pyc
+**/.wh.*
+.wh.*

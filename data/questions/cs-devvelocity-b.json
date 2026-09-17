@@ -1,0 +1,729 @@
+[
+  {
+    "id": "cs-dev-026",
+    "domain": 1,
+    "topic": "Multimodal Engineering Asset Ingestion in Agent Search",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. DevVelocity's SRE and platform engineering teams maintain hundreds of post-mortem incident recordings (MP4 videos), whiteboard architecture diagrams (PNG/PDF), and runbook documents stored in Cloud Storage. When onboarding new engineers across the 800 microservices, engineers want to use Gemini Enterprise to ask natural-language questions that search across both written runbooks and spoken explanations inside post-mortem video recordings. How should you configure data ingestion?",
+    "options": [
+      "Configure Agent Search multimodal ingestion connected to the Cloud Storage buckets using Video Intelligence / Speech-to-Text transcription with timestamp metadata and Document AI layout/image parsing so Gemini Enterprise can retrieve and ground answers on exact video timestamps and diagram components.",
+      "Delete all MP4 video recordings and PNG architecture diagrams because search engines can only process `.txt` files.",
+      "Require SREs to re-record all post-mortem videos in Morse code.",
+      "Upload the confidential post-mortem videos to a public video-sharing website with public comments enabled."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Agent Search and Gemini Enterprise support multimodal enterprise data ingestion. By transcribing MP4 post-mortem videos with timestamp preservation and extracting structural/visual descriptions from PNG/PDF architecture diagrams during indexing, engineers can submit natural-language queries and receive grounded answers pointing to exact video timestamps and architecture diagram segments.",
+    "whyWrong": {
+      "1": "Deleting multimodal engineering assets destroys critical institutional knowledge from incident post-mortems.",
+      "2": "Morse code re-recording is operationally absurd and unnecessary.",
+      "3": "Uploading confidential cloud security post-mortems to public websites violates zero-exfiltration mandates."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/parse-chunk-documents",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/overview"
+    ]
+  },
+  {
+    "id": "cs-dev-027",
+    "domain": 1,
+    "topic": "CX Agent Studio Webhook Fulfillment for Cloud Workstations Provisioning",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. To accelerate developer onboarding, DevVelocity provides a low-code self-service bot built in Customer Experience Agent Studio (CX Agent Studio). When a newly hired engineer requests a development environment, the bot collects their target programming language (`Go`, `Python`, `Java`, or `TypeScript`) and team squad ID, and then automatically provisions a pre-configured Cloud Workstation with Antigravity installed. How should CX Agent Studio trigger this provisioning?",
+    "options": [
+      "Instruct the CX Agent Studio bot to email the CEO asking them to manually create a VM in the console.",
+      "Configure a CX Agent Studio webhook fulfillment on the Confirmation Page that invokes a private Cloud Run service using an IAM-authenticated service account to call the Cloud Workstations API with the collected session parameters.",
+      "Give every new hire Organization Admin credentials in their welcome email so they can create their own VPC networks.",
+      "Store workstation requests in a local browser cookie and never send them to any backend server."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "CX Agent Studio webhooks allow conversational pages to trigger backend infrastructure automation securely. By passing validated session parameters (`$session.params.language`, `$session.params.squad_id`) to a private Cloud Run fulfillment service authenticated via IAM, the workflow programmatically invokes the Cloud Workstations API to spin up an isolated, pre-configured developer workspace.",
+    "whyWrong": {
+      "0": "Manual provisioning by executives creates severe bottlenecks and defeats self-service automation.",
+      "2": "Granting Organization Admin to every new hire violates least-privilege security principles.",
+      "3": "Storing requests only in local browser cookies prevents backend provisioning from ever occurring."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/webhook",
+      "https://cloud.google.com/workstations/docs/reference/rest"
+    ]
+  },
+  {
+    "id": "cs-dev-028",
+    "domain": 2,
+    "topic": "Antigravity Extension Hooks for Pre-Commit & Pre-Edit Verification",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. Platform engineering wants to ensure that whenever an autonomous coding agent in Antigravity modifies a Go or Python source file inside a Cloud Workstation, automated static analysis linters (`golangci-lint`, `ruff`) and secret scanners are executed immediately before the file edit is committed to the local Git branch. If the linter detects a violation of internal security standards, the agent must be forced to fix the violation automatically. What should you configure?",
+    "options": [
+      "Require developers to print out agent code diffs on paper and mail them to the security team.",
+      "Disable all local linters and wait for production outages to discover syntax and security errors.",
+      "Configure Antigravity Extension Hooks (`post-edit` and `pre-commit` hooks) in the workspace configuration that automatically execute local static analysis linters and secret scanners after each agent file edit, piping any non-zero exit codes and linter stderr directly back into the coding agent's active turn.",
+      "Configure Antigravity to delete the `.git` directory whenever a linter warning occurs."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Antigravity Extension Hooks allow deterministic shell scripts and verification tools to intercept agent lifecycle events (`post-edit`, `pre-tool-call`, `pre-commit`). Running `golangci-lint` and secret scanners via a hook immediately after an edit and returning any error output directly into the agent's context loop forces the coding agent to self-correct security or style violations before committing.",
+    "whyWrong": {
+      "0": "Paper code reviews destroy autonomous software engineering velocity.",
+      "1": "Disabling linters increases production bug regressions and violates quality standards.",
+      "3": "Deleting `.git` directories destroys version control history and developer work."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder",
+      "https://cloud.google.com/workstations/docs/overview"
+    ]
+  },
+  {
+    "id": "cs-dev-029",
+    "domain": 2,
+    "topic": "Network Isolation & Private Artifact Access in GKE Sandboxes",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. When autonomous coding agents execute unit and integration tests inside ephemeral GKE sandbox pods, they need to download internal Go modules, Python wheels, and Docker base images from DevVelocity's private Artifact Registry. However, security mandates strictly forbid GKE sandbox pods from having outbound internet access (`0.0.0.0/0`), to guarantee zero exfiltration of proprietary code. How should you configure the GKE sandbox network?",
+    "options": [
+      "Disable all dependency downloads so coding agents can only write code using standard library functions from 1995.",
+      "Attach a public NAT gateway with unrestricted outbound access to all GKE sandbox pods and trust the coding agent not to connect to external IP addresses.",
+      "Copy all 800 microservices onto USB flash drives and plug them into physical GKE worker nodes.",
+      "Configure GKE Private Clusters with Private Google Access enabled, enforce Kubernetes NetworkPolicies that deny all default egress while allowing internal traffic to `private.googleapis.com` / Artifact Registry Virtual IPs and internal MCP server endpoints, and block all public internet routing."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Enabling Private Google Access (`private.googleapis.com` or `restricted.googleapis.com`) on GKE private clusters combined with strict Kubernetes NetworkPolicies allows sandbox pods to pull internal packages and container images from Artifact Registry over Google's private internal network without requiring public IP addresses or outbound internet NAT gateways.",
+    "whyWrong": {
+      "0": "Blocking internal Artifact Registry access prevents compiling and testing modern microservices.",
+      "1": "Unrestricted outbound internet NAT gateways violate zero-exfiltration mandates and allow compromised agents to leak proprietary source code.",
+      "2": "Physical USB drives cannot be attached to managed Google Cloud GKE worker nodes."
+    },
+    "refs": [
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters",
+      "https://cloud.google.com/vpc/docs/configure-private-google-access"
+    ]
+  },
+  {
+    "id": "cs-dev-030",
+    "domain": 2,
+    "topic": "Preventing Hallucinated Imports via Dependency Graph Context",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. A major issue with DevVelocity's previous third-party IDE plugins was that they frequently hallucinated non-existent internal Go packages (e.g., `github.com/devvelocity/common/v99/logger`) or imported deprecated internal Java libraries. How should you configure Antigravity and Claude Code workspaces to eliminate hallucinated imports across all 800 microservices?",
+    "options": [
+      "Configure workspace-scoped Rules (`.antigravity/rules`) paired with an automated dependency-graph MCP tool that injects the active repository's exact `go.mod`, `package.json`, `pom.xml`, or `pyproject.toml` symbol table and exported internal package signatures into the coding agent's context.",
+      "Instruct developers to manually rename their internal packages to match whatever names the LLM hallucinates.",
+      "Set LLM temperature to 1.5 so the model invents even more creative package names.",
+      "Delete `go.mod` and `package.json` files from all repositories."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Grounding coding agents on the deterministic dependency manifest (`go.mod`, `pom.xml`, `pyproject.toml`, `package.json`) and exposing an MCP symbol lookup tool that validates whether an import path and function signature actually exist in the internal Artifact Registry eliminates import hallucinations.",
+    "whyWrong": {
+      "1": "Renaming enterprise libraries to match LLM hallucinations creates chaos across 800 microservices.",
+      "2": "Increasing temperature to 1.5 increases randomness and worsens import hallucinations.",
+      "3": "Deleting dependency manifests breaks builds across Go, Python, Java, and TypeScript."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder",
+      "https://google.github.io/adk-docs/tools/mcp-tools/"
+    ]
+  },
+  {
+    "id": "cs-dev-031",
+    "domain": 2,
+    "topic": "Building Autonomous CI/CD Failure Triage Agents with Antigravity SDK",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. DevVelocity runs tens of thousands of Cloud Build CI pipelines daily. When a pull request build fails due to a flaky integration test or a subtle compilation mismatch, developers waste hours inspecting logs. You want to use the Antigravity SDK to build an autonomous CI/CD Triage Agent that automatically investigates broken builds, reproduces failures in an isolated sandbox, and posts a verified fix commit or diagnostic root-cause comment on the PR. How should you architect this workflow?",
+    "options": [
+      "Configure Cloud Build to automatically force-merge any pull request that fails tests more than twice.",
+      "Trigger an event-driven Cloud Run worker via Pub/Sub whenever Cloud Build emits a `FAILURE` status; the worker uses the Antigravity SDK to spawn an ephemeral GKE sandbox at the failing commit SHA, queries build error logs via the Cloud Logging MCP server, runs targeted reproduction tests, and submits a verified fix patch to the PR branch.",
+      "Have the Antigravity SDK send an automated SMS to all 4,500 engineers whenever any single build fails.",
+      "Disable all CI/CD pipelines so builds never fail."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Using Pub/Sub notifications from Cloud Build to trigger an autonomous triage agent built with the Antigravity SDK enables closed-loop self-healing CI/CD. Spawning an isolated GKE sandbox at the exact failing commit SHA allows the agent to safely reproduce the failure, inspect stack traces via MCP, iterate on a code fix, verify that `go test` / `pytest` passes, and propose a verified fix commit on the PR.",
+    "whyWrong": {
+      "0": "Force-merging failing pull requests introduces severe bug regressions into production.",
+      "2": "Spamming 4,500 engineers with SMS messages causes alert fatigue and zero automated remediation.",
+      "3": "Disabling CI/CD pipelines violates software engineering quality and security standards."
+    },
+    "refs": [
+      "https://cloud.google.com/build/docs/subscribe-build-notifications",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "cs-dev-032",
+    "domain": 2,
+    "topic": "Pre-Warmed Sandbox Pools for Low-Latency Agent Execution",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. At 9:00 AM every weekday, thousands of DevVelocity software engineers simultaneously launch interactive coding agent tasks in Cloud Workstations and GKE sandboxes. Cold-starting container images containing heavy Java JDKs, Go toolchains, and pre-cached internal dependency layers takes 4 minutes per pod, frustrating developers. How should you optimize sandbox startup latency while controlling costs?",
+    "options": [
+      "Force developers to compile the Linux kernel from scratch every morning before starting work.",
+      "Keep 10,000 high-memory VMs running at 100% capacity 24/7 including weekends and holidays.",
+      "Configure Cloud Workstations warm pools and GKE Autopilot pre-warmed pause pods / image streaming with Artifact Registry, scheduled via Cloud Scheduler to scale up a buffer of pre-initialized sandbox instances 15 minutes before peak engineering hours and scale down after business hours.",
+      "Remove all compilers and SDKs from the container images so they are 1 KB in size."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Combining Cloud Workstations warm pools and GKE image streaming / pre-warmed buffer pods with scheduled autoscaling policies (scaling up ahead of the 9:00 AM ramp-up and scaling down overnight/weekends) reduces sandbox assignment latency from minutes to seconds while avoiding 24/7 idle compute waste.",
+    "whyWrong": {
+      "0": "Compiling kernels manually increases startup time to hours rather than reducing it.",
+      "1": "Running 10,000 VMs 24/7 wastes massive cloud budget during nights and weekends.",
+      "3": "Removing compilers and SDKs renders coding sandboxes unable to build or test code."
+    },
+    "refs": [
+      "https://cloud.google.com/workstations/docs/configure-workstation-configs",
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming"
+    ]
+  },
+  {
+    "id": "cs-dev-033",
+    "domain": 2,
+    "topic": "Cryptographic Governance of Antigravity Plugins in Skill Registry",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. Several product squads have developed custom Antigravity Plugins and MCP tools to automate internal database migrations. To prevent supply-chain attacks or malicious plugin injection across the 4,500-engineer organization, platform engineering must ensure that coding agents can only load plugins that have been security-reviewed and cryptographically signed by DevVelocity's Platform Security team. What should you configure?",
+    "options": [
+      "Email plugin zip files around the company with password protection set to `123456`.",
+      "Allow coding agents to download and execute arbitrary `.sh` scripts from public Pastebin URLs.",
+      "Turn off signature verification because cryptographic checks add 5 milliseconds of latency.",
+      "Configure Antigravity workspace policies and Skill Registry governance to enforce Binary Authorization / Cosign cryptographic signature verification on all plugins and MCP server container images, rejecting any unsigned or unapproved extension at runtime."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Enforcing cryptographic signature verification (via Binary Authorization and Cosign attestations stored in Artifact Registry / Skill Registry) ensures software supply-chain integrity for agent tooling. Coding agents in Cloud Workstations verify the Platform Security attestation before loading any plugin or invoking an MCP container image, blocking tampered or unauthorized extensions.",
+    "whyWrong": {
+      "0": "Weak zip passwords shared over email provide zero cryptographic provenance or governance.",
+      "1": "Executing arbitrary scripts from Pastebin creates severe remote code execution (RCE) and exfiltration vulnerabilities.",
+      "2": "Disabling signature verification exposes all 4,500 workstations to supply-chain compromise."
+    },
+    "refs": [
+      "https://cloud.google.com/binary-authorization/docs/overview",
+      "https://cloud.google.com/software-delivery-shield/docs/overview"
+    ]
+  },
+  {
+    "id": "cs-dev-034",
+    "domain": 3,
+    "topic": "Cyclic Graph Workflows in ADK for Autonomous TDD",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. You are building a custom Test-Driven Development (TDD) agent using the Agent Development Kit (ADK). Given a Jira feature specification, the agent must: (1) write unit test cases, (2) run the tests to confirm they fail, (3) write the implementation code, (4) run the test suite in a sandbox, and (5) if any test fails, inspect the failure stack trace and iteratively refine the implementation code until all tests pass or a maximum retry budget is exhausted. How should you structure this workflow in ADK?",
+    "options": [
+      "Compose an ADK `SequentialAgent` for initial test generation followed by a `LoopAgent` (or cyclic state-graph orchestrator) containing the Implementation Agent and Sandbox Test Executor tool, terminating the loop early via an escalation condition as soon as `test_exit_code == 0` or `iteration_count >= max_retries`.",
+      "Use a single one-shot LLM prompt with no tool execution loop and assume the generated code passes all tests on the first try.",
+      "Configure an infinite loop with no termination condition so failed tests run forever.",
+      "Have the agent delete any unit test that fails during step 4."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Autonomous Test-Driven Development (TDD) requires an iterative feedback loop governed by deterministic exit criteria. In ADK, pairing a `SequentialAgent` (for initial test authoring) with a bounded `LoopAgent` that alternates between code refinement and sandbox test execution\u2014checking `Session.state['test_exit_code'] == 0` to break early\u2014reliably produces verified, passing code while preventing runaway token loops.",
+    "whyWrong": {
+      "1": "One-shot code generation without execution feedback frequently fails on complex enterprise microservice dependencies.",
+      "2": "Infinite loops without a `max_retries` termination guard cause severe budget overruns when encountering unsolvable bugs.",
+      "3": "Deleting failing unit tests defeats the entire purpose of Test-Driven Development and introduces regressions."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agents/",
+      "https://google.github.io/adk-docs/agents/workflow-agents/sequential-agents/"
+    ]
+  },
+  {
+    "id": "cs-dev-035",
+    "domain": 3,
+    "topic": "Hybrid Search & Symbol Reranking for Code Retrieval",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. When refactoring TypeScript and Go microservices, coding agents query Vector Search to locate exact interface definitions and callers across 800 repositories. Engineers notice that dense semantic embeddings effectively find conceptually similar functions (e.g., 'rate limiting middleware'), but frequently rank the wrong microservice's implementation higher than the exact symbol identifier (`RateLimiterV2ServerInterface`). How should you optimize retrieval accuracy?",
+    "options": [
+      "Disable vector search and require developers to manually type file paths for every function in all 800 repositories.",
+      "Implement hybrid code retrieval combining dense code embeddings with sparse exact identifier/trigram matching (BM25/SPLADE), followed by a cross-encoder reranking stage that boosts exact symbol signature matches and same-repository/dependency proximity.",
+      "Reduce vector embedding dimensions from 768 to 2 dimensions to speed up search.",
+      "Convert all camelCase and snake_case identifiers into random emojis before indexing."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Code search requires both conceptual semantic understanding and exact lexical symbol precision. Combining dense semantic embeddings with sparse lexical token matching ensures exact CamelCase/snake_case symbols like `RateLimiterV2ServerInterface` are captured, while a cross-encoder reranker weighted by call-graph/dependency proximity surfaces the exact interface definition required by the compiler.",
+    "whyWrong": {
+      "0": "Manual file path lookup across 800 microservices is impossible for human developers to maintain.",
+      "2": "Reducing embeddings to 2 dimensions destroys 99.9% of semantic and syntactic information.",
+      "3": "Replacing identifiers with emojis corrupts source code syntax and breaks retrieval."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/docs/vector-search/overview",
+      "https://cloud.google.com/generative-ai-app-builder/docs/ranking"
+    ]
+  },
+  {
+    "id": "cs-dev-036",
+    "domain": 3,
+    "topic": "Parallel Agent Execution in ADK for Multi-Faceted PR Audits",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. Before any pull request can be merged into DevVelocity's core cloud security platform, four independent verification checks must run: (1) SAST Security Vulnerability Analysis, (2) Open-Source License Compliance Audit, (3) SQL/GKE Runtime Performance Profiling, and (4) Architectural Style Rule Verification. Running these four specialized ADK subagents sequentially adds 3 minutes to every PR review. How should you reduce review latency?",
+    "options": [
+      "Run the checks sequentially on a single CPU core clocked at 100 MHz.",
+      "Skip three of the four checks randomly on every pull request.",
+      "Orchestrate the four specialized verification subagents inside an ADK `ParallelAgent` so all four audits execute concurrently against the PR diff, aggregating their structured pass/fail reports into a unified PR review comment in under 45 seconds.",
+      "Approve all pull requests automatically without running any verification agents."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Because SAST security analysis, license auditing, performance profiling, and style rule verification inspect the same immutable PR diff independently without mutating state, executing them concurrently inside an ADK `ParallelAgent` cuts total wall-clock latency to the duration of the single slowest check (~45s) while preserving comprehensive governance.",
+    "whyWrong": {
+      "0": "Throttling CPU compute increases latency rather than reducing it.",
+      "1": "Skipping security or license checks randomly introduces severe compliance and vulnerability risks.",
+      "3": "Approving unverified PRs violates quality and security mandates."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/parallel-agents/",
+      "https://google.github.io/adk-docs/sessions/state/"
+    ]
+  },
+  {
+    "id": "cs-dev-037",
+    "domain": 3,
+    "topic": "Cross-Repository Dependency Graph Orchestration in ADK",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. A platform engineer uses an autonomous ADK refactoring agent to update a shared gRPC protobuf contract (`telemetry_service.proto`) that is consumed by 18 downstream Go, Python, and TypeScript microservices across different Git repositories. Updating the protobuf without coordinating updates across the 18 consumer repositories breaks downstream CI/CD pipelines. How should the ADK agent orchestrate this cross-repository change?",
+    "options": [
+      "Print the protobuf changes on a poster and hang it in the office cafeteria.",
+      "Modify the protobuf file directly in production without updating any downstream microservices and let customer requests fail.",
+      "Delete the 18 downstream microservices so there are no consumers left to break.",
+      "Equip the ADK Coordinator Agent with a Dependency Graph MCP tool to query all downstream consumers of `telemetry_service.proto`, spawn parallel subagents in isolated sandboxes for each of the 18 consumer repositories to regenerate protobuf stubs and update call sites, verify that all 18 test suites pass, and open linked atomic pull requests across the repositories."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Managing breaking contract changes across a distributed 800-microservice architecture requires dependency-aware multi-agent orchestration. By querying the enterprise dependency graph via MCP to identify all 18 downstream consumers, spawning parallel sandboxed subagents to update stubs and refactor call sites, and validating compilation across all 18 services before opening linked PRs, DevVelocity prevents cross-service regressions.",
+    "whyWrong": {
+      "0": "Cafeteria posters do not prevent automated CI/CD build breakages across 4,500 engineers.",
+      "1": "Deploying breaking protobuf changes without updating consumers causes immediate serialization errors and production outages.",
+      "2": "Deleting 18 production microservices destroys enterprise product functionality."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/",
+      "https://google.github.io/adk-docs/tools/mcp-tools/"
+    ]
+  },
+  {
+    "id": "cs-dev-038",
+    "domain": 3,
+    "topic": "Context Pruning & Stack Trace Filtering in Custom Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. When an autonomous debugging agent queries Cloud Logging via MCP to investigate a Java microservice crash, the raw log output occasionally contains 50 MB of repetitive stack trace frames and verbose GC (Garbage Collection) memory dumps. Injecting 50 MB of raw logs directly into the LLM prompt overflows the context window and causes out-of-memory errors. How should you design the MCP tool and ADK context pipeline?",
+    "options": [
+      "Implement deterministic log pre-processing and stack-trace deduplication inside the Cloud Logging MCP Server that collapses repetitive recursive frames, strips irrelevant JVM GC noise, and returns a structured, token-bounded diagnostic summary (top root-cause exception frames + surrounding application log lines) with an option for the agent to paginate specific frame slices if needed.",
+      "Truncate the 50 MB log file to the first 10 characters (`2026-09-17`) and discard the actual exception message.",
+      "Send the entire 50 MB payload repeated 10 times to test if Vertex AI crashes.",
+      "Configure the agent to ignore all logs and guess the bug based on the day of the week."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "MCP servers should return structured, high-signal context rather than raw multi-megabyte dumps. Deduplicating recursive Java stack frames, filtering out unrelated GC noise, and exposing pagination parameters (`offset`, `limit`, `filter_package='com.devvelocity.*'`) inside the Cloud Logging MCP tool keeps token consumption compact while preserving 100% of the actionable root-cause exception frames.",
+    "whyWrong": {
+      "1": "Truncating logs to the first 10 characters discards the actual exception stack trace needed to diagnose the bug.",
+      "2": "Multiplying 50 MB payloads exceeds API payload limits and wastes compute resources.",
+      "3": "Guessing bugs by the day of the week is completely ineffective."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/tools/mcp-tools/",
+      "https://cloud.google.com/logging/docs/reference/v2/rest"
+    ]
+  },
+  {
+    "id": "cs-dev-039",
+    "domain": 4,
+    "topic": "Custom LLM-as-a-Judge Autoraters for Code Review Quality",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. Platform engineering wants to continuously evaluate the quality of pull request reviews generated by the Security Auditor Subagent and Performance Profiler Subagent across Go and TypeScript repositories. While unit tests verify code compilation, they cannot measure whether an agent's review comments accurately identify architectural anti-patterns or adhere to DevVelocity's constructive code-review tone guidelines. How should you automate this evaluation?",
+    "options": [
+      "Count only the number of exclamation marks used in the agent's PR comments.",
+      "Configure the Vertex AI Gen AI Evaluation Service with custom LLM-as-a-judge autoraters calibrated against Principal Engineer golden review rubrics to score agent PR comments on Security Precision, Actionability, Architectural Alignment, and Zero False-Positive Noise.",
+      "Have the Security Auditor Subagent grade its own review comments with a hardcoded score of 100%.",
+      "Disable code review evaluation and rely on annual employee satisfaction surveys."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Evaluating natural-language engineering artifacts (such as architectural PR review critiques and security remediation advice) requires semantic rubric evaluation. Using the Gen AI Evaluation Service with custom LLM-as-a-judge autoraters calibrated on golden reviews written by DevVelocity Principal Engineers enables continuous, automated scoring of review precision, actionability, and adherence to internal architectural standards.",
+    "whyWrong": {
+      "0": "Punctuation counts have zero correlation with security precision or architectural insight.",
+      "2": "Self-grading with hardcoded 100% scores masks false positives and hallucinated security warnings.",
+      "3": "Annual surveys provide delayed, subjective feedback that cannot block poor agent prompt changes in CI/CD."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
+    ]
+  },
+  {
+    "id": "cs-dev-040",
+    "domain": 4,
+    "topic": "Monitoring MCP Tool Latency & Agent Bottlenecks with Cloud Trace",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. Developers report that when asking Antigravity to analyze a microservice dependency upgrade, the agent takes 38 seconds to respond. You need to determine whether the 38-second latency bottleneck is caused by LLM token generation time in Vertex AI, slow SQL queries inside the internal Dependency Graph MCP server, or network latency inside GKE sandbox initialization. What should you use?",
+    "options": [
+      "Delete random MCP servers one by one in production until response times improve.",
+      "Use a handheld stopwatch while watching a developer's laptop screen.",
+      "Instrument the coding agent orchestrator and all custom MCP servers with OpenTelemetry / Cloud Trace context propagation (`traceparent` headers), and inspect the end-to-end distributed trace waterfall in Google Cloud Observability to pinpoint exact span durations across model calls, MCP tool executions, and sandbox startup.",
+      "Reboot all Google Cloud routers every 15 minutes."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Distributed tracing via Cloud Trace (using OpenTelemetry W3C `traceparent` propagation across the agent runtime, Agent Gateway, Vertex AI LLM calls, and MCP servers) renders a granular waterfall view of every sub-step. Engineers can immediately see whether the 38 seconds was spent waiting on an unindexed SQL query inside an MCP server or waiting on LLM reasoning tokens.",
+    "whyWrong": {
+      "0": "Deleting production MCP servers blindly breaks developer workflows.",
+      "1": "A handheld stopwatch measures total end-to-end wall time but cannot break down internal backend spans.",
+      "3": "Rebooting routers disrupts network stability without diagnosing application-level bottlenecks."
+    },
+    "refs": [
+      "https://cloud.google.com/trace/docs/overview",
+      "https://cloud.google.com/stackdriver/docs/instrumentation/overview"
+    ]
+  },
+  {
+    "id": "cs-dev-041",
+    "domain": 4,
+    "topic": "Canary Rollouts & A/B Testing for Coding Agent Upgrades",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. Platform engineering has developed a new set of Antigravity system rules and upgraded the underlying model version for the automated Java-to-Go refactoring agent. Before rolling out this update to all 4,500 engineers, you want to validate in production that the new agent version increases PR merge acceptance rates and reduces CI build failures compared to the current baseline version. What rollout strategy should you use?",
+    "options": [
+      "Run both agent versions simultaneously on the same file and merge their text outputs line by line.",
+      "Deploy the new version to 100% of all 4,500 engineers on Friday at 5:00 PM with no rollback plan.",
+      "Test the agent only on a single 'Hello World' file and assume it will work across all 800 microservices.",
+      "Use the Agents CLI and Agent Gateway traffic-splitting policies to execute a canary / A/B deployment that routes 5% of pilot engineering squads to the new agent version while keeping 95% on the baseline version, comparing PR merge rates, token cost, and build pass rates in BigQuery before full promotion."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Controlled canary rollouts and A/B testing via Agent Gateway traffic splitting allow platform engineering to measure real-world engineering telemetry (PR acceptance rate, CI pass rate, token spend per refactored service) on a 5% pilot cohort. If regression metrics remain healthy over the canary window, the Agents CLI promotes the release to 100% of the organization.",
+    "whyWrong": {
+      "0": "Interleaving two different LLM code outputs line by line produces uncompilable syntax errors.",
+      "1": "A 100% Friday afternoon rollout without rollback capabilities risks disrupting all 4,500 developers simultaneously.",
+      "2": "A single 'Hello World' test cannot capture the complexity of 800 enterprise microservices."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
+      "https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration"
+    ]
+  },
+  {
+    "id": "cs-dev-042",
+    "domain": 4,
+    "topic": "Context Caching for Enterprise Repository Standards & Headers",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. Every time any of the 4,500 developers invokes an Antigravity coding agent to generate or review microservice code, the agent prompt includes DevVelocity's 120-page Enterprise Architecture Style Guide, OWASP Security Policy Matrix, and common gRPC protobuf definitions (~180,000 static tokens). Processing these 180,000 identical tokens millions of times per day is driving up Vertex AI token costs and adding latency. How should you optimize this?",
+    "options": [
+      "Configure Vertex AI Context Caching to cache the 180,000 tokens of shared enterprise architecture rules, security policies, and common protobuf schemas, configuring Antigravity and Agent Gateway to reference the shared `CachedContent` resource across developer requests.",
+      "Delete the Enterprise Architecture Style Guide and OWASP Security Policy Matrix so agents generate unguided code.",
+      "Compress the prompt text using `gzip` binary bytes and paste raw binary into the LLM text prompt.",
+      "Restrict developers to using the coding agent only during leap years."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Vertex AI Context Caching is specifically designed for scenarios where a large, static prompt prefix (such as organization-wide coding rules, style guides, and common API schemas) is shared across high-frequency requests. Caching the 180,000 static tokens dramatically lowers input token costs and eliminates redundant prefill computation latency across all 4,500 engineers.",
+    "whyWrong": {
+      "1": "Deleting architectural and security standards violates core business requirements for standardization.",
+      "2": "LLMs process tokenized text/multimodal inputs, not raw binary gzip byte streams.",
+      "3": "Restricting usage to leap years halts software delivery."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
+      "https://cloud.google.com/vertex-ai/generative-ai/pricing"
+    ]
+  },
+  {
+    "id": "cs-dev-043",
+    "domain": 4,
+    "topic": "Detecting & Mitigating Behavioral Drift on New Language Toolchains",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. DevVelocity upgrades its enterprise Go toolchain to a newly released Go version that introduces new standard library concurrency primitives and deprecates older patterns. Shortly after the upgrade, telemetry shows that the autonomous refactoring agent's compilation failure rate on Go repositories spikes from 2% to 28% because the LLM defaults to deprecated syntax from its pre-training cutoff. How should you systematically resolve this drift?",
+    "options": [
+      "Downgrade all 800 microservices back to Go 1.0 permanently.",
+      "Update the internal Go Documentation RAG index and workspace Antigravity Rules (`.antigravity/rules`) with the new Go version's release notes, migration examples, and AST linter rules, and add targeted test cases for the new concurrency primitives to the continuous evaluation `evalset`.",
+      "Wait 3 years for the next foundational LLM pre-training cutoff before writing any Go code.",
+      "Instruct the agent to write all Go microservices in COBOL instead."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "When programming language toolchains evolve beyond an LLM's pre-training cutoff, behavioral drift occurs. Updating the workspace Rules (`.antigravity/rules`) and RAG Engine code documentation index with explicit few-shot migration examples of the new Go concurrency primitives provides immediate in-context learning, while adding golden test cases to the `evalset` prevents regression.",
+    "whyWrong": {
+      "0": "Downgrading to obsolete compiler versions reintroduces security vulnerabilities and forfeits runtime performance gains.",
+      "2": "Waiting 3 years halts enterprise feature velocity.",
+      "3": "Rewriting modern cloud microservices in COBOL violates organizational technical standards."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/overview",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "cs-dev-044",
+    "domain": 5,
+    "topic": "Real-Time Secret & Credential Redaction with Sensitive Data Protection",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. When coding agents analyze Cloud Logging traces or Jira bug reports via MCP tools, those logs occasionally contain inadvertently logged customer JWT bearer tokens, TLS private keys, or database connection strings. You must guarantee that these sensitive credentials are never stored in agent session histories or displayed in plain text in developer chat transcripts. What should you implement?",
+    "options": [
+      "Store all raw JWT bearer tokens in a public GitHub repository so security researchers can inspect them.",
+      "Ask developers to close their eyes whenever a JWT token appears on screen.",
+      "Configure Sensitive Data Protection (Cloud DLP) inspection and redaction templates integrated into Agent Gateway and the MCP response pipeline to automatically detect and mask cryptographic keys, JWTs, and connection strings with `[REDACTED_SECRET]` before persisting session state or rendering responses.",
+      "Delete the Cloud Logging service across the entire company."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Integrating Sensitive Data Protection (Cloud DLP) with custom and built-in infoType detectors (`AUTH_TOKEN`, `GCP_CREDENTIALS`, `JSON_WEB_TOKEN`, cryptographic private keys) into Agent Gateway and MCP tool response pipelines guarantees deterministic scrubbing. Secrets are replaced with `[REDACTED_SECRET]` in flight before entering persistent session stores or model context windows.",
+    "whyWrong": {
+      "0": "Publishing live customer JWTs to public GitHub repositories causes immediate account takeover breaches.",
+      "1": "Relying on developers to close their eyes provides zero technical security or compliance protection.",
+      "3": "Deleting Cloud Logging leaves SREs and developers unable to monitor or troubleshoot production systems."
+    },
+    "refs": [
+      "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
+    ]
+  },
+  {
+    "id": "cs-dev-045",
+    "domain": 5,
+    "topic": "Mandatory Human-in-the-Loop (HITL) Gates for IAM & Production Merges",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. An autonomous security-remediation agent identifies an overly permissive IAM policy in a microservice's Terraform configuration and generates a pull request that modifies `google_project_iam_binding` resources. While DevVelocity wants agents to autonomously author and test the Terraform fix in a sandbox (`agent mode`), company governance strictly prohibits autonomous agents from applying IAM changes or merging to production branches without human approval (`human mode`). How should you enforce this?",
+    "options": [
+      "Allow any anonymous internet user to click 'Approve' on internal pull requests.",
+      "Grant the coding agent's service account Organization IAM Admin permissions so it can apply `terraform apply` directly from inside the chat window.",
+      "Disable all IAM policy modifications permanently so security vulnerabilities can never be fixed.",
+      "Configure Cloud Build and Git branch protection policies coupled with Antigravity `human mode` execution gates so that any PR modifying IAM Terraform resources or targeting a production branch pauses pipeline deployment until a designated Principal Security Engineer provides cryptographic WebAuthn/2FA approval."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Enforcing strict separation between `agent mode` (autonomous drafting, linting, and `terraform plan` validation inside sandboxes) and `human mode` (requiring cryptographic human approval from an authorized Principal Security Engineer before `terraform apply` or production branch merge) fulfills DevVelocity's technical requirements and prevents privilege escalation.",
+    "whyWrong": {
+      "0": "Allowing anonymous internet users to approve internal PRs destroys access governance.",
+      "1": "Allowing autonomous agents to execute `terraform apply` with Organization IAM Admin permissions risks catastrophic access lockouts or privilege escalation.",
+      "2": "Freezing IAM policies permanently prevents remediating genuine security vulnerabilities."
+    },
+    "refs": [
+      "https://cloud.google.com/build/docs/deploying-builds/gate-builds-on-approval",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder"
+    ]
+  },
+  {
+    "id": "cs-dev-046",
+    "domain": 5,
+    "topic": "VPC Service Controls (VPC-SC) for Zero Source Code Exfiltration",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. To satisfy Fortune 500 enterprise customer security audits, DevVelocity must demonstrate cryptographic proof that proprietary source code, internal architecture specs, and customer security posture telemetry processed by Antigravity and Claude Code cannot be exfiltrated to external Google Cloud projects or unauthorized networks, even if an attacker steals a developer's OAuth token. Which two security controls should you implement? (Choose two.)",
+    "options": [
+      "Enclose Cloud Workstations, GKE sandboxes, Artifact Registry, Vertex AI (Gemini/Claude endpoints, Agent Runtime, Vector Search), and Cloud Storage inside a unified VPC Service Controls (VPC-SC) perimeter with Private Google Access.",
+      "Configure VPC-SC ingress rules integrated with Access Context Manager to restrict API access strictly to corporate-managed devices connecting from approved IP ranges, blocking all unauthorized external project egress.",
+      "Configure all Cloud Storage source code buckets with `allUsers` Storage Object Viewer permissions.",
+      "Disable VPC firewalls and route all internal MCP traffic over public internet HTTP endpoints.",
+      "Share developer OAuth refresh tokens in public developer forums for community troubleshooting."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "VPC Service Controls (VPC-SC) establishes a hard data-exfiltration barrier around Google Cloud resources. By enclosing Cloud Workstations, GKE sandboxes, Artifact Registry, and Vertex AI inside a single VPC-SC perimeter and enforcing Access Context Manager device/IP trust policies, stolen credentials cannot be used from outside the corporate boundary to read source code or invoke model endpoints.",
+    "whyWrong": {
+      "2": "Granting `allUsers` permissions exposes proprietary source code to the entire public internet.",
+      "3": "Routing MCP traffic over unencrypted public internet HTTP endpoints exposes internal architecture specifications.",
+      "4": "Sharing OAuth refresh tokens publicly compromises developer accounts."
+    },
+    "refs": [
+      "https://cloud.google.com/vpc-service-controls/docs/overview",
+      "https://cloud.google.com/access-context-manager/docs/overview"
+    ]
+  },
+  {
+    "id": "cs-dev-047",
+    "domain": 5,
+    "topic": "Immutable Audit Logging of Autonomous Agent Actions",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. During an enterprise SOC 2 Type II and ISO 27001 compliance audit, external auditors require a complete, tamper-proof historical record of every shell command executed inside GKE coding sandboxes, every MCP tool call invoked by Antigravity or Claude Code, and every human approval sign-off for production merges. How should you configure this audit architecture?",
+    "options": [
+      "Store agent shell command histories in temporary `/tmp/history.log` files inside ephemeral sandbox pods that are deleted every 10 minutes.",
+      "Configure Agent Gateway, GKE Sandbox runtime audit sinks, and Cloud Audit Logs to stream structured JSON audit events to a dedicated Cloud Logging log bucket with Bucket Lock enabled and CMEK encryption.",
+      "Allow developers to edit or delete Cloud Audit Logs whenever they make a mistake.",
+      "Turn off Admin Activity and Data Access audit logs to reduce cloud logging costs."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Streaming structured execution events from Agent Gateway, GKE sandbox audit sinks, and Google Cloud Admin Activity / Data Access logs into a CMEK-encrypted Cloud Logging bucket with Bucket Lock enabled ensures WORM (Write-Once-Read-Many) immutability. Auditors can verify every autonomous action and human approval with cryptographic certainty that logs have not been altered.",
+    "whyWrong": {
+      "0": "Ephemeral `/tmp` logs disappear when pods terminate, failing SOC 2 / ISO 27001 retention mandates.",
+      "2": "Allowing users to edit or delete audit logs invalidates tamper-evident compliance controls.",
+      "3": "Disabling audit logs results in immediate SOC 2 compliance audit failure."
+    },
+    "refs": [
+      "https://cloud.google.com/logging/docs/buckets#lock-bucket",
+      "https://cloud.google.com/logging/docs/audit"
+    ]
+  },
+  {
+    "id": "cs-dev-048",
+    "domain": 5,
+    "topic": "Automated Quarantine & Guardrails for Vulnerable Agent-Generated Code",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. While refactoring a Python microservice, an autonomous coding agent generates code that inadvertently constructs a SQL query using string formatting (`f'SELECT * FROM users WHERE id = {user_input}'`), introducing a critical SQL injection vulnerability. You want your security guardrails to automatically detect, block, and remediate this vulnerability before a pull request can be opened or merged. What layered defense should you configure?",
+    "options": [
+      "Automatically deploy the vulnerable code to production and wait for a bug bounty report.",
+      "Disable all SQL injection checks because parameterized queries require typing extra characters.",
+      "Enable Model Armor code-vulnerability inspection filters on Agent Gateway combined with a mandatory pre-PR Antigravity Security Auditor Subagent hook that executes SAST analysis (`semgrep` / Bandit); if a SQL injection pattern is detected, quarantine the edit and loop the SAST findings back to the coding agent to rewrite using parameterized SQL queries.",
+      "Convert all SQL databases into flat CSV files stored on public web servers."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Combining real-time Model Armor code-security filters with a deterministic pre-PR Security Auditor Subagent hook running static application security testing (SAST) creates a self-healing security loop. When insecure string-interpolated SQL is detected, the commit is blocked and the exact CWE-89 vulnerability trace is fed back to the coding agent, which automatically refactors the code to use safe parameterized queries.",
+    "whyWrong": {
+      "0": "Deploying known vulnerabilities to production violates cloud security posture commitments.",
+      "1": "Disabling SQL injection checks exposes Fortune 500 enterprise customers to catastrophic database breaches.",
+      "3": "Storing enterprise data in public CSV files introduces massive security and performance failures."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
+      "https://cloud.google.com/software-delivery-shield/docs/overview"
+    ]
+  },
+  {
+    "id": "cs-dev-049",
+    "domain": 5,
+    "topic": "Multi-Tenant Isolation in Shared Enterprise MCP Servers",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. Platform engineering deploys a centralized Architecture & Schema MCP Server used by all 4,500 engineers across three distinct business units: CI/CD Tooling, Observability, and Restricted Cloud Security Posture. You must guarantee that when an engineer from CI/CD Tooling queries the shared MCP server, the server enforces strict multi-tenant data isolation and never returns internal database schemas or architecture specs belonging to the Restricted Cloud Security Posture unit. How should you design the MCP server?",
+    "options": [
+      "Shut down the MCP server whenever more than one user connects simultaneously.",
+      "Cache all responses from all three business units in a single global unkeyed Redis cache so every user receives the exact same cached response.",
+      "Rely on the client-side IDE UI to hide restricted text after sending the full unredacted database schema over the network.",
+      "Configure the MCP server to require OAuth 2.0 identity tokens propagated via Agent Gateway, validate the caller's group/division claims against IAM/ABAC policy tags attached to each schema resource, and filter all search/query results by the caller's authorized tenant scope before returning payloads."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In a shared multi-tenant MCP server architecture, security enforcement must occur server-side per request. By extracting cryptographically verified OAuth 2.0 identity and division claims passed through Agent Gateway and applying Attribute-Based Access Control (ABAC) tenant filters to backend database/index queries, the MCP server guarantees zero cross-division data leakage.",
+    "whyWrong": {
+      "0": "Shutting down shared servers when multiple users connect makes the platform unusable for 4,500 engineers.",
+      "1": "An unkeyed global cache leaks restricted Security Posture schemas to unauthorized CI/CD Tooling users.",
+      "2": "Client-side UI hiding transmits sensitive schemas over the network where they can be trivially inspected."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security",
+      "https://cloud.google.com/iam/docs/conditions-overview"
+    ]
+  },
+  {
+    "id": "cs-dev-050",
+    "domain": 5,
+    "topic": "SLSA Supply-Chain Security & Binary Authorization for Agent Commits",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": "devvelocity",
+    "officialSample": false,
+    "question": "For this question, refer to the DevVelocity Cloud case study. Because autonomous coding agents now author and refactor code across 800 microservices, DevVelocity's Chief Information Security Officer requires verifiable cryptographic supply-chain provenance proving that any container image deployed to production GKE clusters was built from source code that passed: (1) automated sandbox unit tests, (2) Security Auditor Subagent SAST verification, and (3) mandatory human code review sign-off. What Google Cloud architecture enforces this requirement?",
+    "options": [
+      "Configure Cloud Build to generate authenticated SLSA Level 3 build provenance attestations and cryptographic vulnerability/review attestations upon completion of the agent verification and human approval pipeline, and enforce GKE Binary Authorization policies that block deployment of any container image lacking all required attestations.",
+      "Allow developers to manually build Docker images on their laptops and push them directly to production GKE nodes using `docker push --force`.",
+      "Write 'Verified by AI' in a text file inside the container image and disable Binary Authorization.",
+      "Delete all container registries and deploy raw uncompiled source code files to production."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Software Delivery Shield with Cloud Build SLSA Level 3 provenance and Binary Authorization provides cryptographic software supply-chain enforcement. Each mandatory gate in the autonomous engineering workflow (sandbox test pass, Security Auditor SAST pass, and human PR review sign-off) generates a KMS-signed cryptographic attestation. GKE Binary Authorization admission controllers verify all three attestations before permitting a pod to run in production.",
+    "whyWrong": {
+      "1": "Laptop builds pushed directly to production bypass CI/CD security checks and lack verifiable provenance.",
+      "2": "Unverified text files inside containers can be trivially forged and provide zero cryptographic security.",
+      "3": "Deploying uncompiled source code files to production breaks container orchestration."
+    },
+    "refs": [
+      "https://cloud.google.com/binary-authorization/docs/overview",
+      "https://cloud.google.com/software-delivery-shield/docs/supply-chain-security"
+    ]
+  }
+]

@@ -1,0 +1,724 @@
+[
+  {
+    "id": "d3-orc-026",
+    "domain": 3,
+    "topic": "Cyclic Graphs & Loop Termination Conditions",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are building a Terraform infrastructure generation system on Vertex AI Agent Engine using Google ADK. A `LoopAgent` orchestrates a cyclic workflow between a `TerraformGeneratorAgent` and a `TFLintCriticAgent`. When `TFLintCriticAgent` runs `terraform validate` and `tflint` and finds zero errors or warnings, it needs to immediately terminate the `LoopAgent` cycle without running remaining iterations up to `max_iterations=6`. What is the native ADK mechanism for a sub-agent inside a `LoopAgent` to signal immediate loop termination?",
+    "options": [
+      "Have the `TFLintCriticAgent` or its custom validation tool set `event.actions.escalate = True` (or invoke an exit tool that sets the escalate action flag on the `EventActions` object), which instructs the parent `LoopAgent` to break out of the loop immediately.",
+      "Raise an uncaught `SystemExit(0)` exception inside the `TFLintCriticAgent` tool execution thread.",
+      "Set `session.state['max_iterations'] = -1` inside a natural language chat response.",
+      "Delete the `TerraformGeneratorAgent` Python object from memory using `del`."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In Google ADK, a `LoopAgent` executes its sub-agents repeatedly until either `max_iterations` is reached or a sub-agent emits an event with `actions.escalate = True`. When the critic agent (`TFLintCriticAgent`) verifies that all lint and validation checks pass, setting `escalate=True` on the emitted event signals to the enclosing `LoopAgent` runtime that the termination condition is satisfied, cleanly exiting the loop and passing control to the next step in the parent workflow.",
+    "whyWrong": {
+      "1": "Raising `SystemExit(0)` kills the Python worker process rather than cleanly exiting the `LoopAgent` orchestration block.",
+      "2": "Modifying a state key named `max_iterations` in natural language does not alter the `LoopAgent` runtime control flow.",
+      "3": "Deleting Python agent objects at runtime causes `AttributeError` or memory corruption."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
+      "https://google.github.io/adk-docs/events/"
+    ]
+  },
+  {
+    "id": "d3-orc-027",
+    "domain": 3,
+    "topic": "Cyclic Graphs & Reflection Loops",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A quantitative hedge fund uses a Cyclic Multi-Agent Reflection graph on Vertex AI Agent Engine to synthesize algorithmic trading strategies. A `StrategyGeneratorAgent` proposes Python backtesting code, and a `RiskCriticAgent` evaluates Sharpe ratio, maximum drawdown, and transaction turnover. During long reflection cycles (up to 8 iterations), the conversation history accumulates all 8 failed code versions and verbose critique logs, causing the 7th and 8th iterations to exceed 120,000 input tokens and degrade code quality due to conflicting older instructions. How should you architect memory management inside this cyclic reflection loop?",
+    "options": [
+      "Allow the raw conversation history to grow unboundedly and switch to a model with a smaller context window so older turns are truncated arbitrarily from the middle.",
+      "Implement a rolling state window pattern where only the latest candidate artifact (`session.state['current_strategy_code']`), the most recent structured critique (`session.state['latest_critique']`), and a compact summary of previously attempted failure modes (`session.state['failed_hypotheses_log']`) are passed into each loop iteration rather than the full raw multi-turn transcript.",
+      "Reset the entire `session.state` to empty `{}` at the start of every loop iteration so the Generator has zero memory of why its previous code failed.",
+      "Store all previous failed code versions inside the system prompt of the `RiskCriticAgent` permanently."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In multi-iteration reflection loops, retaining the full raw transcript of all prior failed drafts and critiques causes quadratic token growth ($O(N^2)$ cumulative tokens across $N$ iterations) and confuses the LLM with stale, contradictory code snippets. The architectural best practice is rolling state compaction: storing the current working draft and latest critique in explicit `session.state` keys alongside a compact, append-only ledger of rejected hypotheses (so the generator doesn't repeat past mistakes without carrying thousands of lines of dead code).",
+    "whyWrong": {
+      "0": "Arbitrary truncation corrupts prompt structure and system instructions unpredictably.",
+      "2": "Wiping all state every iteration creates a stateless memoryless retry loop that repeats the exact same errors.",
+      "3": "Accumulating failed versions in the system prompt exacerbates token bloat and attention degradation."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/state/",
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
+    ]
+  },
+  {
+    "id": "d3-orc-028",
+    "domain": 3,
+    "topic": "Loop Termination Conditions & Guardrails",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise legal compliance platform uses a cyclic Generator-Critic workflow on Vertex AI Agent Engine to draft privacy policies tailored to global jurisdictions (GDPR, CCPA, LGPD). A `PolicyDraftingAgent` writes the policy, and a `LegalAuditAgent` scores compliance across 25 statutory criteria on a 0-100 scale. To prevent runaway cloud spend and infinite loops while ensuring high compliance quality, which two termination guardrails should you implement in your orchestration graph? (Choose two.)",
+    "options": [
+      "Configure a composite termination condition that exits the loop when the `LegalAuditAgent` compliance score reaches `>= 95` with zero critical statutory violations, OR when a hard `max_iterations` ceiling (e.g., 5 iterations) is reached.",
+      "Implement a token budget circuit breaker callback (`before_model_callback`) that tracks cumulative session token consumption (`usage_metadata.total_token_count`) and triggers a graceful fallback escalation if the session exceeds a defined cost ceiling (e.g., 250,000 tokens).",
+      "Set `max_iterations` to `999999` so the agents keep running until they achieve a perfect 100 score regardless of cost.",
+      "Configure the loop to terminate only if the user manually shuts down the Google Cloud project.",
+      "Disable token usage tracking in Vertex AI Agent Engine to improve loop execution speed."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Production cyclic agent graphs require multi-dimensional termination guardrails: (1) Quality convergence combined with an iteration ceiling (`score >= 95` OR `iteration >= max_iterations`), ensuring the loop stops as soon as quality is met or halts deterministically if convergence stalls; and (2) A financial/token circuit breaker monitored via model callbacks (`before_model_callback` / `after_model_callback`) inspecting `usage_metadata`, which prevents runaway token burn if individual iterations produce abnormally large contexts.",
+    "whyWrong": {
+      "2": "An effectively infinite `max_iterations` exposes the enterprise to catastrophic financial loss if the critic and generator reach a deadlock.",
+      "3": "Requiring manual project shutdown is an operational failure, not an automated runtime guardrail.",
+      "4": "Disabling token tracking removes visibility into cost anomalies and prevents budget circuit breakers from functioning."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/",
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
+    ]
+  },
+  {
+    "id": "d3-orc-029",
+    "domain": 3,
+    "topic": "Cyclic Graphs & Reflection Loops",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A software modernization team uses a Generator-Critic reflection loop on Vertex AI Agent Engine where a `JavaToKotlinAgent` converts legacy Java classes to Kotlin, and a `CompilerCriticAgent` compiles the Kotlin code and provides error messages back to the generator. You observe that when the compiler reports a complex generic type variance error, `JavaToKotlinAgent` makes a tiny cosmetic edit that does not fix the error, and across 4 iterations the compiler error remains 100% identical. How should you enhance the reflection loop to handle stalled convergence?",
+    "options": [
+      "Delete the source Java file whenever a compiler error occurs.",
+      "Keep running the exact same prompt with temperature 0.0 for 50 more iterations.",
+      "Instruct the `CompilerCriticAgent` to ignore generic type errors and mark uncompilable code as successful.",
+      "Implement a Stagnation / Delta Detector in the loop controller that compares consecutive critic error hashes; if the exact same compilation error recurs twice consecutively, dynamically escalate by injecting targeted documentation examples or switching the Generator to a higher-reasoning model tier (e.g., Gemini 1.5 Pro with high thinking budget) before giving up."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "When a cyclic Generator-Critic loop encounters identical error states across consecutive iterations (zero semantic progress / stagnation), continuing with the exact same model and context is futile. A Stagnation Detector hashes or compares consecutive diagnostic outputs from the critic. Upon detecting zero delta (repeated error signature), the orchestrator can dynamically intervene—such as retrieving targeted few-shot examples via RAG, escalating from Gemini Flash to Gemini Pro with extended thinking, or breaking early to human escalation.",
+    "whyWrong": {
+      "0": "Deleting source files destroys customer code assets.",
+      "1": "Running identical prompts at temperature 0.0 produces identical deterministic outputs, guaranteeing 50 wasted iterations.",
+      "2": "Suppressing compiler errors results in broken, non-compiling production code."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
+      "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
+    ]
+  },
+  {
+    "id": "d3-orc-030",
+    "domain": 3,
+    "topic": "Multi-Agent State Scoping & Persistence",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are developing a multi-agent wealth advisory application on Vertex AI Agent Engine using Google ADK. During a single conversation turn, a `TaxCalculatorAgent` computes several intermediate scratchpad variables (e.g., marginal tax bracket tables and temporary iteration counters) that are needed by a downstream `PortfolioOptimizerAgent` within the same invocation, but must NEVER persist into future conversation turns or clutter long-term user profile storage. Which ADK `session.state` key prefix should you use for these ephemeral scratchpad variables?",
+    "options": [
+      "Use the `temp:` prefix (e.g., `session.state['temp:marginal_bracket_table']`), which scopes the state variable strictly to the current `InvocationContext` and automatically discards it when the turn completes.",
+      "Use the `user:` prefix (e.g., `session.state['user:marginal_bracket_table']`), which persists across all sessions for that user indefinitely.",
+      "Use the `app:` prefix (e.g., `session.state['app:marginal_bracket_table']`), which shares the variable globally across all users of the application.",
+      "Write the scratchpad variables into Cloud IAM policy bindings."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Google ADK's state management architecture supports explicit lifecycle scoping via key prefixes in `session.state`: (1) `temp:` variables exist only within the current single-turn `InvocationContext` and are automatically purged at the end of the invocation, making them ideal for inter-agent scratchpad data within a pipeline or loop; (2) unprefixed keys persist for the lifetime of the specific `Session`; (3) `user:` keys persist across all sessions belonging to that specific user ID; and (4) `app:` keys are shared globally across the entire application.",
+    "whyWrong": {
+      "1": "The `user:` prefix persists data permanently across all future sessions for that user, violating the requirement to discard scratchpad variables after the turn.",
+      "2": "The `app:` prefix exposes a single user's tax scratchpad globally to all other users of the application, causing severe data leakage.",
+      "3": "Cloud IAM policy bindings are for access control, not runtime application state."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/state/"
+    ]
+  },
+  {
+    "id": "d3-orc-031",
+    "domain": 3,
+    "topic": "Multi-Agent State Scoping & Persistence",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global B2B SaaS platform runs a multi-agent customer success assistant on Vertex AI Agent Engine. When a customer interacts with the assistant across multiple separate chat sessions over several months, all sub-agents (`OnboardingAgent`, `RenewalAgent`, `TechnicalSupportAgent`) need immediate access to the customer's preferred communication language, timezone, and account tier without re-asking the user in every new session. Which ADK `session.state` scoping prefix should you use to store these persistent customer preferences?",
+    "options": [
+      "Use the `temp:` prefix (e.g., `session.state['temp:preferred_language']`).",
+      "Use the `user:` prefix (e.g., `session.state['user:preferred_language']` and `session.state['user:account_tier']`), which binds state to the authenticated `user_id` across all current and future sessions.",
+      "Use unprefixed keys (e.g., `session.state['preferred_language']`), which are isolated to a single `session_id`.",
+      "Use the `app:` prefix (e.g., `session.state['app:preferred_language']`), which overwrites the language setting for every user worldwide."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In Google ADK and Vertex AI Agent Engine Session Management, state keys prefixed with `user:` (e.g., `user:preferred_language`, `user:timezone`) are scoped to the `user_id` across all sessions. Whenever a new `Session` is initialized for that `user_id`, the `SessionService` automatically hydrates the `user:` state namespace, allowing any sub-agent in any future session to access persistent user-level preferences.",
+    "whyWrong": {
+      "0": "`temp:` state is wiped immediately at the end of the single turn/invocation.",
+      "2": "Unprefixed session state is scoped only to a single `session_id` and is not carried over when the user starts a new chat session next month.",
+      "3": "`app:` state is global to the entire application; setting `app:preferred_language = 'Japanese'` would change the language for all customers globally."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/state/"
+    ]
+  },
+  {
+    "id": "d3-orc-032",
+    "domain": 3,
+    "topic": "Cyclic Graphs & Multi-Agent Debate",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A medical diagnostics research group is designing a Multi-Agent Debate / Consensus topology on Vertex AI Agent Engine for rare disease differential diagnosis. Three specialist agents (`CardiologyAgent`, `NeurologyAgent`, `RheumatologyAgent`) independently propose diagnoses and critique each other's hypotheses over 3 rounds of structured debate, followed by a `ChiefMedicalArbiterAgent` that synthesizes the final differential diagnosis. During testing, you notice sycophancy bias: in Round 2, `NeurologyAgent` and `RheumatologyAgent` prematurely abandon valid minority hypotheses just to agree with `CardiologyAgent`'s confident tone. How should you architect the debate graph to eliminate sycophancy bias?",
+    "options": [
+      "Remove the `ChiefMedicalArbiterAgent` and pick whichever diagnosis has the fewest letters.",
+      "Force all three specialist agents to share a single system prompt and run sequentially so the second and third agents copy the first agent's answer.",
+      "Architect each debate round as a blind parallel scatter step where each specialist agent must formulate its evidence-backed critique and updated differential independently without seeing peer updates from the same round, and instruct agents with distinct adversarial system personas requiring explicit citation of contradictory clinical biomarkers before conceding a hypothesis.",
+      "Set `max_iterations=1` and disable all critique rounds."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Multi-agent debate topologies can suffer from LLM sycophancy (premature consensus / groupthink) if agents observe peers' outputs sequentially within the same round or lack adversarial prompting constraints. By structuring each debate round as a synchronous parallel step (`ParallelAgent`) where specialists evaluate the shared prior-round state independently (blind peer review within the round) and enforcing strict evidentiary rules ('do not abandon a hypothesis without citing specific falsifying lab biomarkers'), diversity of reasoning is preserved until the final Arbiter synthesis.",
+    "whyWrong": {
+      "0": "Selecting diagnoses by string length is medically absurd.",
+      "1": "Sequential execution within a round amplifies sycophancy bias/anchoring effect, as later agents anchor heavily on earlier agents' assertions.",
+      "3": "Disabling critique rounds eliminates the cross-specialty diagnostic verification that multi-agent consensus provides."
+    },
+    "refs": [
+      "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems",
+      "https://google.github.io/adk-docs/agents/workflow-agents/"
+    ]
+  },
+  {
+    "id": "d3-orc-033",
+    "domain": 3,
+    "topic": "Loop Termination Conditions & Guardrails",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When an ADK `LoopAgent` reaches its configured `max_iterations` limit (e.g., `max_iterations=5`) without any sub-agent setting `actions.escalate = True` to indicate successful convergence, what is the default execution behavior of the `LoopAgent`, and how should your downstream architecture handle it?",
+    "options": [
+      "The `LoopAgent` automatically rolls back `session.state` to its initial pre-loop state and discards all 5 iterations of work.",
+      "The `LoopAgent` automatically deletes the entire Google Cloud project when `max_iterations` is reached.",
+      "The `LoopAgent` enters an infinite sleep state and hangs the HTTP connection forever.",
+      "The `LoopAgent` terminates normally without throwing an unhandled runtime exception, preserving the state from the final iteration in `session.state`; therefore, you must place a downstream Verification / Escalation Gate agent or callback immediately after the `LoopAgent` to check whether convergence succeeded or if fallback/human escalation is required."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In Google ADK, reaching `max_iterations` is a controlled boundary condition rather than a fatal crash. When the loop counter hits `max_iterations`, the `LoopAgent` stops iterating and passes execution forward to the next step in the parent workflow with whatever state was accumulated in `session.state`. Because the loop may have exited due to hitting the iteration ceiling rather than achieving quality convergence, a downstream check (inspecting a boolean flag like `session.state['validation_passed']`) is essential to route un-converged tasks to a fallback handler or human review.",
+    "whyWrong": {
+      "0": "ADK does not discard accumulated state deltas upon loop exit; preserving the best-effort draft and diagnostic history is critical for fallback handling.",
+      "1": "Reaching `max_iterations` never deletes cloud infrastructure.",
+      "2": "The purpose of `max_iterations` is specifically to prevent infinite hangs."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
+    ]
+  },
+  {
+    "id": "d3-orc-034",
+    "domain": 3,
+    "topic": "DAG Orchestration & Dependency Resolution",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are architecting a complex financial M&A due diligence DAG on Vertex AI Agent Engine with 5 specialized agents: `AgentA` (Document Ingestion), `AgentB` (Revenue Audit), `AgentC` (IP & Patent Litigation Audit), `AgentD` (Tax Liability Audit), and `AgentE` (Final Valuation Model). The data dependencies are: `AgentB`, `AgentC`, and `AgentD` all depend on the output of `AgentA`, and can run concurrently once `AgentA` completes. `AgentE` depends on the outputs of all three (`AgentB`, `AgentC`, AND `AgentD`). How should you express this diamond/fan-out-fan-in DAG topology using ADK workflow agents?",
+    "options": [
+      "Create a root `SequentialAgent` with three child steps: Step 1 = `AgentA`, Step 2 = a `ParallelAgent` containing `[AgentB, AgentC, AgentD]`, and Step 3 = `AgentE`.",
+      "Create a root `ParallelAgent` containing `[AgentA, AgentB, AgentC, AgentD, AgentE]` so all five run simultaneously.",
+      "Create a root `SequentialAgent` containing `[AgentA, AgentB, AgentC, AgentD, AgentE]` so `AgentB`, `AgentC`, and `AgentD` run one after another.",
+      "Create a `LoopAgent` that runs `AgentE` first and `AgentA` last."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "A diamond DAG (1 -> [3 concurrent] -> 1) maps cleanly to nested ADK workflow primitives: a top-level `SequentialAgent` guarantees that Step 1 (`AgentA`) finishes and populates `session.state` before Step 2 begins. Step 2 is a `ParallelAgent` that fans out concurrently to `AgentB`, `AgentC`, and `AgentD`, waiting at a synchronization barrier until all three complete. Step 3 (`AgentE`) then runs sequentially with guaranteed access to all upstream state outputs.",
+    "whyWrong": {
+      "1": "Running all 5 in a root `ParallelAgent` violates data dependencies (`AgentB/C/D` run before `AgentA` ingests documents, and `AgentE` runs before audits complete).",
+      "2": "Running `AgentB`, `AgentC`, and `AgentD` sequentially in a flat `SequentialAgent` adds unnecessary serial latency when they can execute in parallel.",
+      "3": "Running `AgentE` before `AgentA` reverses the causal dependency graph."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/sequential-agent/",
+      "https://google.github.io/adk-docs/agents/workflow-agents/parallel-agent/"
+    ]
+  },
+  {
+    "id": "d3-orc-035",
+    "domain": 3,
+    "topic": "Agent Runtime Callbacks & Interceptors",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise bank deploys a multi-agent wealth advisor on Vertex AI Agent Engine. Compliance rules mandate that before any worker sub-agent executes an external tool call (such as `execute_wire_transfer` or `update_beneficiary`), a deterministic policy engine must verify that the tool arguments comply with daily transaction limits and user MFA status. If the policy check fails, the tool execution must be blocked and replaced with a synthetic policy-denial message returned to the LLM without invoking the underlying tool function. Which ADK callback hook should you implement?",
+    "options": [
+      "Implement an `after_tool_callback` function, which runs only after the wire transfer has already been executed at the bank.",
+      "Implement a `before_tool_callback` function on the agent that inspects `tool`, `args`, and `tool_context`; if the policy check fails, return a dictionary (e.g., `{'status': 'ERROR', 'reason': 'Daily limit exceeded or MFA required'}`), which ADK uses to short-circuit actual tool execution and feed the dictionary directly back to the LLM.",
+      "Implement an `after_agent_callback` function after the entire conversation has ended.",
+      "Rely exclusively on system prompt instructions asking the LLM nicely not to exceed daily wire limits."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Google ADK's `before_tool_callback` provides a deterministic interception point immediately prior to executing any tool function. When a `before_tool_callback` returns `None`, ADK proceeds with normal tool execution. However, if `before_tool_callback` returns a `dict` object, ADK completely skips invoking the actual tool function and returns that dictionary as the synthetic tool result to the LLM agent, allowing deterministic policy enforcement and guardrails.",
+    "whyWrong": {
+      "0": "`after_tool_callback` executes after the side-effect (the wire transfer) has already occurred, which is too late to prevent unauthorized transactions.",
+      "2": "`after_agent_callback` runs after the agent has completed all its internal tool calls and turns.",
+      "3": "System prompt instructions are probabilistic and susceptible to prompt injection or arithmetic hallucinations."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/"
+    ]
+  },
+  {
+    "id": "d3-orc-036",
+    "domain": 3,
+    "topic": "Agent Runtime Callbacks & Interceptors",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You want to implement a semantic caching layer and PII scrubbing guardrail for a multi-agent customer support system on Vertex AI Agent Engine. Before any sub-agent sends its constructed prompt request to the Gemini model endpoint, you need to intercept the `LlmRequest`, redact sensitive SSN/credit card patterns using Cloud DLP or regex, and optionally return a cached `LlmResponse` if an identical sanitized prompt was answered in the last 5 minutes. Which ADK callback hook enables short-circuiting the LLM API call?",
+    "options": [
+      "Implement a `before_tool_callback`, which only triggers on tool calls and does not intercept LLM prompt invocations.",
+      "Implement an `after_model_callback`, which runs after the unredacted PII has already been sent to the model endpoint and billed.",
+      "Implement a `before_model_callback` that receives `callback_context` and `llm_request`; mutate `llm_request` in-place to redact PII, or return an `LlmResponse` object directly on a cache hit to bypass calling the Vertex AI Gemini endpoint.",
+      "Modify the Linux kernel TCP/IP stack inside the container."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "`before_model_callback` is invoked immediately before an `LlmAgent` dispatches an `LlmRequest` to the underlying generative model. It can inspect and mutate `llm_request.contents` in-place (e.g., applying PII redaction or injecting dynamic safety reminders). Furthermore, if `before_model_callback` returns an `LlmResponse` instance instead of `None`, ADK skips the network call to the Gemini model entirely and uses the returned `LlmResponse`, enabling zero-latency semantic caching.",
+    "whyWrong": {
+      "0": "`before_tool_callback` intercepts function calls (`FunctionCall`), not model generation requests (`LlmRequest`).",
+      "1": "`after_model_callback` runs after the model has already processed the unredacted prompt and consumed tokens.",
+      "3": "Kernel-level packet manipulation cannot cleanly parse or return structured ADK `LlmResponse` objects."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/callbacks/"
+    ]
+  },
+  {
+    "id": "d3-orc-037",
+    "domain": 3,
+    "topic": "Cyclic Graphs & Reflection Loops",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An autonomous data science platform on Vertex AI Agent Engine uses a cyclic reflection graph where a `FeatureEngineeringAgent` writes Python pandas transformation scripts, executes them in a Vertex AI Agent Engine Code Execution sandbox, and a `DataQualityCriticAgent` inspects output dataframe statistics (null percentages, schema drift, outlier counts). During execution on a corrupted dataset, the `FeatureEngineeringAgent` enters a loop where it fixes a null-value error in Column A, which introduces a type-conversion bug in Column B; in the next iteration, fixing Column B re-introduces the null-value error in Column A. How should you architect the critic feedback mechanism to break this A-B oscillation?",
+    "options": [
+      "Reduce `max_iterations` to 1 so the agent never attempts to fix Column B.",
+      "Instruct the `DataQualityCriticAgent` to only check one single column per iteration in isolation.",
+      "Randomly shuffle column names in the dataframe on every loop iteration.",
+      "Configure the `DataQualityCriticAgent` to maintain a cumulative monotonically non-decreasing test suite (regression test harness) in `session.state['passed_assertions']` so that every candidate script is validated against all previously passed assertions simultaneously, rejecting any fix that causes a regression on earlier columns."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "A classic failure mode in cyclic reflection loops is state oscillation (fixing Issue B breaks Issue A, and vice versa) because the critic only evaluates the immediate symptom or the generator forgets prior constraints. By maintaining a cumulative regression assertion suite across iterations in `session.state`, the critic evaluates every new candidate against the union of all historical requirements simultaneously. If a candidate fixes Column B but regresses on Column A, the critic explicitly reports the regression diff, forcing the generator to synthesize a joint solution satisfying both constraints.",
+    "whyWrong": {
+      "0": "Setting `max_iterations=1` disables iterative self-correction entirely.",
+      "1": "Checking only one column per iteration guarantees oscillation because regressions on previously checked columns go unnoticed until later cycles.",
+      "2": "Shuffling column names breaks schema consistency and corrupts downstream models."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
+      "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
+    ]
+  },
+  {
+    "id": "d3-orc-038",
+    "domain": 3,
+    "topic": "Multi-Agent Orchestration Topologies",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A retail banking chatbot built on Vertex AI Agent Engine uses a Supervisor agent (`BankingSupervisor`) that delegates conversations to either a `MortgageCalculatorAgent` or a `CreditCardDisputeAgent`. When a customer is mid-way through a 4-step credit card dispute flow with `CreditCardDisputeAgent` (having provided transaction date and merchant name), the customer suddenly asks: 'By the way, what is your current 30-year fixed mortgage rate?' How should the multi-agent architecture handle this context switch without losing the dispute state?",
+    "options": [
+      "Persist the active dispute workflow progress in structured keys in `session.state` (e.g., `session.state['active_dispute_draft']`), allow `CreditCardDisputeAgent` to escalate/transfer the out-of-domain mortgage question back to `BankingSupervisor` (which routes to `MortgageCalculatorAgent` to answer), and then resume the saved dispute flow from `session.state`.",
+      "Force `CreditCardDisputeAgent` to hallucinate mortgage rates so control never leaves the dispute agent.",
+      "Delete the customer's session and force them to start the credit card dispute over from scratch if they ask a side question.",
+      "Block the user's account for asking two different domain questions in one session."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In multi-turn conversational multi-agent systems, users frequently digress across domains. Because Google ADK separates conversational agent routing from durable session state (`session.state`), sub-agents store their multi-step slot/form progress in explicit state keys (`active_dispute_draft`). When an out-of-scope query arrives, the active sub-agent transfers control back to the parent Supervisor, which delegates to `MortgageCalculatorAgent` to answer the rate question, and subsequently re-transfers or resumes the `CreditCardDisputeAgent` with its persisted state intact.",
+    "whyWrong": {
+      "1": "Having a dispute agent hallucinate mortgage rates violates domain specialization and financial compliance.",
+      "2": "Destroying user progress on a context digression creates a frustrating, broken customer experience.",
+      "3": "Blocking users for natural conversational digressions is unacceptable."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/multi-agent-systems/",
+      "https://google.github.io/adk-docs/sessions/state/"
+    ]
+  },
+  {
+    "id": "d3-orc-039",
+    "domain": 3,
+    "topic": "Agent Runtime State & Event Architecture",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In Google ADK on Vertex AI Agent Engine, every interaction turn generates a stream of `Event` objects persisted by the `SessionService`. When a sub-agent or tool modifies `session.state` during execution, how does ADK ensure consistency and enable time-travel replay debugging across multi-agent handoffs?",
+    "options": [
+      "ADK overwrites a single unversioned JSON file on disk without recording which agent or event caused the state change.",
+      "State mutations are captured as explicit `state_delta` dictionaries attached to `Event.actions.state_delta` on each emitted `Event`, enabling the `SessionService` to reconstruct the exact state of `session.state` at any historical step by sequentially applying `state_delta` records up to that event index.",
+      "State changes are stored only in browser cookies on the client side.",
+      "ADK requires developers to manually write SQL `INSERT` statements for every variable assignment."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Google ADK uses an event-sourced state model. Whenever an agent or tool modifies `context.state` (or specifies `output_key`), ADK computes the state diff and records it in `event.actions.state_delta` on the emitted `Event`. Because the `Session` stores an ordered sequence of `Event` objects containing both message contents and `state_delta` mutations, developers can replay or inspect the exact state of the multi-agent graph at any specific step (time-travel debugging) and audit exactly which sub-agent modified which key.",
+    "whyWrong": {
+      "0": "An unversioned overwrite model loses intermediate state transitions and prevents step-by-step replay debugging.",
+      "2": "Server-side `SessionService` manages state durably on Vertex AI Agent Engine, not in insecure client browser cookies.",
+      "3": "ADK tracks state mutations automatically via proxy dictionaries without requiring manual SQL queries."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/events/",
+      "https://google.github.io/adk-docs/sessions/session/"
+    ]
+  },
+  {
+    "id": "d3-orc-040",
+    "domain": 3,
+    "topic": "Multi-Agent Orchestration Topologies",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are building a document translation quality assurance workflow in Google ADK. An `EnglishToJapaneseAgent` translates a technical manual, and a `BilingualReviewerAgent` checks the translation for terminology accuracy. If accuracy issues are found, `EnglishToJapaneseAgent` revises the translation based on the reviewer's notes, repeating up to 3 times. Which ADK workflow class is designed specifically for this cyclic iteration?",
+    "options": [
+      "SequentialAgent",
+      "ParallelAgent",
+      "LoopAgent",
+      "StaticRouterAgent"
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "`LoopAgent` is the built-in ADK workflow agent designed for iterative, cyclic execution of a sequence of sub-agents (such as a Translator and Reviewer) until either a sub-agent signals completion (`actions.escalate = True`) or `max_iterations` (3) is reached.",
+    "whyWrong": {
+      "0": "`SequentialAgent` executes sub-agents in a single linear pass (1 iteration only).",
+      "1": "`ParallelAgent` runs sub-agents simultaneously a single time without iterative feedback.",
+      "3": "`StaticRouterAgent` is not a standard cyclic workflow primitive in ADK."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
+    ]
+  },
+  {
+    "id": "d3-orc-041",
+    "domain": 3,
+    "topic": "Multi-Agent Orchestration Topologies",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A financial services company is deploying a multi-agent fraud investigation system on Vertex AI Agent Engine. The system combines a `SupervisorAgent` with multiple specialized sub-agents (`DeviceFingerprintAgent`, `GeoVelocityAgent`, `TransactionGraphAgent`). To ensure production reliability and prevent cascading failures when deploying updates to individual sub-agents, which two architectural best practices should you implement? (Choose two.)",
+    "options": [
+      "Decouple sub-agent interfaces using strict input/output Pydantic data schemas and versioned state keys so internal prompt or model updates to `GeoVelocityAgent` do not break the `SupervisorAgent` contract.",
+      "Implement automated evaluation datasets using Vertex AI Gen AI Evaluation Service to benchmark sub-agent trajectory accuracy, tool call precision, and end-to-end orchestration latency before promoting sub-agent revisions to production.",
+      "Hard-code the exact token length of `GeoVelocityAgent`'s output inside the Python code of `DeviceFingerprintAgent`.",
+      "Deploy all sub-agents without any unit or trajectory evaluation tests directly to 100% production traffic.",
+      "Require all sub-agents to share a single monolithic 50,000-word system prompt file."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "In modular multi-agent architectures, independent sub-agent evolution requires: (1) Strict interface contracts (typed Pydantic schemas and explicit state keys) between the Supervisor and workers so that upgrading a worker's internal model (e.g., from Gemini 1.5 Flash to Gemini 2.0 Flash) or prompt does not break downstream consumers; and (2) Automated trajectory and response evaluation using Vertex AI Gen AI Evaluation Service to verify that agent routing paths (`trajectory_exact_match` / `trajectory_in_order_match`) and output quality remain high prior to rollout.",
+    "whyWrong": {
+      "2": "Hard-coding exact token lengths across independent agents creates extreme brittleness.",
+      "3": "Deploying untested multi-agent modifications directly to 100% production risks silent routing regressions.",
+      "4": "Sharing a monolithic 50,000-word prompt across all sub-agents destroys modularity, increases cost, and degrades specialized performance."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-agents",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "d3-orc-042",
+    "domain": 3,
+    "topic": "Loop Termination Conditions & Guardrails",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An autonomous research agent on Vertex AI Agent Engine uses a cyclic graph to explore scientific literature, formulate hypotheses, and run simulation tools. Occasionally, a user query asks an unanswerable question (e.g., requiring proprietary unpublished data). When this happens, the agent loops through all `max_iterations=8`, consuming $0.45 in tokens and 90 seconds of latency, before returning a generic timeout error. How should you design an early-exit semantic termination check to save cost and latency on unanswerable queries?",
+    "options": [
+      "Include an explicit `EpistemicFeasibilityCritic` step or structured reflection check after Iteration 1 that evaluates whether required data sources exist in accessible tools/corpora; if the critic determines the query is unanswerable due to missing data access, it sets `actions.escalate = True` with `status='INSUFFICIENT_DATA_SOURCES'` to exit the loop after Iteration 1.",
+      "Increase `max_iterations` to 50 so the agent tries harder to guess unpublished proprietary data.",
+      "Disable all tool calls after 5 seconds using a hard OS process kill signal (`SIGKILL`).",
+      "Instruct the agent to fabricate plausible synthetic citations whenever data is missing."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Not all loop failures are due to temporary formatting or syntax errors; some tasks are fundamentally infeasible given available tools and permissions (epistemic infeasibility). By incorporating an explicit feasibility assessment early in the loop (e.g., after the initial search iteration), the critic can distinguish between 'needs refinement' and 'impossible due to missing external data.' When the latter is detected, setting `actions.escalate = True` immediately terminates the `LoopAgent` at Iteration 1, returning an honest explanation and saving 87% of wasted compute and latency.",
+    "whyWrong": {
+      "1": "Increasing iterations to 50 wastes 6x more tokens on a query that cannot be answered.",
+      "2": "Killing the worker process with `SIGKILL` causes HTTP 502/504 errors without explaining to the user why the query cannot be fulfilled.",
+      "3": "Fabricating synthetic scientific citations is a severe hallucination violation."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
+      "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
+    ]
+  },
+  {
+    "id": "d3-orc-043",
+    "domain": 3,
+    "topic": "Multi-Agent Orchestration Topologies",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are using Vertex AI Gen AI Evaluation Service to evaluate a Hierarchical Supervisor-Worker agent built with Google ADK. You want to verify that when a user submits a complex tax loss harvesting request, the Supervisor first calls `PortfolioFetchAgent`, then calls `TaxLotAnalyzerAgent`, and finally calls `TradeOrderDraftAgent` in that exact sequence. Which agent evaluation metric in Vertex AI Gen AI Evaluation Service specifically measures whether the agent followed this exact ordered sequence of tool/sub-agent invocations?",
+    "options": [
+      "rouge_l_sum",
+      "trajectory_exact_match (or trajectory_in_order_match)",
+      "bleu",
+      "coherence"
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Vertex AI Gen AI Evaluation Service provides specialized trajectory metrics for evaluating multi-step agent and multi-agent orchestration paths. `trajectory_exact_match` verifies that the sequence of tool/sub-agent calls matches the reference golden trajectory step-for-step, while `trajectory_in_order_match` verifies that all required golden steps occurred in the correct relative order (allowing extra intermediate diagnostic steps).",
+    "whyWrong": {
+      "0": "`rouge_l_sum` measures lexical n-gram overlap of text summaries, not agent tool call trajectories.",
+      "2": "`bleu` is a text translation overlap metric and does not evaluate agent execution graphs.",
+      "3": "`coherence` evaluates natural language prose flow, not whether `PortfolioFetchAgent` was called before `TaxLotAnalyzerAgent`."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-agents",
+      "https://google.github.io/adk-docs/evaluate/"
+    ]
+  },
+  {
+    "id": "d3-orc-044",
+    "domain": 3,
+    "topic": "Parallel Scatter-Gather Topology",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global cybersecurity vendor runs a real-time phishing URL analysis engine on Vertex AI Agent Engine using a Parallel Scatter-Gather topology. Five sub-agents inspect the URL concurrently: `WHOISAgent`, `SSLInspectionAgent`, `DOMVisualCloneAgent`, `ThreatIntelFeedAgent`, and `RedirectChainAgent`. To minimize costs and latency, if `ThreatIntelFeedAgent` (which completes in 80ms using a fast lookup table) confirms the URL is on a known active C2 malware blocklist with 100% certainty, you want to cancel the remaining four slow visual/DOM inspection branches immediately and return `MALICIOUS`. What pattern should you implement?",
+    "options": [
+      "Run `DOMVisualCloneAgent` (the slowest 6-second agent) first in a sequential pipeline before checking the 80ms blocklist.",
+      "Wait for all five agents to finish even after `ThreatIntelFeedAgent` returns 100% malware confirmation at 80ms, wasting 6 seconds on `DOMVisualCloneAgent`.",
+      "Implement Speculative Execution with Early Short-Circuit Cancellation (First-Definitive-Win barrier), where an asynchronous task coordinator monitors completed branches as they finish and cancels pending asyncio/sub-agent tasks immediately upon receiving a deterministic high-confidence terminal verdict (`MALICIOUS` with confidence 1.0).",
+      "Disable `ThreatIntelFeedAgent` so all branches take exactly 6 seconds."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In scatter-gather topologies where certain branches can produce a definitive, short-circuiting verdict (such as a known malware blocklist hit or a hard policy violation), waiting for expensive slow branches (like headless browser rendering in `DOMVisualCloneAgent`) wastes compute and latency. Implementing an asynchronous early-cancellation coordinator (`asyncio.wait` with `FIRST_COMPLETED` inspection) allows immediate cancellation of in-flight sibling tasks as soon as a terminal condition is satisfied.",
+    "whyWrong": {
+      "0": "Running the slowest, most expensive agent first in a sequential pipeline maximizes average cost and latency.",
+      "1": "Waiting for a 6-second headless browser render when the URL is already confirmed malicious at 80ms wastes compute and delays user protection.",
+      "3": "Disabling fast threat intelligence degrades both speed and detection accuracy."
+    },
+    "refs": [
+      "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems",
+      "https://google.github.io/adk-docs/agents/workflow-agents/parallel-agent/"
+    ]
+  },
+  {
+    "id": "d3-orc-045",
+    "domain": 3,
+    "topic": "Cyclic Graphs & Reflection Loops",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are designing a marketing copy generation workflow on Vertex AI Agent Engine using a `LoopAgent` containing a `CopywriterAgent` and a `BrandVoiceCriticAgent`. You notice that when `CopywriterAgent` generates the initial draft, it uses Gemini 1.5 Flash for speed, and `BrandVoiceCriticAgent` also uses Gemini 1.5 Flash. However, Gemini 1.5 Flash frequently misses subtle legal disclaimer omissions that only Gemini 1.5 Pro reliably detects. How should you configure model selection across the Generator-Critic roles?",
+    "options": [
+      "ADK requires all agents inside a `LoopAgent` to use the exact same model string.",
+      "Force both agents to use a non-LLM regex script.",
+      "Use Gemini Pro for the initial draft and a random coin flip for the critic.",
+      "Assign heterogeneous model tiers tailored to role complexity: configure `CopywriterAgent` (high-token generation) to use high-throughput Gemini Flash, and configure `BrandVoiceCriticAgent` (strict compliance auditing and subtle reasoning evaluation) to use frontier Gemini Pro with structured rubric evaluation."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "A major architectural benefit of decomposing a workflow into distinct Generator and Critic sub-agents in Google ADK is heterogeneous model assignment. Each `LlmAgent` defines its own `model` parameter independently. Using a fast, cost-efficient model (Gemini Flash) for bulk text generation and a stronger reasoning model (Gemini Pro) for the Critic/Evaluator role optimizes the Pareto frontier of accuracy, latency, and cost.",
+    "whyWrong": {
+      "0": "ADK imposes no restriction requiring sub-agents in a `LoopAgent` to share the same model; each `LlmAgent` configures its own `model` attribute.",
+      "1": "Regex scripts cannot evaluate semantic brand voice tone or nuanced legal context.",
+      "2": "Random coin flips provide zero quality assurance."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/llm-agents/",
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
+    ]
+  },
+  {
+    "id": "d3-orc-046",
+    "domain": 3,
+    "topic": "Multi-Agent Runtime State Management",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A multi-agent insurance underwriting system runs on Vertex AI Agent Engine. During a complex commercial property underwriting workflow, 12 sub-agents execute across nested parallel and sequential stages over 45 seconds. If a user's browser disconnects at second 20 due to a mobile network drop and reconnects at second 50 with the same `session_id`, how should the backend architecture ensure the user receives the completed underwriting decision without re-running the 12 sub-agents?",
+    "options": [
+      "Decouple agent execution lifecycle from the client HTTP connection by executing the multi-agent run asynchronously against the persistent `SessionService` on Vertex AI Agent Engine; when the client reconnects with `session_id`, query `session_service.get_session()` to retrieve the committed final `Event` and `session.state` underwriting decision.",
+      "Bind the multi-agent execution directly to the client's synchronous HTTP request socket so that a client disconnect immediately raises `BrokenPipeError` and aborts all 12 sub-agents.",
+      "Store the session state only in browser `localStorage` so the backend has zero record of the run.",
+      "Re-run all 12 sub-agents from scratch every time the user refreshes the page."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Long-running multi-agent workflows (taking tens of seconds or minutes) must decouple execution state from transient client transport connections. By executing the workflow against Vertex AI Agent Engine's managed `SessionService` (or background task workers updating the persistent session), state transitions and final events are durably committed regardless of client socket state. Upon reconnection, the client queries the session state/event log by `session_id` to fetch the completed output immediately.",
+    "whyWrong": {
+      "1": "Tying long-running multi-agent execution lifecycle to fragile mobile client sockets causes wasted compute and lost work on network blips.",
+      "2": "Client-side `localStorage` cannot capture server-side progress if the connection drops mid-flight.",
+      "3": "Re-running 12 sub-agents wastes 45 seconds and doubles LLM token costs."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/sessions/session/",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d3-orc-047",
+    "domain": 3,
+    "topic": "Hierarchical Supervisor-Worker Topology",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In a Hierarchical Supervisor-Worker system built with Google ADK, a `SupplyChainSupervisor` delegates a task to a `CustomsComplianceWorker`. While executing, `CustomsComplianceWorker` determines that the shipment contains dual-use aerospace components that require an export control review by a sibling `ExportControlWorker`. How should `CustomsComplianceWorker` route the task to `ExportControlWorker` while maintaining clean architectural boundaries?",
+    "options": [
+      "Have `CustomsComplianceWorker` open a raw SSH tunnel directly to `ExportControlWorker`'s container IP address.",
+      "Configure `CustomsComplianceWorker` to return its partial findings and an explicit routing recommendation (`next_required_specialist='ExportControlWorker'`) back to `SupplyChainSupervisor` (or invoke `transfer_to_agent` up to the parent Supervisor), allowing the Supervisor to maintain centralized orchestration state and dispatch `ExportControlWorker`.",
+      "Instruct `CustomsComplianceWorker` to impersonate `ExportControlWorker` and forge export control certificates on its own.",
+      "Crash the application so a human operator notices the shipment."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "In a Hierarchical Supervisor-Worker pattern, leaf workers should avoid hidden mesh/spaghetti point-to-point calls that bypass the Supervisor's awareness. Returning structured state and a delegation recommendation back to the `SupplyChainSupervisor` (or using ADK's managed agent transfer mechanism routed through the parent) preserves centralized trace visibility, loop detection, and policy governance at the Supervisor level.",
+    "whyWrong": {
+      "0": "Point-to-point raw SSH tunnels bypass ADK session tracking, tracing, and IAM boundaries.",
+      "2": "Having a customs agent forge export control certificates violates domain separation and legal compliance.",
+      "3": "Crashing the application is an anti-pattern for exception handling."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/multi-agent-systems/"
+    ]
+  },
+  {
+    "id": "d3-orc-048",
+    "domain": 3,
+    "topic": "Cyclic Graphs & Reflection Loops",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You are building a clinical summary verification system on Vertex AI Agent Engine using a `LoopAgent` with a `ClinicalSummarizerAgent` and a `HallucinationCriticAgent`. To guarantee zero hallucinated medications or dosages in discharge summaries, `HallucinationCriticAgent` cross-checks every entity against the patient's structured EHR medication list. If the loop terminates at `max_iterations=4` and `HallucinationCriticAgent` still detects an unverified dosage, what safety architecture must execute before returning a response to the clinician?",
+    "options": [
+      "Delete the patient's EHR record so that the hallucinated dosage matches the empty record.",
+      "Silently return the unverified summary from Iteration 4 to the clinician without any warning banner.",
+      "Implement a deterministic post-loop Safety Gate that inspects `session.state['critic_verdict']`; if `critic_verdict != 'VERIFIED_CLEAN'`, suppress the unverified LLM summary, return a prominent `HUMAN_CLINICAL_REVIEW_REQUIRED` alert alongside the highlighted discrepancy diff, and log a high-severity compliance event.",
+      "Automatically prescribe the unverified dosage to the patient."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In safety-critical domains (healthcare, finance, aviation), hitting `max_iterations` in a reflection loop means the system failed to reach verified safety convergence. The architecture must never silently emit the final unverified draft as if it were trustworthy. A deterministic post-loop Safety Gate inspects the final critic state; if unverified, it suppresses autonomous output or attaches a mandatory human-in-the-loop review hold (`HUMAN_CLINICAL_REVIEW_REQUIRED`) with explicit discrepancy highlighting.",
+    "whyWrong": {
+      "0": "Deleting patient medical records is illegal and catastrophic.",
+      "1": "Silently presenting an unverified discharge summary with hallucinated dosages endangers patient life.",
+      "3": "Autonomous prescription of hallucinated dosages is a critical medical safety violation."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
+      "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
+    ]
+  },
+  {
+    "id": "d3-orc-049",
+    "domain": 3,
+    "topic": "Multi-Agent Orchestration Topologies",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A financial research platform on Vertex AI Agent Engine uses a `ParallelAgent` to run three sub-agents (`MacroEconomyAgent`, `SectorTrendsAgent`, `CompanyFundamentalsAgent`). Each sub-agent generates a 2,000-word analysis saved to its respective `session.state` key. A downstream `ReportSynthesizerAgent` then combines all three analyses into an executive brief. You want to measure the exact end-to-end wall-clock time of the `ParallelAgent` block versus the individual latency of each of the three parallel branches. How does Vertex AI Agent Engine's OpenTelemetry integration represent this?",
+    "options": [
+      "You must manually calculate latency by looking at monthly Google Cloud billing invoices.",
+      "OpenTelemetry merges all three parallel branches into a single sequential timestamped log line with no parent-child span relationship.",
+      "Parallel execution disables OpenTelemetry tracing because trace context cannot cross async threads.",
+      "OpenTelemetry creates a parent Span for the `ParallelAgent` execution whose duration equals the wall-clock time until barrier completion, with three concurrent child Spans (sharing the same `parent_span_id` and overlapping start/end timestamps) representing each individual sub-agent branch."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Google ADK and Vertex AI Agent Engine automatically propagate OpenTelemetry `Context` across asynchronous tasks and threads spawned by `ParallelAgent`. In Cloud Trace, this renders as a waterfall Gantt view: a single parent Span for `ParallelAgent` spanning the total fan-out/fan-in wall-clock duration, and three overlapping child Spans under that `parent_span_id` showing the exact start time, duration, and token usage of each concurrent sub-agent.",
+    "whyWrong": {
+      "0": "Billing invoices provide aggregate monthly cost, not millisecond-level trace spans.",
+      "1": "OpenTelemetry preserves full hierarchical span trees rather than flattening concurrent spans into a single log line.",
+      "2": "Python `contextvars` and OpenTelemetry instrumentation natively propagate trace contexts across `asyncio` tasks in ADK."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/telemetry",
+      "https://google.github.io/adk-docs/observability/"
+    ]
+  },
+  {
+    "id": "d3-orc-050",
+    "domain": 3,
+    "topic": "Multi-Agent Orchestration Topologies",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise e-commerce company is migrating a monolithic 25-tool customer support agent to a multi-agent architecture on Vertex AI Agent Engine. They are deciding between a Hierarchical Supervisor-Worker topology and a Sequential Pipeline topology. The support workflows involve arbitrary user requests (returns, order tracking, loyalty points, damaged item claims, address changes) where users frequently switch topics or combine two requests in a single message (e.g., 'Change my shipping address for order #123 and also check my loyalty point balance'). Why is a Hierarchical Supervisor-Worker topology superior to a fixed Sequential Pipeline for this workload?",
+    "options": [
+      "A Hierarchical Supervisor can dynamically decompose multi-intent utterances, invoke only the specific domain workers required (`OrderAddressWorker` and `LoyaltyPointsWorker`) in any order or concurrently, and handle conversational turns without executing irrelevant pipeline stages.",
+      "A fixed Sequential Pipeline is superior because running all 25 tools in a strict linear sequence for every chat message guarantees the lowest possible latency.",
+      "A Hierarchical Supervisor-Worker topology does not use LLMs and relies entirely on hard-coded regex rules.",
+      "Sequential Pipelines cannot be deployed on Vertex AI Agent Engine."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In open-ended conversational applications where user intents arrive in unpredictable combinations and orders, a fixed Sequential Pipeline is rigid and wasteful (as it forces execution through a predefined linear chain of stages). A Hierarchical Supervisor-Worker topology provides dynamic planning and intent decomposition: the Supervisor identifies both requests ('address change' + 'loyalty balance'), routes only to the relevant worker sub-agents, synthesizes their responses, and maintains conversational agility.",
+    "whyWrong": {
+      "1": "Running all 25 domain stages sequentially for every single chat message creates extreme latency and token waste.",
+      "2": "Supervisor-Worker topologies use LLM reasoning (or hybrid semantic routers) to plan and delegate dynamically.",
+      "3": "`SequentialAgent` is fully supported on Vertex AI Agent Engine; it is simply the wrong topological fit for non-linear conversational workflows."
+    },
+    "refs": [
+      "https://google.github.io/adk-docs/agents/multi-agent-systems/",
+      "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
+    ]
+  }
+]

@@ -1,0 +1,729 @@
+[
+  {
+    "id": "d3-reg-001",
+    "domain": 3,
+    "topic": "A2A Agent Card Discovery Protocol (`/.well-known/agent.json`)",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A global enterprise is adopting the open Agent-to-Agent (A2A) protocol to enable interoperability between an orchestrator agent built on Vertex AI Agent Engine and specialized sub-agents built by different business units on Cloud Run and GKE. When the orchestrator needs to dynamically discover a remote sub-agent's supported skills, input/output modalities, streaming support, and required authentication schemes over HTTPS without hardcoding client SDKs, which standard endpoint and JSON structure must each A2A-compliant sub-agent expose?",
+    "options": [
+      "Expose an A2A Agent Card JSON document at `https://<agent-domain>/.well-known/agent.json` containing structured fields including `name`, `description`, `url`, `version`, `capabilities` (`streaming`, `pushNotifications`), `authentication` schemes, and an array of `skills` with `tags` and `examples`.",
+      "Expose a raw SQLite database file at `http://<agent-domain>/database.db`.",
+      "Require all orchestrators to SSH into the sub-agent container and read `/etc/passwd`.",
+      "Publish sub-agent IP addresses in public BitTorrent trackers."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In the Agent-to-Agent (A2A) open protocol supported by Google Cloud, every autonomous agent advertises its metadata, endpoint URL, supported authentication schemes, protocol capabilities (`streaming`, `pushNotifications`, `stateTransitionHistory`), and granular `skills` via a standardized Agent Card hosted at the RFC 8615 well-known URI `/.well-known/agent.json`.",
+    "whyWrong": {
+      "1": "Exposing raw database files over HTTP is a severe security vulnerability and not an agent discovery standard.",
+      "2": "SSH access to `/etc/passwd` violates container security and provides zero semantic skill metadata.",
+      "3": "BitTorrent trackers are peer-to-peer file sharing systems unrelated to enterprise agent discovery."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-card",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d3-reg-002",
+    "domain": 3,
+    "topic": "Cryptographic Verification of Agent Identity with Google Cloud OIDC ID Tokens",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise supply chain orchestrator agent running on Vertex AI Agent Engine invokes a high-privilege Procurement Agent hosted on Google Cloud Run (`https://procurement-agent-xyz.a.run.app`). Security architecture mandates zero-trust cryptographic identity verification: the Procurement Agent must mathematically verify that incoming HTTPS A2A task requests originate specifically from the authorized Supply Chain Orchestrator service account (`orchestrator-sa@supply-prod.iam.gserviceaccount.com`) and reject requests from any other agent or user. How should you configure authentication between the two agents?",
+    "options": [
+      "Pass a custom HTTP header `X-Agent-Name: orchestrator` over unauthenticated public HTTP.",
+      "Configure the Orchestrator Agent to generate a Google-signed OIDC ID token targeted at the Procurement Agent's audience URI (`target_audience='https://procurement-agent-xyz.a.run.app'`) passed in the `Authorization: Bearer <ID_TOKEN>` header; configure Cloud Run IAM (`roles/run.invoker` granted only to `orchestrator-sa`) and verify the JWT signature, `iss`, `aud`, and `email` claims inside the Procurement Agent.",
+      "Share a single static API key `secret123` across all 500 microservices in the company.",
+      "Disable authentication on Cloud Run (`--allow-unauthenticated`) and check the caller's IP address using regex."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Google Cloud IAM OIDC ID tokens are cryptographically signed by Google's private keys (verifiable via Google's public JWKS certificates) and bind the caller's exact IAM Service Account identity (`email` / `sub`) to the specific target audience URI (`aud`). Cloud Run natively enforces this at the ingress layer (`roles/run.invoker`), and the receiving agent can inspect the verified JWT claims for fine-grained authorization.",
+    "whyWrong": {
+      "0": "Custom HTTP headers without cryptographic signatures are trivially spoofed by any attacker.",
+      "2": "A shared static API key across 500 services eliminates individual agent identity attribution and creates massive blast radius.",
+      "3": "IP addresses in serverless environments are dynamic/shared and cannot cryptographically identify a specific agent workload."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/authenticating/service-to-service",
+      "https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#sa-credentials-oidc"
+    ]
+  },
+  {
+    "id": "d3-reg-003",
+    "domain": 3,
+    "topic": "Preventing Confused Deputy Attacks via OAuth 2.0 Token Exchange (RFC 8693 `act` Claim)",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A wealth management firm operates a multi-agent delegation chain: a human advisor (`alice@firm.com`) asks the Portfolio Assistant Agent to rebalance a client's account, and the Portfolio Assistant Agent delegates the trade execution to the Trading Engine Agent. If the Trading Engine Agent only checks that the caller is the Portfolio Assistant Agent's service account, any unauthorized employee could trick the Portfolio Assistant into executing trades for accounts they do not own (a Confused Deputy attack). Conversely, if the Portfolio Assistant simply forwards Alice's raw user token, the Trading Engine cannot verify whether Alice called it directly or via an approved agent workflow. What cryptographic identity standard solves this dual-attribution requirement?",
+    "options": [
+      "Grant the Portfolio Assistant Agent super-admin bypass rights on all accounts.",
+      "Trust any request that includes the string 'Alice approved this' in the natural language prompt.",
+      "Implement OAuth 2.0 Token Exchange (RFC 8693) via an enterprise Security Token Service (STS) to issue a delegated JWT containing both the human subject claim (`\"sub\": \"alice@firm.com\"`) and the nested actor claim (`\"act\": {\"sub\": \"portfolio-agent@firm.iam.gserviceaccount.com\"}`), allowing the Trading Engine Agent to cryptographically verify both the human principal's authorization and the immediate agent actor.",
+      "Log out the human user before executing trades."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "RFC 8693 (OAuth 2.0 Token Exchange) defines the standard `act` (actor) claim specifically for delegation chains and agentic architectures. The issued token cryptographically attests that Actor `portfolio-agent` is currently acting on behalf of Subject `alice@firm.com`. Downstream resources validate both that Alice owns the account AND that `portfolio-agent` is an authorized intermediary.",
+    "whyWrong": {
+      "0": "Super-admin bypass rights create the exact Confused Deputy vulnerability described.",
+      "1": "Natural language assertions in prompts have zero cryptographic validity and are vulnerable to prompt injection.",
+      "3": "Logging out the human user breaks session auditing and attribution."
+    },
+    "refs": [
+      "https://datatracker.ietf.org/doc/html/rfc8693#section-4.1",
+      "https://cloud.google.com/iam/docs/workload-identity-federation"
+    ]
+  },
+  {
+    "id": "d3-reg-004",
+    "domain": 3,
+    "topic": "Semantic Agent Discovery in Enterprise Agent Registries",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A conglomerate has registered 180 specialized domain agents (covering tax law, customs clearance, hazardous materials shipping, patent filing, etc.) in a central Enterprise Agent Registry backed by Apigee API Hub and Vertex AI Vector Search. When a user presents a novel multi-disciplinary business problem to the central Router Agent, passing all 180 full Agent Cards into the Router Agent's LLM prompt exceeds token budgets. How should the Router Agent dynamically discover and select the top 3 candidate sub-agents to invoke?",
+    "options": [
+      "Require users to memorize the internal UUIDs of all 180 agents.",
+      "Invoke all 180 sub-agents simultaneously on every single user message.",
+      "Pick 3 agents alphabetically by their service account email address.",
+      "Embed the incoming task description using `text-embedding-004` and query the Agent Registry's Vector Search index (which indexes each registered agent's `skills.description`, `tags`, and `examples` from its Agent Card) with metadata filters for `status='ACTIVE'`, retrieving the top 3 matching Agent Cards for the Router LLM to evaluate."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Semantic Agent Discovery treats registered Agent Cards (specifically their `skills`, natural language `description`, `tags`, and canonical `examples`) as a searchable vector corpus. Embedding the user's intent and retrieving the top-K semantically matching active Agent Cards allows the orchestrator to scale across hundreds of specialized agents with minimal context overhead.",
+    "whyWrong": {
+      "0": "Requiring human users to know internal UUIDs defeats autonomous orchestration.",
+      "1": "Invoking 180 agents per message causes massive cost, latency, and rate-limit exhaustion.",
+      "2": "Alphabetical selection has zero correlation with task relevance."
+    },
+    "refs": [
+      "https://cloud.google.com/apigee/docs/api-hub/what-is-api-hub",
+      "https://google.github.io/A2A/#/documentation?id=agent-card"
+    ]
+  },
+  {
+    "id": "d3-reg-005",
+    "domain": 3,
+    "topic": "SPIFFE / SPIRE Workload Identity & mTLS in GKE Agent Mesh",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A financial trading firm runs 40 autonomous high-frequency analysis agents as microservices across multiple Google Kubernetes Engine (GKE) clusters configured with Cloud Service Mesh (Anthos Service Mesh). Compliance rules prohibit long-lived secrets or unencrypted intra-cluster traffic and require every agent pod to possess a cryptographically verifiable workload identity URI (e.g., `spiffe://trading-prod.svc.id.goog/ns/quant-agents/sa/volatility-agent`) enforced via mutual TLS (mTLS). How does GKE Workload Identity and Cloud Service Mesh satisfy this requirement?",
+    "options": [
+      "Developers manually generate self-signed 10-year SSL certificates on their laptops and bake them into Docker images.",
+      "Cloud Service Mesh automatically provisions and rotates short-lived X.509 SPIFFE Verifiable Identity Documents (SVIDs) signed by Google Cloud Certificate Authority Service for each Kubernetes Service Account, establishing zero-trust mTLS between agent pods and enforcing `AuthorizationPolicy` rules based on SPIFFE IDs.",
+      "Disable TLS inside GKE and rely on network obscurity.",
+      "Use plain HTTP Basic Auth with username `admin` and password `admin`."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "GKE Workload Identity integrated with Cloud Service Mesh implements the SPIFFE standard: each pod's Kubernetes Service Account is automatically issued short-lived, auto-rotated X.509 SVID certificates (`spiffe://<project>.svc.id.goog/ns/<namespace>/sa/<ksa>`). Envoy sidecars terminate and originate mTLS automatically and enforce cryptographic `AuthorizationPolicy` access control lists between specific agent identities.",
+    "whyWrong": {
+      "0": "Baking static 10-year certificates into container images violates secret rotation policies and risks key compromise.",
+      "2": "Disabling TLS violates zero-trust encryption mandates.",
+      "3": "HTTP Basic Auth with default credentials provides no cryptographic workload attestation."
+    },
+    "refs": [
+      "https://cloud.google.com/service-mesh/docs/security/authorization-policy-overview",
+      "https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity"
+    ]
+  },
+  {
+    "id": "d3-reg-006",
+    "domain": 3,
+    "topic": "Dynamic Least-Privilege IAM Scope Brokering for Sub-Agents",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An infrastructure remediation agent is triggered when a Cloud Monitoring alert fires for a specific Google Cloud Storage bucket (`gs://tenant-442-logs`). The remediation agent needs temporary permission to read object metadata ONLY in `gs://tenant-442-logs` for 10 minutes to diagnose the alert. If the remediation agent is permanently bound to `roles/storage.admin` across the entire organization, a prompt injection bug could allow it to access or delete any bucket in any project. What Google Cloud IAM mechanism should the orchestrator use to issue a narrowly scoped, short-lived credential to the remediation agent for this specific task?",
+    "options": [
+      "Create a new Google Cloud Organization every time an alert fires.",
+      "Grant `roles/owner` permanently to the agent's service account.",
+      "Use the IAM Credentials API (`projects.serviceAccounts.generateAccessToken`) with an IAM Access Boundary (Credential Access Boundary / Downscoped Token) that restricts the generated short-lived OAuth2 access token's permissions strictly to `roles/storage.objectViewer` on resource `//storage.googleapis.com/projects/_/buckets/tenant-442-logs` with a 600-second lifetime.",
+      "Share a static JSON key file with organization-wide permissions via Slack."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Google Cloud Token Downscoping (Credential Access Boundaries) allows a token broker or orchestrator to exchange a broader service account token for a short-lived downscoped OAuth access token restricted by an explicit `AccessBoundary` rule (limiting both IAM roles and target resource names/prefixes like a single GCS bucket). Even if the sub-agent is compromised via prompt injection, the token is cryptographically rejected by Google Cloud APIs for any resource outside `gs://tenant-442-logs`.",
+    "whyWrong": {
+      "0": "Creating new Organizations per alert is impossible and operationally absurd.",
+      "1": "Permanent `roles/owner` grants unrestricted access across all resources, violating least privilege.",
+      "3": "Static JSON keys with organization-wide scope create catastrophic security exposure."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/downscoping-short-lived-credentials",
+      "https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/generateAccessToken"
+    ]
+  },
+  {
+    "id": "d3-reg-007",
+    "domain": 3,
+    "topic": "Non-Repudiation & Cryptographic Signing of Autonomous Agent Decisions",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An autonomous underwriting agent evaluates commercial loan applications up to $250,000 and emits a final structured decision payload (`{\"loan_id\": \"LN-902\", \"decision\": \"APPROVED\", \"interest_rate\": 6.25, \"timestamp\": \"2026-09-17T12:00:00Z\"}`). Banking regulators require cryptographic non-repudiation: any downstream settlement system or auditor must be able to mathematically verify that the approval payload was generated by the authentic Underwriting Agent v2.4 and that neither the interest rate nor decision was altered in transit or in storage. How should you implement this using Google Cloud KMS?",
+    "options": [
+      "Ask the agent to append the text 'Signed by Underwriting Agent' at the bottom of the JSON.",
+      "Calculate an unkeyed CRC32 checksum of the JSON string.",
+      "Encrypt the JSON using ROT13 cipher in Python.",
+      "Provision an asymmetric signing key (`EC_SIGN_P256_SHA256`) in Cloud KMS Hardware Security Module (HSM) protection level, grant ONLY the Underwriting Agent's service account `roles/cloudkms.signerVerifier`, compute the SHA-256 digest of the canonicalized decision JSON, call ` AsymmetricSign` via KMS API, and attach the detached JWS/cryptographic signature to the payload."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Asymmetric digital signatures (`EC_SIGN_P256_SHA256` or `RSA_SIGN_PSS_2048_SHA256`) stored in Cloud KMS HSM guarantee non-repudiation and integrity: the private key never leaves the FIPS 140-2 Level 3 HSM, only the Underwriting Agent's IAM identity can invoke `AsymmetricSign`, and any downstream verifier or auditor can verify the signature offline using the public key.",
+    "whyWrong": {
+      "0": "Plain text strings can be forged by anyone.",
+      "1": "CRC32 is an error-detection checksum, not a cryptographic signature; anyone who modifies the JSON can recompute a valid CRC32.",
+      "2": "ROT13 is a trivial Caesar cipher offering zero cryptographic integrity or authenticity."
+    },
+    "refs": [
+      "https://cloud.google.com/kms/docs/create-validate-signatures",
+      "https://cloud.google.com/kms/docs/algorithms#asymmetric_signing_algorithms"
+    ]
+  },
+  {
+    "id": "d3-reg-008",
+    "domain": 3,
+    "topic": "Agent Registry Health Checking & Circuit Breaking for Unhealthy Sub-Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A customer service orchestrator agent discovers sub-agents via an enterprise Agent Registry. During a regional database incident, the registered `Returns-Processing-Agent` begins timing out (taking 30 seconds before returning `HTTP 503`). Because the orchestrator continues routing return requests to the failing sub-agent on every turn, overall chat latency degrades and user threads hang. How should the Agent Registry and Orchestrator handle sub-agent health degradation?",
+    "options": [
+      "Configure active health probes and passive circuit breaking in the Agent Registry / A2A client router: when `Returns-Processing-Agent` exceeds a failure threshold (e.g., 5 consecutive 5xx/timeouts), trip the circuit breaker to `OPEN` state, mark the agent status as `DEGRADED` in the registry, and automatically route return inquiries to a fallback human-queue ticket creation skill.",
+      "Continue sending 100% of traffic to the timing-out agent and increase timeout to 10 minutes.",
+      "Delete the orchestrator agent whenever any sub-agent returns a 503 error.",
+      "Return blank empty chat messages to the user without explanation."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Enterprise agent registries and A2A routers combine active health checking with client-side Circuit Breakers (Closed -> Open -> Half-Open). When a sub-agent's error rate spikes, tripping the circuit breaker fails fast in <1ms and triggers deterministic fallback routing (e.g., degraded mode or asynchronous ticket creation) rather than cascading 30-second timeouts across the agent hierarchy.",
+    "whyWrong": {
+      "1": "Increasing timeouts to 10 minutes causes thread pool exhaustion and cascading failure across the orchestrator.",
+      "2": "Deleting the orchestrator brings down the entire customer service platform.",
+      "3": "Returning blank messages provides a broken user experience."
+    },
+    "refs": [
+      "https://cloud.google.com/service-directory/docs/overview",
+      "https://cloud.google.com/architecture/framework/reliability/Fault-isolation-and-graceful-degradation"
+    ]
+  },
+  {
+    "id": "d3-reg-009",
+    "domain": 3,
+    "topic": "A2A Push Notifications & Webhook Registration for Asynchronous Agent Tasks",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise compliance orchestrator submits a complex background audit task (`tasks/send`) to a specialized Legal Review Sub-Agent via the A2A protocol. Because the legal review involves human paralegal sign-off and takes up to 4 hours, holding an open HTTP connection is impossible. How does the A2A protocol enable the Legal Review Sub-Agent to securely notify the Orchestrator when the task transitions to `COMPLETED` or `INPUT_REQUIRED`?",
+    "options": [
+      "The Sub-Agent sends an unencrypted UDP broadcast packet to the public internet.",
+      "The Orchestrator must poll `tasks/get` every 10 milliseconds for 4 hours (1.44 million requests per task).",
+      "The Legal Review Sub-Agent advertises `capabilities.pushNotifications: true` in its Agent Card; the Orchestrator registers a callback webhook URL and authentication token via `tasks/pushNotification/set`, and the Sub-Agent sends cryptographically signed HTTP POST task status update events to that callback URL when state transitions occur.",
+      "The Sub-Agent deletes the task if it takes longer than 30 seconds."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "The A2A protocol natively supports asynchronous long-running tasks via Push Notifications (`capabilities.pushNotifications`). By calling `tasks/pushNotification/set` with a `PushNotificationConfig` (specifying callback `url` and `authentication` headers/JWT schemes), the client agent receives event-driven webhook callbacks whenever the task state changes (`WORKING`, `INPUT_REQUIRED`, `COMPLETED`, `FAILED`).",
+    "whyWrong": {
+      "0": "Public UDP broadcast packets cannot traverse cloud NATs or protect confidential legal data.",
+      "1": "Polling every 10ms for hours generates millions of useless RPCs and wastes compute resources.",
+      "3": "Deleting tasks after 30 seconds makes asynchronous human-in-the-loop workflows impossible."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=push-notifications",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d3-reg-010",
+    "domain": 3,
+    "topic": "Cross-Cloud Agent Identity Federation (AWS/Azure Agent to Google Cloud Agent)",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "Following a corporate acquisition, a logistics agent running on AWS EKS (using an AWS IAM Role for Service Accounts / IRSA) needs to invoke a Supply Chain Forecasting Agent hosted on Google Cloud Run and protected by Google Cloud IAM. Corporate security strictly forbids creating, exporting, or storing long-lived Google Cloud Service Account JSON private keys in AWS Secrets Manager. How should you configure cryptographic authentication from the AWS EKS agent to the Google Cloud Run agent?",
+    "options": [
+      "Set up an unencrypted FTP server between AWS and Google Cloud.",
+      "Generate a 10-year Google Cloud Service Account JSON key and paste it into a public S3 bucket.",
+      "Disable authentication on the Google Cloud Run forecasting agent.",
+      "Configure Google Cloud Workload Identity Federation with an AWS Workload Identity Pool and Provider that trusts the AWS account and EKS IAM role ARN; the AWS agent exchanges its native AWS STS/OIDC token for a short-lived Google Cloud federated token via Google STS and uses it to invoke the Cloud Run agent."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Google Cloud Workload Identity Federation enables external workloads running on AWS, Azure, or Kubernetes clusters to authenticate to Google Cloud using their native cloud identity tokens (AWS STS GetCallerIdentity tokens or OIDC tokens). Google's Security Token Service (STS) verifies the AWS cryptographic signature and issues a short-lived Google Cloud access/ID token with zero static JSON keys.",
+    "whyWrong": {
+      "0": "Unencrypted FTP cannot perform IAM-authenticated service-to-service RPCs.",
+      "1": "Exporting long-lived JSON keys violates corporate policy and creates high risk of credential leakage.",
+      "2": "Disabling authentication exposes proprietary supply chain forecasts to unauthorized access."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/workload-identity-federation-with-other-clouds",
+      "https://cloud.google.com/run/docs/authenticating/service-to-service"
+    ]
+  },
+  {
+    "id": "d3-reg-011",
+    "domain": 3,
+    "topic": "Agent Registry Version Pinning & Canary Rollouts for Sub-Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An insurance claims orchestrator agent relies on a specialized `Medical-Coding-Agent` registered in the enterprise Agent Registry. The medical coding team releases `v2.0.0` of their agent, which introduces a new reasoning model and updated ICD-10 output schema. To prevent regressions, you want 95% of production claims to continue routing to the battle-tested `v1.4.2` endpoint while routing 5% of claims to `v2.0.0` for canary evaluation, with automatic rollback if schema validation error rates exceed 1%. How should you configure the Agent Registry and routing infrastructure?",
+    "options": [
+      "Register both `v1.4.2` and `v2.0.0` endpoints in the Agent Registry / Cloud Run traffic splitting (or Apigee/Service Mesh weighted virtual service), configure a 95/5 weighted traffic split for the logical agent URI, and monitor Cloud Monitoring custom metrics on structured output validation errors to trigger automated rollback.",
+      "Overwrite the `v1.4.2` container in-place on Friday at 5 PM with zero traffic splitting.",
+      "Ask human claim adjusters to manually flip a physical network switch for every 20th claim.",
+      "Run both versions simultaneously and concatenate their JSON outputs into an invalid string."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Enterprise agent deployments require standard progressive delivery controls. By supporting semantic version metadata (`version: \"2.0.0\"`) in the Agent Registry and leveraging Cloud Run revision traffic splitting or Cloud Service Mesh / Apigee weighted routing (95% to `v1.4.2`, 5% to `v2.0.0`), teams can evaluate real-world agentic quality metrics safely before full cutover.",
+    "whyWrong": {
+      "1": "In-place overwrites without canary testing expose 100% of production traffic to potential schema or prompt regressions.",
+      "2": "Physical network switches cannot perform application-layer A2A session routing.",
+      "3": "Concatenating two JSON objects produces invalid JSON syntax (`{...}{...}`) that crashes parsers."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration",
+      "https://google.github.io/A2A/#/documentation?id=agent-card"
+    ]
+  },
+  {
+    "id": "d3-reg-012",
+    "domain": 3,
+    "topic": "Protecting Agent Cards Against Unauthorized Reconnaissance",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A defense logistics agency deploys internal A2A sub-agents that handle classified troop movement schedules. While these agents use the standard A2A Agent Card format (`/.well-known/agent.json`) for discovery by internal orchestrators, security auditors note that if `/.well-known/agent.json` is left publicly accessible without authentication, external adversaries could scrape the Agent Cards to enumerate internal military capabilities, skill descriptions, and API schemas. How should you secure the Agent Card discovery endpoint?",
+    "options": [
+      "Publish all classified Agent Cards on a public GitHub Pages website.",
+      "Deploy the sub-agents on internal-only endpoints (`--ingress=internal` on Cloud Run or internal GKE Gateway inside a VPC Service Controls perimeter) and require valid Google Cloud IAM / mTLS authentication even for `GET /.well-known/agent.json` requests, indexing the cards only in a private IAM-protected Enterprise Agent Registry.",
+      "Delete all Agent Cards and hardcode IP addresses in plain text emails.",
+      "Leave `/.well-known/agent.json` open to `0.0.0.0/0` but change the font color to white."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "While public consumer agents advertise `/.well-known/agent.json` openly, private enterprise and defense agents must restrict both network ingress (`--ingress=internal` / VPC-SC) and IAM authentication (`roles/run.invoker`) on their discovery endpoints so only authorized internal registries and orchestrator service accounts can fetch capability metadata.",
+    "whyWrong": {
+      "0": "Publishing classified capabilities on public GitHub Pages is a severe national security leak.",
+      "2": "Hardcoding IP addresses in emails destroys dynamic discovery and security governance.",
+      "3": "JSON API responses do not have font colors; `0.0.0.0/0` exposes the endpoint to global scraping."
+    },
+    "refs": [
+      "https://cloud.google.com/run/docs/securing/ingress",
+      "https://google.github.io/A2A/#/documentation?id=security-considerations"
+    ]
+  },
+  {
+    "id": "d3-reg-013",
+    "domain": 3,
+    "topic": "A2A Task Lifecycle States (`SUBMITTED`, `WORKING`, `INPUT_REQUIRED`, `COMPLETED`)",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An HR onboarding orchestrator delegates background check verification to an external Background-Check Sub-Agent via the A2A protocol (`tasks/send`). Halfway through execution, the Background-Check Sub-Agent discovers that the candidate has lived in Germany and requires the candidate's German national ID number before it can continue. According to the A2A protocol state machine, which task state must the Sub-Agent transition to, and how does the Orchestrator resume the task?",
+    "options": [
+      "The Sub-Agent formats its local disk.",
+      "The Sub-Agent crashes with an unhandled `NullPointerException` and deletes the task ID.",
+      "The Sub-Agent transitions to `COMPLETED` and invents a fake German national ID number.",
+      "The Sub-Agent transitions the task state to `INPUT_REQUIRED` and returns a message describing the missing German national ID; the Orchestrator prompts the user (or fetches the ID from HR records) and sends a follow-up `tasks/send` request referencing the same `taskId` with the requested information to transition the task back to `WORKING`."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "The A2A protocol defines a stateful multi-turn task lifecycle (`SUBMITTED` -> `WORKING` -> `INPUT_REQUIRED` -> `WORKING` -> `COMPLETED` / `FAILED` / `CANCELED`). When a sub-agent requires clarification or missing parameters mid-execution, transitioning to `INPUT_REQUIRED` preserves the session state (`taskId`) while signaling the caller to supply additional input.",
+    "whyWrong": {
+      "0": "Formatting disk destroys service availability.",
+      "1": "Crashing and deleting the task loses all progress and forces restarting the background check from scratch.",
+      "2": "Inventing fake government IDs is illegal and corrupts compliance verification."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=task-lifecycle",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d3-reg-014",
+    "domain": 3,
+    "topic": "Preventing Agent Identity Spoofing in Multi-Tenant Registries",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise SaaS marketplace allows third-party partner developers to register specialized AI agents in a shared Agent Registry. A malicious partner attempts to register an agent with `name: \"Official Stripe Refund Agent\"` and `url: \"https://evil-phishing-agent.partner.com\"` to trick the enterprise orchestrator into routing customer payment tokens to their endpoint. What cryptographic verification control must the Agent Registry enforce during agent registration and updates?",
+    "options": [
+      "Enforce domain ownership verification (DNS TXT / HTTPS challenge or mTLS certificate pinning) and cryptographic publisher attestation: bind each registered Agent Card namespace to the verified Google Cloud Organization / Workload Identity Pool principal of the publisher, and require digital signatures from verified publisher keys before activating routes.",
+      "Allow anyone to register any agent name or URL without verification.",
+      "Check if the partner's email address ends in `.com`.",
+      "Ask partners to check a box saying 'I promise I am not malicious'."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In multi-tenant or partner agent registries, preventing namespace squatting and spoofing requires cryptographic domain verification (proving control of the target domain via DNS/mTLS) and verified publisher identity binding (ensuring only Stripe's verified organization principal can publish under the verified `@stripe` namespace).",
+    "whyWrong": {
+      "1": "Unverified registration allows trivial typosquatting and man-in-the-middle hijacking of agent workflows.",
+      "2": "Almost any domain on the internet ends in `.com`, offering zero security.",
+      "3": "Self-attestation checkboxes do not stop malicious actors."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=security-considerations",
+      "https://cloud.google.com/apigee/docs/api-hub/what-is-api-hub"
+    ]
+  },
+  {
+    "id": "d3-reg-015",
+    "domain": 3,
+    "topic": "Service Directory & Private DNS for Internal Agent Discovery",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare enterprise deploys 60 internal clinical and billing agents across 15 VPC networks in different Google Cloud projects connected via Shared VPC and Private Service Connect. Rather than hardcoding internal IP addresses (`10.x.x.x`) or public internet domain names for A2A communication, the platform team wants a managed Google Cloud registry where agents can discover each other by logical service name, region, and metadata attributes, resolving seamlessly over private DNS. Which Google Cloud service provides this capability?",
+    "options": [
+      "Public Google Search indexing.",
+      "Google Cloud Service Directory integrated with Cloud DNS Private Zones, allowing agents to register endpoints with rich key-value metadata (e.g., `a2a_version=1.0`, `domain=billing`) and resolve services privately via DNS or the Service Directory Lookup API.",
+      "Hardcoding IP addresses in `/etc/hosts` on every container image build.",
+      "Using public dynamic DNS providers designed for home routers."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Google Cloud Service Directory provides a single source of truth for registering, discovering, and resolving internal microservices and agents across multi-project VPC topologies. Integration with Cloud DNS Private Zones allows standard DNS resolution (`billing-agent.clinical-ns.internal`) while the Service Directory Lookup API enables metadata filtering.",
+    "whyWrong": {
+      "0": "Public Google Search cannot index private RFC 1918 endpoints and exposes internal topology.",
+      "2": "Hardcoding `/etc/hosts` requires rebuilding and redeploying all 60 containers whenever any IP changes.",
+      "3": "Consumer dynamic DNS exposes internal IPs to third parties and lacks Google Cloud IAM governance."
+    },
+    "refs": [
+      "https://cloud.google.com/service-directory/docs/overview",
+      "https://cloud.google.com/service-directory/docs/configuring-private-dns-zones"
+    ]
+  },
+  {
+    "id": "d3-reg-016",
+    "domain": 3,
+    "topic": "Mutual TLS (mTLS) Client Certificate Enforcement on Cloud Load Balancing for Agents",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A central bank requires that any external commercial bank agent connecting to its Interbank Settlement Agent hosted on Google Cloud must authenticate using Mutual TLS (mTLS) with client certificates issued by the Central Bank's private root Certificate Authority (CA), in addition to application-level OAuth2 tokens. How should you configure Google Cloud's ingress architecture to terminate and cryptographically validate these mTLS client certificates before traffic reaches the Settlement Agent?",
+    "options": [
+      "Ask commercial banks to email their private keys to the central bank.",
+      "Disable TLS on the load balancer and inspect raw TCP packets using bash scripts.",
+      "Deploy a Global External Application Load Balancer in front of the Settlement Agent configured with Mutual TLS (mTLS) enabled, attach a Certificate Manager `TrustConfig` containing the Central Bank's Root CA and intermediate certificates (hosted in Certificate Authority Service), and pass verified client certificate subject headers (`X-Client-Cert-Subject-DN`) to the backend agent.",
+      "Use standard one-way TLS where only the server presents a certificate."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Google Cloud Application Load Balancers support native Mutual TLS (mTLS) client certificate validation using Certificate Manager `TrustConfig` resources backed by Certificate Authority Service (CAS). The load balancer cryptographically verifies the client certificate chain, checks revocation status, rejects unauthenticated connections at the edge, and forwards verified identity headers to the agent.",
+    "whyWrong": {
+      "0": "Private keys must never be transmitted over email; doing so compromises the entire PKI.",
+      "1": "Disabling TLS removes transport encryption and cannot validate X.509 cryptographic handshakes.",
+      "3": "One-way TLS authenticates only the server to the client, not the client agent to the server."
+    },
+    "refs": [
+      "https://cloud.google.com/load-balancing/docs/mtls",
+      "https://cloud.google.com/certificate-manager/docs/trust-configs"
+    ]
+  },
+  {
+    "id": "d3-reg-017",
+    "domain": 3,
+    "topic": "A2A Streaming Task Updates (`tasks/sendSubscribe` via Server-Sent Events)",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An interactive code generation orchestrator delegates a complex microservice refactoring task to a specialized `Refactoring-Agent` via the A2A protocol. The user watching the UI wants to see real-time progress updates ('Analyzing AST...', 'Updating unit tests...', 'Running linter...') and incremental code artifacts streamed live as the `Refactoring-Agent` works over a 45-second period. Which A2A RPC method and transport mechanism supports this real-time streaming experience?",
+    "options": [
+      "Verify that the `Refactoring-Agent` declares `capabilities.streaming: true` in its Agent Card, and invoke the `tasks/sendSubscribe` JSON-RPC method, which returns an HTTP Server-Sent Events (SSE) stream emitting `TaskStatusUpdateEvent` and `TaskArtifactUpdateEvent` frames in real time.",
+      "Use `tasks/send` and block without any output for 45 seconds until the entire job finishes.",
+      "Ask the user to refresh their browser window every second.",
+      "Send progress updates via physical SMS text messages."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "In the A2A specification, when an agent advertises `capabilities.streaming: true`, clients can invoke `tasks/sendSubscribe` (or `tasks/resubscribe`). The server responds with an SSE stream (`text/event-stream`) delivering incremental `TaskStatusUpdateEvent` (status changes and intermediate reasoning steps) and `TaskArtifactUpdateEvent` (streaming code/document chunks).",
+    "whyWrong": {
+      "1": "Blocking synchronously for 45 seconds with zero feedback creates a frozen, unresponsive UI.",
+      "2": "Manual browser refreshes interrupt active sessions and waste bandwidth.",
+      "3": "SMS text messages cannot stream low-latency code diffs into an IDE/web UI."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=streaming-support",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
+    ]
+  },
+  {
+    "id": "d3-reg-018",
+    "domain": 3,
+    "topic": "Cryptographic Attestation of Agent Container Images (Binary Authorization)",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare enterprise runs autonomous clinical decision support agents on Google Kubernetes Engine (GKE) and Cloud Run. To prevent an attacker who compromises a developer laptop from deploying a rogue or backdoored agent container image that impersonates a legitimate clinical agent's Workload Identity, security policy mandates that only container images built by the trusted Cloud Build CI/CD pipeline and passing vulnerability/prompt-safety scans can run in production. Which Google Cloud security control enforces this cryptographic deployment gate?",
+    "options": [
+      "Rely on developers naming their Docker images with the suffix `-safe`.",
+      "Enable Google Cloud Binary Authorization on the GKE clusters and Cloud Run services, configured with a policy that requires cryptographic attestations signed by a Cloud KMS key held exclusively by the automated Cloud Build security verification pipeline.",
+      "Disable container image scanning to speed up deployments.",
+      "Store container images in an unauthenticated public Docker Hub repository."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Binary Authorization provides software supply-chain security for containerized agents on GKE and Cloud Run. By requiring cryptographic attestations (created via Container Analysis / Cloud KMS after CI/CD builds and security scans succeed) at admission time, Google Cloud blocks any unsigned or unauthorized container image from starting, protecting the integrity of workload identities.",
+    "whyWrong": {
+      "0": "Image tag strings like `-safe` can be applied to any malicious image by an attacker.",
+      "2": "Disabling vulnerability scanning increases supply chain risk.",
+      "3": "Public unauthenticated registries allow image tampering and exposure."
+    },
+    "refs": [
+      "https://cloud.google.com/binary-authorization/docs/overview",
+      "https://cloud.google.com/run/docs/securing/binary-authorization"
+    ]
+  },
+  {
+    "id": "d3-reg-019",
+    "domain": 3,
+    "topic": "Agent Registry Governance: Detecting & Quarantining Rogue / Hallucinating Sub-Agents",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An e-commerce company operates an ecosystem of 50 autonomous sub-agents registered in an enterprise Agent Registry. After a third-party model update, the `Dynamic-Discount-Agent` begins offering 99% discounts on luxury electronics due to a prompt regression. You need an automated governance mechanism in the Agent Gateway / Registry that detects anomalous agent behavior in real time and isolates the faulty sub-agent before financial losses mount. What architecture should you implement?",
+    "options": [
+      "Let the agent continue giving 99% discounts until warehouse inventory hits zero.",
+      "Review financial spreadsheets manually once every quarter.",
+      "Implement real-time policy guardrails and anomaly detection in the A2A Gateway / Apigee proxy (monitoring output value distributions and policy bounds like `discount_percent <= 25`); when violations breach safety thresholds, automatically update the Agent Registry state to `QUARANTINED`, revoke the agent's IAM invoker bindings, and alert SREs via Cloud Monitoring.",
+      "Shut down the company website completely whenever any discount is offered."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Autonomous agent ecosystems require automated runtime circuit breakers and policy guardrails (deterministic output bounds checking + anomaly detection on business metrics). Automatically quarantining the offending sub-agent in the Agent Registry and revoking its IAM/routing bindings immediately contains the blast radius.",
+    "whyWrong": {
+      "0": "Allowing unbounded discounts causes severe financial loss.",
+      "1": "Quarterly manual reviews discover financial losses months too late.",
+      "3": "Shutting down the entire e-commerce website for a single faulty sub-agent violates fault isolation principles."
+    },
+    "refs": [
+      "https://cloud.google.com/apigee/docs/api-platform/security/apigee-advanced-api-security",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
+    ]
+  },
+  {
+    "id": "d3-reg-020",
+    "domain": 3,
+    "topic": "A2A Input and Output Modalities Negotiation (`inputModes`, `outputModes`)",
+    "difficulty": "easy",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An insurance claims orchestrator agent receives photos of damaged vehicles (`image/jpeg`), voice recordings of witness statements (`audio/wav`), and text descriptions (`text/plain`). It wants to route specific sub-tasks to specialized sub-agents registered via A2A Agent Cards. How do the `defaultInputModes` / `defaultOutputModes` (and per-skill `inputModes` / `outputModes`) fields in the A2A Agent Card assist the orchestrator during task routing? (Choose two.)",
+    "options": [
+      "They declare the exact MIME types / content modalities (e.g., `[\"text/plain\", \"image/jpeg\", \"application/json\"]`) that the sub-agent can accept as input parameters (`FilePart` or `DataPart`) and return as artifacts.",
+      "They allow the orchestrator router to deterministically filter out sub-agents that cannot process binary image or audio payloads before sending requests that would otherwise fail.",
+      "They set the hardware fan speed of the GPU server.",
+      "They encrypt the database password using MD5.",
+      "They change the billing currency of Google Cloud from USD to EUR."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "In the A2A Agent Card schema, `defaultInputModes` and `defaultOutputModes` (as well as skill-level overrides) explicitly list supported MIME types (such as `text/plain`, `application/json`, `image/png`, `audio/mpeg`). Orchestrators inspect these arrays during discovery to ensure modality compatibility before dispatching multimodal `Part` payloads.",
+    "whyWrong": {
+      "2": "Agent Card MIME types have no interaction with hardware fan speeds.",
+      "3": "Input/output modes describe data formats, not cryptographic password hashing.",
+      "4": "Agent Card modalities do not control cloud billing currencies."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-card",
+      "https://google.github.io/A2A/#/documentation?id=parts"
+    ]
+  },
+  {
+    "id": "d3-reg-021",
+    "domain": 3,
+    "topic": "Preventing Replay Attacks on Cryptographically Signed Agent Messages",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An autonomous treasury agent sends signed A2A task requests to a Wire Transfer Agent to execute daily vendor payments (`{\"vendor_id\": \"V-109\", \"amount_usd\": 50000}`). Even though the request payload is signed with an asymmetric Cloud KMS key and sent over HTTPS, a rogue insider with access to network proxy logs captures a valid signed HTTP request frame from Tuesday and replays the exact same HTTP request frame on Wednesday to trigger a duplicate $50,000 payout. How should you harden the agent-to-agent cryptographic verification protocol against replay attacks?",
+    "options": [
+      "Remove timestamps from all requests to save 20 bytes of bandwidth.",
+      "Use the exact same static signature string for every request forever.",
+      "Set the token expiration (`exp`) to 50 years in the future.",
+      "Require every signed agent message header/payload to include a unique cryptographic nonce (`jti` / UUID) and strict creation/expiration timestamps (`iat` and `exp` with a narrow 60-second clock skew window); the receiving Wire Transfer Agent validates the signature, checks that `now < exp`, and records the `jti` in a high-speed distributed cache (Memorystore for Redis / Spanner) for the duration of the validity window to reject any duplicate `jti`."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Cryptographic signatures alone only prove that a payload was signed at some point in the past; without replay protection, captured valid frames can be re-sent indefinitely. Combining a narrow validity window (`iat`/`exp` <= 60 seconds) with stateful deduplication of unique nonces (`jti`) in Memorystore/Spanner guarantees that each signed instruction can be executed at most once.",
+    "whyWrong": {
+      "0": "Removing timestamps makes time-bounded replay window enforcement impossible.",
+      "1": "Static signatures make every request trivially replayable forever.",
+      "2": "A 50-year expiration window allows captured tokens to be replayed for half a century."
+    },
+    "refs": [
+      "https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7",
+      "https://cloud.google.com/architecture/designing-idempotent-apis"
+    ]
+  },
+  {
+    "id": "d3-reg-022",
+    "domain": 3,
+    "topic": "Service Account Impersonation Chains & IAM Audit Log Attribution",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A developer platform hosts a central `Developer-Assistant-Agent` (`dev-agent@platform.iam.gserviceaccount.com`) that helps engineers debug infrastructure across 30 team projects. When Engineer Bob (`bob@company.com`) asks the agent to inspect logs in `project-alpha`, the agent uses IAM Service Account Impersonation (`roles/iam.serviceAccountTokenCreator`) to impersonate `alpha-reader-sa@project-alpha.iam.gserviceaccount.com`. When security auditors review Google Cloud Audit Logs in `project-alpha`, how is this impersonation chain recorded?",
+    "options": [
+      "Cloud Audit Logs erase all history and show `anonymous` for impersonated requests.",
+      "Cloud Audit Logs automatically record the full cryptographic delegation chain inside `authenticationInfo.serviceAccountDelegationInfo`, showing both the immediate executing principal (`alpha-reader-sa`) and the first-party delegating principal (`dev-agent`), while the agent passes Bob's identity in structured audit metadata.",
+      "Cloud Audit Logs crash whenever Service Account Impersonation is used.",
+      "Google Cloud charges a $10,000 penalty per log entry when impersonation is used."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Google Cloud IAM natively tracks multi-hop service account impersonation chains in Cloud Audit Logs via the `authenticationInfo.serviceAccountDelegationInfo` array. Security teams can see every intermediate service account involved in generating the short-lived credential, ensuring complete forensic accountability.",
+    "whyWrong": {
+      "0": "Cloud Audit Logs never show `anonymous` for authenticated IAM impersonation chains.",
+      "2": "Impersonation is a first-class supported IAM feature and does not crash audit logging.",
+      "3": "There is no penalty fee for using standard IAM Service Account Impersonation."
+    },
+    "refs": [
+      "https://cloud.google.com/iam/docs/service-account-impersonation",
+      "https://cloud.google.com/logging/docs/audit/understanding-audit-logs#service-account-delegation"
+    ]
+  },
+  {
+    "id": "d3-reg-023",
+    "domain": 3,
+    "topic": "Agent Registry Taxonomy & Standardized Skill Tagging",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise AI Center of Excellence (CoE) is establishing governance standards for publishing A2A Agent Cards into the corporate Agent Registry. Previously, different teams used inconsistent tags (`\"billing\"`, `\"fin_ops\"`, `\"invoicing_v1\"`, `\"money-stuff\"`) and vague descriptions (`\"Does stuff with invoices\"`), causing the central orchestrator's semantic router to miss relevant agents 30% of the time. What governance practice should the CoE enforce on Agent Card `skills` definitions?",
+    "options": [
+      "Require all descriptions to be written in Latin haikus.",
+      "Allow teams to leave `description` and `examples` empty (`\"\"`).",
+      "Enforce a standardized enterprise skill taxonomy (`tags` validated against a controlled vocabulary schema in CI/CD), require descriptive action-oriented `description` text detailing exact capabilities and boundaries, and mandate 3–5 diverse natural language `examples` per skill in the Agent Card JSON.",
+      "Limit every agent in the company to a single 3-character skill name."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "High-accuracy agent routing depends directly on the quality of metadata in the Agent Registry. Enforcing CI/CD schema validation on `/.well-known/agent.json` to require controlled taxonomy tags, clear boundary descriptions, and concrete natural-language `examples` provides high-signal anchor points for both dense embedding similarity and LLM tool selection.",
+    "whyWrong": {
+      "0": "Latin haikus do not match enterprise employee query vocabulary.",
+      "1": "Empty descriptions and examples starve the semantic router of semantic signal.",
+      "3": "3-character names convey no semantic meaning."
+    },
+    "refs": [
+      "https://google.github.io/A2A/#/documentation?id=agent-card",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#best-practices"
+    ]
+  },
+  {
+    "id": "d3-reg-024",
+    "domain": 3,
+    "topic": "Zero-Trust Network Isolation for Agent Registries with VPC Service Controls",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A pharmaceutical company stores proprietary drug discovery agent capabilities and molecular analysis sub-agents inside a dedicated Google Cloud project (`mol-discovery-prod`). Even if an external collaborator steals a valid OAuth token belonging to a researcher, the company must guarantee that the token cannot be used from an unauthorized external network or external Google Cloud project to query the Agent Registry or invoke the molecular analysis agents. Which Google Cloud security boundary enforces this context-aware perimeter?",
+    "options": [
+      "Change the project name to `do-not-hack-prod`.",
+      "Rely exclusively on IAM roles without network or device context checks.",
+      "Add a disclaimer banner to the agent's chat window.",
+      "Create a VPC Service Controls (VPC-SC) perimeter around `mol-discovery-prod` covering Vertex AI, Cloud Run, and Service Directory APIs, combined with Access Context Manager (ACM) ingress rules that restrict access strictly to corporate-managed devices and authorized VPC networks."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "VPC Service Controls (VPC-SC) combined with Access Context Manager (ACM) enforces context-aware zero-trust perimeters. Even if an attacker possesses a stolen valid IAM/OAuth token, VPC-SC blocks the API call if the request originates outside the authorized VPC network or from an unmanaged device.",
+    "whyWrong": {
+      "0": "Project naming has no security effect.",
+      "1": "IAM roles alone authenticate identity but do not block stolen credentials used from external networks.",
+      "2": "Disclaimer banners provide zero technical enforcement against stolen credentials."
+    },
+    "refs": [
+      "https://cloud.google.com/vpc-service-controls/docs/overview",
+      "https://cloud.google.com/access-context-manager/docs/overview"
+    ]
+  },
+  {
+    "id": "d3-reg-025",
+    "domain": 3,
+    "topic": "Automated Secret & Key Rotation for Agent Identities",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise security policy mandates that all cryptographic signing keys and API credentials used by autonomous agents to sign A2A assertions or authenticate to legacy external partners must be rotated automatically every 30 days with zero agent downtime. If an agent relies on a single static key version, rotation causes verification failures for in-flight requests. How should you architect key rotation using Cloud KMS and Secret Manager?",
+    "options": [
+      "Configure automatic rotation schedules (`rotationPeriod: 2592000s`) on Cloud KMS keys and Secret Manager secrets (triggered via Pub/Sub rotation notifications); publish a JWKS (JSON Web Key Set) endpoint containing both the newly active public key (`kid=v2`) and the previous key (`kid=v1`) during a grace period so verifiers validate signatures signed by either key ID seamlessly.",
+      "Delete the old key immediately at midnight and manually restart all agents over a 4-hour maintenance window.",
+      "Never rotate keys because rotation is too complicated.",
+      "Email new keys to developers every month to paste into Cloud Run environment variables."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Zero-downtime cryptographic rotation requires supporting overlapping key validity windows via Key IDs (`kid`) in a published JWKS endpoint. When Cloud KMS or Secret Manager rotates to `v2`, the signer begins signing new tokens with `kid=v2`, while verifiers continue trusting both `kid=v2` and `kid=v1` until all in-flight `v1` tokens expire.",
+    "whyWrong": {
+      "1": "Immediate deletion without overlapping verification windows causes mass authentication failures and 4 hours of downtime.",
+      "2": "Never rotating keys violates enterprise compliance (PCI-DSS, NIST, ISO 27001).",
+      "3": "Manual email distribution of secrets is slow, error-prone, and insecure."
+    },
+    "refs": [
+      "https://cloud.google.com/kms/docs/key-rotation",
+      "https://cloud.google.com/secret-manager/docs/rotation-recommendations"
+    ]
+  }
+]

@@ -1,0 +1,716 @@
+[
+  {
+    "id": "d1-low-051",
+    "domain": 1,
+    "topic": "CX Agent Studio: Custom Client Events & UI Synchronization",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A wealth management firm embeds a CX Agent Studio chat widget inside its authenticated single-page web application. When a user clicks the 'Rebalance Portfolio' button on the web dashboard outside the chat window, the web application needs the chat agent to immediately transition to the `Portfolio Rebalance Page`, greet the user with their current asset allocation summary, and start walking them through the rebalancing steps—without waiting for the user to type a message in chat. How should you implement this interaction?",
+    "options": [
+      "Configure a Custom Event Handler (e.g., `event.trigger_rebalance`) on the Root Flow or active page in CX Agent Studio that transitions to the `Portfolio Rebalance Page`, and have the web frontend send a `detectIntent` request containing the custom event payload (`queryInput.event.event = 'trigger_rebalance'`) when the dashboard button is clicked.",
+      "Ask the user to type 'I clicked the rebalance button on the dashboard' into the chat window.",
+      "Have the web frontend simulate 50 fake keyboard presses into the chat input box.",
+      "Restart the Google Cloud project whenever a user clicks a button on the web page."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "CX Agent Studio Custom Event Handlers allow external client applications (web widgets, mobile apps, or webhooks) to trigger state transitions and agent responses programmatically via `detectIntent` event inputs without requiring natural language text utterances from the user.",
+    "whyWrong": {
+      "1": "Forcing users to manually type what they just clicked in the UI breaks seamless multimodal/multi-surface UX.",
+      "2": "Simulating DOM keystrokes is brittle, hacky, and unnecessary when `detectIntent` supports native Custom Events.",
+      "3": "Restarting cloud projects on UI clicks is impossible and destructive."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/handler#event-custom"
+    ]
+  },
+  {
+    "id": "d1-low-052",
+    "domain": 1,
+    "topic": "Gemini Enterprise Agent Designer: Sub-Playbook Output Parameters",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In Gemini Enterprise Agent Designer, your Root Coordinator Playbook delegates shipping fee calculations to a specialized `Freight Calculator Sub-Playbook`. The `Freight Calculator Sub-Playbook` calls carrier APIs, negotiates pallet surcharges, and determines the final shipping cost. When the sub-playbook finishes its task and returns control to the Root Coordinator Playbook, how should you ensure the Root Coordinator reliably receives the exact numerical shipping cost and selected carrier code?",
+    "options": [
+      "Hope the parent playbook reads the sub-playbook's internal logs via telepathy.",
+      "Define explicit Output Parameters (`final_shipping_cost` and `selected_carrier_code`) on the `Freight Calculator Sub-Playbook` definition so that when it completes execution, those typed values are formally returned to the parent playbook's session state.",
+      "Tell the user to write down the shipping cost on a piece of paper and type it back to the Root Playbook.",
+      "Store the shipping cost in a public GitHub repository README file."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Playbooks in Gemini Enterprise Agent Designer support formal Input and Output Parameter contracts. Defining explicit Output Parameters on a sub-playbook ensures the LLM populates and validates those structured fields before returning control to the calling playbook or flow.",
+    "whyWrong": {
+      "0": "Parent playbooks require explicit state/parameter passing or conversation history rather than unexposed internal logs.",
+      "2": "Requiring manual user copy-pasting between sub-agents ruins the automated workflow.",
+      "3": "Using public GitHub commits for runtime session state is insecure and high-latency."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/playbook#parameters"
+    ]
+  },
+  {
+    "id": "d1-low-053",
+    "domain": 1,
+    "topic": "Agent Search: Google Drive Connector & Domain-Wide Delegation",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A media agency stores its brand style guides, client pitch decks, and campaign post-mortems across 35 Shared Drives in Google Workspace. You are building an internal creative strategist agent in CX Agent Studio backed by the Agent Search Google Drive connector. When you configure the connector, how should you authenticate the synchronization service so it can index documents across all 35 Shared Drives while preserving Google Workspace user/group sharing permissions?",
+    "options": [
+      "Make all 35 Shared Drives public to anyone on the internet with the link.",
+      "Ask the CEO to log in with their personal Gmail account every 10 minutes to refresh an OAuth token.",
+      "Configure a Google Cloud Service Account with Google Workspace Domain-Wide Delegation enabled, authorize the required Drive read/metadata OAuth scopes in the Google Workspace Admin Console, and enable ACL ingestion on the Agent Search Drive connector.",
+      "Download all Google Docs as `.bmp` bitmap images and store them on a local USB drive."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "To index organizational Google Workspace Shared Drives with full ACL preservation, the Vertex AI Agent Search Google Drive connector requires a service account configured with Google Workspace Domain-Wide Delegation authorized by a Workspace Super Admin.",
+    "whyWrong": {
+      "0": "Making confidential client pitch decks public to the internet is a severe data breach.",
+      "1": "Personal user interactive OAuth sessions expire and cannot reliably index enterprise-wide Shared Drives.",
+      "3": "Converting Docs to local bitmap images breaks cloud search indexing and ACL enforcement."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es#google-drive"
+    ]
+  },
+  {
+    "id": "d1-low-054",
+    "domain": 1,
+    "topic": "State-Based Workflows: `CURRENT_PAGE` vs `PREVIOUS_PAGE` Transitions",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In a CX Agent Studio state-based checkout flow, a customer is currently on the `Payment Method Page`. While on this page, the customer asks 'Wait, what is your return policy on electronics?'. You have a flow-level intent route for `intent.ask_return_policy` that answers the question using fulfillment text. After answering the return policy question, you want the agent to stay on the `Payment Method Page` and immediately re-prompt the user for their pending form parameter (`credit_card_type`) without resetting the page state. Which symbolic transition target should you configure on the `intent.ask_return_policy` route?",
+    "options": [
+      "Set the transition target to `PREVIOUS_PAGE`, sending the user backward to the `Shipping Address Page`.",
+      "Set the transition target to `START_PAGE`, forcing the user to re-enter their shipping address from scratch.",
+      "Set the transition target to `END_SESSION`, disconnecting the user after answering the question.",
+      "Set the transition target to `CURRENT_PAGE` (or leave the transition target blank/none while enabling re-prompt), which keeps the user on `Payment Method Page` and resumes form parameter collection."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "When handling side-channel FAQ questions during form collection, leaving the transition target empty (or targeting `CURRENT_PAGE` depending on whether entry fulfillment should re-run) keeps the conversation anchored on the active page so CX Agent Studio automatically resumes collecting the next required form parameter.",
+    "whyWrong": {
+      "0": "Targeting `PREVIOUS_PAGE` moves the user backward in the checkout funnel rather than staying on the current payment step.",
+      "1": "Targeting `START_PAGE` abandons checkout progress and forces the user to start over.",
+      "2": "Targeting `END_SESSION` abruptly terminates the shopping session."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/handler#target"
+    ]
+  },
+  {
+    "id": "d1-low-055",
+    "domain": 1,
+    "topic": "Multimodal Data Ingestion: Barcode & QR Code Visual Recognition",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A warehouse logistics company wants its mobile worker assistant (built in Gemini Enterprise Agent Designer) to handle damaged package reports. When a warehouse worker encounters a crushed box whose printed barcode is partially smudged or torn, they take a photo showing both the damaged box label (which has a QR code, a partially readable alphanumeric tracking string, and a hazard icon) and upload it to the agent. The agent must decode any readable barcode/QR data or alphanumeric text from the image, identify the hazard class icon, and invoke the `log_damaged_freight` tool. Which two capabilities should you configure? (Choose two.)",
+    "options": [
+      "Enable multimodal image input in the Gemini Enterprise Agent Designer playbook and instruct the model to visually extract both the alphanumeric tracking number, any readable QR/barcode content, and the hazard class symbol from the photo.",
+      "Configure a tool parameter validation rule or confirmation step in the playbook so that if the tracking number is partially obscured, the agent asks the worker to confirm the inferred characters before calling `log_damaged_freight`.",
+      "Require workers to mail the physical crushed box to Google Cloud headquarters.",
+      "Disable vision capabilities and ask workers to describe the binary pattern of the QR code verbally.",
+      "Convert all uploaded photos to audio MP3 files before processing."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Gemini multimodal models excel at joint visual reasoning—simultaneously reading partially damaged text, recognizing hazard iconography, and interpreting visual labels. Pairing multimodal extraction with a playbook confirmation rule when confidence is low ensures data integrity before logging freight claims.",
+    "whyWrong": {
+      "2": "Mailing physical damaged freight to data centers is absurd.",
+      "3": "Humans cannot verbally read binary QR matrix patterns.",
+      "4": "Converting still images to MP3 audio destroys visual information."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/image-understanding"
+    ]
+  },
+  {
+    "id": "d1-low-056",
+    "domain": 1,
+    "topic": "System Instructions Engineering: Persona & Tone Consistency",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A luxury pediatric hospital is deploying a parent-facing symptom preparation assistant using Gemini Enterprise Agent Designer. Hospital leadership requires the agent's tone to always be calm, empathetic, reassuring, and written at a 6th-grade reading level so stressed parents can easily understand instructions, while avoiding complex Latin medical jargon unless immediately explained in plain terms. Where should you enforce these communication standards in your low-code design?",
+    "options": [
+      "Define explicit Persona, Tone, and Reading Level guidelines inside the Playbook System Instructions (e.g., 'Adopt a calm, empathetic pediatric nurse navigator persona; write at a 6th-grade reading level; always translate medical terminology into simple parent-friendly language').",
+      "Configure a Cloud Armor WAF rule to block HTTP packets that contain Latin words.",
+      "Change the Google Cloud region from `us-central1` to `europe-west1`.",
+      "Set the webhook timeout to 30 seconds."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "System instructions in Gemini Enterprise Agent Designer govern the persona, stylistic tone, empathy level, and vocabulary complexity across all generated responses.",
+    "whyWrong": {
+      "1": "Cloud Armor network WAF rules inspect HTTP traffic headers/payloads for cyberattacks, not LLM prose reading levels.",
+      "2": "Cloud region selection affects data residency and latency, not linguistic empathy or reading level.",
+      "3": "Webhook timeout settings control network wait duration, not generative writing style."
+    },
+    "refs": [
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/system-instructions"
+    ]
+  },
+  {
+    "id": "d1-low-057",
+    "domain": 1,
+    "topic": "State-Based Workflows: List Parameter Manipulation Functions",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In a CX Agent Studio shopping cart flow, the user's selected items are stored in a session list parameter `$session.params.cart_items` (currently `['Laptop', 'Mouse', 'Keyboard']`). When the user says 'Remove the Mouse from my cart', you capture `'Mouse'` in an intent parameter `$intent.params.item_to_remove`. How should you update `$session.params.cart_items` on the intent route's Parameter Presets without calling an external webhook?",
+    "options": [
+      "Set `$session.params.cart_items` to `null`, deleting the Laptop and Keyboard as well.",
+      "Set `$session.params.cart_items` to `$sys.func.REMOVE($session.params.cart_items, $intent.params.item_to_remove)` in the Parameter Presets configuration.",
+      "Write a Java microservice on GKE to parse the array.",
+      "Tell the user that items can never be removed once added."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "CX Agent Studio provides the built-in `$sys.func.REMOVE(list, item)` system function specifically to remove matching elements from a list parameter directly within Parameter Presets, avoiding external webhook calls.",
+    "whyWrong": {
+      "0": "Setting the list to `null` deletes the entire shopping cart rather than removing just the specified item.",
+      "2": "Deploying a GKE microservice for a simple array removal violates low-code design when `$sys.func.REMOVE` is built in.",
+      "3": "Refusing to remove cart items causes high shopping cart abandonment."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/reference/condition#functions"
+    ]
+  },
+  {
+    "id": "d1-low-058",
+    "domain": 1,
+    "topic": "Agent Search: Custom Embeddings & Domain Vocabulary",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A biotechnology research institute uses Vertex AI Agent Search to index internal genomic research papers filled with proprietary gene sequence identifiers, chemical compound codes (e.g., `CMPD-774-X9`), and rare disease acronyms. Standard dense vector embeddings occasionally struggle to retrieve exact matches for novel chemical compound codes that never appeared in public pre-training corpora. How should you configure Agent Search retrieval to maximize both semantic understanding and exact chemical code recall?",
+    "options": [
+      "Replace all chemical compound codes in the PDFs with random emojis.",
+      "Disable all search indexing and use `grep` on a single laptop.",
+      "Enable hybrid search (combining dense semantic vector embeddings with sparse keyword/token matching such as BM25/SPLADE) in the Agent Search engine configuration so both exact alphanumeric compound codes and conceptual biological queries are retrieved accurately.",
+      "Reduce the search result count (`top_k`) to 0."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Vertex AI Agent Search supports hybrid retrieval that blends dense semantic embeddings (for conceptual understanding) with sparse lexical/keyword matching (for exact out-of-vocabulary alphanumeric identifiers like `CMPD-774-X9`), delivering high recall across both natural language and proprietary codes.",
+    "whyWrong": {
+      "0": "Replacing scientific compound codes with emojis corrupts research data.",
+      "1": "Local `grep` does not scale to enterprise agent grounding or semantic queries.",
+      "3": "Setting `top_k` to 0 returns zero documents, breaking RAG grounding."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/about-hybrid-search"
+    ]
+  },
+  {
+    "id": "d1-low-059",
+    "domain": 1,
+    "topic": "CX Agent Studio: Form Parameter Required vs Optional & Conditional Prompts",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "On the `Insurance Claim Page` in a CX Agent Studio state-based flow, you collect `accident_date` (Required), `police_report_filed` (Required boolean), and `police_report_number` (Optional). However, if the user answers `true` to `police_report_filed`, then collecting `police_report_number` becomes mandatory before leaving the page. How should you model this conditional requirement cleanly in CX Agent Studio?",
+    "options": [
+      "Hardcode a fake police report number `'12345'` for every claim.",
+      "Mark `police_report_number` as unconditionally Required so users who did not file a police report are trapped on the page forever.",
+      "Delete `police_report_filed` and never ask about police reports.",
+      "Keep `police_report_number` optional on the main page form (or split into a dedicated follow-up step), and add a conditional transition route on the page where `$page.params.status = 'FINAL' AND $session.params.police_report_filed = true AND $session.params.police_report_number = null` that transitions to a `Collect Police Report Page` (or re-prompts) before allowing transition to `Claim Summary Page`."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "In CX Agent Studio, conditional requirements dependent on prior answers are best enforced either by evaluating a conditional transition route after `$page.params.status = 'FINAL'` (checking if `police_report_filed = true AND police_report_number = null` to route to a dedicated collection page) or by separating conditional slots onto a subsequent page.",
+    "whyWrong": {
+      "0": "Submitting fabricated police report numbers constitutes insurance fraud.",
+      "1": "Marking the parameter unconditionally Required traps users who legitimately have no police report.",
+      "2": "Deleting the field violates claims processing requirements."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/page#form"
+    ]
+  },
+  {
+    "id": "d1-low-060",
+    "domain": 1,
+    "topic": "Gemini Enterprise Agent Designer: Handling Tool Execution Errors",
+    "difficulty": "medium",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An e-commerce return assistant built in Gemini Enterprise Agent Designer invokes an OpenAPI tool `generate_return_label` that calls a third-party shipping carrier API. Occasionally, the carrier API returns an HTTP 422 error with a JSON body `{ \"error_code\": \"INVALID_POSTAL_CODE\", \"message\": \"Postal code 99999 does not match city Seattle\" }`. Instead of crashing or showing raw JSON to the customer, you want the agent to explain the postal code mismatch clearly and ask the customer for their correct ZIP code. Which two low-code configurations should you apply? (Choose two.)",
+    "options": [
+      "Document the HTTP 4xx error response schema and descriptions in the OpenAPI YAML specification so the playbook receives the structured error message in its tool observation.",
+      "Include explicit error-handling instructions and a few-shot example in the playbook demonstrating how the agent should interpret `INVALID_POSTAL_CODE` tool outputs, apologize politely, explain the city/ZIP mismatch, and prompt the user for a corrected postal code before retrying the tool.",
+      "Configure the playbook to immediately terminate the session on any non-200 HTTP response.",
+      "Print the raw stack trace and API secret keys to the customer chat window.",
+      "Set the tool timeout to 0 milliseconds."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "When OpenAPI error response schemas are defined in the tool specification, Gemini Enterprise Agent Designer passes the structured error payload back to the LLM as a tool observation. Pairing this with playbook instructions and few-shot examples on how to handle validation errors enables conversational self-healing (asking the user to fix the postal code and retrying).",
+    "whyWrong": {
+      "2": "Terminating the session on recoverable validation errors creates a poor user experience.",
+      "3": "Exposing stack traces and secret keys is a severe security vulnerability.",
+      "4": "A 0ms timeout causes every API call to fail instantaneously."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/playbook-examples",
+      "https://cloud.google.com/dialogflow/cx/docs/concept/tool#openapi"
+    ]
+  },
+  {
+    "id": "d1-low-061",
+    "domain": 1,
+    "topic": "Agent Search: ServiceNow Connector & Knowledge Base Scoping",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise uses ServiceNow for both internal HR confidential employee grievances (`kb_knowledge_base = 'HR_Confidential'`) and general IT employee self-service (`kb_knowledge_base = 'IT_Support'`). You are connecting Vertex AI Agent Search to ServiceNow to power an IT Helpdesk agent. How should you configure the ServiceNow connector to ensure that confidential HR grievance records are never indexed into the IT Helpdesk search data store?",
+    "options": [
+      "Configure entity and query filters in the Agent Search ServiceNow connector ingestion settings to strictly include only articles where `kb_knowledge_base = 'IT_Support'` (and active status is published) during synchronization.",
+      "Index the entire ServiceNow instance including HR grievances and hope employees never type HR keywords.",
+      "Delete the HR department's ServiceNow instance.",
+      "Turn off HTTPS encryption on the ServiceNow connector."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Vertex AI Agent Search third-party SaaS connectors (including ServiceNow, Jira, and Salesforce) support source-level ingestion filters (such as filtering by knowledge base ID, table, or workflow state) so sensitive out-of-scope records are never ingested into the data store.",
+    "whyWrong": {
+      "1": "Ingesting confidential HR grievances into an IT data store risks data leakage via semantic search.",
+      "2": "Deleting production HR systems is destructive and unacceptable.",
+      "3": "Disabling HTTPS compromises transport security."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es#servicenow"
+    ]
+  },
+  {
+    "id": "d1-low-062",
+    "domain": 1,
+    "topic": "CX Agent Studio: Webhook Parameter Validation vs NLU Slot Filling",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "In a CX Agent Studio hotel reservation flow, a user specifies their check-in date (`$session.params.check_in_date`) and check-out date (`$session.params.check_out_date`) using `@sys.date`. NLU correctly extracts both dates, but a user accidentally enters a check-out date that is 3 days BEFORE their check-in date. How should you validate this cross-parameter chronological constraint and prompt the user to re-enter the check-out date?",
+    "options": [
+      "Delete `@sys.date` and ask users to enter dates as Unix epoch timestamps.",
+      "Enable webhook fulfillment (or a conditional route using date comparison system functions) that evaluates whether `check_out_date <= check_in_date`; if invalid, set `$page.params.check_out_date = null` (or return a webhook validation error/parameter reset) and deliver a message explaining that check-out must be after check-in.",
+      "Allow negative hotel stays and pay the customer money for staying minus 3 days.",
+      "Restart the user's web browser."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "When validation requires cross-parameter logic (verifying `check_out_date > check_in_date`), setting the invalid parameter back to `null` (via Parameter Presets on a conditional route or via Webhook `sessionInfo.parameters`) causes CX Agent Studio to mark the form slot as unfilled and re-prompt the user specifically for that parameter.",
+    "whyWrong": {
+      "0": "Requiring Unix epoch timestamps from hotel guests is a terrible user experience.",
+      "2": "Allowing negative stay durations causes financial and booking system errors.",
+      "3": "Restarting the browser loses the entire session state."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/parameter#validation"
+    ]
+  },
+  {
+    "id": "d1-low-063",
+    "domain": 1,
+    "topic": "Few-Shot Prompt Templates: Multi-Tool Orchestration Sequences",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An insurance claims playbook in Gemini Enterprise Agent Designer has access to three OpenAPI tools: `get_policy_details`, `verify_coverage_limits`, and `create_claim_ticket`. Business rules mandate that for every claim request, the agent must ALWAYS invoke `get_policy_details` first, pass the resulting `policy_tier` into `verify_coverage_limits` second, and only call `create_claim_ticket` third if `is_covered` returns true. During zero-shot testing, the LLM occasionally calls `create_claim_ticket` directly on the first turn. How should you enforce this strict sequential tool chaining in your low-code design?",
+    "options": [
+      "Delete `get_policy_details` and `verify_coverage_limits` so every claim is approved blindly.",
+      "Combine all three backend microservices into a single monolithic database table.",
+      "Provide comprehensive multi-step few-shot examples in the playbook showing the exact sequential tool calling trajectory (`get_policy_details` -> observation -> `verify_coverage_limits` -> observation -> conditional `create_claim_ticket`), and reinforce the mandatory prerequisite sequence in the system instructions.",
+      "Ask the user to type the names of the tools in alphabetical order."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "In Gemini Enterprise Agent Designer, multi-step tool dependencies are best taught through multi-turn/multi-step few-shot examples that explicitly demonstrate the sequential chain of tool invocations and intermediate observations, reinforced by explicit prerequisite rules in the playbook instructions.",
+    "whyWrong": {
+      "0": "Blindly approving all claims without policy verification causes severe financial losses.",
+      "1": "Re-architecting enterprise backend microservices violates the low-code integration boundary.",
+      "3": "Users should never be responsible for orchestrating internal backend API calls."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/playbook-examples"
+    ]
+  },
+  {
+    "id": "d1-low-064",
+    "domain": 1,
+    "topic": "Multimodal Data Ingestion: Medical Lab Results & Image Privacy",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A telehealth platform is building a patient intake assistant in CX Agent Studio where patients upload smartphone photos of paper blood test lab results before their video consultation. The agent must extract key lab values (such as Cholesterol, HbA1c, and White Blood Cell count) from the image into structured session parameters for the physician's EHR dashboard, while ensuring that sensitive patient PII visible on the paper lab header (such as Social Security Number and Home Address) is protected according to HIPAA requirements. Which two low-code/managed Google Cloud capabilities should you integrate? (Choose two.)",
+    "options": [
+      "Use Sensitive Data Protection (Cloud DLP) image inspection/redaction (or redact PII in transit/logs via CX Agent Studio parameter redaction and DLP templates) to mask SSN and address regions before storing transcripts or images.",
+      "Configure a Gemini multimodal playbook or Document AI healthcare parser tool to extract the specific clinical lab values (`cholesterol`, `hba1c`, `wbc`) from the lab report image into structured JSON session parameters.",
+      "Post all patient lab photos to a public social media feed for crowdsourced transcription.",
+      "Store unencrypted SSNs in plain text inside the agent's public greeting message.",
+      "Disable HTTPS TLS on the mobile upload endpoint."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Combining Gemini multimodal extraction (or Document AI) for structured clinical lab value capture with Sensitive Data Protection (Cloud DLP image/text redaction) and CX parameter redaction satisfies both accurate clinical intake and strict HIPAA PII/PHI protection.",
+    "whyWrong": {
+      "2": "Posting PHI to public social media is a catastrophic HIPAA violation.",
+      "3": "Storing plain-text SSNs in public greetings exposes sensitive data to unauthorized users.",
+      "4": "Disabling TLS encryption violates HIPAA transmission security mandates."
+    },
+    "refs": [
+      "https://cloud.google.com/sensitive-data-protection/docs/redacting-sensitive-data-images",
+      "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/document-understanding"
+    ]
+  },
+  {
+    "id": "d1-low-065",
+    "domain": 1,
+    "topic": "CX Agent Studio: Generator Fulfillment in State-Based Flows",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "You have an existing deterministic state-based flow in CX Agent Studio that handles flight cancellations. When a flight is cancelled, the agent transitions to the `Cancellation Confirmation Page` with session parameters `$session.params.passenger_name`, `$session.params.flight_number`, `$session.params.refund_amount`, and `$session.params.weather_reason`. Instead of using a rigid, robotic static text response ('Flight cancelled. Refund issued.'), you want the agent to generate a warm, empathetic, personalized confirmation message that naturally weaves in these four session parameters while keeping the flow 100% deterministic. What feature should you use on the `Cancellation Confirmation Page`?",
+    "options": [
+      "Send an empty response so the user sees a blank screen.",
+      "Delete the entire deterministic flow and replace it with an unconstrained open-ended chatbot.",
+      "Write 10,000 static response variations manually for every possible flight number and refund dollar amount.",
+      "Configure a Generator in CX Agent Studio with a prompt template referencing `$session.params.passenger_name`, `$session.params.flight_number`, `$session.params.refund_amount`, and `$session.params.weather_reason`, and attach the Generator to the page's entry fulfillment."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Generators in CX Agent Studio allow state-based flows to invoke an LLM at specific fulfillment points using a structured prompt template with injected `$session.params.*` variables. This gives architects natural, empathetic generative phrasing while retaining strict deterministic state transitions.",
+    "whyWrong": {
+      "0": "Sending a blank screen leaves the user uncertain if their cancellation succeeded.",
+      "1": "Replacing a working deterministic transactional flow is unnecessary when Generators add localized generative phrasing cleanly.",
+      "2": "Manually authoring thousands of static variations for continuous numerical refund amounts is impossible."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/generative/generators"
+    ]
+  },
+  {
+    "id": "d1-low-066",
+    "domain": 1,
+    "topic": "Agent Search: Website Crawl Exclusions & Robots.txt",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A retail brand configures an Agent Search Website data store to crawl its public domain `https://www.cymbal-retail.com/*` to answer product FAQ questions. However, the domain also hosts staging test pages under `https://www.cymbal-retail.com/staging/*` and legacy promotional archives under `https://www.cymbal-retail.com/archive-2018/*` that contain expired pricing. How should you prevent the agent from retrieving or citing content from these two subdirectories?",
+    "options": [
+      "Add URL Exclusion Patterns (`*cymbal-retail.com/staging/*` and `*cymbal-retail.com/archive-2018/*`) in the Agent Search Website data store configuration.",
+      "Shut down the company's entire production website.",
+      "Ask users to promise not to ask about products from 2018.",
+      "Set the LLM temperature to 0.0."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "Agent Search Website data stores support explicit URL Inclusion and Exclusion glob patterns. Adding `/staging/*` and `/archive-2018/*` to the exclusion list ensures the crawler ignores those paths during indexing and removes any previously indexed pages from search results.",
+    "whyWrong": {
+      "1": "Shutting down the production e-commerce website stops all online sales.",
+      "2": "User promises do not stop the retriever from pulling expired pricing chunks.",
+      "3": "Temperature settings control token randomness, not URL crawl exclusions."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es#website-urls"
+    ]
+  },
+  {
+    "id": "d1-low-067",
+    "domain": 1,
+    "topic": "Gemini Enterprise Agent Designer: Simulator & Trace Debugging",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "During testing of a multi-playbook agent in Gemini Enterprise Agent Designer, you notice that when a user asks 'Can you upgrade my subscription and email me the invoice?', the agent upgrades the subscription via the `upgrade_subscription` tool but forgets to call the `send_invoice_email` tool. You want to inspect the exact prompt context, internal LLM reasoning trace, tool call arguments, and sub-playbook transitions that occurred during that turn. Which built-in tool in the CX Agent Studio / Agent Designer console should you use?",
+    "options": [
+      "Guess randomly and change 20 settings at once.",
+      "Open the built-in Test Agent Simulator, execute the test utterance, and inspect the Execution Trace / Event Log panel showing step-by-step LLM thoughts, tool requests/responses, and active state transitions.",
+      "Wait 30 days for the monthly Google Cloud billing invoice.",
+      "Run `tcpdump` on the user's home Wi-Fi router."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "The CX Agent Studio / Agent Designer Test Simulator includes an interactive Execution Trace and Diagnostic Info panel that displays the complete turn-by-turn reasoning trace, raw tool inputs/outputs, latency breakdown, and playbook/flow transitions.",
+    "whyWrong": {
+      "0": "Randomly changing multiple settings without inspecting traces makes debugging impossible.",
+      "2": "Billing invoices do not contain conversational execution traces.",
+      "3": "Client Wi-Fi packet captures are encrypted and do not reveal server-side LLM reasoning traces."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/simulator"
+    ]
+  },
+  {
+    "id": "d1-low-068",
+    "domain": 1,
+    "topic": "State-Based Workflows: Intent Confidence Threshold Tuning",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A healthcare clinic's state-based CX Agent Studio agent has a sensitive intent `intent.cancel_all_appointments` that cancels every upcoming surgery and clinic visit for a patient. In production logs, you observe that when patients say casual phrases like 'Can we talk about my appointments?', the NLU engine occasionally matches `intent.cancel_all_appointments` with a low confidence score of 0.42, triggering unwanted cancellations. The global agent classification threshold is currently set to 0.30. What is the most targeted way to prevent false-positive matches without breaking other intents?",
+    "options": [
+      "Delete all training phrases from all intents.",
+      "Lower the classification threshold to 0.01 so every utterance matches `intent.cancel_all_appointments`.",
+      "Raise the agent/flow NLU classification threshold (e.g., to 0.70+), add negative training phrases (phrases that should NOT match) to `intent.cancel_all_appointments`, and require an explicit yes/no confirmation page before executing the cancellation webhook.",
+      "Turn off the webhook server permanently."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Preventing false positives on high-impact intents requires raising the classification confidence threshold, adding negative examples to sharpen NLU decision boundaries, and placing a deterministic confirmation page before destructive webhook execution.",
+    "whyWrong": {
+      "0": "Deleting training phrases disables intent recognition entirely.",
+      "1": "Lowering the threshold to 0.01 drastically increases false-positive cancellations.",
+      "3": "Turning off the webhook server breaks all legitimate patient self-service."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/intent#negative",
+      "https://cloud.google.com/dialogflow/cx/docs/concept/agent#settings-ml"
+    ]
+  },
+  {
+    "id": "d1-low-069",
+    "domain": 1,
+    "topic": "Agent Search: FAQ Schema & Structured Q&A Ingestion",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A municipal government is launching a citizen 311 assistant in CX Agent Studio. The city already maintains an official spreadsheet containing 1,500 curated Question-and-Answer pairs (`question`, `answer`, `department`, `url`) vetted by city attorneys. When a citizen asks a question that closely matches one of these 1,500 vetted questions, the city wants the agent to prioritize the exact vetted answer from the spreadsheet over general web crawling. How should you ingest this dataset into Agent Search?",
+    "options": [
+      "Ask citizens to guess which row number their question is on.",
+      "Convert the spreadsheet into an unindexed MP4 video animation.",
+      "Print the spreadsheet and tape it to the city hall front door.",
+      "Import the curated Q&A dataset into an Agent Search Structured / FAQ data store (formatted as CSV/JSONL with explicit `question` and `answer` schema mappings) and set high priority/boost on the FAQ data store tool."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Agent Search supports structured FAQ/Q&A data store schemas where explicit `question` and `answer` columns are mapped. When a user query matches a curated FAQ question semantically, Agent Search retrieves the authoritative vetted answer with high precision.",
+    "whyWrong": {
+      "0": "Citizens cannot know internal spreadsheet row numbers.",
+      "1": "Converting structured text to video makes indexing and retrieval slower and less accurate.",
+      "2": "Physical printouts are inaccessible to online chat users."
+    },
+    "refs": [
+      "https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es#faq"
+    ]
+  },
+  {
+    "id": "d1-low-070",
+    "domain": 1,
+    "topic": "System Instructions Engineering: Escalation & Human Handoff Metadata",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A retail bank's Gemini Enterprise Agent Designer playbook handles disputed credit card charges. When a dispute involves suspected identity theft or exceeds $2,500, the agent must immediately transfer the conversation to a live human fraud specialist in Contact Center AI (CCAI) and pass structured context (`dispute_reason`, `total_disputed_amount`, and a 2-sentence `conversation_summary`) so the human specialist does not ask the customer to repeat themselves. Which two low-code configurations should you implement? (Choose two.)",
+    "options": [
+      "Configure a Live Agent Handoff tool / transition action in the playbook that triggers when `$session.params.total_disputed_amount > 2500` or identity theft is detected.",
+      "Instruct the playbook (or use a Generator/Output Parameter schema) to populate `$session.params.dispute_reason`, `$session.params.total_disputed_amount`, and `$session.params.conversation_summary` in the session state payload transmitted to the CCAI human agent desktop.",
+      "Tell the customer to hang up, dial the bank's general phone number, and explain everything from scratch.",
+      "Clear all session parameters (`$session.params = null`) immediately before transferring to the human agent.",
+      "Configure the agent to argue with the customer for 20 minutes before allowing escalation."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Seamless human handoff in CX Agent Studio / CCAI requires triggering a Live Agent Handoff action/event while populating structured session parameters (`conversation_summary`, `dispute_reason`, `total_disputed_amount`) that are automatically delivered to the human agent's CCAI desktop UI.",
+    "whyWrong": {
+      "2": "Forcing customers to hang up and re-explain their fraud issue destroys customer satisfaction.",
+      "3": "Clearing session parameters right before handoff wipes out the context needed by the human specialist.",
+      "4": "Arguing with fraud victims violates banking compliance and customer experience standards."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/handler#live-agent",
+      "https://cloud.google.com/contact-center/ccai-platform/docs"
+    ]
+  },
+  {
+    "id": "d1-low-071",
+    "domain": 1,
+    "topic": "State-Based Workflows: System Entities & Date/Time Normalization",
+    "difficulty": "easy",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When a user interacting with a CX Agent Studio appointment booking flow says 'Next Tuesday at 3 PM', you use the built-in `@sys.date-time` system entity on a form parameter named `appointment_slot`. How does CX Agent Studio represent the extracted value inside `$session.params.appointment_slot` when passed to your fulfillment webhook?",
+    "options": [
+      "As a structured JSON object containing normalized ISO-8601 date/time fields (`year`, `month`, `day`, `hours`, `minutes`, `seconds`) resolved relative to the agent's configured timezone.",
+      "As an audio WAV recording of the user's voice.",
+      "As the literal unparsed string `'Next Tuesday at 3 PM'` with no calendar dates attached.",
+      "As a random floating-point number between 0 and 1."
+    ],
+    "answer": [
+      0
+    ],
+    "explanation": "CX Agent Studio's `@sys.date-time` system entity automatically resolves relative temporal expressions ('tomorrow', 'next Tuesday at 3 PM') against the agent's timezone and stores a normalized structured JSON object containing explicit `year`, `month`, `day`, `hours`, `minutes`, and `seconds` properties.",
+    "whyWrong": {
+      "1": "System entities extract structured JSON data, not raw audio files.",
+      "2": "While `.original` holds the raw text, the parameter value itself is resolved into normalized calendar fields.",
+      "3": "Date-time entities do not output random probability floats."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/reference/system-entity"
+    ]
+  },
+  {
+    "id": "d1-low-072",
+    "domain": 1,
+    "topic": "Gemini Enterprise Agent Designer: Grounding Citation Controls",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An internal corporate policy agent built in Gemini Enterprise Agent Designer answers employee questions using an Agent Search data store of PDF handbooks. Employees love the answers, but when an answer synthesizes information from multiple handbooks, they want clickable inline citations (e.g., `[1] Employee Benefits Handbook, p. 14`) at the end of sentences so they can verify the source document directly. How should you enable this in the low-code agent configuration?",
+    "options": [
+      "Ask employees to search Google manually if they want to verify sources.",
+      "Enable 'Include citations / source links' in the Agent Search data store tool / generative response settings within CX Agent Studio / Agent Designer, ensuring document title and URI metadata are populated in the data store.",
+      "Manually type fake citation numbers like `[99]` into the system instructions.",
+      "Disable the data store tool completely."
+    ],
+    "answer": [
+      1
+    ],
+    "explanation": "Vertex AI Agent Search and CX Agent Studio provide built-in citation controls that automatically append grounded citation markers (`[1]`, `[2]`) linked to the source document URIs and page numbers retrieved during RAG synthesis.",
+    "whyWrong": {
+      "0": "Telling employees to search manually defeats the value of an enterprise RAG assistant.",
+      "2": "Hardcoding fake citation numbers in system instructions causes hallucinated citations.",
+      "3": "Disabling the data store tool removes all grounded knowledge."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/data-store-agent#citations"
+    ]
+  },
+  {
+    "id": "d1-low-073",
+    "domain": 1,
+    "topic": "State-Based Workflows: Webhook Retries & Idempotency Keys",
+    "difficulty": "hard",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "A CX Agent Studio state-based payment flow invokes a `charge_credit_card` webhook when transitioning to the `Receipt Page`. If a transient network glitch occurs after the payment gateway processes the charge but before the HTTP 200 response reaches Google Cloud, CX Agent Studio (or a user retry) might invoke the webhook a second time for the same turn. How should you design the webhook request payload and state parameters to prevent charging the customer's credit card twice?",
+    "options": [
+      "Disable all credit card payments on the website.",
+      "Charge the customer twice and hope they do not check their bank statement.",
+      "Generate a unique `transaction_idempotency_key` (e.g., using `$session.id` combined with a turn/order counter or UUID preset) in CX Agent Studio session parameters and pass it in the webhook request so the backend payment service enforces idempotent execution.",
+      "Set the webhook timeout to 0.001 seconds."
+    ],
+    "answer": [
+      2
+    ],
+    "explanation": "Passing a deterministic idempotency key (derived from the Dialogflow CX session ID and order/turn identifier stored in `$session.params`) allows the receiving webhook and payment gateway to detect duplicate requests and return the cached transaction result without double-charging.",
+    "whyWrong": {
+      "0": "Disabling payments halts e-commerce revenue.",
+      "1": "Double-charging customers causes chargebacks, regulatory fines, and loss of trust.",
+      "3": "An ultra-low timeout guarantees that every webhook call times out."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/webhook"
+    ]
+  },
+  {
+    "id": "d1-low-074",
+    "domain": 1,
+    "topic": "Multimodal Data Ingestion: Real-Time Audio Barge-In & Interruption",
+    "difficulty": "medium",
+    "type": "single",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "When callers interact with your CX Agent Studio voice agent over the phone, the agent sometimes reads a 20-second legal disclosure or list of clinic locations. Experienced callers who already know which location they want frequently interrupt the agent mid-sentence (e.g., saying 'Stop, I want the Downtown clinic!' after 3 seconds). By default, the agent ignores the caller's speech while TTS audio is playing and finishes the entire 20-second monologue. What low-code voice setting should you enable to allow callers to interrupt the agent naturally?",
+    "options": [
+      "Double the length of the legal disclosure to 40 seconds.",
+      "Mute the caller's microphone hardware remotely.",
+      "Play a loud siren sound whenever the caller tries to speak.",
+      "Enable 'Barge-in' (Allow user interruption during TTS playback) in the CX Agent Studio Agent Speech and IVR settings so incoming user speech immediately halts TTS playback and processes the caller's utterance."
+    ],
+    "answer": [
+      3
+    ],
+    "explanation": "Enabling Barge-in in CX Agent Studio's voice settings monitors the incoming audio stream for speech activity while TTS output is playing, immediately halting audio playback and routing the caller's interrupting utterance to NLU/Playbook processing.",
+    "whyWrong": {
+      "0": "Lengthening the uninterruptible monologue worsens caller frustration.",
+      "1": "Muting the caller prevents any voice interaction.",
+      "2": "Playing sirens is hostile and ruins user experience."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/voice-agent-design#barge-in"
+    ]
+  },
+  {
+    "id": "d1-low-075",
+    "domain": 1,
+    "topic": "Gemini Enterprise Agent Designer: Playbook Instruction Modularity",
+    "difficulty": "hard",
+    "type": "multi",
+    "caseStudy": null,
+    "officialSample": false,
+    "question": "An enterprise retail conglomerate is building a customer service assistant in Gemini Enterprise Agent Designer that handles inquiries across 8 different retail brands. While each brand has its own return window (e.g., Brand A is 30 days, Brand B is 90 days) and distinct catalog API tools, all 8 brands share identical enterprise-wide PCI compliance rules, profanity handling policies, and escalation procedures. You want to avoid duplicating the 500-word PCI and escalation policy across 8 separate playbooks. Which two architectural patterns in CX Agent Studio / Agent Designer support clean reuse and modularity? (Choose two.)",
+    "options": [
+      "Create a shared Root Coordinator Playbook (or global Agent-level System Instructions / Safety Settings) that enforces the universal PCI compliance, profanity filters, and escalation rules before delegating brand-specific tasks to modular Brand Sub-Playbooks.",
+      "Store brand-specific variables (like `return_window_days` and `brand_name`) in session parameters populated at session initialization and inject them dynamically into a shared return playbook template.",
+      "Copy and paste the 500-word policy into 800 different text files manually every morning.",
+      "Delete PCI compliance rules so all playbooks are shorter.",
+      "Create 8 separate Google Cloud organizations with no shared governance."
+    ],
+    "answer": [
+      0,
+      1
+    ],
+    "explanation": "Global agent-level instructions/safety settings and Coordinator-to-Sub-Playbook hierarchies centralize universal compliance rules, while parameterizing brand attributes (`$session.params.return_window_days`) allows a single modular playbook to adapt dynamically across brands without prompt duplication.",
+    "whyWrong": {
+      "2": "Manual daily copy-pasting across hundreds of files is error-prone and unmaintainable.",
+      "3": "Deleting PCI compliance rules violates mandatory payment card industry security standards.",
+      "4": "Splitting into 8 separate GCP organizations prevents shared governance and increases cost."
+    },
+    "refs": [
+      "https://cloud.google.com/dialogflow/cx/docs/concept/playbook#sub-playbooks"
+    ]
+  }
+]
