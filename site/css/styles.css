@@ -278,10 +278,21 @@ select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--t
 .explain{margin-top:24px;padding:20px 22px;border-radius:12px;background:var(--canvas);border:1px solid var(--rule)}
 .explain.ok{border-left:4px solid var(--green)}
 .explain.bad{border-left:4px solid var(--red)}
-.explain h4{margin:0 0 8px;font-size:15px;display:flex;align-items:center;gap:8px}
+.explain h4{margin:0 0 12px;font-size:15.5px;display:flex;align-items:center;gap:8px}
 .explain h4 svg{width:20px;height:20px}
-.explain p{font-size:15px;margin:0 0 10px;line-height:1.6}
-.explain .refs{font-size:13px;color:var(--ink-2)}
+.explain-hint{background:#FFFBEB;border:1px solid #FDE68A;border-left:4px solid #F59E0B;border-radius:8px;padding:12px 14px;margin:0 0 14px}
+.explain-hint-label{display:block;font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#B45309;margin-bottom:4px}
+.explain-hint-body{font-size:14.5px;line-height:1.55;color:#78350F;font-weight:500}
+.explain-section-title{font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);margin:12px 0 6px}
+.explain p{font-size:15px;margin:0 0 12px;line-height:1.6}
+.explain-ww{margin:12px 0 10px;padding-top:10px;border-top:1px solid var(--rule-2)}
+.explain-ww-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.explain-ww-item{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:baseline;font-size:14px;line-height:1.55;padding:8px 10px;border-radius:8px;background:#fff;border:1px solid var(--rule-2)}
+.explain-ww-item.user-picked{background:#FEF2F2;border-color:#FECACA}
+.explain-ww-opt{color:var(--ink);font-size:13.5px}
+.explain-ww-text{color:var(--ink-2)}
+.badge.wrong-pick{background:#FEE2E2;color:#B91C1C;border:1px solid #FCA5A5;font-size:11px;padding:1px 6px}
+.explain .refs{font-size:13px;color:var(--ink-2);margin-top:10px;padding-top:10px;border-top:1px solid var(--rule-2)}
 .explain .refs a{margin-right:12px}
 .qactions{display:flex;gap:12px;align-items:center;margin-top:24px;flex-wrap:wrap}
 .qactions .spacer{flex:1}

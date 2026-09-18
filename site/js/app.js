@@ -466,19 +466,35 @@ route(/^#\/bank(\?.*)?$/, async () => {
   const qs = parseQuery(location.hash);
   const f = { search: qs.get('q') || '', domains: [], caseStudy: 'all', difficulty: 'all', source: qs.get('source') || 'all' };
   let pageN = 0; const PER = 25;
+  const bankAns = {}; // qid -> { chosen: number[], revealed: boolean }
   const offN = filterBank(bank, { source: 'official' }).length;
   const paint = () => {
     const list = filterBank(bank, f);
     const slice = list.slice(pageN * PER, pageN * PER + PER);
     page(html`<div class="wrap" style="max-width:980px">
-      <div class="module-head"><span class="eyebrow">Question bank</span><h1>Browse all ${bank.length.toLocaleString()} questions</h1><p class="muted" style="font-size:17px">Search stems and options by keyword — useful for looking up how a service is tested. Includes ${offN} official sample questions.</p></div>
+      <div class="module-head"><span class="eyebrow">Question bank</span><h1>Browse & answer all ${bank.length.toLocaleString()} questions</h1><p class="muted" style="font-size:17px">Search stems and options by keyword. Select an option on any question to check your answer and unlock its post-answer architectural hint, full explanation, and distractor analysis. Includes ${offN} official sample questions.</p></div>
       <div class="card flat" style="margin-bottom:20px"><div class="grid c4"><div style="grid-column:span 4"><input type="search" id="q" placeholder="Search e.g. “Agent Development Kit”, “Principal Access Boundary”, “Model Armor”, “A2A”…" value="${esc(f.search)}"></div>
         <select id="src"><option value="all" ${f.source === 'all' ? 'selected' : ''}>All sources (${bank.length.toLocaleString()})</option><option value="official" ${f.source === 'official' ? 'selected' : ''}>Official sample questions (${offN})</option></select>
         <select id="d"><option value="">All domains</option>${[1, 2, 3, 4, 5].map(d => `<option value="${d}" ${f.domains[0] === d ? 'selected' : ''}>0${d} ${esc(DOMAINS[d].short)}</option>`).join('')}</select>
         <select id="c"><option value="all">Any case study</option><option value="none" ${f.caseStudy === 'none' ? 'selected' : ''}>None</option>${Object.entries(CASES).map(([k, c]) => `<option value="${k}" ${f.caseStudy === k ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
         <select id="df"><option value="all">Any difficulty</option>${['easy', 'medium', 'hard'].map(d => `<option value="${d}" ${f.difficulty === d ? 'selected' : ''}>${d}</option>`).join('')}</select></div></div>
       <p class="muted small"><b class="tnum">${list.length.toLocaleString()}</b> questions · page ${pageN + 1} of ${Math.max(1, Math.ceil(list.length / PER))}</p>
-      ${slice.map(qq => `<div class="bank-item"><div class="row"><span class="badge d${qq.domain}">Domain ${qq.domain}</span><span class="badge ${qq.difficulty}">${qq.difficulty}</span>${qq.officialSample ? '<span class="badge official">Official sample</span>' : ''}${qq.type === 'multi' ? '<span class="badge multi">multi</span>' : ''}${qq.caseStudy ? `<span class="badge cs">${esc(CASES[qq.caseStudy].name)}</span>` : ''}<span class="muted small" style="margin-left:auto">${esc(qq.area)} · <span class="mono">${qq.id}</span></span></div><div class="q">${esc(qq.question)}</div><details><summary class="small" style="cursor:pointer;color:var(--accent-ink)">Show answer</summary><div class="a" style="margin-top:10px"><b>${qq.answer.map(i => letter(i) + '. ' + esc(qq.options[i])).join('<br>')}</b><p style="margin:8px 0 0">${esc(qq.explanation)}</p></div></details></div>`).join('')}
+      ${slice.map(qq => {
+        const st = bankAns[qq.id] || { chosen: [], revealed: false };
+        const rev = st.revealed;
+        return `<div class="bank-item" data-qid="${qq.id}">
+          <div class="row"><span class="badge d${qq.domain}">Domain ${qq.domain}</span><span class="badge ${qq.difficulty}">${qq.difficulty}</span>${qq.officialSample ? '<span class="badge official">Official sample</span>' : ''}${qq.type === 'multi' ? `<span class="badge multi">Choose ${qq.answer.length}</span>` : ''}${qq.caseStudy ? `<span class="badge cs">${esc(CASES[qq.caseStudy].name)}</span>` : ''}<span class="muted small" style="margin-left:auto">${esc(qq.area)} · <span class="mono">${qq.id}</span></span></div>
+          <div class="q">${esc(qq.question)}</div>
+          <ul class="opts" style="margin-top:12px">${qq.options.map((o, i) => {
+            const sel = st.chosen.includes(i), corr = qq.answer.includes(i);
+            let cls = qq.type === 'multi' ? 'multi' : '';
+            if (rev) { if (corr && sel) cls += ' correct'; else if (sel && !corr) cls += ' wrong'; else if (corr) cls += ' missed'; }
+            else if (sel) cls += ' sel';
+            return `<li><button class="opt ${cls}" data-bopt="${i}" data-qid="${qq.id}" ${rev ? 'disabled' : ''}><span class="k">${letter(i)}</span><span>${esc(o)}</span></button></li>`;
+          }).join('')}</ul>
+          ${rev ? `<div style="margin-top:14px">${explain(qq, st.chosen)}<div class="row" style="margin-top:10px"><button class="btn ghost sm" data-breset="${qq.id}">Reset answer</button></div></div>` : `<div class="muted small" style="margin-top:10px">Select ${qq.type === 'multi' ? `${qq.answer.length} options` : 'an option'} above to reveal the hint & explanation.</div>`}
+        </div>`;
+      }).join('')}
       <div class="row between" style="margin:24px 0 72px"><button class="btn secondary sm" id="prev" ${pageN === 0 ? 'disabled' : ''}>Previous</button><button class="btn secondary sm" id="next" ${(pageN + 1) * PER >= list.length ? 'disabled' : ''}>Next</button></div>
     </div>`);
     const inp = $('#q'); let t; inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { f.search = inp.value; pageN = 0; const pos = inp.selectionStart; paint(); const n = $('#q'); n.focus(); n.setSelectionRange(pos, pos); }, 250); });
@@ -488,6 +504,25 @@ route(/^#\/bank(\?.*)?$/, async () => {
     $('#df').addEventListener('change', e => { f.difficulty = e.target.value; pageN = 0; paint(); });
     $('#prev').addEventListener('click', () => { pageN--; paint(); });
     $('#next').addEventListener('click', () => { pageN++; paint(); });
+    $$('[data-bopt]').forEach(b => b.addEventListener('click', () => {
+      const qid = b.dataset.qid, opt = +b.dataset.bopt;
+      const qq = bank.find(x => x.id === qid);
+      const st = bankAns[qid] || (bankAns[qid] = { chosen: [], revealed: false });
+      if (qq.type === 'multi') {
+        const k = st.chosen.indexOf(opt);
+        if (k >= 0) st.chosen.splice(k, 1);
+        else st.chosen.push(opt);
+        if (st.chosen.length === qq.answer.length) st.revealed = true;
+      } else {
+        st.chosen = [opt];
+        st.revealed = true;
+      }
+      paint();
+    }));
+    $$('[data-breset]').forEach(b => b.addEventListener('click', () => {
+      delete bankAns[b.dataset.breset];
+      paint();
+    }));
   };
   paint();
 });

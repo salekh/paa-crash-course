@@ -123,10 +123,34 @@ function view(s) {
 
 export function explain(qq, chosen) {
   const ok = isCorrect(qq, chosen);
+  const wrongIndices = qq.options.map((_, i) => i).filter(i => !qq.answer.includes(i));
+  const ww = qq.whyWrong || {};
+  const hasWW = wrongIndices.some(i => ww[String(i)] || ww[i]);
+  const hintText = qq.hint || '';
   return `<div class="explain ${ok ? 'ok' : 'bad'}">
-    <h4>${ok ? `<span style="color:#188038">${ICON.check.replace('<svg', '<svg fill="#188038"')}</span> Correct` : `<span style="color:#C5221F">${ICON.close.replace('<svg', '<svg fill="#C5221F"')}</span> Not quite`} — answer: ${qq.answer.map(letter).join(', ')}</h4>
+    <h4>${ok ? `<span style="color:#188038">${ICON.check.replace('<svg', '<svg fill="#188038"')}</span> Correct` : `<span style="color:#C5221F">${ICON.close.replace('<svg', '<svg fill="#C5221F"')}</span> Not quite`} — correct answer: ${qq.answer.map(letter).join(', ')}</h4>
+    ${hintText ? `<div class="explain-hint"><span class="explain-hint-label">💡 Architectural Hint & Core Takeaway</span><div class="explain-hint-body">${esc(hintText)}</div></div>` : ''}
+    <div class="explain-section-title">Why ${qq.answer.map(letter).join(', ')} is correct</div>
     <p>${esc(qq.explanation)}</p>
-    ${qq.refs && qq.refs.length ? `<div class="refs">Read more: ${qq.refs.map(r => `<a href="${esc(r)}" target="_blank" rel="noopener">${esc(r.replace(/^https?:\/\/(cloud\.google\.com\/)?/, '').split('?')[0].slice(0, 60))}</a>`).join('')}</div>` : ''}
+    ${hasWW ? `<div class="explain-ww">
+      <div class="explain-section-title">Why the other options are wrong</div>
+      <ul class="explain-ww-list">
+        ${wrongIndices.map(i => {
+          const reason = ww[String(i)] || ww[i];
+          if (!reason) return '';
+          const userPicked = chosen && chosen.includes(i);
+          return `<li class="explain-ww-item ${userPicked ? 'user-picked' : ''}">
+            <span class="explain-ww-opt"><b>Option ${letter(i)}</b>${userPicked ? ' <span class="badge wrong-pick">Your choice</span>' : ''}</span>
+            <span class="explain-ww-text">${esc(reason)}</span>
+          </li>`;
+        }).join('')}
+      </ul>
+    </div>` : ''}
+    ${qq.refs && qq.refs.length ? `<div class="refs">References: ${qq.refs.map(r => {
+      const isYT = /youtube\.com|youtu\.be/.test(r);
+      const label = isYT ? '▶ Video Walkthrough (' + (r.match(/[?&]v=([^&]+)/)?.[1] || 'YouTube') + ')' : r.replace(/^https?:\/\/(cloud\.google\.com\/|docs\.cloud\.google\.com\/)?/, '').split('?')[0].slice(0, 58);
+      return `<a href="${esc(r)}" target="_blank" rel="noopener">${esc(label)}</a>`;
+    }).join('')}</div>` : ''}
   </div>`;
 }
 

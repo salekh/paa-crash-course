@@ -25,7 +25,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/handler#target"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio: Symbolic Transition Targets): In CX Agent Studio, transitioning to the symbolic target `END_FLOW` concludes the execution of the active sub-flow and returns control to the calling parent flow at the exact state where the sub-flow was invoked, preserving all session parameters."
   },
   {
     "id": "d1-low-027",
@@ -54,7 +55,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/configure-boost",
       "https://cloud.google.com/generative-ai-app-builder/docs/filter-search-metadata"
-    ]
+    ],
+    "hint": "Core Rule (Agent Search: Metadata Filtering & Search Boost): Agent Search data store tools in CX Agent Studio support dynamic metadata filter expressions (e.g., `product_version: ANY(\"$session.params.user_product_version\")`) and search boost specifications (boosting fresher documents based on date/numeric attributes)."
   },
   {
     "id": "d1-low-028",
@@ -83,7 +85,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/code-execution",
       "https://cloud.google.com/dialogflow/cx/docs/concept/tool#code-interpreter"
-    ]
+    ],
+    "hint": "Core Rule (Gemini Enterprise Agent Designer: Code Execution Tool): Gemini Enterprise Agent Designer supports a built-in Python Code Execution sandbox tool."
   },
   {
     "id": "d1-low-029",
@@ -111,7 +114,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/entity#custom-regexp"
-    ]
+    ],
+    "hint": "Core Rule (State-Based Workflows: Custom Regex Entities & Validation): CX Agent Studio supports Custom Regexp Entities that match structured alphanumeric patterns directly during NLU slot filling."
   },
   {
     "id": "d1-low-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/video-understanding",
       "https://cloud.google.com/dialogflow/cx/docs/concept/playbook"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal Data Ingestion: Video & Visual Troubleshooting): Gemini multimodal models natively process interleaved video frames and audio tracks within a single prompt context."
   },
   {
     "id": "d1-low-031",
@@ -170,7 +175,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/reference/rpc/google.cloud.dialogflow.cx.v3#webhookresponse"
-    ]
+    ],
+    "hint": "Core Rule (Webhook Fulfillment: Session Info Payload Manipulation): According to the CX Agent Studio Webhook Response specification, session parameters are created, updated, or deleted via the `sessionInfo.parameters` map in the JSON response payload."
   },
   {
     "id": "d1-low-032",
@@ -198,7 +204,8 @@
     },
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/parse-chunk-documents"
-    ]
+    ],
+    "hint": "Core Rule (Agent Search: Chunk Size & Overlap Optimization): Increasing chunk token length and configuring chunk overlap (or enabling hierarchical parent-document retrieval where a matched child chunk retrieves its broader parent context) ensures that closely related cross-referenced paragraphs remain together in the retrieved context window passed to the LLM."
   },
   {
     "id": "d1-low-033",
@@ -227,7 +234,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/hybrid-agents",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/system-instructions"
-    ]
+    ],
+    "hint": "Core Rule (System Instructions Engineering: Prompt Injection Defense): For high-risk financial actions susceptible to indirect or direct prompt injection, relying solely on natural language guardrails in a generative playbook is insufficient."
   },
   {
     "id": "d1-low-034",
@@ -255,7 +263,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/handler#eval"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio: Flow-Level vs Page-Level Event Handlers): CX Agent Studio supports hierarchical event handler inheritance."
   },
   {
     "id": "d1-low-035",
@@ -283,7 +292,8 @@
     },
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es#cloud-sql"
-    ]
+    ],
+    "hint": "Core Rule (Agent Search: Cloud SQL & Relational Database Grounding): To ground low-code agents in relational Cloud SQL data, architects can either synchronize the relational tables into a structured Agent Search data store using the managed Cloud SQL connector or expose safe, parameterized read queries via an OpenAPI/Cloud Function tool invoked by the playbook."
   },
   {
     "id": "d1-low-036",
@@ -313,7 +323,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/tool#openapi"
-    ]
+    ],
+    "hint": "Core Rule (Gemini Enterprise Agent Designer: Tool Input/Output Schema Validation): Minimizing tool output payloads to essential fields prevents context window bloat and reduces token latency in multi-turn agent sessions."
   },
   {
     "id": "d1-low-037",
@@ -341,7 +352,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/entity#composite"
-    ]
+    ],
+    "hint": "Core Rule (State-Based Workflows: Composite Entities & Slot Filling): Composite Entities in CX Agent Studio allow grouping multiple sub-entities (such as quantity, size, and menu item) into a single structured object."
   },
   {
     "id": "d1-low-038",
@@ -369,7 +381,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/playbook#instructions"
-    ]
+    ],
+    "hint": "Core Rule (System Instructions Engineering: Output Formatting & Markdown Control): By injecting `$session.params.channel_type` into the playbook instructions and specifying clear formatting rules per channel, the Gemini model dynamically adapts its output style (rich Markdown for Web vs clean plain text for SMS) within a single unified playbook."
   },
   {
     "id": "d1-low-039",
@@ -399,7 +412,8 @@
     },
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/data-source-connectors"
-    ]
+    ],
+    "hint": "Core Rule (Agent Search: Third-Party SaaS Connectors & Sync Schedules): Vertex AI Agent Search third-party connectors support configurable full and incremental synchronization schedules to maintain data freshness, alongside native ACL synchronization that enforces source-system document permissions when paired with federated end-user identity tokens at query time."
   },
   {
     "id": "d1-low-040",
@@ -427,7 +441,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/reference/condition"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio: Conditional Transition Routes & Boolean Logic): CX Agent Studio conditional transition routes support standard compound boolean expressions using `AND`, `OR`, `NOT`, and comparison operators (`>=`, `>`, `=`, `!=`)."
   },
   {
     "id": "d1-low-041",
@@ -455,7 +470,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/playbook-examples"
-    ]
+    ],
+    "hint": "Core Rule (Few-Shot Prompt Templates: Negative Examples & Edge Cases): Providing explicit few-shot examples that demonstrate prerequisite verification (showing the internal thought step refusing immediate tool invocation until the safety precondition is verified by the user) trains the playbook to pause and ask for confirmation before executing destructive tools."
   },
   {
     "id": "d1-low-042",
@@ -483,7 +499,8 @@
     },
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/snippets#extractive-segments"
-    ]
+    ],
+    "hint": "Core Rule (Agent Search: Extractive Answers vs Generative Summarization): Vertex AI Agent Search supports Extractive Answers and Extractive Segments, which extract verbatim text snippets and exact document metadata (such as page numbers) directly from the indexed source document without generative LLM paraphrasing."
   },
   {
     "id": "d1-low-043",
@@ -511,7 +528,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/prebuilt-agent"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio: Prebuilt Agents & Accelerators): CX Agent Studio provides vertical-specific Prebuilt Agents (for Financial Services, Retail, Telecommunications, Travel, Healthcare, etc.) complete with production-tested intents, entities, pages, and state flows that significantly accelerate time-to-market."
   },
   {
     "id": "d1-low-044",
@@ -540,7 +558,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/document-understanding",
       "https://cloud.google.com/document-ai/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal Data Ingestion: PDF Form & Invoice Processing): Gemini multimodal models and Document AI Form/Custom Extractors natively process visual document layouts, handwriting, signatures, and skewed tables directly from PDF inputs, returning structured key-value JSON that maps seamlessly into CX Agent Studio session parameters."
   },
   {
     "id": "d1-low-045",
@@ -568,7 +587,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/reference/condition#functions"
-    ]
+    ],
+    "hint": "Core Rule (State-Based Workflows: Loop Prevention & Max Turn Counters): Using `$sys.func.ADD()` inside parameter presets increments a loop counter deterministically each time the page is visited."
   },
   {
     "id": "d1-low-046",
@@ -599,7 +619,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/playbook",
       "https://cloud.google.com/dialogflow/cx/docs/concept/tool"
-    ]
+    ],
+    "hint": "Core Rule (Gemini Enterprise Agent Designer: Grounding vs Tool Calling): Unstructured static policy manuals are best served by an Agent Search data store (RAG grounding with chunking and semantic retrieval), whereas live, per-user transactional lookups by ID require dynamic API invocation via an OpenAPI tool binding."
   },
   {
     "id": "d1-low-047",
@@ -627,7 +648,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/version"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio: Environment Management & Version Control): CX Agent Studio supports immutable Versions of flows/playbooks and named Environments (such as `DEV`, `STAGING`, `PROD`)."
   },
   {
     "id": "d1-low-048",
@@ -655,7 +677,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/chain-of-thought"
-    ]
+    ],
+    "hint": "Core Rule (Chain-of-Thought Prompt Templates: Multi-Constraint Reasoning): Structured Chain-of-Thought (CoT) templates force the LLM to explicitly evaluate each constraint against candidate options sequentially in its reasoning trace before committing to a final recommendation, dramatically reducing multi-constraint oversight errors."
   },
   {
     "id": "d1-low-049",
@@ -683,7 +706,8 @@
     },
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/dtmf"
-    ]
+    ],
+    "hint": "Core Rule (State-Based Workflows: DTMF & Dual-Mode Input Handling): CX Agent Studio voice integrations natively support dual-mode input (simultaneous ASR speech recognition and DTMF keypad tone capture)."
   },
   {
     "id": "d1-low-050",
@@ -714,6 +738,7 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/filter-search-metadata",
       "https://cloud.google.com/dialogflow/cx/docs/concept/data-store-agent"
-    ]
+    ],
+    "hint": "Core Rule (Agent Search: Custom Metadata & Document-Level Filtering): To guarantee strict jurisdictional isolation in RAG retrieval, documents must be tagged with explicit schema metadata (`jurisdiction`) during ingestion, and query-time hard filtering must be enforced via the data store tool filter expression (`jurisdiction: ANY(\"$session.params.user_country_code\")`) so out-of-jurisdiction chunks are excluded before LLM synthesis."
   }
 ]

@@ -26,7 +26,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/architecture",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (MCP Primitives: Resources vs Tools vs Prompts): The Model Context Protocol (MCP) defines three core primitives: Resources (application-controlled, URI-addressable read-only context data like file contents, database schemas, or logs), Tools (model-controlled executable functions with JSON Schema input validation that perform computations or side effects like running SQL queries), and Prompts (user/application-controlled templates that structure interactions and workflows)."
   },
   {
     "id": "d3-mcp-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/transports",
       "https://cloud.google.com/run/docs/triggering/https-request"
-    ]
+    ],
+    "hint": "Core Rule (MCP Transport Protocols: stdio vs SSE / Streamable HTTP on Cloud Run): While `stdio` transport is designed for local process-to-process communication on the same machine, remote cloud-hosted MCP servers deployed on serverless platforms like Cloud Run require network-capable transports—specifically HTTP with Server-Sent Events (SSE) or Streamable HTTP—allowing remote MCP clients to send JSON-RPC requests via HTTP POST and receive streaming responses/notifications over HTTPS."
   },
   {
     "id": "d3-mcp-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/best-practices-costs#limit_query_costs_by_restricting_the_number_of_bytes_billed",
       "https://cloud.google.com/bigquery/docs/dry-run-queries"
-    ]
+    ],
+    "hint": "Core Rule (BigQuery MCP Server Cost Guardrails & Read-Only Safety): Production BigQuery MCP servers must enforce deterministic server-side guardrails: (1) Least-privilege IAM (`bigquery.dataViewer` + `bigquery.jobUser` prevents any DDL/DML `DROP`, `DELETE`, `UPDATE`, or `INSERT` at the IAM layer), (2) executing a BigQuery `dry_run` to inspect `total_bytes_processed` and return a helpful error message prompting the agent to add partition filters if too large, and (3) setting `maximum_bytes_billed` on the `QueryJobConfig` as a hard server-side circuit breaker."
   },
   {
     "id": "d3-mcp-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/sql/docs/postgres/iam-authentication",
       "https://github.com/GoogleCloudPlatform/cloud-sql-python-connector"
-    ]
+    ],
+    "hint": "Core Rule (Cloud SQL MCP Server IAM Database Authentication & Auth Proxy): The Cloud SQL Python Connector (`cloud-sql-python-connector`) with `enable_iam_auth=True` automatically fetches ephemeral IAM OAuth2 access tokens for the Cloud Run service account (`roles/cloudsql.instanceUser`) and establishes mTLS-encrypted connections (`roles/cloudsql.client`) to Cloud SQL without managing static database passwords or sidecar proxy binaries."
   },
   {
     "id": "d3-mcp-005",
@@ -142,7 +146,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/resources#resource-templates",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling"
-    ]
+    ],
+    "hint": "Core Rule (MCP Schema Bloat & Dynamic Tool/Resource Discovery): Progressive disclosure (hierarchical tool/resource discovery) is essential for large-scale enterprise MCP servers."
   },
   {
     "id": "d3-mcp-006",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/spanner/docs/graph/overview",
       "https://cloud.google.com/spanner/docs/graph/queries-overview"
-    ]
+    ],
+    "hint": "Core Rule (Spanner Graph MCP Server for Multi-Hop Fraud Detection): Cloud Spanner Graph natively supports ISO GQL syntax within SQL queries via `GRAPH_TABLE`."
   },
   {
     "id": "d3-mcp-007",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/spanner/docs/timestamp-bounds",
       "https://cloud.google.com/spanner/docs/reads"
-    ]
+    ],
+    "hint": "Core Rule (Spanner MCP Server Read-Only Stale Reads for Hot Tables): In Cloud Spanner, read-only transactions with bounded staleness (`exact_staleness` or `max_staleness`) execute entirely lock-free against historical MVCC timestamps on the nearest replica."
   },
   {
     "id": "d3-mcp-008",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/integration-connectors/docs/overview",
       "https://cloud.google.com/apigee/docs/api-platform/get-started/what-apigee"
-    ]
+    ],
+    "hint": "Core Rule (3P SaaS MCP Servers with Apigee & Integration Connectors): Google Cloud Integration Connectors provides pre-built, managed connectors for 100+ SaaS/ERP systems (Salesforce, SAP, ServiceNow, HubSpot) with built-in Secret Manager OAuth lifecycle management and normalized entity operations."
   },
   {
     "id": "d3-mcp-009",
@@ -258,7 +266,8 @@
     "refs": [
       "https://cloud.google.com/sql/docs/postgres/manage-connections",
       "https://cloud.google.com/sql/docs/postgres/connection-pooling"
-    ]
+    ],
+    "hint": "Core Rule (Connection Pooling in Cloud SQL MCP Servers): Opening and closing a database connection per MCP tool call exhausts TCP ports, CPU (from repeated TLS/IAM auth handshakes), and PostgreSQL `max_connections`."
   },
   {
     "id": "d3-mcp-010",
@@ -287,7 +296,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/tools#error-handling",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling"
-    ]
+    ],
+    "hint": "Core Rule (MCP JSON-RPC 2.0 Error Handling & Self-Correction Feedback): In the Model Context Protocol, tool execution failures that the LLM can recover from (such as SQL syntax errors, invalid parameter values, or missing column names) should return a structured `CallToolResult` with `isError: true` and descriptive diagnostic text in `content`."
   },
   {
     "id": "d3-mcp-011",
@@ -316,7 +326,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/security",
       "https://cloud.google.com/iam/docs/workload-identity-federation"
-    ]
+    ],
+    "hint": "Core Rule (Per-User Identity Propagation (On-Behalf-Of OAuth) in 3P MCP Servers): Zero-trust enterprise agents must never elevate a user's privileges via confused deputy attacks (where a low-privilege user queries a high-privilege shared service account)."
   },
   {
     "id": "d3-mcp-012",
@@ -345,7 +356,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/resources#subscriptions",
       "https://modelcontextprotocol.io/specification/2024-11-05/server/resources"
-    ]
+    ],
+    "hint": "Core Rule (MCP Resource Subscriptions & Real-Time Notifications): The Model Context Protocol natively supports reactive resource updates via Resource Subscriptions (`capabilities.resources.subscribe = true`)."
   },
   {
     "id": "d3-mcp-013",
@@ -374,7 +386,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/parameterized-queries",
       "https://modelcontextprotocol.io/docs/concepts/security"
-    ]
+    ],
+    "hint": "Core Rule (Securing MCP Servers Against SQL Injection via Parameterized Queries): LLMs frequently extract strings verbatim from untrusted user inputs, emails, or web pages when populating tool arguments."
   },
   {
     "id": "d3-mcp-014",
@@ -403,7 +416,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/paging-results",
       "https://modelcontextprotocol.io/docs/concepts/tools"
-    ]
+    ],
+    "hint": "Core Rule (BigQuery MCP Server Result Set Truncation & Pagination): MCP tool responses must be bounded to protect the host agent's memory and LLM context window."
   },
   {
     "id": "d3-mcp-015",
@@ -432,7 +446,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/tools#tool-annotations",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop Approval for Mutating MCP Tools): The Model Context Protocol tool specification supports tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`)."
   },
   {
     "id": "d3-mcp-016",
@@ -461,7 +476,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/setup/python-ot",
       "https://modelcontextprotocol.io/specification/2024-11-05/basic/utilities/cancellation#meta"
-    ]
+    ],
+    "hint": "Core Rule (MCP Server Observability & Cloud Trace Context Propagation): Propagating W3C Trace Context (`traceparent`) across MCP JSON-RPC calls (via HTTP headers on SSE/HTTP transports or the `_meta` object in JSON-RPC params) allows OpenTelemetry to stitch together a single unified waterfall trace in Google Cloud Trace spanning the Agent Host -> LLM invocation -> MCP Client -> Cloud Run MCP Server -> Spanner/BigQuery execution."
   },
   {
     "id": "d3-mcp-017",
@@ -490,7 +506,8 @@
     "refs": [
       "https://modelcontextprotocol.io/specification/2024-11-05/server/tools#list-changed-notification",
       "https://modelcontextprotocol.io/docs/concepts/tools"
-    ]
+    ],
+    "hint": "Core Rule (MCP Dynamic Tool Registration & `notifications/tools/list_changed`): When an MCP server advertises `capabilities.tools.listChanged: true`, it can dynamically emit `notifications/tools/list_changed` whenever tools are added, modified, or removed at runtime."
   },
   {
     "id": "d3-mcp-018",
@@ -519,7 +536,8 @@
     "refs": [
       "https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http",
       "https://cloud.google.com/run/docs/configuring/session-affinity"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Stateless vs Stateful MCP Servers on Cloud Run): Horizontally scaled cloud deployments require either the modern MCP Streamable HTTP transport (designed for serverless/stateless cloud environments where POST requests return direct responses or SSE streams on the same HTTP exchange) or externalizing session pub/sub routing to Memorystore for Redis paired with Cloud Run session affinity so any instance can route messages to the active stream."
   },
   {
     "id": "d3-mcp-019",
@@ -548,7 +566,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/vpc-direct-vpc",
       "https://cloud.google.com/sql/docs/postgres/configure-private-ip"
-    ]
+    ],
+    "hint": "Core Rule (VPC Service Controls & Private Connectivity for Cloud SQL/Spanner MCP Servers): Direct VPC Egress allows Cloud Run services to send traffic directly into a VPC network over internal RFC 1918 IP addresses without requiring a public IP on the Cloud SQL instance, satisfying HIPAA and VPC Service Controls isolation requirements with low latency."
   },
   {
     "id": "d3-mcp-020",
@@ -577,7 +596,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/sampling",
       "https://modelcontextprotocol.io/specification/2024-11-05/client/sampling"
-    ]
+    ],
+    "hint": "Core Rule (MCP Sampling Primitive (`sampling/createMessage`)): MCP Sampling (`sampling/createMessage`) allows an MCP Server to request an LLM completion from the MCP Client/Host in a reverse-RPC flow."
   },
   {
     "id": "d3-mcp-021",
@@ -606,7 +626,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/information-schema-columns",
       "https://cloud.google.com/bigquery/docs/column-level-security-intro"
-    ]
+    ],
+    "hint": "Core Rule (BigQuery MCP Server Information Schema Metadata Filtering): BigQuery `INFORMATION_SCHEMA` views (`COLUMNS`, `COLUMN_FIELD_PATHS`, `TABLES`, `PARTITIONS`) and Dataplex/Data Catalog APIs provide complete structural metadata, column descriptions, and policy tag assignments at zero table-scan cost and sub-second latency."
   },
   {
     "id": "d3-mcp-022",
@@ -635,7 +656,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/roots",
       "https://modelcontextprotocol.io/specification/2024-11-05/client/roots"
-    ]
+    ],
+    "hint": "Core Rule (MCP Roots Capability (`roots/list`) for Workspace Sandboxing): In MCP, Roots (`roots/list` and `notifications/roots/list_changed`) define the workspace boundaries (filesystem paths, Cloud Storage bucket prefixes, or repository URLs) that the client exposes to the server."
   },
   {
     "id": "d3-mcp-023",
@@ -666,7 +688,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/tools#tool-definition-structure",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#best-practices"
-    ]
+    ],
+    "hint": "Core Rule (MCP Tool Input Schema Validation & JSON Schema Descriptions): LLMs rely heavily on the JSON Schema `description`, property names, `enum` values, `pattern` regular expressions, and numeric bounds (`minimum`/`maximum`) provided in the MCP `tools/list` response to construct valid tool call arguments, while the MCP server uses the same JSON Schema to deterministically validate inputs before execution."
   },
   {
     "id": "d3-mcp-024",
@@ -695,7 +718,8 @@
     "refs": [
       "https://modelcontextprotocol.io/specification/2024-11-05/basic/utilities/progress",
       "https://cloud.google.com/bigquery/docs/managing-jobs"
-    ]
+    ],
+    "hint": "Core Rule (Handling Long-Running Operations (LROs) in MCP Servers): Long-Running Operations (LROs) exceeding standard RPC timeouts should be decoupled into asynchronous initiation (returning a `job_id` immediately) paired with MCP progress notifications (`notifications/progress` using the request `progressToken`) and status polling/subscription tools (`get_job_status`)."
   },
   {
     "id": "d3-mcp-025",
@@ -724,6 +748,7 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/secrets",
       "https://cloud.google.com/secret-manager/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Secret Management for 3P SaaS MCP Servers on Cloud Run): Google Cloud Secret Manager natively integrates with Cloud Run."
   }
 ]

@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/workflows",
       "https://cloud.google.com/architecture/ai-ml/sequential-agent-pipelines"
-    ]
+    ],
+    "hint": "Core Rule (Sequential Multi-Stage Content Pipeline in ADK): A multi-stage SequentialAgent pipeline in ADK ensures strict causal ordering: the Research Agent gathers verified wire and archival evidence, the Drafting Agent composes the story, and the Fact-Check & Rights Verification Agent enforces copyright and factual policy gates before any downstream localization occurs."
   },
   {
     "id": "cs-med-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/mcp-servers",
       "https://cloud.google.com/agent-builder/docs/auth-manager"
-    ]
+    ],
+    "hint": "Core Rule (Standardized Third-Party SaaS Integration via MCP & Auth Manager): Model Context Protocol (MCP) servers provide a uniform, schema-validated tool abstraction layer for third-party SaaS platforms (CMS, Slack, DAM, Rights APIs)."
   },
   {
     "id": "cs-med-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/video-understanding",
       "https://cloud.google.com/generative-ai-app-builder/docs/grounding-overview"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal Ingestion & Grounded Journalistic RAG): Gemini 1.5 Pro natively ingests multimodal assets (4K video frames, audio tracks, and text) directly from Cloud Storage."
   },
   {
     "id": "cs-med-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/iam/docs/agent-identity"
-    ]
+    ],
+    "hint": "Core Rule (Principal Access Boundary (PAB) for Embargoed Syndicate Assets): Principal Access Boundary (PAB) policies combined with Google Cloud Agent Identity enforce cryptographic isolation between syndicate divisions."
   },
   {
     "id": "cs-med-005",
@@ -144,7 +148,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-autorater",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
-    ]
+    ],
+    "hint": "Core Rule (Continuous Pre-CMS Production Evaluation & Autoraters): MediaPulse's zero-defect requirement necessitates a hybrid pre-staging evaluation gate combining: (1) custom LLM autoraters within ADK evaluation pipelines to score semantic groundedness and brand tone alignment against verified source notes, and (2) deterministic MCP rights lookup against the DAM licensing database to verify copyright clearance for all target geographic territories."
   },
   {
     "id": "cs-med-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/human-in-the-loop",
       "https://cloud.google.com/agent-builder/docs/governance-policies"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Governance for Investigative Journalism): By combining metadata-driven policy classification in Agent Registry with ADK stateful Human-in-the-Loop (HITL) interrupt checkpoints and interactive Slack/CMS MCP notifications, MediaPulse achieves sub-10-minute autonomous publishing for routine news while guaranteeing strict human editorial control over high-sensitivity investigative stories."
   },
   {
     "id": "cs-med-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agent-gateway-monitoring",
       "https://cloud.google.com/bigquery/docs/cost-attribution"
-    ]
+    ],
+    "hint": "Core Rule (Token Cost Attribution & Editorial ROI Tracking): Agent Gateway intercepts all agent and LLM invocations, allowing enforcement of custom organizational headers (`brand_id`, `region_code`, `language_locale`)."
   },
   {
     "id": "cs-med-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/model-armor/docs/overview",
       "https://cloud.google.com/sensitive-data-protection/docs/deidentification"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Guardrails for Copyright & Defamation Prevention): Model Armor paired with Sensitive Data Protection (Cloud DLP) provides enterprise-grade bidirectional content governance."
   },
   {
     "id": "cs-med-009",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/overview",
       "https://cloud.google.com/agent-builder/docs/antigravity"
-    ]
+    ],
+    "hint": "Core Rule (Developing Custom CMS & DAM Extensions with Antigravity): Antigravity running inside secure Cloud Workstations provides developers with an AI-assisted coding environment that has governed access to internal OpenAPI specifications and enterprise coding rules, enabling rapid generation, testing, and packaging of standardized MCP servers without exposing proprietary schemas externally."
   },
   {
     "id": "cs-med-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agent-designer",
       "https://cloud.google.com/generative-ai-app-builder/docs/enterprise-search"
-    ]
+    ],
+    "hint": "Core Rule (Low-Code Editorial Assistant in Gemini Enterprise): Gemini Enterprise Agent Designer enables low-code configuration of enterprise conversational agents grounded in structured and unstructured company data via Agent Search connectors (Firestore, BigQuery, DAM APIs)."
   },
   {
     "id": "cs-med-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/audio-understanding",
       "https://cloud.google.com/text-to-speech/docs/chirp-voices"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal Audio/Video Localization Pipeline): Achieving culturally accurate, lip-synced audio/video dubbing across 28 languages in under 10 minutes requires parallelizing multimodal AI capabilities."
   },
   {
     "id": "cs-med-012",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agent-gateway-monitoring",
       "https://cloud.google.com/trace/docs/setup/opentelemetry"
-    ]
+    ],
+    "hint": "Core Rule (Monitoring Third-Party MCP Latency & Agent Drift): Google Cloud Observability (Cloud Trace and Cloud Monitoring) integrated with Agent Gateway and OpenTelemetry provides granular visibility into both external dependencies (MCP tool call latency and error rates) and internal agent behavior (reasoning loop counts, drift in autorater groundedness scores), enabling precise root-cause isolation."
   },
   {
     "id": "cs-med-013",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/hybrid-search",
       "https://cloud.google.com/generative-ai-app-builder/docs/ranking"
-    ]
+    ],
+    "hint": "Core Rule (Hybrid Search & Reranking in Agent Search for Archival Verification): Journalistic fact-checking requires both conceptual understanding (dense embeddings) and exact string matching for proper names, dates, and legal citations (sparse lexical BM25)."
   },
   {
     "id": "cs-med-014",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agent-registry-governance",
       "https://cloud.google.com/model-armor/docs/policy-enforcement"
-    ]
+    ],
+    "hint": "Core Rule (Enforcing Territorial Syndication Rights via Agent Registry Policies): Zero copyright infringement requires deterministic policy enforcement outside the probabilistic LLM loop."
   },
   {
     "id": "cs-med-015",
@@ -434,7 +448,8 @@
     "refs": [
       "https://cloud.google.com/firestore/docs/overview",
       "https://cloud.google.com/firestore/docs/solutions/bigquery-export"
-    ]
+    ],
+    "hint": "Core Rule (Managing Shared State & Asset Metadata in Firestore and BigQuery): MediaPulse's existing technical environment leverages Firestore for real-time operational metadata and BigQuery for analytical warehousing."
   },
   {
     "id": "cs-med-016",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agents-cli",
       "https://cloud.google.com/build/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Automating Agent Governance & Deployment with Agents CLI): Agents CLI in Agent Platform provides declarative command-line automation designed for CI/CD integration."
   },
   {
     "id": "cs-med-017",
@@ -492,7 +508,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset-best-practices",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
-    ]
+    ],
+    "hint": "Core Rule (Designing Golden Datasets for Multi-Language Fact-Checking): High-validity agent evaluation requires a representative, stratified golden dataset covering all target domains and failure modes."
   },
   {
     "id": "cs-med-018",
@@ -521,7 +538,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agent-runtime",
       "https://cloud.google.com/run/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent Runtime vs. Cloud Run Selection for Media Processing): Managed Agent Runtime (formerly Agent Engine) is purpose-built for hosting stateful ADK agent graphs with native integration for Agent Platform Memory Bank, trace instrumentation, and A2A routing."
   },
   {
     "id": "cs-med-019",
@@ -550,7 +568,8 @@
     "refs": [
       "https://cloud.google.com/model-armor/docs/prompt-injection-protection",
       "https://cloud.google.com/architecture/ai-ml/securing-rag-and-agent-pipelines"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Indirect Prompt Injection from Breaking News Wires): Defense-in-depth against indirect prompt injection in media ingestion requires: (1) Model Armor input scanning to detect adversarial instruction overrides; (2) strict structural separation between trusted system instructions and untrusted external wire data; and (3) multi-source verification rules in the Fact-Check Agent requiring independent corroboration from verified Agent Search archives before publishing market-moving claims."
   },
   {
     "id": "cs-med-020",
@@ -579,7 +598,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/cx-agent-studio",
       "https://cloud.google.com/dialogflow/cx/docs/concept/flow"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio Workflow for Subscriber & Syndication Support): CX Agent Studio provides low-code state-based workflow management (Pages, Transition Routes, Event Handlers) tailored for customer and partner experience."
   },
   {
     "id": "cs-med-021",
@@ -608,7 +628,8 @@
     "refs": [
       "https://cloud.google.com/pubsub/docs/handling-failures",
       "https://cloud.google.com/architecture/ai-ml/resilient-agent-workflows"
-    ]
+    ],
+    "hint": "Core Rule (Handling Agent Retry & Dead-Letter Queues for Third-Party CMS Outages): Decoupling expensive upstream LLM generation/localization from downstream third-party API delivery is a core resilience pattern."
   },
   {
     "id": "cs-med-022",
@@ -637,7 +658,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-autorater"
-    ]
+    ],
+    "hint": "Core Rule (Diagnosing Hallucination Spikes in Localized Podcasts): Creative conversational formats (like dual-host podcasts) are prone to 'banter drift' where high temperature or open-ended prompts encourage the model to embellish facts."
   },
   {
     "id": "cs-med-023",
@@ -666,7 +688,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods",
       "https://cloud.google.com/agent-builder/docs/code-execution-sandboxes"
-    ]
+    ],
+    "hint": "Core Rule (Sandboxed Execution for Dynamic Media Analysis Scripts): Whenever an agent dynamically generates and executes code (such as Python data analysis scripts on untrusted/leaked datasets), strict kernel and network isolation is mandatory."
   },
   {
     "id": "cs-med-024",
@@ -695,7 +718,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/负责任的-ai/synthid",
       "https://c2pa.org/specifications/specifications/2.1/specs/C2PA_Specification.html"
-    ]
+    ],
+    "hint": "Core Rule (Watermarking & Provenance for AI-Generated Media Assets): Google Cloud Vertex AI supports SynthID (imperceptible watermarking resilient to compression and cropping for audio, video, image, and text) alongside C2PA digital provenance manifests."
   },
   {
     "id": "cs-med-025",
@@ -726,6 +750,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview"
-    ]
+    ],
+    "hint": "Core Rule (Optimizing Context Windows for Long-Form Investigative Archives): Combining Vertex AI Context Caching with targeted RAG retrieval is the gold standard for long-context media workflows."
   }
 ]

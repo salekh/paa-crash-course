@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview",
       "https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Token Bucket Rate-Limiting per Authenticated Principal): An AI-aware Agent Gateway (such as Apigee AI Gateway) inspects incoming JWT identity claims (`sub`) and parses LLM response token usage counters (`total_token_count`), enforcing distributed Token Bucket quotas per authenticated principal without requiring thousands of separate cloud projects."
   },
   {
     "id": "d5-gtw-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/workflows/docs/tutorials/callbacks-human-in-the-loop",
       "https://cloud.google.com/kms/docs/create-validate-signatures"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Cryptographic Parameter Binding): Cryptographic parameter binding (signing the canonical SHA-256 digest of the exact tool arguments within the VP's approval JWS) guarantees zero Time-of-Check to Time-of-Use (TOCTOU) tampering."
   },
   {
     "id": "d5-gtw-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/secure-web-proxy/docs/tls-inspection-overview",
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Egress Inspection & MCP Tool Proxy Governance): Centralized egress governance combines network-layer containment (private VPC with no public IPs and blocked direct egress) with an explicit Layer-7 proxy (Secure Web Proxy / Agent Gateway) performing TLS inspection, DLP payload scanning, and fine-grained identity-aware FQDN/path authorization."
   },
   {
     "id": "d5-gtw-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/identity-platform/docs/step-up-authentication",
       "https://datatracker.ietf.org/doc/html/rfc9470"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Step-Up Authentication via WebAuthn/FIDO2): Enforcing step-up authentication at the Agent Gateway using OAuth 2.0 `acr_values` and verifying hardware key authentication method references (`amr: [\"hwk\"]`) ensures cryptographic proof that a human physically tapped a FIDO2 security key to authorize the specific production mutation."
   },
   {
     "id": "d5-gtw-005",
@@ -144,7 +148,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview",
       "https://cloud.google.com/security-command-center/docs/model-armor-concepts"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Circuit Breakers & Automated Anomaly Containment): Resilient AI gateway architecture requires (1) target-level Circuit Breakers to isolate degraded downstream dependencies and prevent cascading thread starvation, and (2) session-level security velocity tracking to automatically quarantine and revoke principals exhibiting active attack patterns."
   },
   {
     "id": "d5-gtw-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/workflows/docs/tutorials/callbacks-human-in-the-loop",
       "https://cloud.google.com/eventarc/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Escalation & SLA Governance): Cloud Workflows / Agent Engine callback workflows natively support long-running durable state persistence with non-blocking timers and branching escalation logic (e.g., triggering PagerDuty at 90 minutes and queue escalation at 120 minutes) without holding open fragile network connections."
   },
   {
     "id": "d5-gtw-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/reference/policies/assign-message-policy",
       "https://cloud.google.com/architecture/zero-trust-security-model"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Protocol Translation & A2A Header Sanitization): Zero-trust API gateway security mandates stripping (sanitizing) all internal privilege, tenant-routing, and identity headers at the untrusted ingress boundary before authentication, ensuring that downstream internal services only ever receive headers freshly minted and signed by the gateway itself."
   },
   {
     "id": "d5-gtw-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
       "https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.deidentifyTemplates#charactermaskconfig"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Redaction of Reviewer Interfaces): Enforcing server-side role-based de-identification via Sensitive Data Protection (Cloud DLP) before sending data to the HITL review frontend ensures raw PANs and SSNs never reach the analyst's browser or network inspector."
   },
   {
     "id": "d5-gtw-009",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Semantic Cache Poisoning & Tenant Isolation): Preventing semantic cache poisoning requires strict pre-cache validation: canonicalizing inputs (stripping invisible Unicode), scanning both the prompt and generated completion via Model Armor (blocking URLs/injections), and verifying high grounding confidence before committing any key-value pair to the shared cache."
   },
   {
     "id": "d5-gtw-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/service-directory/docs/overview",
       "https://cloud.google.com/apigee/docs/api-hub/overview"
-    ]
+    ],
+    "hint": "Core Rule (Governing A2A Multi-Agent Discovery & Service Registry Security): Securing dynamic multi-agent discovery requires registry-level IAM write governance combined with cryptographic verification of Agent Cards (`agent.json` signed by a trusted enterprise KMS key) and runtime mTLS/OIDC identity verification of the endpoint, preventing rogue agent spoofing."
   },
   {
     "id": "d5-gtw-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/logging/docs/audit",
       "https://cloud.google.com/workflows/docs/tutorials/callbacks-human-in-the-loop"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Auditability & Non-Repudiation): Regulatory non-repudiation requires proving exactly WHO approved WHAT and WHEN with cryptographic certainty: capturing the authenticated identity (`sub`), MFA assurance (`amr`), exact parameter hash, timestamp, and signature in immutable Cloud Audit Logs."
   },
   {
     "id": "d5-gtw-012",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview",
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Shadow Traffic & Blue/Green Guardrail Deployment): Asynchronous shadow traffic mirroring at the Agent Gateway evaluates candidate security policies (Green) against 100% of real-world production payloads with zero latency or blocking impact on live users (protected by the active Blue policy), providing exact empirical false-positive metrics before cutover."
   },
   {
     "id": "d5-gtw-013",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/armor/docs/security-policy-overview",
       "https://cloud.google.com/load-balancing/docs/https#timeouts_and_retries"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Defense Against Slowloris & Streaming Connection Exhaustion): Defending streaming AI endpoints against slow-read/slow-write (Slowloris) attacks requires enforcing aggressive header/body ingestion timeouts (terminating connections that trickle prompt bytes slowly) and per-client concurrent stream caps at Cloud Armor / Load Balancer edge."
   },
   {
     "id": "d5-gtw-014",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/conditions-overview",
       "https://cloud.google.com/iam/docs/privileged-access-manager-overview"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Delegation & Vacation Coverage Governance): Time-bound IAM Conditions (`request.time < timestamp(...)`) or Privileged Access Manager (PAM) grants enforce automatic, deterministic expiration of delegated authority at the exact scheduled timestamp without sharing credentials or relying on manual administrative cleanup."
   },
   {
     "id": "d5-gtw-015",
@@ -436,7 +450,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview",
       "https://cloud.google.com/sensitive-data-protection/docs/inspecting-text"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Dynamic Cost-Based Routing & Model Tiering): Content-aware dynamic routing at the Agent Gateway combines pre-routing payload classification (using Cloud DLP / Model Armor to tag PII sensitivity and token count) with conditional target routing (directing Restricted PII strictly to CMEK/VPC-SC hardened endpoints while routing simple benign tasks to Flash)."
   },
   {
     "id": "d5-gtw-016",
@@ -465,7 +480,8 @@
     "refs": [
       "https://grpc.io/docs/guides/auth/",
       "https://datatracker.ietf.org/doc/html/rfc8693"
-    ]
+    ],
+    "hint": "Core Rule (Securing Agent-to-Agent (A2A) Streaming Event Channels): In long-lived multiplexed HTTP/2 or gRPC streams serving multiple end-user sessions, connection-level authentication (mTLS) only proves the peer service identity (`Order-Agent`), not the authority of the specific human user whose transaction is inside frame #4,912."
   },
   {
     "id": "d5-gtw-017",
@@ -494,7 +510,8 @@
     "refs": [
       "https://cloud.google.com/workflows/docs/tutorials/saga-pattern",
       "https://cloud.google.com/workflows/docs/tutorials/callbacks-human-in-the-loop"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) cryptographic Rejection & Compensating Transactions): Distributed state mutations across long-running HITL pauses require the Saga pattern: explicitly wiring compensating rollback transactions (`release_inventory_reservation`) to both rejection and timeout branches in a durable orchestrator (Cloud Workflows / Agent Engine) ensures eventual consistency without relying on probabilistic LLM memory."
   },
   {
     "id": "d5-gtw-018",
@@ -523,7 +540,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/apigee/docs/api-hub/overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Protection Against Tool Schema Poisoning & Prompt Injection in OpenAPI Specs): Tool metadata (`description` fields in OpenAPI specs or MCP manifests) forms part of the privileged system prompt context."
   },
   {
     "id": "d5-gtw-019",
@@ -552,7 +570,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/GenerateContentResponse#UsageMetadata",
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Egress Token Rate-Limiting & FinOps Chargeback Headers): Vertex AI responses include exact `usageMetadata` token counts (`promptTokenCount`, `candidatesTokenCount`)."
   },
   {
     "id": "d5-gtw-020",
@@ -581,7 +600,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/authenticating/service-to-service",
       "https://cloud.google.com/workflows/docs/tutorials/callbacks-human-in-the-loop"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Approval Spoofing Prevention via Mutual OIDC): Zero-trust internal callback security requires verifying both the calling service identity (via a Google-signed OIDC ID token from `sa-slack-approver` enforced by IAM) and the human approver's cryptographic authorization signature inside the payload, preventing any other compromised workload on the VPC from spoofing approvals."
   },
   {
     "id": "d5-gtw-021",
@@ -610,7 +630,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://owasp.org/www-community/attacks/xss/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Response Sanitization & Preventing Markdown XSS): Mitigating Stored/Reflected XSS triggered via LLM outputs requires both gateway-level output sanitization (blocking `javascript:`/`data:` schemes and script tags via Model Armor / gateway policies) and client-side defense-in-depth (DOMPurify sanitization and strict Content Security Policy headers blocking unauthorized inline script execution)."
   },
   {
     "id": "d5-gtw-022",
@@ -639,7 +660,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/quotas"
-    ]
+    ],
+    "hint": "Core Rule (Governing Multi-Agent Fan-Out Concurrency at the Agent Gateway): Propagating a `root_session_id` across A2A fan-out trees allows the Agent Gateway to enforce hierarchical concurrency governance: capping the maximum simultaneous in-flight child requests spawned by any single root user session (e.g., max 10 concurrent with token-bucket queueing), preventing a single fan-out query from starving other users."
   },
   {
     "id": "d5-gtw-023",
@@ -668,7 +690,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/separation-of-duties",
       "https://cloud.google.com/workflows/docs/tutorials/callbacks-human-in-the-loop"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Separation of Duties for Self-Initiated Requests): Separation of Duties (SoD) in HITL workflows requires programmatically enforcing `approver_jwt.sub != session.initiator_sub` at the deterministic callback verification gateway, ensuring that even if the initiator holds the `firewall-approvers` role, a second independent peer must sign off."
   },
   {
     "id": "d5-gtw-024",
@@ -699,7 +722,8 @@
     "refs": [
       "https://cloud.google.com/secure-web-proxy/docs/tls-inspection-overview",
       "https://cloud.google.com/certificate-authority-service/docs"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway TLS Inspection & Certificate Pinning for High-Security Tools): Secure enterprise TLS inspection requires (1) configuring Secure Web Proxy with a managed Private CA in Certificate Authority Service (CAS) to sign dynamic interception certificates, and (2) adding that Private CA's public root certificate to the container trust store (`REQUESTS_CA_BUNDLE`), preserving full cryptographic TLS verification while enabling inline DLP scanning."
   },
   {
     "id": "d5-gtw-025",
@@ -728,6 +752,7 @@
     "refs": [
       "https://cloud.google.com/logging/docs/export/configure_export_v2",
       "https://cloud.google.com/bigquery/docs/bi-engine-intro"
-    ]
+    ],
+    "hint": "Core Rule (Unified Governance Dashboard & Real-Time Agent Security Telemetry): Streaming structured Cloud Logging sinks from Agent Gateway, Model Armor, DLP, and Cloud Workflows into a time-partitioned BigQuery dataset provides a zero-ops, petabyte-scale unified telemetry warehouse that integrates natively with Looker Studio and BI Engine for real-time CISO dashboards."
   }
 ]

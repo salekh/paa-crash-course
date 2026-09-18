@@ -26,7 +26,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (ADK Evaluation & Trajectory Testing): The Agent Development Kit (ADK) provides built-in local and CI trajectory evaluation via `AgentEvaluator.evaluate()` and `adk eval`."
   },
   {
     "id": "d4-evl-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics"
-    ]
+    ],
+    "hint": "Core Rule (ADK Evaluation & Trajectory Testing): ADK's `tool_trajectory_avg_score` supports three trajectory comparison modes: `EXACT` (identical sequence and count), `IN_ORDER` (expected tools appear in order, allowing extra intermediate tools), and `ANY_ORDER` (all expected tool calls are present with matching arguments regardless of ordering)."
   },
   {
     "id": "d4-evl-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Gen AI Evaluation Service vs Local ADK Eval): A best-practice agentic evaluation architecture separates fast, deterministic CI checks from large-scale semantic batch evaluation."
   },
   {
     "id": "d4-evl-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Trajectory Precision and Recall Metrics): In trajectory evaluation, Tool Recall = (Number of correctly invoked golden tools) / (Total golden tools required) = 3 / 3 = 100%."
   },
   {
     "id": "d4-evl-005",
@@ -142,7 +146,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://google.github.io/adk-docs/get-started/quickstart/"
-    ]
+    ],
+    "hint": "Core Rule (ADK EvalSet Schema & Authoring): The ADK interactive developer UI (`adk web`) includes native support for inspecting live agent traces and exporting/saving any session directly into an ADK `EvalSet` JSON file (`.evalset.json`)."
   },
   {
     "id": "d4-evl-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
-    ]
+    ],
+    "hint": "Core Rule (Gen AI Evaluation Service Metrics): In Vertex AI Gen AI Evaluation Service, `GROUNDEDNESS` uses an LLM-as-a-judge autorater to verify whether every claim in the agent's response is strictly supported by the provided retrieval context, directly detecting invented indemnity caps (hallucinations)."
   },
   {
     "id": "d4-evl-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/side-by-side-eval"
-    ]
+    ],
+    "hint": "Core Rule (Pairwise vs Pointwise Evaluation): When two models tie or cluster closely on coarse pointwise Likert scales (e.g., 1-5), `PairwiseMetric` evaluation provides higher discriminative power by asking the LLM-as-a-judge autorater to directly compare Model A vs Model B against specific persuasion/empathy rubrics."
   },
   {
     "id": "d4-evl-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://google.github.io/adk-docs/tools/"
-    ]
+    ],
+    "hint": "Core Rule (Tool Argument Validation in ADK Eval): In ADK `EvalSet` files, each entry under `intermediate_data.tool_uses` specifies both the `name` of the tool and the `args` dictionary (e.g., `{\"origin\": \"SFO\", \"destination\": \"JFK\", \"departure_date\": \"2026-10-15\", \"cabin_class\": \"ECONOMY\"}`)."
   },
   {
     "id": "d4-evl-009",
@@ -260,7 +268,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/build/docs/configuring-builds/create-basic-configuration"
-    ]
+    ],
+    "hint": "Core Rule (ADK Eval CLI & Configuration Thresholds): ADK evaluation supports passing a `test_config.json` file (via `--config_file_path` in `adk eval` or as a parameter to `AgentEvaluator.evaluate()`)."
   },
   {
     "id": "d4-evl-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/docs/experiments/intro-vertex-ai-experiments"
-    ]
+    ],
+    "hint": "Core Rule (Experiment Tracking & Evaluation Lineage): The Vertex AI Gen AI Evaluation Service integrates directly with Vertex AI Experiments and Vertex AI Metadata."
   },
   {
     "id": "d4-evl-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics"
-    ]
+    ],
+    "hint": "Core Rule (ADK Evaluation & Trajectory Testing): In ADK evaluation, the `IN_ORDER` match strategy verifies that all expected tools defined in the golden trajectory appear in the actual trajectory in the exact relative sequence specified (i.e., `search_sec_filings` precedes `summarize_financial_metrics`), while permitting additional intermediate or helper tool calls (like `get_company_ticker`) to occur without causing a test failure."
   },
   {
     "id": "d4-evl-012",
@@ -347,7 +358,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://google.github.io/adk-docs/tools/"
-    ]
+    ],
+    "hint": "Core Rule (Mocking Tools in CI Evaluation): When evaluating agents with side-effecting or state-mutating tools in CI/CD, best practice is to mock or stub the underlying tool implementations (or supply deterministic `tool_outputs` in the evaluation harness)."
   },
   {
     "id": "d4-evl-013",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Semantic Response Evaluation vs Lexical Overlap): N-gram overlap metrics like ROUGE-L and BLEU penalize semantically equivalent answers that use different vocabulary or syntactic structures (e.g., '61-day window centered on the sale date' vs '30 days before or after')."
   },
   {
     "id": "d4-evl-014",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
-    ]
+    ],
+    "hint": "Core Rule (Gen AI Evaluation Service Dataset Format): Each metric in the Vertex AI Gen AI Evaluation Service requires specific dataset columns: `GROUNDEDNESS` checks whether claims in the `response` are supported by the retrieved `context`, while reference-based metrics like `RESPONSE_RECALL` or `ROUGE` compare the `response` against the ground-truth `reference` answer given the user `prompt`."
   },
   {
     "id": "d4-evl-015",
@@ -434,7 +448,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://google.github.io/adk-docs/sessions/"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Multi-Turn Agent Conversations): ADK's `EvalSet` schema natively supports full multi-turn conversations (`conversation` list of turns within an `EvalCase`)."
   },
   {
     "id": "d4-evl-016",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/docs/pipelines/introduction"
-    ]
+    ],
+    "hint": "Core Rule (Gen AI Evaluation Service Batch Execution): For large-scale batch evaluation (thousands of rows), the Vertex AI Gen AI Evaluation Service supports passing a BigQuery table URI (`bq://project.dataset.table`) or Cloud Storage JSONL URI directly to `EvalTask` and orchestrating execution via Vertex AI Pipelines."
   },
   {
     "id": "d4-evl-017",
@@ -492,7 +508,8 @@
     "refs": [
       "https://google.github.io/adk-docs/tools/",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Tool Selection Precision vs Tool Argument Accuracy): When Tool Name Match is high (0.98) but Trajectory Exact Match (which validates both tool name and argument dictionary equality) is low (0.42), the agent understands tool selection routing but struggles with entity extraction or argument formatting (e.g., passing `\"$5,000\"` as a string instead of integer `5000`, or omitting optional-looking required fields)."
   },
   {
     "id": "d4-evl-018",
@@ -521,7 +538,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://docs.pytest.org/en/stable/"
-    ]
+    ],
+    "hint": "Core Rule (Pytest Integration with ADK AgentEvaluator): ADK provides the `AgentEvaluator.evaluate()` class method in `google.adk.evaluation`."
   },
   {
     "id": "d4-evl-019",
@@ -550,7 +568,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Handling Non-Determinism in Agent Evaluation): Because LLM inference and multi-agent asynchronous tool execution can exhibit minor run-to-run variance even at low temperatures, ADK's `AgentEvaluator.evaluate()` supports the `num_runs` parameter."
   },
   {
     "id": "d4-evl-020",
@@ -581,7 +600,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Computation-Based vs Model-Based Metrics Trade-offs): Computation-based metrics compute mathematical formulas (set intersection, sequence matching, n-gram overlap) over strings and JSON structures locally, offering deterministic results, negligible latency, and zero token cost—making them ideal for fast CI checks."
   },
   {
     "id": "d4-evl-021",
@@ -610,7 +630,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Agent Latency and Token Efficiency): Comprehensive agent evaluation requires balancing quality metrics (accuracy, groundedness, trajectory match) against operational efficiency metrics: latency (p50/p95 time-to-first-token and end-to-end turn duration), token consumption (input, output, and cached tokens), and step count (number of subagent handoffs and LLM calls per user query)."
   },
   {
     "id": "d4-evl-022",
@@ -639,7 +660,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://google.github.io/adk-docs/get-started/quickstart/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Eval CLI Execution & Output Analysis): The ADK CLI provides the `adk eval <AGENT_PATH> <EVALSET_PATH>` command for executing trajectory and response evaluations directly from the command line."
   },
   {
     "id": "d4-evl-023",
@@ -668,7 +690,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://google.github.io/adk-docs/tools/"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Error Recovery Trajectories): Agentic workflows must be evaluated not only on happy-path trajectories but also on autonomous error recovery and fallback paths."
   },
   {
     "id": "d4-evl-024",
@@ -697,7 +720,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
-    ]
+    ],
+    "hint": "Core Rule (Gen AI Evaluation Service Custom Metrics Integration): The Vertex AI Gen AI Evaluation Service allows combining built-in LLM-as-a-judge metrics (`Metric.GROUNDEDNESS`, `Metric.SAFETY`) with custom computation-based Python functions (`CustomMetric`) in a single `EvalTask`."
   },
   {
     "id": "d4-evl-025",
@@ -726,6 +750,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Baseline Comparison & Regression Detection): Global mean evaluation metrics often mask critical localized regressions (Simpson's paradox / slice degradation), where an improvement on simple FAQ queries hides a severe drop in high-risk slices like billing disputes or cancellations."
   }
 ]

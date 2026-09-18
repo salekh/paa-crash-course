@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/a2a",
       "https://google.github.io/A2A/"
-    ]
+    ],
+    "hint": "Core Rule (Agent2Agent (A2A) Protocol for Institutional Custody Settlement): The Agent2Agent (A2A) protocol provides an open, standardized framework for multi-agent interoperability across organizational and framework boundaries."
   },
   {
     "id": "cs-fin-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://datatracker.ietf.org/doc/html/rfc8693"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Confused Deputy Attacks in Multi-Hop Subagent Delegation): FinServe Global's technical requirements mandate enforcing zero-trust identity propagation using Agent Identity, Auth Manager (OAuth 2.0), and Principal Access Boundary (PAB) policies so agents can never query client accounts outside the authenticated user scope."
   },
   {
     "id": "cs-fin-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/access-control",
       "https://cloud.google.com/generative-ai-app-builder/docs/enterprise-search-introduction"
-    ]
+    ],
+    "hint": "Core Rule (Connecting Enterprise Data with ACL Enforcement in Agent Search): When connecting enterprise proprietary data sources to Gemini Enterprise via Agent Search, configuring document-level ACLs ensures that identity-aware search enforces access permissions at retrieval time before any document chunks reach the LLM context window."
   },
   {
     "id": "cs-fin-029",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-custom-metrics",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Custom Financial Compliance Autoraters for SEC Reg BI): FinServe Global's technical requirements mandate evaluating all agent trajectories and tool execution accuracy continuously against a curated golden dataset using ADK `evalset` and custom financial compliance autoraters prior to production promotion."
   },
   {
     "id": "cs-fin-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/overview",
       "https://cloud.google.com/software-supply-chain-security/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Automated Vulnerability Remediation in Legacy GKE Java Code with Antigravity): Section 2 of the PAA exam covers using coding agents (Antigravity, Claude Code) to refactor source code and patch application-layer vulnerabilities."
   },
   {
     "id": "cs-fin-031",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank",
       "https://cloud.google.com/privacy/gdpr"
-    ]
+    ],
+    "hint": "Core Rule (GDPR Right-to-be-Forgotten (RTBF) in Agent Platform Memory Bank): FinServe Global must maintain 100% compliance with GDPR mandates."
   },
   {
     "id": "cs-fin-032",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/security-command-center/docs/model-armor-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/configure-safety-attributes"
-    ]
+    ],
+    "hint": "Core Rule (Configuring Model Armor Guardrails for High-Risk Derivative Queries): FinServe Global's technical requirements mandate deploying Model Armor inline to block prompt injection, jailbreaks, and policy violations across all prompts and outputs."
   },
   {
     "id": "cs-fin-033",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/finding-traces",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/monitor"
-    ]
+    ],
+    "hint": "Core Rule (Troubleshooting Tool Invocation Latency Spikes with Cloud Trace): Distributed tracing with Cloud Trace provides granular visibility into multi-agent workflows by recording hierarchical child spans for every gateway check, LLM generation call, subagent delegation, and MCP tool query."
   },
   {
     "id": "cs-fin-034",
@@ -258,7 +266,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/handler#event",
       "https://cloud.google.com/dialogflow/cx/docs/concept/webhook"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio Webhook Error Handling During Ledger Maintenance): In CX Agent Studio, state-based workflows support built-in event handlers for webhook failures (`webhook.error`)."
   },
   {
     "id": "cs-fin-035",
@@ -287,7 +296,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models",
       "https://cloud.google.com/architecture/ai-ml"
-    ]
+    ],
+    "hint": "Core Rule (Cost & Latency Optimization: SLM vs. Frontier LLM Selection): Section 3.1 of the PAA exam emphasizes selecting the appropriate language model (LLM vs."
   },
   {
     "id": "cs-fin-036",
@@ -316,7 +326,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview",
       "https://cloud.google.com/workstations/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Customizing Antigravity with Enterprise Financial Coding Rules): Section 2.2 of the PAA exam covers customizing coding agents for enterprise workflows by creating rules, extensions hooks, and plugins using Antigravity."
   },
   {
     "id": "cs-fin-037",
@@ -345,7 +356,8 @@
     "refs": [
       "https://cloud.google.com/dlp/docs/deidentify-sensitive-data",
       "https://cloud.google.com/dlp/docs/pseudonymization"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection De-identification for Evaluation & Analytics): Surrogate tokenization or format-preserving de-identification via Cloud Sensitive Data Protection replaces sensitive PII (e.g., `SSN: 123-45-6789` -> `SSN: [PERSON_SSN_1]`) consistently across multi-turn conversations while preserving non-sensitive financial figures (dollar amounts, tax brackets, dates)."
   },
   {
     "id": "cs-fin-038",
@@ -374,7 +386,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (ADK Graph Workflows for Conditional Margin & Compliance Branching): Section 3.3 of the PAA exam highlights selecting and coordinating multi-agent handoffs and graph workflows using ADK."
   },
   {
     "id": "cs-fin-039",
@@ -403,7 +416,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration",
       "https://cloud.google.com/monitoring/alerts"
-    ]
+    ],
+    "hint": "Core Rule (Progressive Canary Rollout of ADK Agents on Agent Runtime): Progressive delivery using traffic splitting (canary/blue-green deployments) at the Agent Gateway or managed runtime revision layer enables safe validation of new agent versions under real production traffic while limiting blast radius."
   },
   {
     "id": "cs-fin-040",
@@ -432,7 +446,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/parameter",
       "https://cloud.google.com/dialogflow/cx/docs/concept/playbook"
-    ]
+    ],
+    "hint": "Core Rule (Slot-Filling & Few-Shot Prompting in Low-Code Financial Planning): CX Agent Studio supports explicit parameter schema definitions, required parameter validation, and few-shot prompt examples within generative playbooks and state-based pages."
   },
   {
     "id": "cs-fin-041",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/vpc/docs/private-service-connect",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/service-mesh"
-    ]
+    ],
+    "hint": "Core Rule (Securing Agent-to-Tool API Calls to GKE Microservices): Securing agent-to-tool execution requires both network-layer isolation (Private Service Connect / Direct VPC Egress so traffic never hits the public internet) and application/identity-layer zero-trust authentication (OAuth 2.0 short-lived JWT tokens issued via Auth Manager / Agent Identity and verified at the GKE service mesh ingress)."
   },
   {
     "id": "cs-fin-042",
@@ -494,7 +510,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/stream-update",
       "https://cloud.google.com/vertex-ai/docs/vector-search/filtering"
-    ]
+    ],
+    "hint": "Core Rule (Optimizing Vector Search 1.0 for Real-Time Market Research): Vector Search 1.0 Streaming Indexes allow real-time ingestion of new embeddings within seconds, essential for live market news."
   },
   {
     "id": "cs-fin-043",
@@ -525,7 +542,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluate",
       "https://cloud.google.com/build/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Continuous Evaluation Pipelines with ADK Evalset & Trajectory Metrics): FinServe Global's technical requirements mandate evaluating all agent trajectories and tool execution accuracy continuously against a curated golden dataset using ADK `evalset` and custom financial compliance autoraters prior to production promotion."
   },
   {
     "id": "cs-fin-044",
@@ -556,7 +574,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/mcp"
-    ]
+    ],
+    "hint": "Core Rule (Secure Coding Agent Architecture with Antigravity & MCP Servers): Providing coding agents with a read-only MCP server connected to a synthetic/staging database allows accurate SQL schema discovery and query validation without any risk of mutating or leaking production client wealth ledgers."
   },
   {
     "id": "cs-fin-045",
@@ -585,7 +604,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/sessions",
       "https://cloud.google.com/memorystore/docs/redis/overview"
-    ]
+    ],
+    "hint": "Core Rule (Concurrency Control for Multi-Device Managed Sessions): In transactional financial applications, concurrent session mutations must be serialized to prevent double-execution or state corruption."
   },
   {
     "id": "cs-fin-046",
@@ -614,7 +634,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/bigquery/docs/row-level-security-intro"
-    ]
+    ],
+    "hint": "Core Rule (Principal Access Boundary (PAB) Scoping for Wealth Advisors): FinServe Global's technical requirements require enforcing zero-trust identity propagation using Agent Identity, Auth Manager (OAuth 2.0), and Principal Access Boundary (PAB) policies so principals can never query accounts outside their authorized scope."
   },
   {
     "id": "cs-fin-047",
@@ -643,7 +664,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output"
-    ]
+    ],
+    "hint": "Core Rule (Detecting Hallucinations Between Tool JSON Outputs & LLM Synthesis): In financial advisory, decimal shifts or numerical misquotations during final natural language synthesis are unacceptable."
   },
   {
     "id": "cs-fin-048",
@@ -672,7 +694,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/voice-agent",
       "https://cloud.google.com/dialogflow/cx/docs/concept/speech-settings"
-    ]
+    ],
+    "hint": "Core Rule (Configuring Multimodal Voice Interaction & Barge-In in CX Agent Studio): CX Agent Studio natively supports conversational voice features including user barge-in, streaming Speech-to-Text (STT), and expressive Text-to-Speech (TTS)."
   },
   {
     "id": "cs-fin-049",
@@ -701,7 +724,8 @@
     "refs": [
       "https://cloud.google.com/architecture/framework/reliability/graceful-degradation",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview"
-    ]
+    ],
+    "hint": "Core Rule (Circuit Breaker Pattern & Staleness Disclosure for Market Data Outages): High availability combined with regulatory precision requires graceful degradation with explicit provenance disclosure."
   },
   {
     "id": "cs-fin-050",
@@ -730,6 +754,7 @@
     "refs": [
       "https://cloud.google.com/logging/docs/audit",
       "https://cloud.google.com/storage/docs/bucket-lock"
-    ]
+    ],
+    "hint": "Core Rule (Cryptographic Auditability of HITL Approval Workflows): FinServe Global's business requirements mandate preventing unauthorized autonomous trade execution through mandatory human advisor approval thresholds and providing full cryptographic lineage and audit trails of every step."
   }
 ]

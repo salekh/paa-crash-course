@@ -26,7 +26,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
       "https://google.github.io/adk-docs/events/"
-    ]
+    ],
+    "hint": "Core Rule (Cyclic Graphs & Loop Termination Conditions): In Google ADK, a `LoopAgent` executes its sub-agents repeatedly until either `max_iterations` is reached or a sub-agent emits an event with `actions.escalate = True`."
   },
   {
     "id": "d3-orc-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/state/",
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
-    ]
+    ],
+    "hint": "Core Rule (Cyclic Graphs & Reflection Loops): In multi-iteration reflection loops, retaining the full raw transcript of all prior failed drafts and critiques causes quadratic token growth ($O(N^2)$ cumulative tokens across $N$ iterations) and confuses the LLM with stale, contradictory code snippets."
   },
   {
     "id": "d3-orc-028",
@@ -86,7 +88,8 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/",
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
-    ]
+    ],
+    "hint": "Core Rule (Loop Termination Conditions & Guardrails): Production cyclic agent graphs require multi-dimensional termination guardrails: (1) Quality convergence combined with an iteration ceiling (`score >= 95` OR `iteration >= max_iterations`), ensuring the loop stops as soon as quality is met or halts deterministically if convergence stalls; and (2) A financial/token circuit breaker monitored via model callbacks (`before_model_callback` / `after_model_callback`) inspecting `usage_metadata`, which prevents runaway token burn if individual iterations produce abnormally large contexts."
   },
   {
     "id": "d3-orc-029",
@@ -115,7 +118,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
       "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
-    ]
+    ],
+    "hint": "Core Rule (Cyclic Graphs & Reflection Loops): When a cyclic Generator-Critic loop encounters identical error states across consecutive iterations (zero semantic progress / stagnation), continuing with the exact same model and context is futile."
   },
   {
     "id": "d3-orc-030",
@@ -143,7 +147,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent State Scoping & Persistence): Google ADK's state management architecture supports explicit lifecycle scoping via key prefixes in `session.state`: (1) `temp:` variables exist only within the current single-turn `InvocationContext` and are automatically purged at the end of the invocation, making them ideal for inter-agent scratchpad data within a pipeline or loop; (2) unprefixed keys persist for the lifetime of the specific `Session`; (3) `user:` keys persist across all sessions belonging to that specific user ID; and (4) `app:` keys are shared globally across the entire application."
   },
   {
     "id": "d3-orc-031",
@@ -171,7 +176,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent State Scoping & Persistence): In Google ADK and Vertex AI Agent Engine Session Management, state keys prefixed with `user:` (e.g., `user:preferred_language`, `user:timezone`) are scoped to the `user_id` across all sessions."
   },
   {
     "id": "d3-orc-032",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems",
       "https://google.github.io/adk-docs/agents/workflow-agents/"
-    ]
+    ],
+    "hint": "Core Rule (Cyclic Graphs & Multi-Agent Debate): Multi-agent debate topologies can suffer from LLM sycophancy (premature consensus / groupthink) if agents observe peers' outputs sequentially within the same round or lack adversarial prompting constraints."
   },
   {
     "id": "d3-orc-033",
@@ -228,7 +235,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
-    ]
+    ],
+    "hint": "Core Rule (Loop Termination Conditions & Guardrails): In Google ADK, reaching `max_iterations` is a controlled boundary condition rather than a fatal crash."
   },
   {
     "id": "d3-orc-034",
@@ -257,7 +265,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/sequential-agent/",
       "https://google.github.io/adk-docs/agents/workflow-agents/parallel-agent/"
-    ]
+    ],
+    "hint": "Core Rule (DAG Orchestration & Dependency Resolution): A diamond DAG (1 -> [3 concurrent] -> 1) maps cleanly to nested ADK workflow primitives: a top-level `SequentialAgent` guarantees that Step 1 (`AgentA`) finishes and populates `session.state` before Step 2 begins."
   },
   {
     "id": "d3-orc-035",
@@ -285,7 +294,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/callbacks/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Runtime Callbacks & Interceptors): Google ADK's `before_tool_callback` provides a deterministic interception point immediately prior to executing any tool function."
   },
   {
     "id": "d3-orc-036",
@@ -313,7 +323,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/callbacks/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Runtime Callbacks & Interceptors): `before_model_callback` is invoked immediately before an `LlmAgent` dispatches an `LlmRequest` to the underlying generative model."
   },
   {
     "id": "d3-orc-037",
@@ -342,7 +353,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
       "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
-    ]
+    ],
+    "hint": "Core Rule (Cyclic Graphs & Reflection Loops): A classic failure mode in cyclic reflection loops is state oscillation (fixing Issue B breaks Issue A, and vice versa) because the critic only evaluates the immediate symptom or the generator forgets prior constraints."
   },
   {
     "id": "d3-orc-038",
@@ -371,7 +383,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/multi-agent-systems/",
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Orchestration Topologies): In multi-turn conversational multi-agent systems, users frequently digress across domains."
   },
   {
     "id": "d3-orc-039",
@@ -400,7 +413,8 @@
     "refs": [
       "https://google.github.io/adk-docs/events/",
       "https://google.github.io/adk-docs/sessions/session/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Runtime State & Event Architecture): Google ADK uses an event-sourced state model."
   },
   {
     "id": "d3-orc-040",
@@ -428,7 +442,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Orchestration Topologies): `LoopAgent` is the built-in ADK workflow agent designed for iterative, cyclic execution of a sequence of sub-agents (such as a Translator and Reviewer) until either a sub-agent signals completion (`actions.escalate = True`) or `max_iterations` (3) is reached."
   },
   {
     "id": "d3-orc-041",
@@ -459,7 +474,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-agents",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Orchestration Topologies): In modular multi-agent architectures, independent sub-agent evolution requires: (1) Strict interface contracts (typed Pydantic schemas and explicit state keys) between the Supervisor and workers so that upgrading a worker's internal model (e.g., from Gemini 1.5 Flash to Gemini 2.0 Flash) or prompt does not break downstream consumers; and (2) Automated trajectory and response evaluation using Vertex AI Gen AI Evaluation Service to verify that agent routing paths (`trajectory_exact_match` / `trajectory_in_order_match`) and output quality remain high prior to rollout."
   },
   {
     "id": "d3-orc-042",
@@ -488,7 +504,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
       "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
-    ]
+    ],
+    "hint": "Core Rule (Loop Termination Conditions & Guardrails): Not all loop failures are due to temporary formatting or syntax errors; some tasks are fundamentally infeasible given available tools and permissions (epistemic infeasibility)."
   },
   {
     "id": "d3-orc-043",
@@ -517,7 +534,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-agents",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Orchestration Topologies): Vertex AI Gen AI Evaluation Service provides specialized trajectory metrics for evaluating multi-step agent and multi-agent orchestration paths."
   },
   {
     "id": "d3-orc-044",
@@ -546,7 +564,8 @@
     "refs": [
       "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems",
       "https://google.github.io/adk-docs/agents/workflow-agents/parallel-agent/"
-    ]
+    ],
+    "hint": "Core Rule (Parallel Scatter-Gather Topology): In scatter-gather topologies where certain branches can produce a definitive, short-circuiting verdict (such as a known malware blocklist hit or a hard policy violation), waiting for expensive slow branches (like headless browser rendering in `DOMVisualCloneAgent`) wastes compute and latency."
   },
   {
     "id": "d3-orc-045",
@@ -575,7 +594,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/llm-agents/",
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
-    ]
+    ],
+    "hint": "Core Rule (Cyclic Graphs & Reflection Loops): A major architectural benefit of decomposing a workflow into distinct Generator and Critic sub-agents in Google ADK is heterogeneous model assignment."
   },
   {
     "id": "d3-orc-046",
@@ -604,7 +624,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/session/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Runtime State Management): Long-running multi-agent workflows (taking tens of seconds or minutes) must decouple execution state from transient client transport connections."
   },
   {
     "id": "d3-orc-047",
@@ -632,7 +653,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/multi-agent-systems/"
-    ]
+    ],
+    "hint": "Core Rule (Hierarchical Supervisor-Worker Topology): In a Hierarchical Supervisor-Worker pattern, leaf workers should avoid hidden mesh/spaghetti point-to-point calls that bypass the Supervisor's awareness."
   },
   {
     "id": "d3-orc-048",
@@ -661,7 +683,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/",
       "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
-    ]
+    ],
+    "hint": "Core Rule (Cyclic Graphs & Reflection Loops): In safety-critical domains (healthcare, finance, aviation), hitting `max_iterations` in a reflection loop means the system failed to reach verified safety convergence."
   },
   {
     "id": "d3-orc-049",
@@ -690,7 +713,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/telemetry",
       "https://google.github.io/adk-docs/observability/"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Orchestration Topologies): Google ADK and Vertex AI Agent Engine automatically propagate OpenTelemetry `Context` across asynchronous tasks and threads spawned by `ParallelAgent`."
   },
   {
     "id": "d3-orc-050",
@@ -719,6 +743,7 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/multi-agent-systems/",
       "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Orchestration Topologies): In open-ended conversational applications where user intents arrive in unpredictable combinations and orders, a fixed Sequential Pipeline is rigid and wasteful (as it forces execution through a predefined linear chain of stages)."
   }
 ]

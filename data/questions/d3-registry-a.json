@@ -26,7 +26,8 @@
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-card",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (A2A Agent Card Discovery Protocol (`/.well-known/agent.json`)): In the Agent-to-Agent (A2A) open protocol supported by Google Cloud, every autonomous agent advertises its metadata, endpoint URL, supported authentication schemes, protocol capabilities (`streaming`, `pushNotifications`, `stateTransitionHistory`), and granular `skills` via a standardized Agent Card hosted at the RFC 8615 well-known URI `/.well-known/agent.json`."
   },
   {
     "id": "d3-reg-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/authenticating/service-to-service",
       "https://cloud.google.com/iam/docs/create-short-lived-credentials-direct#sa-credentials-oidc"
-    ]
+    ],
+    "hint": "Core Rule (Cryptographic Verification of Agent Identity with Google Cloud OIDC ID Tokens): Google Cloud IAM OIDC ID tokens are cryptographically signed by Google's private keys (verifiable via Google's public JWKS certificates) and bind the caller's exact IAM Service Account identity (`email` / `sub`) to the specific target audience URI (`aud`)."
   },
   {
     "id": "d3-reg-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://datatracker.ietf.org/doc/html/rfc8693#section-4.1",
       "https://cloud.google.com/iam/docs/workload-identity-federation"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Confused Deputy Attacks via OAuth 2.0 Token Exchange (RFC 8693 `act` Claim)): RFC 8693 (OAuth 2.0 Token Exchange) defines the standard `act` (actor) claim specifically for delegation chains and agentic architectures."
   },
   {
     "id": "d3-reg-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-hub/what-is-api-hub",
       "https://google.github.io/A2A/#/documentation?id=agent-card"
-    ]
+    ],
+    "hint": "Core Rule (Semantic Agent Discovery in Enterprise Agent Registries): Semantic Agent Discovery treats registered Agent Cards (specifically their `skills`, natural language `description`, `tags`, and canonical `examples`) as a searchable vector corpus."
   },
   {
     "id": "d3-reg-005",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/service-mesh/docs/security/authorization-policy-overview",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity"
-    ]
+    ],
+    "hint": "Core Rule (SPIFFE / SPIRE Workload Identity & mTLS in GKE Agent Mesh): GKE Workload Identity integrated with Cloud Service Mesh implements the SPIFFE standard: each pod's Kubernetes Service Account is automatically issued short-lived, auto-rotated X.509 SVID certificates (`spiffe://<project>.svc.id.goog/ns/<namespace>/sa/<ksa>`)."
   },
   {
     "id": "d3-reg-006",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/downscoping-short-lived-credentials",
       "https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/generateAccessToken"
-    ]
+    ],
+    "hint": "Core Rule (Dynamic Least-Privilege IAM Scope Brokering for Sub-Agents): Google Cloud Token Downscoping (Credential Access Boundaries) allows a token broker or orchestrator to exchange a broader service account token for a short-lived downscoped OAuth access token restricted by an explicit `AccessBoundary` rule (limiting both IAM roles and target resource names/prefixes like a single GCS bucket)."
   },
   {
     "id": "d3-reg-007",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/kms/docs/create-validate-signatures",
       "https://cloud.google.com/kms/docs/algorithms#asymmetric_signing_algorithms"
-    ]
+    ],
+    "hint": "Core Rule (Non-Repudiation & Cryptographic Signing of Autonomous Agent Decisions): Asymmetric digital signatures (`EC_SIGN_P256_SHA256` or `RSA_SIGN_PSS_2048_SHA256`) stored in Cloud KMS HSM guarantee non-repudiation and integrity: the private key never leaves the FIPS 140-2 Level 3 HSM, only the Underwriting Agent's IAM identity can invoke `AsymmetricSign`, and any downstream verifier or auditor can verify the signature offline using the public key."
   },
   {
     "id": "d3-reg-008",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/service-directory/docs/overview",
       "https://cloud.google.com/architecture/framework/reliability/Fault-isolation-and-graceful-degradation"
-    ]
+    ],
+    "hint": "Core Rule (Agent Registry Health Checking & Circuit Breaking for Unhealthy Sub-Agents): Enterprise agent registries and A2A routers combine active health checking with client-side Circuit Breakers (Closed -> Open -> Half-Open)."
   },
   {
     "id": "d3-reg-009",
@@ -258,7 +266,8 @@
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=push-notifications",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (A2A Push Notifications & Webhook Registration for Asynchronous Agent Tasks): The A2A protocol natively supports asynchronous long-running tasks via Push Notifications (`capabilities.pushNotifications`)."
   },
   {
     "id": "d3-reg-010",
@@ -287,7 +296,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/workload-identity-federation-with-other-clouds",
       "https://cloud.google.com/run/docs/authenticating/service-to-service"
-    ]
+    ],
+    "hint": "Core Rule (Cross-Cloud Agent Identity Federation (AWS/Azure Agent to Google Cloud Agent)): Google Cloud Workload Identity Federation enables external workloads running on AWS, Azure, or Kubernetes clusters to authenticate to Google Cloud using their native cloud identity tokens (AWS STS GetCallerIdentity tokens or OIDC tokens)."
   },
   {
     "id": "d3-reg-011",
@@ -316,7 +326,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration",
       "https://google.github.io/A2A/#/documentation?id=agent-card"
-    ]
+    ],
+    "hint": "Core Rule (Agent Registry Version Pinning & Canary Rollouts for Sub-Agents): Enterprise agent deployments require standard progressive delivery controls."
   },
   {
     "id": "d3-reg-012",
@@ -345,7 +356,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/securing/ingress",
       "https://google.github.io/A2A/#/documentation?id=security-considerations"
-    ]
+    ],
+    "hint": "Core Rule (Protecting Agent Cards Against Unauthorized Reconnaissance): While public consumer agents advertise `/.well-known/agent.json` openly, private enterprise and defense agents must restrict both network ingress (`--ingress=internal` / VPC-SC) and IAM authentication (`roles/run.invoker`) on their discovery endpoints so only authorized internal registries and orchestrator service accounts can fetch capability metadata."
   },
   {
     "id": "d3-reg-013",
@@ -374,7 +386,8 @@
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=task-lifecycle",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (A2A Task Lifecycle States (`SUBMITTED`, `WORKING`, `INPUT_REQUIRED`, `COMPLETED`)): The A2A protocol defines a stateful multi-turn task lifecycle (`SUBMITTED` -> `WORKING` -> `INPUT_REQUIRED` -> `WORKING` -> `COMPLETED` / `FAILED` / `CANCELED`)."
   },
   {
     "id": "d3-reg-014",
@@ -403,7 +416,8 @@
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=security-considerations",
       "https://cloud.google.com/apigee/docs/api-hub/what-is-api-hub"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Agent Identity Spoofing in Multi-Tenant Registries): In multi-tenant or partner agent registries, preventing namespace squatting and spoofing requires cryptographic domain verification (proving control of the target domain via DNS/mTLS) and verified publisher identity binding (ensuring only Stripe's verified organization principal can publish under the verified `@stripe` namespace)."
   },
   {
     "id": "d3-reg-015",
@@ -432,7 +446,8 @@
     "refs": [
       "https://cloud.google.com/service-directory/docs/overview",
       "https://cloud.google.com/service-directory/docs/configuring-private-dns-zones"
-    ]
+    ],
+    "hint": "Core Rule (Service Directory & Private DNS for Internal Agent Discovery): Google Cloud Service Directory provides a single source of truth for registering, discovering, and resolving internal microservices and agents across multi-project VPC topologies."
   },
   {
     "id": "d3-reg-016",
@@ -461,7 +476,8 @@
     "refs": [
       "https://cloud.google.com/load-balancing/docs/mtls",
       "https://cloud.google.com/certificate-manager/docs/trust-configs"
-    ]
+    ],
+    "hint": "Core Rule (Mutual TLS (mTLS) Client Certificate Enforcement on Cloud Load Balancing for Agents): Google Cloud Application Load Balancers support native Mutual TLS (mTLS) client certificate validation using Certificate Manager `TrustConfig` resources backed by Certificate Authority Service (CAS)."
   },
   {
     "id": "d3-reg-017",
@@ -490,7 +506,8 @@
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=streaming-support",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (A2A Streaming Task Updates (`tasks/sendSubscribe` via Server-Sent Events)): In the A2A specification, when an agent advertises `capabilities.streaming: true`, clients can invoke `tasks/sendSubscribe` (or `tasks/resubscribe`)."
   },
   {
     "id": "d3-reg-018",
@@ -519,7 +536,8 @@
     "refs": [
       "https://cloud.google.com/binary-authorization/docs/overview",
       "https://cloud.google.com/run/docs/securing/binary-authorization"
-    ]
+    ],
+    "hint": "Core Rule (Cryptographic Attestation of Agent Container Images (Binary Authorization)): Binary Authorization provides software supply-chain security for containerized agents on GKE and Cloud Run."
   },
   {
     "id": "d3-reg-019",
@@ -548,7 +566,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/security/apigee-advanced-api-security",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent Registry Governance: Detecting & Quarantining Rogue / Hallucinating Sub-Agents): Autonomous agent ecosystems require automated runtime circuit breakers and policy guardrails (deterministic output bounds checking + anomaly detection on business metrics)."
   },
   {
     "id": "d3-reg-020",
@@ -579,7 +598,8 @@
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-card",
       "https://google.github.io/A2A/#/documentation?id=parts"
-    ]
+    ],
+    "hint": "Core Rule (A2A Input and Output Modalities Negotiation (`inputModes`, `outputModes`)): In the A2A Agent Card schema, `defaultInputModes` and `defaultOutputModes` (as well as skill-level overrides) explicitly list supported MIME types (such as `text/plain`, `application/json`, `image/png`, `audio/mpeg`)."
   },
   {
     "id": "d3-reg-021",
@@ -608,7 +628,8 @@
     "refs": [
       "https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7",
       "https://cloud.google.com/architecture/designing-idempotent-apis"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Replay Attacks on Cryptographically Signed Agent Messages): Cryptographic signatures alone only prove that a payload was signed at some point in the past; without replay protection, captured valid frames can be re-sent indefinitely."
   },
   {
     "id": "d3-reg-022",
@@ -637,7 +658,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/service-account-impersonation",
       "https://cloud.google.com/logging/docs/audit/understanding-audit-logs#service-account-delegation"
-    ]
+    ],
+    "hint": "Core Rule (Service Account Impersonation Chains & IAM Audit Log Attribution): Google Cloud IAM natively tracks multi-hop service account impersonation chains in Cloud Audit Logs via the `authenticationInfo.serviceAccountDelegationInfo` array."
   },
   {
     "id": "d3-reg-023",
@@ -666,7 +688,8 @@
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-card",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#best-practices"
-    ]
+    ],
+    "hint": "Core Rule (Agent Registry Taxonomy & Standardized Skill Tagging): High-accuracy agent routing depends directly on the quality of metadata in the Agent Registry."
   },
   {
     "id": "d3-reg-024",
@@ -695,7 +718,8 @@
     "refs": [
       "https://cloud.google.com/vpc-service-controls/docs/overview",
       "https://cloud.google.com/access-context-manager/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Zero-Trust Network Isolation for Agent Registries with VPC Service Controls): VPC Service Controls (VPC-SC) combined with Access Context Manager (ACM) enforces context-aware zero-trust perimeters."
   },
   {
     "id": "d3-reg-025",
@@ -724,6 +748,7 @@
     "refs": [
       "https://cloud.google.com/kms/docs/key-rotation",
       "https://cloud.google.com/secret-manager/docs/rotation-recommendations"
-    ]
+    ],
+    "hint": "Core Rule (Automated Secret & Key Rotation for Agent Identities): Zero-downtime cryptographic rotation requires supporting overlapping key validity windows via Key IDs (`kid`) in a published JWKS endpoint."
   }
 ]

@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/load-balancing/docs/https#timeout_and_retry_settings"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity SDK Streaming & Long-Running Tool Execution): The Antigravity SDK supports streaming tool execution callbacks (`onToolProgress` / SSE streaming)."
   },
   {
     "id": "d2-cod-077",
@@ -55,7 +56,8 @@
     "refs": [
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/security",
       "https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods"
-    ]
+    ],
+    "hint": "Core Rule (Claude Code Permission Modes & Sandbox Execution): In persistent developer environments with broad credentials, interactive permission confirmation prevents unintended destructive shell commands."
   },
   {
     "id": "d2-cod-078",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/logging/docs/access-control#log-views",
       "https://modelcontextprotocol.io/docs"
-    ]
+    ],
+    "hint": "Core Rule (Google Cloud Error Reporting & Logging MCP Server): Google Cloud Logging Views allow administrators to define fine-grained filter expressions over log buckets."
   },
   {
     "id": "d2-cod-079",
@@ -115,7 +118,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/concepts/confidential-nodes",
       "https://cloud.google.com/security-command-center/docs/concepts-container-threat-detection-overview"
-    ]
+    ],
+    "hint": "Core Rule (Confidential GKE Nodes & Container Threat Detection): Confidential GKE Nodes leverage AMD SEV-SNP or Intel TDX hardware root-of-trust to encrypt VM and container memory in RAM with per-VM keys, protecting proprietary source code in use."
   },
   {
     "id": "d2-cod-080",
@@ -144,7 +148,8 @@
     "refs": [
       "https://openapi-generator.tech/",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills for Automated API SDK Generation): Packaging multi-step deterministic engineering workflows into a `SKILL.md` file ensures that whenever an agent is asked to update SDKs, it executes the exact code generator CLI tools, verifies type safety across all target languages (`tsc`, `mypy`, `go vet`), and applies consistent SemVer changelog rules."
   },
   {
     "id": "d2-cod-081",
@@ -173,7 +178,8 @@
     "refs": [
       "https://developer.hashicorp.com/terraform/language/state",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks Protecting Immutable Infrastructure Files): A pre-tool extension hook inspects target file paths before any disk write occurs."
   },
   {
     "id": "d2-cod-082",
@@ -202,7 +208,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Cross-Repository Dependency Impact Analysis): Combining a cross-repository Code Search MCP server (to accurately discover call sites across the organization) with parallel repository-scoped subagents allows each downstream microservice to be refactored and tested concurrently in its own isolated context window."
   },
   {
     "id": "d2-cod-083",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/compute/docs/disks/scheduled-snapshots",
       "https://cloud.google.com/workstations/docs/architecture"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Workstations Disaster Recovery & Snapshots): Cloud Workstations persistent home directories reside on Compute Engine Persistent Disks (or Hyperdisks)."
   },
   {
     "id": "d2-cod-084",
@@ -262,7 +270,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI FinOps & Model Routing Governance): Agentic FinOps best practices combine task-aware tiered model routing (matching model capability and cost to task complexity: Flash/Haiku for routine tasks, Pro/Sonnet for complex reasoning) with declarative token budget enforcement and automated tier downgrading governed centrally via the Agents CLI."
   },
   {
     "id": "d2-cod-085",
@@ -291,7 +300,8 @@
     "refs": [
       "https://owasp.org/www-community/attacks/Command_Injection",
       "https://docs.python.org/3/library/subprocess.html#security-considerations"
-    ]
+    ],
+    "hint": "Core Rule (Patching OS Command Injection Vulnerabilities (CWE-78)): Passing an argument array to `subprocess.run(..., shell=False)` invokes the OS `execve()` syscall directly without spawning a `/bin/sh` shell interpreter, making shell metacharacter injection (`;`, `|`, `&&`, backticks) impossible."
   },
   {
     "id": "d2-cod-086",
@@ -320,7 +330,8 @@
     "refs": [
       "https://nextjs.org/docs/app/building-your-application/optimizing/package-bundling",
       "https://web.dev/articles/vitals"
-    ]
+    ],
+    "hint": "Core Rule (Frontend Bundle & Core Web Vitals Optimization): Providing empirical bundle analysis (`@next/bundle-analyzer`) and Lighthouse metrics allows the coding agent to identify the exact modules bloating initial page load."
   },
   {
     "id": "d2-cod-087",
@@ -349,7 +360,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity CLI Diff Review & Interactive Governance): Antigravity CLI's default interactive approval mode intercepts file-mutating tool calls, renders a unified diff of the proposed additions and deletions in the terminal, and waits for explicit user confirmation (`y` to apply, `n` to reject with feedback, or `e` to edit) before touching disk."
   },
   {
     "id": "d2-cod-088",
@@ -378,7 +390,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/sampling",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (MCP Sampling Capability & Human-in-the-Loop): In the Model Context Protocol (MCP) specification, `sampling/createMessage` allows an MCP server to request an LLM completion from the client host (e.g., Antigravity or Claude Code)."
   },
   {
     "id": "d2-cod-089",
@@ -409,7 +422,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/custom-container-images#startup-scripts",
       "https://cloud.google.com/source-repositories/docs/authentication"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Workstations Startup Hooks & Daemon Initialization): Cloud Workstations executes scripts located in `/etc/workstation-startup.d/` in lexical order every time a workstation container starts."
   },
   {
     "id": "d2-cod-090",
@@ -438,7 +452,8 @@
     "refs": [
       "https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-DEADLOCKS",
       "https://cloud.google.com/sql/docs/postgres"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills for Database Deadlock Remediation): Database deadlocks occur when concurrent transactions acquire locks on multiple resources in opposing orders (e.g., Tx1 locks Order A then Item B, while Tx2 locks Item B then Order A)."
   },
   {
     "id": "d2-cod-091",
@@ -467,7 +482,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://docs.pytest.org/"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks for Flaky Test Quarantine & Issue Tracking): A post-tool extension hook inspecting structured test runner output can deterministically detect pass-on-retry flaky behavior and asynchronously file a detailed issue via an MCP issue-tracker integration, capturing diagnostic evidence without derailing the coding agent's active development task."
   },
   {
     "id": "d2-cod-092",
@@ -496,7 +512,8 @@
     "refs": [
       "https://owasp.org/www-project-web-security-testing-guide/",
       "https://semgrep.dev/docs/"
-    ]
+    ],
+    "hint": "Core Rule (Workspace Rules for Cryptographic Standards Compliance): Pairing explicit workspace rules (`.antigravity/rules.md`)—which steer the LLM to select `AES-GCM-256`, `Argon2id`, and `crypto/rand` during generation—with a deterministic Semgrep AST pre-commit extension hook guarantees both proactive compliance and hard enforcement against weak cryptography."
   },
   {
     "id": "d2-cod-093",
@@ -525,7 +542,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://git-scm.com/docs/git-worktree"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Competitive Ensemble Pattern (Best-of-N)): The Best-of-N (competitive ensemble / tournament) subagent pattern leverages parallel agent execution in isolated Git worktrees (`git worktree add`) to explore divergent algorithmic solutions simultaneously."
   },
   {
     "id": "d2-cod-094",
@@ -556,7 +574,8 @@
     "refs": [
       "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html",
       "https://www.zaproxy.org/"
-    ]
+    ],
+    "hint": "Core Rule (Patching CSRF & Cookie Security Vulnerabilities): Defending against CSRF requires combining strict cookie attributes (`SameSite=Strict/Lax`, `Secure`, `HttpOnly`) with cryptographic anti-CSRF tokens on state-changing endpoints."
   },
   {
     "id": "d2-cod-095",
@@ -585,7 +604,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/security/best-practices"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity Plugin Capability Sandboxing): Antigravity's plugin security architecture enforces least-privilege capability manifests: restricting a formatting plugin to `network: none` and scoping filesystem read/write mounts strictly to workspace `.md` files (blocking `$HOME/.ssh` and `$HOME/.config/gcloud`) prevents credential theft and network exfiltration even if the plugin code is compromised."
   },
   {
     "id": "d2-cod-096",
@@ -614,7 +634,8 @@
     "refs": [
       "https://docs.python.org/3/library/asyncio-dev.html#running-blocking-code",
       "https://fastapi.tiangolo.com/async/"
-    ]
+    ],
+    "hint": "Core Rule (Optimizing Python Asyncio Event Loop Bottlenecks): In Python's single-threaded `asyncio` event loop, invoking synchronous blocking calls (`requests.get`, synchronous DB drivers, or heavy CPU loops) directly inside an `async def` coroutine blocks the entire OS thread, freezing all 500 concurrent requests."
   },
   {
     "id": "d2-cod-097",
@@ -643,7 +664,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/general/access-control",
       "https://cloud.google.com/artifact-registry/docs/access-control"
-    ]
+    ],
+    "hint": "Core Rule (Claude Code Cross-Project IAM & Shared Resources): In a hub-and-spoke Google Cloud architecture, cross-project access is governed cleanly via IAM bindings on the hub resources: granting `roles/aiplatform.user` on `prj-central-ai-hub` enables spoke principals to invoke Vertex AI Model Garden endpoints, while `roles/artifactregistry.reader` grants read-only container image pull access."
   },
   {
     "id": "d2-cod-098",
@@ -672,7 +694,8 @@
     "refs": [
       "https://cloud.google.com/artifact-analysis/docs/sbom-overview",
       "https://spdx.org/licenses/"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Policy Enforcement for OSS License Compliance): Enforcing open-source license compliance requires deterministic inspection of Software Bill of Materials (SBOM) metadata and SPDX license identifiers during dependency installation or pre-commit hooks."
   },
   {
     "id": "d2-cod-099",
@@ -703,7 +726,8 @@
     "refs": [
       "https://cloud.google.com/pubsub/docs/dead-letter-topics",
       "https://cloud.google.com/pubsub/docs/emulator"
-    ]
+    ],
+    "hint": "Core Rule (Google Cloud Pub/Sub & Eventarc MCP Server Design): Inspecting DLQ messages safely requires non-destructive sampling (pulling without acknowledging or inspecting via snapshots) and schema validation against the Pub/Sub Schema Registry."
   },
   {
     "id": "d2-cod-100",
@@ -732,6 +756,7 @@
     "refs": [
       "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage",
       "https://cloud.google.com/kubernetes-engine/docs/concepts/local-ssd"
-    ]
+    ],
+    "hint": "Core Rule (GKE Sandbox Ephemeral Storage & DiskPressure Protection): In Kubernetes, setting `emptyDir.sizeLimit` along with container `resources.limits.ephemeral-storage` enforces strict per-pod disk quotas tracked by the kubelet."
   }
 ]

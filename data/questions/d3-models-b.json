@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/tpu/docs/v6e",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm-tpu"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Hardware Selection: Cloud TPU vs GPU for OSS Serving): Google Cloud TPUs—specifically TPU v5e and TPU v6e (Trillium)—are purpose-built for high-efficiency LLM inference and training."
   },
   {
     "id": "d3-mod-027",
@@ -54,7 +55,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection Evaluation: Vertex AI Gen AI Evaluation Service): Vertex AI Gen AI Evaluation Service provides automated, scalable LLM-as-a-Judge evaluation (both Pointwise rubric scoring and Pairwise side-by-side / AutoSxS comparison)."
   },
   {
     "id": "d3-mod-028",
@@ -82,7 +84,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Context Caching Economics & Break-Even Analysis): Context Caching has a clear economic break-even point: creating a cache incurs standard input token processing plus an hourly storage fee (`$/million-tokens/hour`)."
   },
   {
     "id": "d3-mod-029",
@@ -110,7 +113,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/configure-safety-attributes"
-    ]
+    ],
+    "hint": "Core Rule (ADK & Gemini Safety Settings Configuration): Vertex AI Gemini allows granular per-category customization of safety filters via `SafetySetting` inside `GenerateContentConfig`."
   },
   {
     "id": "d3-mod-030",
@@ -138,7 +142,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini-supervised-tuning"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Supervised Fine-Tuning Hyperparameters): Diverging validation loss (validation loss rising while training loss approaches zero) and verbatim memorization are textbook symptoms of overfitting on a small fine-tuning dataset (800 examples)."
   },
   {
     "id": "d3-mod-031",
@@ -167,7 +172,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy",
       "https://cloud.google.com/run/docs/configuring/min-instances"
-    ]
+    ],
+    "hint": "Core Rule (Vertex AI Agent Engine Cold Start Optimization): Serverless runtimes (Vertex AI Agent Engine and Cloud Run) scale down to zero instances by default during idle periods to save cost, incurring a cold-start penalty when a new container must be scheduled and Python dependencies imported."
   },
   {
     "id": "d3-mod-032",
@@ -195,7 +201,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/image/edit-images"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Multimodal Image Editing with Imagen 3): `Imagen 3` in Vertex AI supports advanced image editing workflows including mask-based inpainting (`EDIT_MODE_INPAINT_INSERTION`) and outpainting."
   },
   {
     "id": "d3-mod-033",
@@ -224,7 +231,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/ranking",
       "https://cloud.google.com/vertex-ai/docs/vector-search/hybrid-search"
-    ]
+    ],
+    "hint": "Core Rule (Long Context 'Lost in the Middle' vs Hybrid Search Reranking): Dense embeddings excel at conceptual synonymy but often struggle with exact out-of-vocabulary alphanumeric identifiers (`CFR-49-Part-172.101`)."
   },
   {
     "id": "d3-mod-034",
@@ -252,7 +260,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/get-started/quickstart/"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Project Scaffolding & Directory Structure): The ADK CLI (`adk web`, `adk run`, `adk eval`, `adk deploy`) discovers agents by importing the specified Python agent module directory and looking for the standard exported symbol `root_agent` (which can be an `LlmAgent`, `SequentialAgent`, `ParallelAgent`, `LoopAgent`, or custom `BaseAgent`)."
   },
   {
     "id": "d3-mod-035",
@@ -281,7 +290,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/multi-agents/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Cost Optimization: Dynamic Cascade Routing): Model cascading / complexity-based dynamic routing is a foundational agentic FinOps pattern."
   },
   {
     "id": "d3-mod-036",
@@ -310,7 +320,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/memory/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank"
-    ]
+    ],
+    "hint": "Core Rule (Agent Platform Memory Bank TTL & Stale Fact Expiration): Effective agent memory hygiene requires separating ephemeral task context from enduring user traits."
   },
   {
     "id": "d3-mod-037",
@@ -341,7 +352,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/predictions/using-private-endpoints",
       "https://cloud.google.com/vertex-ai/docs/general/vpc-sc"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Open-Weights Deployment: Private Service Connect & VPC-SC): To achieve private RFC 1918 connectivity and zero-exfiltration governance for Vertex AI Model Garden dedicated endpoints: (1) Private Service Connect (PSC) provisions a private endpoint IP within your VPC, ensuring all inference requests travel exclusively over Google's private Andromeda network fabric; (2) VPC Service Controls (VPC-SC) wraps `aiplatform.googleapis.com` and storage resources in a service perimeter that blocks unauthorized data movement or API calls from outside the perimeter."
   },
   {
     "id": "d3-mod-038",
@@ -369,7 +381,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/content-generation-parameters"
-    ]
+    ],
+    "hint": "Core Rule (ADK & Model Garden Temperature and Top-P Sampling Configuration): In LLM sampling, `temperature` controls the entropy of the softmax probability distribution over next-token logits."
   },
   {
     "id": "d3-mod-039",
@@ -397,7 +410,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/fine-tuning"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Direct Preference Optimization (DPO) vs SFT): While Supervised Fine-Tuning (SFT) maximizes the likelihood of positive demonstration examples, Direct Preference Optimization (DPO) and RLHF explicitly optimize the model on contrastive preference pairs (`chosen` vs."
   },
   {
     "id": "d3-mod-040",
@@ -425,7 +439,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/get-token-count"
-    ]
+    ],
+    "hint": "Core Rule (ADK & Model Garden Multimodal Token Counting & Billing Estimation): The Google GenAI SDK / Vertex AI API provides the free, low-latency `count_tokens` endpoint (`client.models.count_tokens`)."
   },
   {
     "id": "d3-mod-041",
@@ -453,7 +468,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/get-started/quickstart/#set-up-the-environment"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Local Environment Variables & Secret Management): ADK uses the unified `google-genai` SDK under the hood."
   },
   {
     "id": "d3-mod-042",
@@ -481,7 +497,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Custom Container Serving on Vertex AI Endpoints): Vertex AI Prediction supports deploying any custom Docker container image from Artifact Registry."
   },
   {
     "id": "d3-mod-043",
@@ -509,7 +526,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/sessions/memory/#inmemorymemoryservice"
-    ]
+    ],
+    "hint": "Core Rule (Agent Platform Memory Bank vs In-Memory Testing): Just as ADK provides `InMemorySessionService` and `InMemoryArtifactService` for local development, it provides `InMemoryMemoryService` (`google.adk.memory.InMemoryMemoryService`)."
   },
   {
     "id": "d3-mod-044",
@@ -537,7 +555,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/locations#global-endpoint"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection: Regional Multi-Region Endpoint Routing & Failover): Vertex AI offers Global Endpoints (`location='global'`) for Gemini models."
   },
   {
     "id": "d3-mod-045",
@@ -565,7 +584,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Open-Weights Evaluation: Function Calling Benchmarks): For an ADK `LlmAgent` to reliably invoke tools, pass valid JSON arguments matching Pydantic schemas, and interpret `FunctionResponse` payloads across multi-turn trajectories, the underlying model must support native structured Function Calling / Tool Use templates (such as Llama 3.1/3.3 tool tokens or Gemma 3 function calling format) and score highly on tool-use benchmarks like the Berkeley Function-Calling Leaderboard (BFCL)."
   },
   {
     "id": "d3-mod-046",
@@ -593,7 +613,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview"
-    ]
+    ],
+    "hint": "Core Rule (ADK & Model Garden Grounding Metadata & Citation Extraction): When Vertex AI Gemini generates grounded responses (via `google_search`, `VertexAiSearchTool`, or `VertexAiRagRetrieval`), the API populates structured `GroundingMetadata` on the response `Candidate` (propagated by ADK on the yielded `Event`)."
   },
   {
     "id": "d3-mod-047",
@@ -621,7 +642,8 @@
     },
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden OSS Deployment: vLLM Prefix Caching): vLLM's Automatic Prefix Caching (`--enable-prefix-caching`), built on top of PagedAttention, automatically identifies shared prefix token blocks (such as long ADK system instructions, few-shot examples, and tool schemas) across incoming requests."
   },
   {
     "id": "d3-mod-048",
@@ -650,7 +672,8 @@
     "refs": [
       "https://google.github.io/adk-docs/deploy/agent-engine/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/manage-sessions"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI & Vertex AI Agent Engine Session Resumption): When an ADK application is deployed to Vertex AI Agent Engine, session state and event histories are durably persisted by `VertexAiSessionService`."
   },
   {
     "id": "d3-mod-049",
@@ -678,7 +701,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/video-understanding"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection: Multimodal Video & Audio Timestamp Grounding): Unlike traditional pipelines that strip video into a text-only ASR transcript (losing all visual cues like facial expressions, gestures, and on-screen graphics), `Gemini 2.5 Pro` natively tokenizes both audio waveforms and sampled video frames stamped with temporal markers across up to 2 million tokens (over 1-2 hours of video)."
   },
   {
     "id": "d3-mod-050",
@@ -709,6 +733,7 @@
     "refs": [
       "https://google.github.io/adk-docs/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Comprehensive ADK & Model Garden Enterprise Architecture): This architecture synthesizes the complete Google Cloud Agentic AI stack: (1) ADK's deterministic workflow agents (`SequentialAgent`/`ParallelAgent`) combined with `before_tool_callback` guardrails enforce strict compliance ordering before deploying to serverless Vertex AI Agent Engine; (2) `VertexAiSessionService` + `VertexAiMemoryBankService` provide dual short-term session state and long-term semantic client memory; and (3) `VertexAiSearchTool` + `google_search` deliver hybrid private/public grounding verified continuously via `adk eval` in CI/CD."
   }
 ]

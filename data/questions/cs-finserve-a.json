@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview",
       "https://cloud.google.com/architecture/ai-ml"
-    ]
+    ],
+    "hint": "Core Rule (Hierarchical Multi-Agent Orchestration with ADK): FinServe Global's technical requirements explicitly mandate a hierarchical multi-agent architecture using ADK where a Supervisor Agent delegates tasks to specialized Portfolio, Tax, and Compliance subagents."
   },
   {
     "id": "cs-fin-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/dialogflow/cx/docs/concept/human-agent-handoff"
-    ]
+    ],
+    "hint": "Core Rule (Deterministic Human-in-the-Loop (HITL) Governance): Regulatory precision and preventing unauthorized autonomous trade execution are non-negotiable for FinServe Global."
   },
   {
     "id": "cs-fin-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
-    ]
+    ],
+    "hint": "Core Rule (Zero-Trust Identity Propagation & Principal Access Boundary): FinServe Global explicitly requires zero-trust identity propagation using Agent Identity, Auth Manager (OAuth 2.0), and Principal Access Boundary (PAB) policies so agents can never query client accounts outside the authenticated user scope."
   },
   {
     "id": "cs-fin-004",
@@ -115,7 +118,8 @@
     "refs": [
       "https://cloud.google.com/security-command-center/docs/model-armor-overview",
       "https://cloud.google.com/dlp/docs/concepts-templates"
-    ]
+    ],
+    "hint": "Core Rule (Inline Prompt Injection & PII Protection with Model Armor): FinServe Global's technical requirements specify routing all agent ingress, egress, and inter-agent traffic through Agent Gateway for centralized telemetry and control, and deploying Model Armor alongside Sensitive Data Protection inline to block prompt injection, jailbreaks, and PII/PCI leakage across both prompts and tool outputs."
   },
   {
     "id": "cs-fin-005",
@@ -144,7 +148,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/sessions"
-    ]
+    ],
+    "hint": "Core Rule (Session State vs. Long-Term Memory Bank Architecture): FinServe Global's technical requirements state that the platform must persist long-term client financial goals and risk profiles using Agent Platform Memory Bank while maintaining ephemeral multi-turn conversation state in managed sessions."
   },
   {
     "id": "cs-fin-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluate"
-    ]
+    ],
+    "hint": "Core Rule (Pre-Production Agent Evaluation with ADK Evalset & Autoraters): FinServe Global's technical requirements specify evaluating all agent trajectories and tool execution accuracy continuously against a curated golden dataset using ADK `evalset` and custom financial compliance autoraters prior to production promotion."
   },
   {
     "id": "cs-fin-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/generative-agent",
       "https://cloud.google.com/dialogflow/cx/docs/concept/handler"
-    ]
+    ],
+    "hint": "Core Rule (Migrating Static Intent Bots to CX Agent Studio Hybrid Workflows): CX Agent Studio enables hybrid agent design: generative playbooks/LLM-powered agents handle complex, open-ended multi-turn conversations (like financial planning and tax inquiries grounded in enterprise knowledge), while state-based pages and conditional transition routes enforce deterministic step-by-step compliance flows (such as multi-factor identity verification before address changes)."
   },
   {
     "id": "cs-fin-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/overview",
       "https://cloud.google.com/vpc-service-controls/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Modernizing Legacy Java Microservices with Coding Agents in Secure Sandboxes): Using coding agents inside isolated, VPC-secured sandboxes (Cloud Workstations or dedicated GKE sandbox environments) allows developers to accelerate code refactoring, vulnerability patching, and MCP wrapper generation while strictly enforcing enterprise data exfiltration controls (VPC Service Controls) and preventing unverified code from impacting production workloads."
   },
   {
     "id": "cs-fin-009",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/storage/docs/bucket-lock",
       "https://cloud.google.com/logging/docs/export/configure_export_v2"
-    ]
+    ],
+    "hint": "Core Rule (Cryptographic Lineage & Audit Trails for SEC/FINRA Compliance): FinServe Global's business requirements mandate 100% compliance with SEC, FINRA, and GDPR auditability mandates, including full cryptographic lineage and audit trails of every agent reasoning step, tool call, and data retrieval event."
   },
   {
     "id": "cs-fin-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/locations",
       "https://cloud.google.com/resource-manager/docs/organization-policy/defining-locations"
-    ]
+    ],
+    "hint": "Core Rule (Cross-Region Data Sovereignty for Multinational Operations): Data sovereignty under GDPR and financial regulations requires that data storage, memory persistence, vector indexing, and LLM inference occur strictly within authorized jurisdictional boundaries."
   },
   {
     "id": "cs-fin-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/mcp",
       "https://modelcontextprotocol.io/introduction"
-    ]
+    ],
+    "hint": "Core Rule (MCP Server Integration for Core Banking Ledgers): Model Context Protocol (MCP) servers provide a standardized, secure abstraction layer between agents and enterprise data sources."
   },
   {
     "id": "cs-fin-012",
@@ -349,7 +360,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/streaming"
-    ]
+    ],
+    "hint": "Core Rule (Achieving Sub-2-Second Latency for Interactive Client Chat): To achieve sub-2-second perceived and actual response times in multi-agent systems, architects use streaming responses (SSE/WebSockets) to deliver immediate time-to-first-token (TTFT) feedback, execute independent subagents in parallel rather than sequentially, and apply dynamic model routing so fast, low-latency models (Gemini 1.5 Flash) handle routine queries while reserving frontier models for heavy analytical tasks."
   },
   {
     "id": "cs-fin-013",
@@ -378,7 +390,8 @@
     "refs": [
       "https://cloud.google.com/api-gateway/docs/quotas",
       "https://cloud.google.com/architecture/rate-limiting-strategies-techniques"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Rate Limiting & Anomaly Detection): FinServe Global's technical requirements explicitly mandate routing all agent ingress, egress, and inter-agent traffic through Agent Gateway for centralized telemetry, rate limiting, and anomaly detection."
   },
   {
     "id": "cs-fin-014",
@@ -407,7 +420,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview",
       "https://cloud.google.com/vertex-ai/docs/vector-search/overview"
-    ]
+    ],
+    "hint": "Core Rule (Grounding Compliance Subagent on Regulatory Rules via RAG): Regulatory documents contain dense legal terminology, exact rule numbers (e.g., SEC Rule 15c3-1), and frequent amendments."
   },
   {
     "id": "cs-fin-015",
@@ -436,7 +450,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview",
       "https://cloud.google.com/sdk/gcloud/reference/alpha/ai"
-    ]
+    ],
+    "hint": "Core Rule (Using Agents CLI & Antigravity to Govern Custom Skills): The Agents CLI and Skill Registry / Agent Registry provide centralized enterprise lifecycle governance for agent capabilities."
   },
   {
     "id": "cs-fin-016",
@@ -465,7 +480,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview"
-    ]
+    ],
+    "hint": "Core Rule (Detecting & Mitigating Multi-Agent Reasoning Loops): In multi-agent orchestration, competing optimization objectives can cause infinite delegation loops."
   },
   {
     "id": "cs-fin-017",
@@ -494,7 +510,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling",
       "https://cloud.google.com/bigquery/docs/reference/standard-sql/date_functions"
-    ]
+    ],
+    "hint": "Core Rule (Automated Tax-Loss Harvesting Wash-Sale Verification): Financial arithmetic, exact date window calculations (30 days prior and 30 days post sale), and cross-account CUSIP matching require 100% deterministic accuracy."
   },
   {
     "id": "cs-fin-018",
@@ -523,7 +540,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/few-shot-examples"
-    ]
+    ],
+    "hint": "Core Rule (Few-Shot & Chain-of-Thought Prompt Templates for Wealth Advisors): In Gemini Enterprise Agent Designer and CX Agent Studio, combining structured system instructions, explicit negative constraints (guardrails against promissory financial language), chain-of-thought instructions, and high-quality few-shot exemplars ensures consistent formatting, tone, and regulatory compliance across generated reports."
   },
   {
     "id": "cs-fin-019",
@@ -552,7 +570,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/deploy"
-    ]
+    ],
+    "hint": "Core Rule (Selecting Deployment Runtime: Agent Runtime vs. GKE): FinServe Global's solution concept explicitly standardizes on ADK deployed on Agent Runtime."
   },
   {
     "id": "cs-fin-020",
@@ -581,7 +600,8 @@
     "refs": [
       "https://cloud.google.com/security-command-center/docs/model-armor-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Indirect Prompt Injection from External Market News): Indirect prompt injection occurs when untrusted third-party data retrieved via RAG or web search contains adversarial instructions."
   },
   {
     "id": "cs-fin-021",
@@ -610,7 +630,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/architecture/ai-ml"
-    ]
+    ],
+    "hint": "Core Rule (Agent Registry for Governance & Capability Discovery): Agent Registry serves as the central catalog and governance plane for enterprise agentic ecosystems on Google Cloud."
   },
   {
     "id": "cs-fin-022",
@@ -639,7 +660,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/trace/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Monitoring & Troubleshooting Context Drift in Production): Production agentic systems require continuous observability and online evaluation to catch data drift, market regime shifts, and context degradation."
   },
   {
     "id": "cs-fin-023",
@@ -659,7 +681,7 @@
     "answer": [
       0
     ],
-    "explanation": "Gemini 1.5 Pro natively supports multimodal inputs\u2014including high-resolution PDF pages with complex financial tables, images, and audio recordings\u2014within a single context window. By combining native multimodal understanding with structured outputs (JSON schema enforcement), FinServe automates onboarding data extraction while reducing manual advisor research time by 70%.",
+    "explanation": "Gemini 1.5 Pro natively supports multimodal inputs—including high-resolution PDF pages with complex financial tables, images, and audio recordings—within a single context window. By combining native multimodal understanding with structured outputs (JSON schema enforcement), FinServe automates onboarding data extraction while reducing manual advisor research time by 70%.",
     "whyWrong": {
       "1": "Manual transcription defeats the business requirement to reduce wealth advisor manual work by 70%.",
       "2": "Legacy OCR loses spatial table relationships (matching tickers to cost basis columns) and cannot process voice memos.",
@@ -668,7 +690,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal Document Ingestion for Client Onboarding): Gemini 1.5 Pro natively supports multimodal inputs—including high-resolution PDF pages with complex financial tables, images, and audio recordings—within a single context window."
   },
   {
     "id": "cs-fin-024",
@@ -697,7 +720,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security",
       "https://cloud.google.com/vpc/docs/private-service-connect"
-    ]
+    ],
+    "hint": "Core Rule (Securing Inter-Agent Communication via Agent Gateway): FinServe Global's technical requirements state that all agent ingress, egress, and inter-agent traffic must route through Agent Gateway for centralized telemetry, rate limiting, and anomaly detection."
   },
   {
     "id": "cs-fin-025",
@@ -717,7 +741,7 @@
     "answer": [
       2
     ],
-    "explanation": "In FinServe Global's executive statement, trust and regulatory precision are non-negotiable\u2014agents must never hallucinate financial advice. Implementing bounded retries with graceful degradation allows the Supervisor to deliver verified available data (the portfolio summary) within the sub-2-second SLA while explicitly and transparently disclosing that the tax simulation component is pending retry.",
+    "explanation": "In FinServe Global's executive statement, trust and regulatory precision are non-negotiable—agents must never hallucinate financial advice. Implementing bounded retries with graceful degradation allows the Supervisor to deliver verified available data (the portfolio summary) within the sub-2-second SLA while explicitly and transparently disclosing that the tax simulation component is pending retry.",
     "whyWrong": {
       "0": "Exposing raw stack traces and internal schema names leaks sensitive infrastructure details and degrades user experience.",
       "1": "Fabricating financial or tax figures is a severe compliance violation and directly contradicts the executive mandate against hallucinated advice.",
@@ -726,6 +750,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview",
       "https://cloud.google.com/architecture/framework/reliability"
-    ]
+    ],
+    "hint": "Core Rule (Handling Partial Subagent Failures Gracefully in ADK): In FinServe Global's executive statement, trust and regulatory precision are non-negotiable—agents must never hallucinate financial advice."
   }
 ]

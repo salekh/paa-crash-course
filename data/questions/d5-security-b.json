@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/storage/docs/access-control/iam-roles"
-    ]
+    ],
+    "hint": "Core Rule (Principal Access Boundary (PAB) & Multi-Tenant RAG Isolation): Binding a session-scoped Principal Access Boundary (PAB) policy derived from the authenticated user's JWT claims ensures that even if prompt injection manipulates the vector search metadata filter or URI arguments, Google Cloud IAM deterministically blocks the agent's service account from reading any Cloud Storage bucket outside the caller's authorized tenant boundary."
   },
   {
     "id": "d5-sec-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/web-risk/docs"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Guardrails for Malicious URL & Phishing Generation): Model Armor inline response guardrails can inspect LLM completions for embedded URIs, cross-referencing against Google Web Risk / Safe Browsing threat intelligence and enforcing strict domain allowlists so unauthorized or phishing links are neutralized before delivery."
   },
   {
     "id": "d5-sec-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/auth-manager",
       "https://datatracker.ietf.org/doc/html/rfc6749"
-    ]
+    ],
+    "hint": "Core Rule (Auth Manager OAuth 2.0 Scopes & Token Downscoping): Principle of least privilege in multi-agent systems requires scoping tokens to the exact capabilities needed by each sub-agent."
   },
   {
     "id": "d5-sec-029",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/creating-custom-infotypes",
       "https://cloud.google.com/sensitive-data-protection/docs/creating-custom-infotypes-dictionary"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection (DLP) Custom InfoTypes & Dictionaries): Sensitive Data Protection (Cloud DLP) supports Custom InfoType Detectors, including regular expressions for structured internal identifiers and Cloud Storage-backed Custom Dictionary detectors capable of matching tens of thousands of proprietary terms or codenames at low latency."
   },
   {
     "id": "d5-sec-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/workflows/docs/tutorials/callbacks-human-in-the-loop",
       "https://cloud.google.com/iam/docs/separation-of-duties"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Dual-Authorization & Timeout Escalation): Cloud Workflows / Agent Engine callback gates support deterministic state persistence, configurable timeouts (e.g., 4 hours without holding open HTTP connections), and programmatic identity verification ensuring two distinct authenticated principals (`approver_1.sub != approver_2.sub`) sign off before execution proceeds."
   },
   {
     "id": "d5-sec-031",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/kms/docs/create-validate-signatures",
       "https://cloud.google.com/security/zero-trust"
-    ]
+    ],
+    "hint": "Core Rule (A2A Context Integrity & Preventing Parameter Tampering): End-to-end payload integrity across distributed A2A hops is guaranteed by signing the canonical transaction payload (JWS) with an asymmetric key protected in Cloud KMS."
   },
   {
     "id": "d5-sec-032",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/quotas"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Quota Governance & Cost Attribution): An AI-aware Agent Gateway enables both granular FinOps cost attribution (extracting token counts from Vertex AI usage metadata and tagging metrics per authenticated tenant/business unit) and dynamic policy-driven routing (gracefully degrading model tiers from Pro to Flash when budget thresholds are breached)."
   },
   {
     "id": "d5-sec-033",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy"
-    ]
+    ],
+    "hint": "Core Rule (Mitigating SSRF & Metadata Server Exploitation in Agent Tools): Preventing SSRF against cloud metadata services requires defense-in-depth: (1) GKE Workload Identity replaces broad node-level metadata credentials with least-privilege pod identities, (2) Network Policies / egress firewalls block pod traffic to the metadata server (`169.254.169.254`) and internal RFC 1918 networks, and (3) DNS resolution validation prevents DNS rebinding attacks."
   },
   {
     "id": "d5-sec-034",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/security-command-center/docs/model-armor-concepts"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Defense Against Jailbreaks & Roleplay Attacks): Model Armor includes specialized deep-learning classifiers trained specifically on adversarial jailbreaks, hypothetical roleplay framing, and persona-hijacking techniques, evaluating both single-turn and multi-turn conversational context to block attacks deterministically."
   },
   {
     "id": "d5-sec-035",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
       "https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.deidentifyTemplates#cryptohashconfig"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection (DLP) De-Identification in BigQuery Analytics): `CryptoHashConfig` in Sensitive Data Protection (Cloud DLP) produces deterministic cryptographic hashes using a secret KMS-managed key, allowing data scientists to join records across BigQuery tables on the pseudonymized hash without exposing the underlying customer identifier, while free-text PII is redacted."
   },
   {
     "id": "d5-sec-036",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/iam/docs/service-account-impersonation"
-    ]
+    ],
+    "hint": "Core Rule (Principal Access Boundary (PAB) & Service Account Impersonation Chains): Google Cloud IAM enforces Principal Access Boundaries across delegation and impersonation chains by computing the intersection of boundaries."
   },
   {
     "id": "d5-sec-037",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/webhook#mtls",
       "https://cloud.google.com/dialogflow/cx/docs/concept/webhook#oauth"
-    ]
+    ],
+    "hint": "Core Rule (Securing Agent Webhooks with Mutual TLS (mTLS) & Identity Tokens): CX Agent Studio / Dialogflow CX webhooks natively support both transport-layer Mutual TLS (mTLS) with custom client certificates/CA verification and application-layer Google-signed OIDC ID tokens, providing dual-layer cryptographic assurance."
   },
   {
     "id": "d5-sec-038",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Denial-of-Wallet via Recursive Tool Loops): Deterministic loop prevention in distributed A2A systems requires tracking call depth (`hop_count`) and cumulative token/cost consumption keyed by session `correlation_id` at the orchestrator/gateway boundary, enforcing hard upper bounds independent of LLM reasoning."
   },
   {
     "id": "d5-sec-039",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor & Indirect Injection via Multimodal Image Inputs): Mitigating multimodal visual injection requires (1) extracting embedded visual text for Model Armor injection scanning, (2) using Vertex AI Controlled Generation (`response_schema`) so the multimodal model can only emit constrained damage classification enums rather than free-form tool calls, and (3) decoupling financial payout execution into a deterministic rules engine or HITL workflow."
   },
   {
     "id": "d5-sec-040",
@@ -434,7 +448,8 @@
     "refs": [
       "https://cloud.google.com/confidential-computing/confidential-vm/docs/about-cvm",
       "https://cloud.google.com/confidential-computing/confidential-space/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Confidential Computing & Encryption in Use for Sensitive Agent Workloads): Confidential GKE Nodes / Confidential Space leverage hardware-enforced memory encryption (AMD SEV-SNP / Intel TDX) to protect data in use (in RAM), while Cloud KMS attestation policies cryptographically verify hardware TEE measurements before authorizing key release."
   },
   {
     "id": "d5-sec-041",
@@ -465,7 +480,8 @@
     "refs": [
       "https://cloud.google.com/sql/docs/postgres/iam-authentication",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder/security"
-    ]
+    ],
+    "hint": "Core Rule (Least-Privilege Tool Design & SQL Injection Prevention in Text-to-SQL Agents): Securing Text-to-SQL agents requires database-layer least privilege (connecting exclusively via a read-only `SELECT`-only database role with RLS) combined with deterministic AST syntax validation (`sqlglot`) to block multi-statement injections and DDL/DML operations prior to database submission."
   },
   {
     "id": "d5-sec-042",
@@ -494,7 +510,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/row-level-security-intro",
       "https://cloud.google.com/agent-builder/docs/auth-manager"
-    ]
+    ],
+    "hint": "Core Rule (Identity Propagation & Cloud Audit Logs Attribution for BigQuery Tools): When BigQuery jobs are executed using the authenticated end-user's OAuth 2.0 access token (or federated user credential via Auth Manager), BigQuery evaluates IAM permissions and Row-Level Security (`SESSION_USER()`) against the human user (`smith@hospital.org`) and records the human principal directly in immutable Cloud Audit Logs."
   },
   {
     "id": "d5-sec-043",
@@ -523,7 +540,8 @@
     "refs": [
       "https://cloud.google.com/security-command-center/docs/model-armor-concepts",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Integration with Security Command Center (SCC)): Model Armor integrates natively with Security Command Center (SCC) and Cloud Logging, emitting structured security findings whenever prompt injection, jailbreak, or data safety violations occur, enabling centralized SOC visibility and automated SOAR response."
   },
   {
     "id": "d5-sec-044",
@@ -552,7 +570,8 @@
     "refs": [
       "https://cloud.google.com/storage/docs/lifecycle",
       "https://cloud.google.com/iam/docs/downscoping-short-lived-credentials"
-    ]
+    ],
+    "hint": "Core Rule (Governing Ephemeral Artifacts & File Uploads in Agent Sessions): Combining Cloud Storage Object Lifecycle rules (automated 1-day deletion), asynchronous malware inspection on upload, and session-scoped downscoped credentials / PAB policies ensures strict isolation and guaranteed expiration of sensitive user uploads."
   },
   {
     "id": "d5-sec-045",
@@ -581,7 +600,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder/security",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
-    ]
+    ],
+    "hint": "Core Rule (Protecting Against Prompt Extraction & System Instruction Leakage): Any secret, credential, or proprietary algorithm placed inside an LLM context window is fundamentally exposed to probabilistic extraction."
   },
   {
     "id": "d5-sec-046",
@@ -610,7 +630,8 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/templates"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway Canary Rollouts & Shadow Security Testing): Traffic mirroring (shadow testing) combined with audit-only mode at the Agent Gateway allows evaluating real-world false-positive rates, token latency, and guardrail triggers on live production payloads asynchronously without impacting customer-facing responses."
   },
   {
     "id": "d5-sec-047",
@@ -639,7 +660,8 @@
     "refs": [
       "https://cloud.google.com/workflows/docs/tutorials/callbacks-human-in-the-loop",
       "https://cloud.google.com/run/docs/authenticating/service-to-service"
-    ]
+    ],
+    "hint": "Core Rule (Securing Long-Running Asynchronous Agent Callbacks): Securing asynchronous webhook callbacks requires authenticating the sender (via OIDC identity tokens or mutual HMAC signatures) and binding the callback to a single-use cryptographic nonce/state token generated when the task was suspended, preventing unauthorized spoofed resumptions and replay attacks."
   },
   {
     "id": "d5-sec-048",
@@ -668,7 +690,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/locations",
       "https://cloud.google.com/resource-manager/docs/organization-policy/defining-locations"
-    ]
+    ],
+    "hint": "Core Rule (Data Residency & Sovereign Controls for Multi-Region Agents): Guaranteed data residency requires Organization Policy location constraints (`gcp.resourceLocations`), explicit binding to regional Vertex AI / Model Armor endpoints (`europe-west4-aiplatform.googleapis.com`), and EU-regionalized Cloud Logging buckets with EU-hosted KMS keys."
   },
   {
     "id": "d5-sec-049",
@@ -699,7 +722,8 @@
     "refs": [
       "https://cloud.google.com/binary-authorization/docs/overview",
       "https://cloud.google.com/artifact-registry/docs/analysis"
-    ]
+    ],
+    "hint": "Core Rule (Governing Third-Party Agent Plugins & Supply Chain Security): Securing the agent tool supply chain requires (1) Binary Authorization with Artifact Analysis and SLSA build provenance attestations to ensure only trusted, vulnerability-scanned images run, and (2) runtime network containment (VPC-SC and egress firewalls) so even a compromised dependency cannot phone home."
   },
   {
     "id": "d5-sec-050",
@@ -728,6 +752,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/general/access-control",
       "https://cloud.google.com/iam/docs/using-iam-securely"
-    ]
+    ],
+    "hint": "Core Rule (Least-Privilege Access for Vector Search Index Updates): Separation of duties between data ingestion (write/mutate index) and runtime inference (read/query index) ensures that even if the runtime query agent is compromised via prompt injection, it lacks IAM permissions to poison or overwrite the underlying vector knowledge base."
   }
 ]

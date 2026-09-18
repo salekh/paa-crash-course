@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/layout-parser",
       "https://cloud.google.com/document-ai/docs/layout-parser-overview"
-    ]
+    ],
+    "hint": "Core Rule (RAG Engine Ingestion & Chunking): Vertex AI RAG Engine natively integrates with Document AI Layout Parser during document ingestion (`ImportRagFiles`)."
   },
   {
     "id": "d3-rag-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/hybrid-search",
       "https://cloud.google.com/vertex-ai/docs/vector-search/overview"
-    ]
+    ],
+    "hint": "Core Rule (Vector Search 1.0 Hybrid Search): Vertex AI Vector Search 1.0 supports Hybrid Search by storing both dense vector embeddings (for semantic understanding) and sparse embeddings (token-level frequency representations like BM25 or SPLADE for exact keyword, SKU, and fault code matching) within the same index datapoint."
   },
   {
     "id": "d3-rag-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/filtering",
       "https://cloud.google.com/vertex-ai/docs/vector-search/create-manage-index"
-    ]
+    ],
+    "hint": "Core Rule (Vector Search 1.0 Metadata Filtering): Vertex AI Vector Search 1.0 supports token-based boolean filtering via `restricts` (string namespaces for categorical exact matches like `tenant_id` and `status`) and range comparisons via `numeric_restricts` (for integers/floats like `execution_year`)."
   },
   {
     "id": "d3-rag-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent Retrieval Semantic Routing): A hybrid semantic router uses fast vector similarity against canonical route exemplars for low-latency single-intent routing, and falls back to Gemini Flash structured output (`response_schema`) when a query spans multiple domains or falls below similarity thresholds, decomposing multi-part queries into targeted sub-queries."
   },
   {
     "id": "d3-rag-005",
@@ -144,7 +148,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/ranking",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview"
-    ]
+    ],
+    "hint": "Core Rule (RAG Engine Reranking & Grounded Generation): Two-stage retrieval (bi-encoder vector search retrieving `top_k=40` followed by a cross-encoder reranker via Vertex AI Ranking API / `ranking_config`) dramatically improves precision in the final top-K chunks passed to the LLM."
   },
   {
     "id": "d3-rag-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/update-rebuild-index",
       "https://cloud.google.com/vertex-ai/docs/vector-search/create-manage-index"
-    ]
+    ],
+    "hint": "Core Rule (Vector Search 1.0 Streaming vs Batch Index Updates): Vertex AI Vector Search 1.0 supports two update methods: `BATCH_UPDATE` and `STREAM_UPDATE`."
   },
   {
     "id": "d3-rag-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/configure-index",
       "https://cloud.google.com/vertex-ai/docs/vector-search/scann-explained"
-    ]
+    ],
+    "hint": "Core Rule (Vector Search 1.0 ScaNN Tuning Parameters): In ScaNN Tree-AH indices, `leafNodesToSearchPercent` controls the percentage of leaf partitions searched during a query."
   },
   {
     "id": "d3-rag-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/choose-vector-db",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
-    ]
+    ],
+    "hint": "Core Rule (RAG Engine Vector DB Backends): While `RagManagedDb` is ideal for rapid prototyping and moderate workloads, enterprise production workloads requiring tens of millions of vectors, custom ScaNN shard sizing, Private Service Connect / VPC peering, and CMEK should configure the Vertex AI RAG Engine Corpus to use an enterprise Vertex AI Vector Search 1.0 Index or Feature Store / AlloyDB / Cloud SQL pgvector backend."
   },
   {
     "id": "d3-rag-009",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-multimodal-embeddings",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/design-multimodal-prompts"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal RAG Ingestion & Retrieval): For complex technical diagrams (like wiring schematics), a dual-indexing multimodal RAG pattern works best: Gemini 1.5 Pro generates rich textual descriptions of the visual diagram (capturing pin numbers, connections, and labels for high lexical/semantic recall) alongside multimodal embeddings (`multimodalembedding@001`)."
   },
   {
     "id": "d3-rag-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/setup-private-service-connect",
       "https://cloud.google.com/vpc/docs/private-service-connect"
-    ]
+    ],
+    "hint": "Core Rule (Vector Search 1.0 Private Networking): Private Service Connect (PSC) is the recommended enterprise networking architecture for Vertex AI Vector Search Index Endpoints in Shared VPC and multi-project environments."
   },
   {
     "id": "d3-rag-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview",
       "https://cloud.google.com/generative-ai-app-builder/docs/configure-access-control"
-    ]
+    ],
+    "hint": "Core Rule (RAG Engine Access Control & Document ACLs): Document-level security in RAG requires propagating source ACLs (user IDs and group principals) into the vector index metadata during ingestion and applying deterministic pre-filtering at retrieval time based on the authenticated user's verified IAM/OIDC identity and group memberships."
   },
   {
     "id": "d3-rag-012",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/task-types"
-    ]
+    ],
+    "hint": "Core Rule (Embedding Task Types & Dimensionality): Vertex AI `text-embedding-004` uses asymmetric task types (`RETRIEVAL_DOCUMENT` for corpus documents and `RETRIEVAL_QUERY` for search queries) to align query and document vector spaces."
   },
   {
     "id": "d3-rag-013",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/create-manage-index#shard-size",
       "https://cloud.google.com/vertex-ai/docs/vector-search/deploy-index-public"
-    ]
+    ],
+    "hint": "Core Rule (Vector Search 1.0 Shard Sizing & Machine Types): 100 million 768-dimensional vectors require roughly 307 GB of raw vector data plus index overhead and metadata."
   },
   {
     "id": "d3-rag-014",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent Retrieval Query Decomposition & Multi-Hop RAG): Multi-hop questions where the second entity is unknown until the first hop is resolved cannot be answered by single-shot similarity search."
   },
   {
     "id": "d3-rag-015",
@@ -434,7 +448,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/layout-parser",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
-    ]
+    ],
+    "hint": "Core Rule (Contextual Retrieval & Parent-Child Chunking): Contextual Chunking (prepending hierarchical breadcrumbs or LLM-generated document context headers to every chunk before embedding) and Parent-Child Chunking (searching over small granular child chunks for high vector similarity, but returning the parent section/window to the LLM) are industry-standard agentic RAG architectures that eliminate orphan pronouns and scope ambiguity."
   },
   {
     "id": "d3-rag-016",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/filtering#crowding",
       "https://cloud.google.com/vertex-ai/docs/vector-search/query-index"
-    ]
+    ],
+    "hint": "Core Rule (Vector Search 1.0 Crowding Attribute): Vertex AI Vector Search 1.0 natively supports result diversity via Crowding."
   },
   {
     "id": "d3-rag-017",
@@ -494,7 +510,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/import-files",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
-    ]
+    ],
+    "hint": "Core Rule (RAG Engine Ingestion Data Sources & Sync): Vertex AI RAG Engine `ImportRagFiles` natively supports ingesting files from Google Cloud Storage (`GcsSource`), Google Drive (`GoogleDriveSource`), Slack (`SlackSource`), and Jira (`JiraSource`), handling parsing, chunking, and embedding generation automatically."
   },
   {
     "id": "d3-rag-018",
@@ -523,7 +540,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluate-rag"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating RAG Quality with Vertex AI Gen AI Evaluation Service): The RAG Triad evaluation framework supported by Vertex AI Gen AI Evaluation Service decouples retrieval quality from generation quality: Context Relevance (and Context Recall) measures whether the retriever fetched the right chunks for the question, while Groundedness (Faithfulness) measures whether the LLM's generated answer contains any unverified claims outside the retrieved context."
   },
   {
     "id": "d3-rag-019",
@@ -552,7 +570,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/manage-rag-files",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1beta1/projects.locations.ragCorpora.ragFiles/delete"
-    ]
+    ],
+    "hint": "Core Rule (Handling Stale Documents & Lifecycle in RAG Engine): Importing a new file into a RAG Corpus adds new vector chunks without automatically deleting older files with different names."
   },
   {
     "id": "d3-rag-020",
@@ -581,7 +600,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/configure-index#distance-measure-type",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings"
-    ]
+    ],
+    "hint": "Core Rule (Vector Search 1.0 Distance Metrics & Normalization): When vectors are unit-normalized (L2 norm = 1.0), the cosine similarity between two vectors is identical to their dot product ($u \\cdot v$)."
   },
   {
     "id": "d3-rag-021",
@@ -610,7 +630,8 @@
     "refs": [
       "https://cloud.google.com/spanner/docs/graph/overview",
       "https://cloud.google.com/blog/products/databases/using-spanner-graph-with-langchain-for-graphrag"
-    ]
+    ],
+    "hint": "Core Rule (Hybrid RAG over Unstructured Docs and Knowledge Graphs): GraphRAG combines vector similarity search (ideal for semantic passage discovery) with knowledge graph traversal (using Spanner Graph or graph databases to deterministically traverse multi-hop relationships like Malware -> C2 -> Threat Actor)."
   },
   {
     "id": "d3-rag-022",
@@ -639,7 +660,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Agentic Query Rewriting & HyDE (Hypothetical Document Embeddings)): Query Rewriting and Hypothetical Document Embeddings (HyDE) use a fast LLM call (e.g., Gemini 1.5 Flash) to bridge the lexical and semantic gap between novice user vocabulary and expert corpus terminology before generating the retrieval embedding, dramatically improving recall."
   },
   {
     "id": "d3-rag-023",
@@ -668,7 +690,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/retrieve-contexts",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1beta1/RetrieveContextsRequest"
-    ]
+    ],
+    "hint": "Core Rule (RAG Engine Grounding Threshold & Fallback Handling): Vertex AI RAG Engine `RagRetrievalConfig` supports specifying a `vector_distance_threshold` / `vector_similarity_threshold`."
   },
   {
     "id": "d3-rag-024",
@@ -697,7 +720,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/enterprise-search-introduction",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
-    ]
+    ],
+    "hint": "Core Rule (Enterprise Search vs Custom RAG Engine Tradeoffs): Vertex AI Search provides a turnkey, fully managed search and RAG experience with out-of-the-box data connectors, automated document parsing/chunking, built-in ranking, and embeddable UI widgets—ideal when rapid time-to-market and minimal ML engineering overhead are prioritized over low-level custom RAG pipeline control."
   },
   {
     "id": "d3-rag-025",
@@ -726,6 +750,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/rag-overview"
-    ]
+    ],
+    "hint": "Core Rule (Long-Context Gemini vs RAG Engine Cost & Latency Optimization): Combining Vertex AI Context Caching (for high-frequency, shared static background instructions/definitions at a steep token discount and near-instant TTFT) with Vertex AI RAG Engine (to dynamically fetch the specific statutory clauses relevant to each user query) achieves the optimal balance of sub-second retrieval latency, low token cost, and high accuracy."
   }
 ]

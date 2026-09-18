@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/security-command-center/docs/model-armor-concepts"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Inline Inspection of RAG Context Chunks): Indirect prompt injection originates from untrusted external or shared data sources (like Jira comments or web pages) retrieved during RAG or tool execution."
   },
   {
     "id": "d5-arm-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/creating-custom-infotypes-rules",
       "https://cloud.google.com/sensitive-data-protection/docs/concepts-infotypes-likelihood"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection Hotword & Proximity Tuning): Sensitive Data Protection `InspectionRuleSet` supports `HotwordRule` (adjusting match likelihood upward or downward based on surrounding contextual keywords within a configurable character window) and `ExclusionRule` (excluding matches that fit known benign regexes or dictionaries), dramatically reducing false positives on structured internal identifiers."
   },
   {
     "id": "d5-arm-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/reidentify-sensitive-data",
       "https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.deidentifyTemplates#cryptodeterministicconfig"
-    ]
+    ],
+    "hint": "Core Rule (Deterministic Surrogate Re-Identification in Multi-Step Tool Calls): `CryptoDeterministicConfig` enables reversible cryptographic surrogate tokenization backed by a KMS-wrapped key (`KmsWrappedCryptoKey`)."
   },
   {
     "id": "d5-arm-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/templates",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Custom Phrase & Regex Guardrails for Financial Compliance): Model Armor templates allow defining custom regex and phrase blocklists tailored to industry-specific compliance rules (like FINRA/SEC promissory language restrictions) and applying them deterministically on model responses (`sanitizeModelResponse`)."
   },
   {
     "id": "d5-arm-005",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.deidentifyTemplates#cryptoreplaceffxfpeconfig",
       "https://cloud.google.com/sensitive-data-protection/docs/concepts-tokenization"
-    ]
+    ],
+    "hint": "Core Rule (Format-Preserving Encryption (FPE) for Database-Backed Agent Tools): `CryptoReplaceFfxFpeConfig` implements Format-Preserving Encryption (FPE) over a specified alphabet (`NUMERIC`, `ALPHA_NUMERIC`, etc.)."
   },
   {
     "id": "d5-arm-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://unicode.org/reports/tr15/"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Defense Against Encoded & Obfuscated Jailbreaks): Defeating obfuscated jailbreaks requires combining input canonicalization (Unicode NFKC normalization, stripping zero-width characters, and decoding base64/hex payloads) with Model Armor's semantic classifier, which identifies malicious instruction patterns across diverse linguistic and encoded representations."
   },
   {
     "id": "d5-arm-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-structured-data",
       "https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.deidentifyTemplates#recordtransformations"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection Inspection of Structured Tool JSON Payloads): Sensitive Data Protection supports structured `RecordTransformations` / `FieldTransformation` rules that target specific field paths (e.g., applying deterministic encryption to `ssn`) while simultaneously applying free-text infoType scanning to unstructured notes fields, preserving the structural JSON validity."
   },
   {
     "id": "d5-arm-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/text-to-speech/docs/streaming-tts"
-    ]
+    ],
+    "hint": "Core Rule (Handling Model Armor Streaming Responses & Latency Trade-offs): Sentence-level / sliding-window chunk buffering with overlap allows the TTS engine to begin speaking the first validated sentence within ~300-400ms while guaranteeing that no sentence or multi-token entity (like a 16-digit credit card spanning chunk boundaries) is vocalized before passing Model Armor and DLP checks."
   },
   {
     "id": "d5-arm-009",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/create-wrapped-key",
       "https://cloud.google.com/kms/docs/separation-of-duties"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection KmsWrappedCryptoKey & Separation of Duties): Using `KmsWrappedCryptoKey` enforces cryptographic separation of duties: the DLP template contains only the KMS-encrypted (wrapped) key ciphertext."
   },
   {
     "id": "d5-arm-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/templates"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Guardrails for Code Generation & Injection Prevention): Model Armor combines built-in Dangerous Content / Malicious Code detection with custom regex blocklists on model outputs (`sanitizeModelResponse`), deterministically blocking reverse shell payloads and privilege-escalation commands before they are returned to the developer."
   },
   {
     "id": "d5-arm-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/redacting-sensitive-data-images",
       "https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.image/redact"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection Image Redaction in Multimodal Agents): Sensitive Data Protection's `image.redact` API performs OCR inspection on images and renders opaque pixel bounding boxes directly over detected PII infoTypes (`US_DRIVERS_LICENSE_NUMBER`, `STREET_ADDRESS`), ensuring the downstream multimodal LLM and storage buckets only ever receive visually redacted images."
   },
   {
     "id": "d5-arm-012",
@@ -349,7 +360,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/workflows/docs/tutorials/callbacks-human-in-the-loop"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Indirect Prompt Injection via Email Summarization Agents): Defending email-processing agents against indirect injection requires (1) structural HTML sanitization and inline Model Armor scanning to strip hidden text and flag injection instructions before context ingestion, and (2) strict HITL approval gating on high-risk outbound actions (`gmail.send`) so unauthorized external exfiltration cannot occur silently."
   },
   {
     "id": "d5-arm-013",
@@ -378,7 +390,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/templates",
       "https://cloud.google.com/docs/terraform"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Template Versioning & Regional Deployment): Deploying regionalized, version-controlled Model Armor templates (`locations/<region>/templates/<id>`) via Terraform ensures sub-10ms local inspection latency, strict regional data residency compliance, and reproducible auditability across environments."
   },
   {
     "id": "d5-arm-014",
@@ -407,7 +420,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.deidentifyTemplates#dateshiftconfig",
       "https://cloud.google.com/sensitive-data-protection/docs/concepts-date-shifting"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection Date Shifting for Temporal Reasoning): `DateShiftConfig` shifts dates by a random number of days within a specified range, but when scoped to a patient identifier (`context` field), every date belonging to that patient is shifted by the exact same offset."
   },
   {
     "id": "d5-arm-015",
@@ -436,7 +450,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/templates",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Guardrails for PII Leakage in Model Completions): Model Armor integrates Sensitive Data Protection (SDP) directly into its guardrail templates."
   },
   {
     "id": "d5-arm-016",
@@ -465,7 +480,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/generative-ai-app-builder/docs/data-stores-overview"
-    ]
+    ],
+    "hint": "Core Rule (Securing RAG Knowledge Bases Against Poisoning Attacks): Shift-left security in RAG pipelines requires scanning documents at ingestion time using Model Armor and malicious command detectors before they are embedded and indexed into Vertex AI Search, preventing poisoned knowledge chunks from ever entering the retrieval corpus."
   },
   {
     "id": "d5-arm-017",
@@ -494,7 +510,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.deidentifyTemplates#bucketingconfig",
       "https://cloud.google.com/sensitive-data-protection/docs/reference/rest/v2/projects.deidentifyTemplates#fixedsizebucketingconfig"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection Bucketing & Generalization for Analytics Agents): `BucketingConfig` and `FixedSizeBucketingConfig` generalize continuous numerical values into discrete intervals (e.g., `125000-150000`), achieving k-anonymity / generalization so the LLM can perform range-based statistical reasoning without seeing exact individual salaries."
   },
   {
     "id": "d5-arm-018",
@@ -523,7 +540,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/templates",
       "https://github.com/google/re2/wiki/WhyRE2"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Guardrails Against Denial-of-Service Token Bombs): Google Cloud Model Armor and Cloud DLP utilize Google's RE2 regular expression engine, which guarantees linear-time $O(n)$ execution and is immune to ReDoS catastrophic backtracking."
   },
   {
     "id": "d5-arm-019",
@@ -552,7 +570,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/data-profiles",
       "https://cloud.google.com/bigquery/docs/column-level-security-intro"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection Profiling for BigQuery Agent Data Stores): Sensitive Data Protection Automated Data Profiling continuously discovers, classifies, and profiles BigQuery tables across projects, automatically tagging high-sensitivity columns so governance teams can apply IAM/PAB restrictions or column-level security before exposing datasets to AI agents."
   },
   {
     "id": "d5-arm-020",
@@ -583,7 +602,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output"
-    ]
+    ],
+    "hint": "Core Rule (Contextual Grounding & Hallucination Guardrails in High-Stakes Agents): Preventing dangerous hallucinations in regulated domains requires combining Vertex AI Grounding attribution scoring (rejecting ungrounded claims) with programmatic schema enforcement (`response_schema` with verified `citation_chunk_id` / quote validation at the gateway)."
   },
   {
     "id": "d5-arm-021",
@@ -612,7 +632,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/security-command-center/docs/model-armor-concepts"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Guardrails for Multi-Turn Conversational Context Drift): Multi-turn payload splitting (crescendo / variable-assembly attacks) exploits stateless single-turn filters."
   },
   {
     "id": "d5-arm-022",
@@ -641,7 +662,8 @@
     "refs": [
       "https://cloud.google.com/speech-to-text/docs/time-offsets",
       "https://cloud.google.com/sensitive-data-protection/docs/inspecting-text"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection De-Identification of Audio Transcripts in Voice Agents): Combining Speech-to-Text word-level time offsets (`startOffset`, `endOffset`) with Sensitive Data Protection infoType detection pinpoints the exact millisecond intervals where sensitive numbers were spoken, allowing deterministic audio zeroing/silencing of those specific segments while preserving the rest of the call recording for QA."
   },
   {
     "id": "d5-arm-023",
@@ -670,7 +692,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/templates",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Custom Blocklists vs Semantic Classifiers): Defense-in-depth combines deterministic pattern matching (Custom Word/Regex blocklists for exact codenames, prohibited competitors, or structured patterns) with probabilistic deep-learning classifiers (Prompt Injection / Jailbreak filters for semantic intent and adversarial paraphrasing)."
   },
   {
     "id": "d5-arm-024",
@@ -701,7 +724,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini-supervised-tuning"
-    ]
+    ],
+    "hint": "Core Rule (Sensitive Data Protection De-Identification in Vertex AI Fine-Tuning Datasets): Preventing PII memorization in fine-tuned LLMs requires pre-training sanitization (batch Cloud DLP de-identification replacing PII with realistic synthetic/surrogate tokens) paired with a deterministic verification gate (blocking tuning job submission if a secondary DLP scan detects any residual PII)."
   },
   {
     "id": "d5-arm-025",
@@ -730,6 +754,7 @@
     "refs": [
       "https://cloud.google.com/apigee/docs/api-platform/AI-gateway/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Fail-Closed vs Fail-Open Resiliency Architecture): High-security and classified workloads require strict `FAIL_CLOSED` gateway semantics so an attacker cannot trigger a guardrail timeout (e.g., via volumetric traffic) to bypass inspection."
   }
 ]

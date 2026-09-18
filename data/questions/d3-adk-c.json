@@ -25,7 +25,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/callbacks/before-tool-callback/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Callbacks & Tool Argument Injection): In Google Cloud ADK, `before_tool_callback` receives `(tool, args, tool_context)` where `args` is the mutable Python dictionary of arguments extracted from the LLM's `FunctionCall`."
   },
   {
     "id": "d3-adk-052",
@@ -53,7 +54,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/tools/third-party-tools/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Third-Party Tool Ecosystem Interoperability): Google Cloud ADK provides built-in interoperability adapters for popular ecosystem libraries, including `LangchainTool` (in `google.adk.tools.langchain_tool`) and CrewAI/LlamaIndex wrappers."
   },
   {
     "id": "d3-adk-053",
@@ -81,7 +83,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/sessions/session/#databasesessionservice"
-    ]
+    ],
+    "hint": "Core Rule (ADK Session Persistence & DatabaseSessionService): ADK provides `DatabaseSessionService`, an out-of-the-box SQLAlchemy-backed implementation of `BaseSessionService` that supports relational databases including PostgreSQL (Cloud SQL / AlloyDB), MySQL, and SQLite."
   },
   {
     "id": "d3-adk-054",
@@ -110,7 +113,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/multi-agents/#programmatic-transfer",
       "https://google.github.io/adk-docs/events/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Deterministic Agent Handoff via EventActions): In Google Cloud ADK, `ToolContext` exposes `tool_context.actions` (an instance of `EventActions`)."
   },
   {
     "id": "d3-adk-055",
@@ -138,7 +142,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/callbacks/before-model-callback/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Context Window Management & History Sliding Window): In ADK, `before_model_callback` receives `llm_request: LlmRequest` right before the model API call is dispatched."
   },
   {
     "id": "d3-adk-056",
@@ -166,7 +171,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/tools/function-tools/"
-    ]
+    ],
+    "hint": "Core Rule (ADK FunctionTool Schema Generation & Docstrings): ADK's `FunctionTool` wrapper inspects Python's `inspect` module metadata and type hints (as well as Pydantic models if used) along with the function docstring."
   },
   {
     "id": "d3-adk-057",
@@ -194,7 +200,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/tools/google-cloud-tools/#application-integration"
-    ]
+    ],
+    "hint": "Core Rule (ADK Enterprise Integration via ApplicationIntegrationToolset): Google Cloud ADK provides native enterprise connector support through `ApplicationIntegrationToolset` (and `IntegrationConnectorTool`)."
   },
   {
     "id": "d3-adk-058",
@@ -222,7 +229,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/deploy/cloud-run/"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Cloud Run vs Vertex AI Agent Engine Deployment): When an ADK agent requires custom OS-level Linux packages (`apt-get install ffmpeg libreoffice`), custom sidecar containers, or custom Cloud Run volume mounts (Cloud Storage FUSE / Filestore NFS), deploying to Google Cloud Run (`adk deploy cloud_run` or custom container deployment) provides full Dockerfile customization while preserving serverless autoscaling and ADK's FastAPI HTTP/SSE endpoints."
   },
   {
     "id": "d3-adk-059",
@@ -250,7 +258,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/callbacks/before-agent-callback/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Short-Circuiting Agent Execution via BeforeAgentCallback): In Google Cloud ADK, `before_agent_callback` runs at the very beginning of an agent's execution (`_run_async_impl`)."
   },
   {
     "id": "d3-adk-060",
@@ -279,7 +288,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/send-multimodal-prompts#gs-uris",
       "https://google.github.io/adk-docs/artifacts/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Multimodal Cloud Storage URI Handling): Vertex AI Gemini models natively support reading multimodal files (videos, PDFs, audio, high-res images up to 2GB) directly from Google Cloud Storage (`gs://` URIs) using the service account permissions of the calling environment."
   },
   {
     "id": "d3-adk-061",
@@ -307,7 +317,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/tools/vertex-ai-rag-engine/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Vertex AI RAG Engine Retrieval Tool): ADK's `VertexAiRagRetrieval` tool integrates directly with Vertex AI RAG Engine corpora."
   },
   {
     "id": "d3-adk-062",
@@ -336,7 +347,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/state/#state-scopes",
       "https://google.github.io/adk-docs/callbacks/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Multi-Agent Infinite Loop Prevention): Because `temp:` state keys (`session.state['temp:transfer_count']`) are automatically scoped to the active turn/invocation and reset to zero on the next user turn, incrementing a counter in `temp:transfer_count` inside `before_agent_callback` (or intercepting `transfer_to_agent` in `before_tool_callback`) provides an exact count of intra-turn handoffs."
   },
   {
     "id": "d3-adk-063",
@@ -365,7 +377,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank",
       "https://google.github.io/adk-docs/sessions/memory/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Platform Memory Bank Episodic vs Semantic Memory): Unlike naive append-only vector databases that accumulate contradictory chunks over months of chatting (e.g., returning both 'User lives in Chicago' and 'User lives in Austin' with equal similarity scores), `VertexAiMemoryBankService` runs an intelligent LLM-driven memory consolidation and reconciliation pipeline."
   },
   {
     "id": "d3-adk-064",
@@ -393,7 +406,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/models/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Model Fallback & Resilience in Callbacks): ADK decouples agent orchestration from the underlying model implementation through the `BaseLlm` interface (`google.adk.models.BaseLlm` / `Gemini`)."
   },
   {
     "id": "d3-adk-065",
@@ -423,7 +437,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/tools/function-tools/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Tool Design Best Practices): LLM tool calling relies on the generated `FunctionDeclaration` schema and the returned `FunctionResponse` payload."
   },
   {
     "id": "d3-adk-066",
@@ -451,7 +466,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/callbacks/after-agent-callback/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Asynchronous Audit Logging via AfterAgentCallback): In Google Cloud ADK, `after_agent_callback` is invoked once at the completion of an agent's run (`_run_async_impl`), receiving the `CallbackContext` with full access to the final mutated `session.state` and invocation metadata."
   },
   {
     "id": "d3-adk-067",
@@ -479,7 +495,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/sessions/memory/#using-memory-in-your-agent"
-    ]
+    ],
+    "hint": "Core Rule (ADK PreloadMemoryTool vs Explicit Memory Tool): ADK provides `load_memory` (`LoadMemoryTool` in `google.adk.tools`), a built-in function tool that exposes `memory_service.search_memory(query=...)` directly to the LLM."
   },
   {
     "id": "d3-adk-068",
@@ -507,7 +524,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/get-started/quickstart/#run-your-agent"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Debugging with ADK Web UI): The `adk web` CLI command launches ADK's built-in interactive visual developer environment."
   },
   {
     "id": "d3-adk-069",
@@ -535,7 +553,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Iterative MapReduce Pattern with Parallel + Loop): ADK's workflow agents (`SequentialAgent`, `ParallelAgent`, `LoopAgent`) are fully composable `BaseAgent` subclasses that can be arbitrarily nested."
   },
   {
     "id": "d3-adk-070",
@@ -565,7 +584,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Headless CI/CD Evaluation Gating): Comprehensive automated agent evaluation in CI/CD requires validating both process and outcome: (1) `tool_trajectory_avg_score` verifies that the agent followed the expected sequence of tool calls with valid parameters (process correctness), and (2) `response_match_score` / LLM-as-a-judge semantic rubrics verify that the final synthesized response is accurate, helpful, and grounded (outcome correctness)."
   },
   {
     "id": "d3-adk-071",
@@ -594,7 +614,8 @@
     "refs": [
       "https://google.github.io/adk-docs/streaming/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/live-api"
-    ]
+    ],
+    "hint": "Core Rule (ADK Live API Barge-in & Interruption Handling): In ADK's bidirectional streaming architecture (`run_live()`), when the Gemini Live API's built-in Voice Activity Detection (VAD) detects that the user has started speaking while model audio is still generating/streaming, the server immediately halts ongoing generation and emits an `Event` with the `interrupted=True` flag."
   },
   {
     "id": "d3-adk-072",
@@ -622,7 +643,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/llm-agents/#planning"
-    ]
+    ],
+    "hint": "Core Rule (ADK Planner & Plan-ReAct Execution): Google Cloud ADK supports attachable `Planner` modules (such as `BuiltInPlanner` / `PlanReActPlanner` in `google.adk.planners`) on `LlmAgent`."
   },
   {
     "id": "d3-adk-073",
@@ -652,7 +674,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/sessions/session/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Session Service Selection Across Environments): ADK's modular `BaseSessionService` architecture allows seamless environment promotion: `InMemorySessionService` requires zero external infrastructure and is ideal for local unit testing and `adk web` debugging."
   },
   {
     "id": "d3-adk-074",
@@ -681,7 +704,8 @@
     "refs": [
       "https://google.github.io/adk-docs/tools/function-tools/",
       "https://google.github.io/adk-docs/agents/llm-agents/#instructions"
-    ]
+    ],
+    "hint": "Core Rule (ADK Conversational Slot Filling & Tool Parameter Clarification): When a parameter in an ADK function tool has no default value in Python, ADK marks that property as `required` in the generated JSON Schema (`FunctionDeclaration`)."
   },
   {
     "id": "d3-adk-075",
@@ -709,6 +733,7 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/custom-agents/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Custom Agent Event Streaming & Yielding): In Google Cloud ADK's event-driven architecture, `BaseAgent.run_async(ctx)` returns an asynchronous generator (`AsyncGenerator[Event, None]`)."
   }
 ]

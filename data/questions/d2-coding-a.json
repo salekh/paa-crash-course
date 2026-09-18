@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/sql/docs/postgres/authentication",
       "https://modelcontextprotocol.io/docs/concepts/architecture"
-    ]
+    ],
+    "hint": "Core Rule (MCP Servers & Tool Access): Deploying a Google Cloud MCP Server for Cloud SQL with IAM database authentication and a read-only Google Cloud service account enforces least privilege at the database protocol level while keeping credentials out of plaintext files."
   },
   {
     "id": "d2-cod-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy"
-    ]
+    ],
+    "hint": "Core Rule (Secure Sandboxes (GKE & Cloud Workstations)): GKE Sandbox uses gVisor (runsc) to provide an application kernel that intercepts and implements Linux system calls in userspace, preventing untrusted agent-generated code from directly accessing the host kernel."
   },
   {
     "id": "d2-cod-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks & Commit Gates): Antigravity pre-tool extension hooks intercept tool calls before execution."
   },
   {
     "id": "d2-cod-004",
@@ -115,7 +118,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude",
       "https://cloud.google.com/vpc-service-controls/docs/supported-products"
-    ]
+    ],
+    "hint": "Core Rule (Claude Code on Google Cloud): Routing Claude Code through Vertex AI Model Garden partner endpoints over Private Service Connect keeps all model inference traffic strictly within the Google Cloud VPC Service Controls perimeter under Google Cloud's enterprise data privacy guarantees."
   },
   {
     "id": "d2-cod-005",
@@ -144,7 +148,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/docs"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills (SKILL.md)): Custom skills defined via SKILL.md with YAML frontmatter allow teams to encapsulate domain-specific instructions, templates, tool permissions, and verification steps into a modular capability."
   },
   {
     "id": "d2-cod-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Delegation & Parallel Refactoring): Subagent delegation allows a parent orchestrator agent to decompose large-scale cross-repository migrations into independent work units."
   },
   {
     "id": "d2-cod-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/configure-vpc-service-controls",
       "https://cloud.google.com/workstations/docs/cmek"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Workstations Security & Architecture): Cloud Workstations natively supports zero-trust enterprise requirements by disabling public IP addresses (`disablePublicIpAddresses: true`), operating inside a VPC Service Controls perimeter using Private Google Access for internal Google APIs, and encrypting persistent developer disks using Customer-Managed Encryption Keys (CMEK) in Cloud KMS."
   },
   {
     "id": "d2-cod-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/sdk/gcloud"
-    ]
+    ],
+    "hint": "Core Rule (Scaling & Governance with Agents CLI): The Agents CLI in Google Cloud Agent Platform provides declarative lifecycle management for building, scaling, governing, and optimizing deployed agents."
   },
   {
     "id": "d2-cod-009",
@@ -262,7 +270,8 @@
     "refs": [
       "https://cloud.google.com/security-command-center/docs",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Application-Layer Vulnerability Patching): Effective agentic vulnerability patching relies on a closed-loop test-driven workflow: first authoring a failing exploit reproduction test to prove the vulnerability exists, applying parameterized queries/allowlists to fix the root cause, and running automated SAST/DAST verification via MCP tools alongside existing regression suites to prove both security remediation and functional preservation."
   },
   {
     "id": "d2-cod-010",
@@ -291,7 +300,8 @@
     "refs": [
       "https://cloud.google.com/profiler/docs",
       "https://cloud.google.com/trace/docs"
-    ]
+    ],
+    "hint": "Core Rule (Runtime Optimization & Profiling with Coding Agents): Connecting the coding agent to Cloud Profiler and Cloud Trace via an MCP server provides empirical p99 CPU and memory flame graph data so the agent focuses refactoring on actual bottlenecks (e.g., N+1 queries, synchronous serialization locks, or excessive object allocations)."
   },
   {
     "id": "d2-cod-011",
@@ -320,7 +330,8 @@
     "refs": [
       "https://cloud.google.com/build/docs",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity Architecture (CLI, SDK, App)): The Antigravity CLI supports headless, non-interactive execution flags specifically designed for CI/CD automation, allowing pipelines in Cloud Build or GitHub Actions to pass prompts, workspace contexts, and tool permissions programmatically."
   },
   {
     "id": "d2-cod-012",
@@ -349,7 +360,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/docs"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity SDK Customization): The Antigravity SDK exposes programmatic primitives in Python and TypeScript for instantiating agent sessions, registering dynamic tools at runtime, subscribing to streaming thought/tool events, and implementing custom virtual filesystem interceptors."
   },
   {
     "id": "d2-cod-013",
@@ -378,7 +390,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/transports",
       "https://cloud.google.com/run/docs"
-    ]
+    ],
+    "hint": "Core Rule (MCP Transport Protocols (stdio vs SSE)): The Model Context Protocol (MCP) defines stdio transport for low-latency local subprocess communication where the client spawns the server directly, and HTTP/SSE (or Streamable HTTP) transport for remote, multi-tenant, stateless or stateful network services deployed on platforms like Cloud Run."
   },
   {
     "id": "d2-cod-014",
@@ -409,7 +422,8 @@
     "refs": [
       "https://cloud.google.com/secret-manager/docs/best-practices",
       "https://cloud.google.com/run/docs/authenticating/service-to-service"
-    ]
+    ],
+    "hint": "Core Rule (MCP Server Security & Secret Management): Secret Manager securely stores sensitive credentials outside container images and source code, granting access via least-privilege IAM roles (`roles/secretmanager.secretAccessor`)."
   },
   {
     "id": "d2-cod-015",
@@ -438,7 +452,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/docs"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills Metadata & Invocation): Antigravity uses progressive context loading for skills: only the lightweight metadata from the YAML frontmatter (`name`, `description`, `triggers`) is loaded initially so the agent knows what capabilities exist."
   },
   {
     "id": "d2-cod-016",
@@ -467,7 +482,8 @@
     "refs": [
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Workspace Rules & Architectural Enforcement): Checking workspace rule files (e.g., `.antigravity/rules.md` or `.claude/CLAUDE.md`) into the root of the Git repository ensures that every coding agent session launched within that workspace automatically inherits the project's architectural and stylistic conventions."
   },
   {
     "id": "d2-cod-017",
@@ -496,7 +512,8 @@
     "refs": [
       "https://cloud.google.com/artifact-registry/docs",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity Plugins Packaging): Antigravity Plugins allow platform teams to bundle multiple related artifacts—custom skills (`SKILL.md`), extension hooks, workspace rules, and MCP server configurations—into a single versioned manifest that can be installed, updated, and governed atomically via the CLI."
   },
   {
     "id": "d2-cod-018",
@@ -525,7 +542,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks (Post-Tool Execution)): Post-tool extension hooks run immediately after a tool execution finishes."
   },
   {
     "id": "d2-cod-019",
@@ -556,7 +574,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods",
       "https://katacontainers.io/"
-    ]
+    ],
+    "hint": "Core Rule (GKE Sandbox Isolation (Kata vs gVisor)): gVisor (`runsc`) implements a user-space syscall interception layer that provides strong isolation with minimal overhead for standard web/microservice workloads, but intentionally restricts low-level kernel syscalls like `bpf()`."
   },
   {
     "id": "d2-cod-020",
@@ -585,7 +604,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/iam/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Modes in Agents CLI): Antigravity and Agents CLI support granular tool execution policies that distinguish between safe read-only operations (`agent-auto` mode) and destructive/state-mutating operations (`human-approval-required` / HITL mode)."
   },
   {
     "id": "d2-cod-021",
@@ -614,7 +634,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs",
       "https://microsoft.github.io/language-server-protocol/"
-    ]
+    ],
+    "hint": "Core Rule (AST-Aware Code Refactoring): Text-based regex tools (`grep`/`sed`) lack semantic type awareness and cannot reliably distinguish between overloaded or identically named methods on different classes or interfaces."
   },
   {
     "id": "d2-cod-022",
@@ -643,7 +664,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Token Budget & Context Isolation): A primary benefit of subagent delegation is context isolation: the subagent absorbs noisy, high-volume intermediate data (such as 10,000 log lines or verbose test outputs) within its own ephemeral context window and returns only a distilled, structured summary (e.g., root cause, affected file, and recommended fix) to the parent orchestrator."
   },
   {
     "id": "d2-cod-023",
@@ -672,7 +694,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/custom-container-images",
       "https://cloud.google.com/artifact-registry/docs"
-    ]
+    ],
+    "hint": "Core Rule (Custom Cloud Workstations Images for Coding Agents): Cloud Workstations supports custom container images stored in Artifact Registry."
   },
   {
     "id": "d2-cod-024",
@@ -703,7 +726,8 @@
     "refs": [
       "https://cloud.google.com/compute/docs/metadata/overview#metadata_security_considerations",
       "https://owasp.org/www-community/attacks/Server_Side_Request_Forgery"
-    ]
+    ],
+    "hint": "Core Rule (Patching SSRF & XSS Vulnerabilities): Remediating XSS requires context-aware output encoding or auto-escaping template engines so untrusted input cannot inject executable `<script>` tags."
   },
   {
     "id": "d2-cod-025",
@@ -732,6 +756,7 @@
     "refs": [
       "https://cloud.google.com/logging/docs/export/configure_export_v2",
       "https://cloud.google.com/trace/docs"
-    ]
+    ],
+    "hint": "Core Rule (Observability & Telemetry for Coding Agents): Antigravity and Google Cloud Agent Platform natively support OpenTelemetry tracing and structured Cloud Logging events."
   }
 ]

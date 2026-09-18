@@ -26,7 +26,8 @@
     "refs": [
       "https://www.postgresql.org/docs/current/ddl-rowsecurity.html",
       "https://cloud.google.com/sql/docs/postgres/users"
-    ]
+    ],
+    "hint": "Core Rule (Enforcing Row-Level Security (RLS) in Multi-Tenant Cloud SQL MCP Servers): PostgreSQL Row-Level Security (RLS) with `SET LOCAL app.current_tenant_id = ...` inside a non-superuser transaction block guarantees kernel-level database isolation."
   },
   {
     "id": "d3-mcp-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/row-level-security-intro",
       "https://cloud.google.com/bigquery/docs/column-level-security-intro"
-    ]
+    ],
+    "hint": "Core Rule (BigQuery Authorized Views & Row-Level Access Policies in MCP Servers): BigQuery natively enforces Row-Level Security (`CREATE ROW ACCESS POLICY`) and Column-Level Dynamic Data Masking based on the executing principal's IAM identity."
   },
   {
     "id": "d3-mcp-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://google.github.io/adk-docs/",
       "https://modelcontextprotocol.io/docs/concepts/tools"
-    ]
+    ],
+    "hint": "Core Rule (Resolving Tool Name Collisions Across Multiple MCP Servers in ADK): When an MCP Host/Client aggregates tools from multiple independent MCP servers, tool names frequently collide (`search`, `get_status`, `create_issue`)."
   },
   {
     "id": "d3-mcp-029",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/architecture/rate-limiting-strategies-techniques",
       "https://modelcontextprotocol.io/docs/concepts/tools#error-handling"
-    ]
+    ],
+    "hint": "Core Rule (Handling 3P SaaS API Rate Limits (`429 Too Many Requests`) in MCP Tools): Third-party SaaS APIs enforce strict rate limits."
   },
   {
     "id": "d3-mcp-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-forecast",
       "https://cloud.google.com/bigquery/docs/reference/standard-sql/bigqueryml-syntax-generate-text"
-    ]
+    ],
+    "hint": "Core Rule (BigQuery ML & Remote Vertex AI Models via BigQuery MCP Server): BigQuery ML allows executing machine learning inference (`ML.FORECAST`, `ML.PREDICT`, `ML.DETECT_ANOMALIES`) and Vertex AI remote model calls (`ML.GENERATE_TEXT`, `ML.GENERATE_EMBEDDING`) directly inside standard BigQuery SQL queries at warehouse scale."
   },
   {
     "id": "d3-mcp-031",
@@ -171,7 +176,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/prompts",
       "https://modelcontextprotocol.io/specification/2024-11-05/server/prompts"
-    ]
+    ],
+    "hint": "Core Rule (MCP Prompt Primitive (`prompts/get`) with Dynamic Arguments): In MCP, `prompts/get` allows a client to request a named prompt template (`name`) along with dynamic runtime `arguments`."
   },
   {
     "id": "d3-mcp-032",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/spanner/docs/dml-partitioned",
       "https://cloud.google.com/spanner/docs/quotas#transaction_limits"
-    ]
+    ],
+    "hint": "Core Rule (Spanner Partitioned DML via MCP for Bulk Maintenance Operations): Cloud Spanner enforces mutation limits (up to 40,000–80,000 mutations / 100MB) on standard ACID read-write transactions to maintain external consistency."
   },
   {
     "id": "d3-mcp-033",
@@ -229,7 +236,8 @@
     "refs": [
       "https://modelcontextprotocol.io/specification/2024-11-05/basic/utilities/cancellation",
       "https://cloud.google.com/bigquery/docs/managing-jobs#cancel_a_job"
-    ]
+    ],
+    "hint": "Core Rule (MCP Cancellation Protocol (`notifications/cancelled`) for Aborted Turns): The Model Context Protocol defines a standard cancellation mechanism: either party can send a `notifications/cancelled` notification referencing the `requestId` of an in-flight request."
   },
   {
     "id": "d3-mcp-034",
@@ -258,7 +266,8 @@
     "refs": [
       "https://cloud.google.com/alloydb/docs/ai/generate-embeddings",
       "https://cloud.google.com/alloydb/docs/ai/run-vector-similarity-search"
-    ]
+    ],
+    "hint": "Core Rule (AlloyDB MCP Server Inline Vector Embedding (`google_ml_integration`)): AlloyDB's `google_ml_integration` extension allows PostgreSQL to call Vertex AI models (`embedding('text-embedding-004', text)`) directly inside SQL expressions."
   },
   {
     "id": "d3-mcp-035",
@@ -287,7 +296,8 @@
     "refs": [
       "https://modelcontextprotocol.io/specification/2024-11-05/server/utilities/logging",
       "https://modelcontextprotocol.io/docs/concepts/transports#standard-input-output-stdio"
-    ]
+    ],
+    "hint": "Core Rule (MCP Server Logging Primitive (`notifications/message`) & Log Levels): On `stdio` transports, writing raw `print()` statements to `stdout` corrupts the JSON-RPC frame stream (which uses `stdout` for protocol messages and `stderr` for OS diagnostics)."
   },
   {
     "id": "d3-mcp-036",
@@ -316,7 +326,8 @@
     "refs": [
       "https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries",
       "https://cloud.google.com/run/docs/triggering/webhooks"
-    ]
+    ],
+    "hint": "Core Rule (Securing 3P SaaS Webhooks to Trigger MCP Resource Updates): HTTP headers like `User-Agent` or IP addresses can be spoofed or proxied."
   },
   {
     "id": "d3-mcp-037",
@@ -345,7 +356,8 @@
     "refs": [
       "https://modelcontextprotocol.io/specification/2024-11-05/server/tools#list-changed-notification",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Caching Static BigQuery & Spanner Schemas in MCP Clients): In MCP, tool and resource definitions (`tools/list`, `resources/list`) are relatively static metadata."
   },
   {
     "id": "d3-mcp-038",
@@ -374,7 +386,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
       "https://modelcontextprotocol.io/docs/concepts/security"
-    ]
+    ],
+    "hint": "Core Rule (Preventing PII Leakage in MCP Server Tool Outputs via Cloud DLP): Scrubbing PII inside the MCP server response pipeline (before returning `CallToolResult` to the MCP Host/LLM) guarantees that sensitive data (SSNs, PANs) never enters the LLM context window, never gets logged in LLM prompt/completion traces, and never leaks to unauthorized recipients."
   },
   {
     "id": "d3-mcp-039",
@@ -403,7 +416,8 @@
     "refs": [
       "https://cloud.google.com/spanner/docs/change-streams",
       "https://modelcontextprotocol.io/docs/concepts/resources#subscriptions"
-    ]
+    ],
+    "hint": "Core Rule (Spanner Change Streams Integration with Event-Driven MCP Servers): Cloud Spanner Change Streams capture data changes (inserts, updates, deletes) asynchronously as they commit across Spanner splits with near-zero impact on transactional read/write latency."
   },
   {
     "id": "d3-mcp-040",
@@ -432,7 +446,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/resources#resource-contents",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/send-multimodal-prompts"
-    ]
+    ],
+    "hint": "Core Rule (MCP Binary & Multimodal Resource Content (`blob` base64)): The Model Context Protocol natively supports binary and multimodal payloads in both Resources (`BlobResourceContents` with `uri`, `mimeType`, and base64-encoded `blob`) and Tool results (`ImageContent` with `type: 'image'`, `data` base64, and `mimeType`)."
   },
   {
     "id": "d3-mcp-041",
@@ -461,7 +476,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/cloud-sql-federated-queries",
       "https://cloud.google.com/bigquery/docs/federated-queries-intro"
-    ]
+    ],
+    "hint": "Core Rule (Federated SQL Queries across BigQuery and Cloud SQL via MCP): BigQuery Federated Queries (`EXTERNAL_QUERY`) allow BigQuery to push down read queries to Cloud SQL (PostgreSQL/MySQL) or Cloud Spanner over a managed private connection and join the live operational result set directly with petabyte-scale BigQuery tables in a single SQL execution plan."
   },
   {
     "id": "d3-mcp-042",
@@ -490,7 +506,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/tools#tool-annotations",
       "https://cloud.google.com/architecture/designing-idempotent-apis"
-    ]
+    ],
+    "hint": "Core Rule (MCP Tool Idempotency & Safe Retries on Network Timeouts): Distributed agent tool invocations over networks are subject to ambiguous timeouts (where the client cannot distinguish between a dropped request and a dropped response)."
   },
   {
     "id": "d3-mcp-043",
@@ -519,7 +536,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/workforce-identity-federation",
       "https://cloud.google.com/bigquery/docs/workforce-identity-federation"
-    ]
+    ],
+    "hint": "Core Rule (Workforce Identity Federation for Multi-Cloud / 3P MCP Clients): Workforce Identity Federation lets external human users authenticated by an external IdP (Okta, Azure AD/Entra ID) access Google Cloud resources (Cloud Run, BigQuery) using short-lived Security Token Service (STS) tokens without requiring Google Workspace licenses or static service account keys."
   },
   {
     "id": "d3-mcp-044",
@@ -548,7 +566,8 @@
     "refs": [
       "https://modelcontextprotocol.io/specification/2024-11-05/basic/utilities/ping",
       "https://cloud.google.com/run/docs/configuring/healthchecks"
-    ]
+    ],
+    "hint": "Core Rule (MCP Server Health Checks & Liveness Probes on GKE/Cloud Run): The MCP protocol includes a native `ping` request (`{\"jsonrpc\": \"2.0\", \"id\": \"1\", \"method\": \"ping\"}` returning `{}`) to verify transport liveness, and HTTP-based cloud deployments should expose a `/healthz` liveness probe endpoint configured in GKE/Cloud Run specs to automatically replace unresponsive containers."
   },
   {
     "id": "d3-mcp-045",
@@ -577,7 +596,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#best-practices",
       "https://modelcontextprotocol.io/docs/concepts/tools"
-    ]
+    ],
+    "hint": "Core Rule (Semantic Tool Selection over Large MCP Tool Catalogs): When the total number of tools across federated MCP servers exceeds ~20–30, LLM function calling accuracy and latency degrade."
   },
   {
     "id": "d3-mcp-046",
@@ -606,7 +626,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/materialized-views-intro",
       "https://cloud.google.com/bi-engine/docs/introduction"
-    ]
+    ],
+    "hint": "Core Rule (BigQuery BI Engine & Materialized Views Acceleration for MCP Servers): BigQuery Materialized Views automatically pre-compute and incrementally refresh aggregations (`SUM`, `COUNT`, `AVG`), while BigQuery BI Engine caches hot data and materialized views in memory using vectorized execution."
   },
   {
     "id": "d3-mcp-047",
@@ -635,7 +656,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/roots",
       "https://modelcontextprotocol.io/docs/concepts/resources"
-    ]
+    ],
+    "hint": "Core Rule (MCP Roots vs Resources Security Boundary): Directionality and purpose define the distinction: `Roots` flow from **Client -> Server** (`roots/list` is a client capability queried by the server) to establish workspace scope boundaries (e.g., 'you may operate inside `/workspace/app`')."
   },
   {
     "id": "d3-mcp-048",
@@ -664,7 +686,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/tools",
       "https://cloud.google.com/apis/design/compatibility"
-    ]
+    ],
+    "hint": "Core Rule (Handling Schema Evolution & Deprecation in Enterprise MCP Servers): Just like REST/gRPC microservices, production MCP servers must practice non-breaking schema evolution."
   },
   {
     "id": "d3-mcp-049",
@@ -693,7 +716,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/cpu-allocation",
       "https://cloud.google.com/run/docs/configuring/concurrency"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Run Concurrency & CPU Allocation for SSE/Streaming MCP Servers): For I/O-bound asynchronous MCP servers handling persistent SSE/Streamable HTTP connections and background pub/sub listeners on Cloud Run, enabling `CPU always allocated` (`--no-cpu-throttling`) prevents CPU throttling between HTTP request frames, while setting high container concurrency (`--concurrency=80` to `250`) allows Python's `asyncio` event loop to multiplex dozens of lightweight connections on a single instance."
   },
   {
     "id": "d3-mcp-050",
@@ -724,6 +748,7 @@
     "refs": [
       "https://cloud.google.com/logging/docs/structured-logging",
       "https://cloud.google.com/storage/docs/bucket-lock"
-    ]
+    ],
+    "hint": "Core Rule (Auditing MCP Tool Invocations with Google Cloud Audit Logs & Cloud Logging): Emitting structured JSON logs containing caller identity claims, trace IDs, and sanitized tool payloads to Cloud Logging and routing them via a Log Sink to a Cloud Storage bucket with Bucket Lock (Write-Once-Read-Many / WORM retention policy) or a restricted BigQuery dataset provides a tamper-evident, queryable enterprise compliance audit trail."
   }
 ]

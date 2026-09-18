@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration",
       "https://google.github.io/adk-docs/deploy/cloud-run/"
-    ]
+    ],
+    "hint": "Core Rule (Canary & Gradual Traffic Splitting on Cloud Run): Cloud Run natively supports dark launches and progressive canary rollouts via revision tagging and traffic splitting."
   },
   {
     "id": "d4-dep-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://google.github.io/adk-docs/tools/",
       "https://cloud.google.com/iam/docs/best-practices-service-accounts"
-    ]
+    ],
+    "hint": "Core Rule (End-User OAuth Credential Propagation vs Service Account Identity): To prevent 'confused deputy' privilege escalation vulnerabilities in enterprise agents, tools that access user-scoped data repositories (Google Drive, Gmail, Salesforce, Jira) must NOT execute under an over-privileged shared agent service account."
   },
   {
     "id": "d4-dep-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/vpc-service-controls/docs/overview",
       "https://cloud.google.com/vertex-ai/docs/general/vpc-sc"
-    ]
+    ],
+    "hint": "Core Rule (VPC Service Controls (VPC-SC) & Private Service Connect for Agents): For high-security enterprise deployments, **VPC Service Controls (VPC-SC)** creates a cryptographic service perimeter around Google Cloud resources (Vertex AI, BigQuery, Cloud Storage, Cloud Run), blocking data exfiltration even if credentials are compromised."
   },
   {
     "id": "d4-dep-029",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/provisioned-throughput/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/quotas"
-    ]
+    ],
+    "hint": "Core Rule (Vertex AI Provisioned Throughput vs Pay-As-You-Go Quota Management): **Vertex AI Provisioned Throughput** reserves dedicated inference capacity (measured in Generative AI Scale Units / GSUs) for specific Gemini models and regions, guaranteeing consistent low latency and zero `429 Resource Exhausted` quota errors up to your provisioned token/request ceiling."
   },
   {
     "id": "d4-dep-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/quotas",
       "https://cloud.google.com/architecture/scalable-and-resilient-apps"
-    ]
+    ],
+    "hint": "Core Rule (Resilience Patterns: Handling 429 Quota Errors & Multi-Region Model Fallback): Standard distributed systems resilience for LLM quotas combines: (1) **Exponential backoff with jitter** (waiting `2^attempt + uniform_jitter` seconds) for transient micro-bursts, (2) **Multi-region / Global Endpoint routing** (routing requests to Vertex AI's Global Endpoint or failing over across `us-central1` -> `us-east4` -> `us-west1` where separate regional quotas apply), and (3) **Model tier fallback** (gracefully degrading from `gemini-2.5-pro` to high-throughput `gemini-2.5-flash` when primary model quotas are exhausted)."
   },
   {
     "id": "d4-dep-031",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-use"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Vertex AI Context Caching in Production Agents): In a multi-instance production deployment, creating a separate `CachedContent` object per request or per container startup wastes cache storage fees."
   },
   {
     "id": "d4-dep-032",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/armor/docs/cloud-armor-overview",
       "https://cloud.google.com/security-command-center/docs/model-armor-overview"
-    ]
+    ],
+    "hint": "Core Rule (Securing Public Agent Endpoints with Cloud Armor & Model Armor): Securing public-facing generative AI applications requires defense-in-depth across network and AI layers: (1) **Google Cloud Armor** operates at the edge load balancer to stop volumetric Layer 7 DDoS floods, enforce rate limiting per IP, apply geo-restrictions, and block traditional OWASP web attacks; (2) **Model Armor** (and Vertex AI Safety Filters) inspects the semantic payload of user prompts and model outputs to intercept prompt injections, jailbreak attempts, toxic content, and sensitive PII/PHI exfiltration before execution."
   },
   {
     "id": "d4-dep-033",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/best-practices-service-accounts",
       "https://cloud.google.com/run/docs/securing/service-identity"
-    ]
+    ],
+    "hint": "Core Rule (Least-Privilege IAM Service Accounts for Multi-Tool Agents): The default Compute Engine service account with `roles/editor` grants broad read/write/delete permissions across almost every resource in the Google Cloud project—if the agent suffers a prompt injection or SSRF vulnerability, an attacker could delete unrelated databases or buckets."
   },
   {
     "id": "d4-dep-034",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/vpc-direct-vpc",
       "https://cloud.google.com/network-connectivity/docs/interconnect/concepts/overview"
-    ]
+    ],
+    "hint": "Core Rule (Private Networking from Cloud Run to On-Premises / Private VPC APIs): **Direct VPC Egress** (or Serverless VPC Access connectors) enables serverless Cloud Run containers to send outbound network packets directly into a Google Cloud VPC network."
   },
   {
     "id": "d4-dep-035",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-management",
       "https://google.github.io/adk-docs/agents/"
-    ]
+    ],
+    "hint": "Core Rule (Prompt & Agent Configuration Versioning Registry): Decoupling prompt templates and model parameters from container binaries via **Vertex AI Prompt Management** (or a structured, IAM-secured config registry in Firestore/Cloud Storage synced via GitOps) allows controlled prompt versioning (`v1.0`, `v1.1`)."
   },
   {
     "id": "d4-dep-036",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/code-execution",
       "https://google.github.io/adk-docs/tools/"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Sandboxed Code Execution Tools Safely): Executing LLM-generated code (`exec()` / `subprocess`) inside the primary agent application container is a critical remote code execution (RCE) vulnerability, as prompt injection allows arbitrary shell access and credential theft from the metadata server (`169.254.169.254`)."
   },
   {
     "id": "d4-dep-037",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/container-contract#instance-shutdown",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/Pod-termination"
-    ]
+    ],
+    "hint": "Core Rule (Graceful Shutdown (`SIGTERM`) Handling in Stateful Streaming Agents): Proper lifecycle management in containerized agent deployments requires intercepting `SIGTERM` signals."
   },
   {
     "id": "d4-dep-038",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/secret-manager/docs/overview",
       "https://google.github.io/adk-docs/deploy/agent-engine/"
-    ]
+    ],
+    "hint": "Core Rule (Managing API Keys & Third-Party Credentials in Agent Tools): **Google Cloud Secret Manager** provides centralized, encrypted secret storage with IAM access control (`roles/secretmanager.secretAccessor`), automatic rotation scheduling via Pub/Sub notifications, and Cloud Audit Logs recording every secret read."
   },
   {
     "id": "d4-dep-039",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/memorystore/docs/redis/vector-search-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings"
-    ]
+    ],
+    "hint": "Core Rule (Semantic Response Caching for High-Frequency Repetitive Queries): While exact string caching misses paraphrased questions ('When does the sale end?' vs 'What time do deals stop?'), a **Semantic Cache** computes a fast vector embedding of the incoming query (`text-embedding-005` in ~15ms) and searches an in-memory vector store (Memorystore for Redis / Vector Search)."
   },
   {
     "id": "d4-dep-040",
@@ -434,7 +448,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/filtering",
       "https://cloud.google.com/bigquery/docs/managing-row-level-security"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Multi-Tenant SaaS Agents with Strict Tenant Isolation): In multi-tenant SaaS agent architectures, **tenant identity must never be trusted from natural language prompt inputs** (which are trivially spoofed via prompt injection)."
   },
   {
     "id": "d4-dep-041",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/predictions/deploy-model-api#traffic-split",
       "https://cloud.google.com/vertex-ai/docs/general/deployment"
-    ]
+    ],
+    "hint": "Core Rule (Blue/Green Deployment & Instant Rollback for Vertex AI Endpoints): Vertex AI Endpoints natively support hosting multiple `DeployedModel` instances simultaneously under a single stable endpoint URL with granular `traffic_split` percentages."
   },
   {
     "id": "d4-dep-042",
@@ -492,7 +508,8 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/",
       "https://cloud.google.com/apigee/docs/api-platform/reference/policies/quota-policy"
-    ]
+    ],
+    "hint": "Core Rule (Rate Limiting & Abuse Protection per User Session): IP-based rate limiting at the edge WAF (Cloud Armor) is bypassed when attackers use distributed proxy networks while authenticating with a single account token."
   },
   {
     "id": "d4-dep-043",
@@ -521,7 +538,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/data-governance",
       "https://cloud.google.com/resource-manager/docs/organization-policy/defining-locations"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Agents Across Sovereign & Data Residency Boundaries): Strict data residency compliance requires governance at three levels: (1) **Preventive Guardrails**: Organization Policy `constraints/gcp.resourceLocations` set to EU regions prevents engineers from accidentally provisioning US resources; (2) **Compute & Storage**: Cloud Run, Firestore/Spanner session stores, and Vector Search deployed strictly in EU regions; and (3) **Model Inference**: Explicitly binding Vertex AI SDK calls to regional EU endpoints (e.g., `location='europe-west4'`) rather than the `global` dynamic routing endpoint (which routes across continents for capacity availability)."
   },
   {
     "id": "d4-dep-044",
@@ -550,7 +568,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy",
       "https://google.github.io/adk-docs/deploy/agent-engine/"
-    ]
+    ],
+    "hint": "Core Rule (Managing Dependencies & Reproducible Builds for Agent Engine): In Python agent deployments (`ReasoningEngine.create()` or Docker builds for Cloud Run), specifying unpinned dependencies (`package` instead of `package==X.Y.Z`) causes non-deterministic builds because `pip` resolves the latest available upstream releases at build time."
   },
   {
     "id": "d4-dep-045",
@@ -579,7 +598,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/",
       "https://cloud.google.com/workflows/docs/creating-callback-endpoints"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Human-in-the-Loop Approval Workflows with Cloud Workflows / Tasks): Human-in-the-loop (HITL) approvals spanning hours or days require **asynchronous state checkpointing and callback resumption**."
   },
   {
     "id": "d4-dep-046",
@@ -608,7 +628,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/tips/general#optimize_container_images",
       "https://docs.docker.com/build/building/multi-stage/"
-    ]
+    ],
+    "hint": "Core Rule (Optimizing Docker Image Size & Startup Time for Cloud Run Agents): Container startup latency on Cloud Run and GKE correlates with image layer size and filesystem extraction overhead."
   },
   {
     "id": "d4-dep-047",
@@ -637,7 +658,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/authenticating/service-to-service",
       "https://cloud.google.com/run/docs/securing/ingress"
-    ]
+    ],
+    "hint": "Core Rule (Securing Agent-to-Agent Internal Microservice Communication on Cloud Run): To enforce zero-trust service-to-service authentication between Cloud Run microservices: (1) Set `--no-allow-unauthenticated` on the receiving service (`service-b`) so the Google Front End rejects unauthenticated requests at the perimeter; (2) Set `--ingress=internal` to restrict network paths to internal VPC / Cloud Run traffic; (3) Grant the IAM role **Cloud Run Invoker** (`roles/run.invoker`) on `service-b` specifically to `service-a`'s service account; and (4) Have `service-a` fetch a Google-signed OIDC ID token (with `audience` set to `service-b`'s URL) from the local compute metadata server and pass it in the `Authorization: Bearer` header."
   },
   {
     "id": "d4-dep-048",
@@ -666,7 +688,8 @@
     "refs": [
       "https://cloud.google.com/run/quotas",
       "https://cloud.google.com/storage/docs/access-control/signed-urls"
-    ]
+    ],
+    "hint": "Core Rule (Handling Large File Uploads & Multimodal Payloads in Agent Deployments): Cloud Run HTTP/1.1 requests enforce a hard **32 MiB request body limit** (and streaming gRPC/HTTP2 through serverless proxies is still suboptimal for multi-hundred-megabyte blobs)."
   },
   {
     "id": "d4-dep-049",
@@ -695,7 +718,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/tutorials/serve-gemma-gpu-vllm",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Hybrid Self-Hosted vLLM Models on GKE with Vertex AI Fallback): A **hybrid Cloud-Bursting inference architecture** combines the predictable low unit cost of reserved/committed GPU node pools on GKE (running vLLM at high utilization for baseline traffic) with the elastic serverless capacity of Vertex AI managed endpoints (`gemini-2.5-flash` or Vertex AI Model Garden endpoints) for instant peak spillover."
   },
   {
     "id": "d4-dep-050",
@@ -728,6 +752,7 @@
     "refs": [
       "https://cloud.google.com/run/docs/securing/security",
       "https://google.github.io/adk-docs/deploy/"
-    ]
+    ],
+    "hint": "Core Rule (Deployment Readiness: End-to-End Security & Resiliency Architecture): Enterprise production agent deployments require three foundational operational pillars: (1) **Release & Compute Reliability**: Immutable Artifact Registry SHA-256 digests, progressive canary traffic splitting, and `--min-instances` warm pools; (2) **Zero-Trust Security**: Least-privilege IAM roles, Secret Manager integration, and end-user OAuth token propagation to prevent confused-deputy privilege escalation; and (3) **Inference Resilience**: Exponential backoff with jitter paired with multi-region / model-tier failover for Vertex AI quota management."
   }
 ]

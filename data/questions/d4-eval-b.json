@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset"
-    ]
+    ],
+    "hint": "Core Rule (Golden Dataset Curation & PII Redaction): When curating golden evaluation datasets from real production traces in regulated industries, Sensitive Data Protection (Cloud DLP) should be integrated into the ingestion pipeline to automatically detect and de-identify PII/PHI."
   },
   {
     "id": "d4-evl-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset",
       "https://cloud.google.com/bigquery/docs/table-sampling"
-    ]
+    ],
+    "hint": "Core Rule (Sampling Strategies for Golden Datasets): In skewed production distributions, simple uniform random sampling under-samples rare but business-critical intents (e.g., 1% of 1,000 = 10 cases), making slice-level evaluation statistically noisy."
   },
   {
     "id": "d4-evl-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics"
-    ]
+    ],
+    "hint": "Core Rule (Custom LLM-as-a-Judge Autorater Design): LLM-as-a-judge reliability improves dramatically when: (1) broad unanchored scales (1-10 or 1-100) are replaced with compact 1-5 rubrics or binary criteria where every score level has explicit, observable criteria; (2) the prompt enforces Chain-of-Thought reasoning (`explanation` field generated *before* the numeric `score` token), allowing the autoregressive model to ground its score in specific text evidence; and (3) few-shot examples anchor edge cases."
   },
   {
     "id": "d4-evl-029",
@@ -115,7 +118,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/side-by-side-eval",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Mitigating LLM-as-a-Judge Biases): LLM judges exhibit well-documented cognitive biases: (1) Verbosity/Length bias, where longer, more elaborate responses are favored over concise, equally accurate ones regardless of filler content—mitigated by explicit length-neutral or conciseness rubrics; and (2) Self-enhancement bias, where a model favors outputs matching its own stylistic distribution—mitigated by using a stronger tier model (e.g., Gemini 2.5 Pro judging Flash/smaller models) and validating against human-annotated golden sets."
   },
   {
     "id": "d4-evl-030",
@@ -144,7 +148,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Calibrating Autoraters Against Human Raters): To validate an automated judge (autorater) as a trustworthy proxy for human evaluation, psychometric best practice requires computing statistical agreement metrics between the LLM judge and human domain experts on a shared calibration set."
   },
   {
     "id": "d4-evl-031",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Synthetic Evaluation Dataset Generation): When cold-starting a new agent domain without historical logs, synthetic data generation grounded in domain documents (policy PDFs) and parameterized by user personas, complexity levels, and edge-case/adversarial constraints is the standard architectural pattern."
   },
   {
     "id": "d4-evl-032",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval",
       "https://cloud.google.com/python/docs/reference/vertexai/latest/vertexai.evaluation"
-    ]
+    ],
+    "hint": "Core Rule (Custom PointwiseMetric Definition in Python SDK): In the `vertexai.evaluation` module of the Vertex AI SDK for Python, custom LLM-as-a-judge metrics are defined by instantiating `PointwiseMetric` (or `PairwiseMetric`) with a `metric` name and a `metric_prompt_template` (constructed via `MetricPromptTemplate` or a formatted string containing `{prompt}`, `{response}`, criteria, and rating rubrics)."
   },
   {
     "id": "d4-evl-033",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://google.github.io/adk-docs/safety/"
-    ]
+    ],
+    "hint": "Core Rule (Adversarial & Red-Team Dataset Curation): Evaluating agent security requires a dedicated adversarial/red-team evaluation suite (`EvalSet`) testing both direct prompt injections (from users) and indirect prompt injections (malicious instructions returned inside untrusted data sources like emails, web pages, or invoice records)."
   },
   {
     "id": "d4-evl-034",
@@ -260,7 +268,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/docs/experiments/intro-vertex-ai-experiments"
-    ]
+    ],
+    "hint": "Core Rule (Golden Dataset Versioning & Drift Maintenance): Golden datasets are living assets that must evolve when underlying business policies, tool schemas, or ground-truth facts change."
   },
   {
     "id": "d4-evl-035",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics"
-    ]
+    ],
+    "hint": "Core Rule (Decomposing Complex Rubrics into Atomic Criteria): Monolithic rubrics that conflate multiple unrelated dimensions (accuracy, syntax, tone, compliance) suffer from low diagnostic utility and poor judge calibration—an LLM judge struggles to weigh conflicting failures (e.g., 100% accurate but missing a disclaimer)."
   },
   {
     "id": "d4-evl-036",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Reference-Free vs Reference-Based Evaluation): Reference-free LLM-as-a-judge metrics do not require a human-authored ground-truth `reference` answer."
   },
   {
     "id": "d4-evl-037",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Handling Multi-Modal Inputs in Golden Datasets): Gemini and Vertex AI Evaluation natively support multimodal inputs (images, audio, video, PDFs) referenced via Cloud Storage URIs (`gs://...`) or inline `Part` structures."
   },
   {
     "id": "d4-evl-038",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Judge Model Selection & Cost-Accuracy Trade-offs): In large-scale evaluation pipelines, a tiered/hybrid judge architecture optimizes the cost-accuracy Pareto frontier."
   },
   {
     "id": "d4-evl-039",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
       "https://google.github.io/adk-docs/safety/"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Negative Constraints & Refusal Accuracy): When evaluating guardrails and negative constraints, measuring only refusal rate on prohibited queries encourages degenerate 'over-refusal' (where a model achieves 100% safety by refusing valid customer questions)."
   },
   {
     "id": "d4-evl-040",
@@ -434,7 +448,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop Annotation & Golden Set Expansion): A hallmark of mature agentic operations (AgentOps) is an active-learning 'flywheel' that routes production edge cases (escalations, thumbs-down, low-confidence traces) to human domain experts for curation."
   },
   {
     "id": "d4-evl-041",
@@ -463,7 +478,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://docs.pydantic.dev/latest/concepts/json/"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating JSON Schema & Structured Output Compliance): Whenever an agent or subagent is required to produce structured JSON outputs conforming to a strict schema, deterministic validation using Pydantic (`model_validate_json`) or `jsonschema` provides 100% precision, zero token cost, and sub-millisecond execution."
   },
   {
     "id": "d4-evl-042",
@@ -492,7 +508,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/side-by-side-eval",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
-    ]
+    ],
+    "hint": "Core Rule (Pairwise Position Bias Quantification): Position bias (primacy or recency preference) is a common artifact in pairwise LLM evaluation."
   },
   {
     "id": "d4-evl-043",
@@ -521,7 +538,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating RAG Context Relevance vs Groundedness): In the RAG Triad framework, an honest refusal ('I cannot answer based on retrieved context') is 100% grounded/faithful to the irrelevant context provided, resulting in high `GROUNDEDNESS` but low `ANSWER_RELEVANCE`."
   },
   {
     "id": "d4-evl-044",
@@ -550,7 +568,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Dataset Contamination & Train-Test Leakage Prevention): Putting held-out golden evaluation test cases into the agent's system prompt or few-shot retrieval store is classic train-test leakage (data contamination)."
   },
   {
     "id": "d4-evl-045",
@@ -579,7 +598,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Tool Output Interpretation Accuracy): Agent evaluation spans two distinct phases: (1) Trajectory generation (did the agent call the right tool with the right arguments?) and (2) Tool output synthesis (did the agent accurately read, reason over, and summarize the structured payload returned by the tool?)."
   },
   {
     "id": "d4-evl-046",
@@ -608,7 +628,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
-    ]
+    ],
+    "hint": "Core Rule (Custom Autorater Output Parsing & Resilience): Gemini models on Vertex AI support Controlled Generation (`response_mime_type='application/json'` combined with `response_schema`)."
   },
   {
     "id": "d4-evl-047",
@@ -637,7 +658,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Rater Consensus & Golden Label Quality): High inter-annotator disagreement among human experts indicates either an underspecified/ambiguous user prompt or a task where multiple valid solution paths exist."
   },
   {
     "id": "d4-evl-048",
@@ -666,7 +688,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval",
       "https://google.github.io/adk-docs/sessions/"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Agent Tone & Persona Adherence Across Segments): When an agent's expected behavior or persona dynamically adapts to user session context or metadata (e.g., VIP tier vs Standard tier), the evaluation prompt template must be parameterized with that same context variable (`{user_tier}` / `{persona_guidelines}`)."
   },
   {
     "id": "d4-evl-049",
@@ -695,7 +718,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/long-context"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Long-Context Memory & Needle-in-a-Haystack Retrieval): To rigorously evaluate long-context reasoning and detect attention degradation ('lost-in-the-middle' phenomenon), architects use multi-needle Needle-in-a-Haystack (NIAH) benchmarks."
   },
   {
     "id": "d4-evl-050",
@@ -724,6 +748,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-dataset",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Cost-Optimal Golden Dataset Sizing & Statistical Power): By standard binomial proportion / paired statistical power formulas, a sample size of N=12 has a 95% confidence interval half-width of roughly ±28%, meaning a true 5% regression is completely drowned out by sampling noise."
   }
 ]

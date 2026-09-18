@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/page",
       "https://cloud.google.com/dialogflow/cx/docs/concept/handler"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio & State-Based Workflows): CX Agent Studio supports deterministic state-based workflows through Pages, Transition Routes, Form parameters, and Webhook Event Handlers."
   },
   {
     "id": "cs-apx-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/system-instructions",
       "https://cloud.google.com/agent-builder/docs/agent-designer"
-    ]
+    ],
+    "hint": "Core Rule (System Instructions & Prompt Templates in Agent Designer): In Gemini Enterprise Agent Designer, combining explicit chain-of-thought (CoT) prompting with strict negative constraints (abstaining when source evidence is ambiguous) and mandatory citation formatting directly addresses hallucination risks in high-stakes clinical domains."
   },
   {
     "id": "cs-apx-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/cmek",
       "https://cloud.google.com/storage/docs/encryption/customer-managed-keys"
-    ]
+    ],
+    "hint": "Core Rule (Connecting Enterprise Data to Gemini Enterprise): Agent Search (Vertex AI Search) natively supports CMEK-encrypted Cloud Storage data sources and CMEK-protected data stores."
   },
   {
     "id": "cs-apx-004",
@@ -115,7 +118,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/parse-chunk-documents",
       "https://cloud.google.com/speech-to-text/docs/medical-models"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal Data Ingestion in Agent Workflows): To support high-recall cross-modal querying across audio dictations and complex clinical PDFs, pathology WAV files should be transcribed using Cloud Speech-to-Text's specialized medical model (which accurately recognizes clinical terminology and oncology nomenclature) with timestamp metadata preserved for citation grounding."
   },
   {
     "id": "cs-apx-005",
@@ -144,7 +148,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/synonyms",
       "https://cloud.google.com/generative-ai-app-builder/docs/boost-search-results"
-    ]
+    ],
+    "hint": "Core Rule (Improving Domain-Specific Retrieval Recall in Agent Search): Agent Search allows administrators to configure custom synonym controls (one-way and two-way synonyms) and boost/bury rules."
   },
   {
     "id": "cs-apx-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/overview",
       "https://cloud.google.com/vpc-service-controls/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Coding Agents in Secure Sandboxes for Clinical Pipelines): Running Antigravity and Claude Code inside Cloud Workstations deployed within a VPC Service Controls (VPC-SC) perimeter with Private Google Access ensures complete network isolation."
   },
   {
     "id": "cs-apx-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/mcp",
       "https://cloud.google.com/bigquery/docs/information-schema-intro"
-    ]
+    ],
+    "hint": "Core Rule (Configuring Coding Agents with Custom MCP Servers): A custom Model Context Protocol (MCP) server allows Antigravity coding agents to dynamically query live structural metadata (via BigQuery `INFORMATION_SCHEMA` and FHIR structure definitions) and execute dry-run validations against synthetic, de-identified test datasets."
   },
   {
     "id": "cs-apx-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder",
       "https://cloud.google.com/logging/docs/audit"
-    ]
+    ],
+    "hint": "Core Rule (Customizing Coding Agents with Antigravity Rules & Skills): Antigravity Rules allow organizations to embed mandatory architectural, security, and compliance standards directly into the coding agent's workspace context, while Antigravity Skills in the Skill Registry package reusable code patterns (such as GxP-compliant cryptographic audit decorators and PHI-redacting exception handlers)."
   },
   {
     "id": "cs-apx-009",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Refactoring Legacy Clinical Code in GKE Sandboxes): Ephemeral GKE sandboxes provide isolated, reproducible compute environments where coding agents can safely compile, execute, and benchmark refactored code against legacy baselines using synthetic clinical datasets."
   },
   {
     "id": "cs-apx-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Orchestration in ADK (Synthesis & Verification)): In ADK, separating generation from critique using a sequential/iterative orchestration pattern (`SequentialAgent` / `LoopAgent`) with distinct specialized agents (Synthesis Agent + Verification Agent) directly implements the actor-critic / verification design pattern required by the case study."
   },
   {
     "id": "cs-apx-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/overview",
       "https://cloud.google.com/generative-ai-app-builder/docs/ranking"
-    ]
+    ],
+    "hint": "Core Rule (RAG Engine Architecture & Hybrid Reranking): Hybrid search combines the strengths of dense semantic embeddings (which capture conceptual medical relationships like 'immune-mediated pneumonitis') and sparse lexical matching (which captures exact alphanumeric strings like 'EGFR T790M')."
   },
   {
     "id": "cs-apx-012",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/use-rag-engine"
-    ]
+    ],
+    "hint": "Core Rule (Verifiable Citation Grounding in Custom Agents): Preserving chunk-level structural metadata (`document_uri`, `page_number`, `cohort_id`) during RAG Engine ingestion allows Vertex AI's grounding service to return structured `groundingMetadata` containing exact segment attributions and supporting `groundingChunks`."
   },
   {
     "id": "cs-apx-013",
@@ -376,7 +388,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/memory/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/sessions"
-    ]
+    ],
+    "hint": "Core Rule (Session & Memory Management in Agent Platform): Agent Platform Memory Bank works alongside ADK managed sessions to extract, consolidate, and persist long-term semantic memories (such as researcher preferences, study hypotheses, and verified clinical findings) across multi-session interactions."
   },
   {
     "id": "cs-apx-014",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection Strategy (LLM vs SLM & Multimodal)): A tiered model architecture aligns model capabilities with workload requirements: high-volume, repetitive entity extraction (ICD-10/MedDRA tagging) achieves lower latency and up to 10x lower cost using a specialized Small Language Model (SLM) or Gemini Flash, whereas complex cross-modal reasoning over DICOM images, audio transcripts, and long protocols requires Gemini Pro's native multimodal long-context reasoning capabilities."
   },
   {
     "id": "cs-apx-015",
@@ -434,7 +448,8 @@
     "refs": [
       "https://google.github.io/adk-docs/a2a/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Interoperability with Agent2Agent (A2A) Protocol): The Agent2Agent (A2A) protocol enables standardized, asynchronous task delegation, capability negotiation, and structured artifact exchange across heterogeneous multi-agent ecosystems."
   },
   {
     "id": "cs-apx-016",
@@ -463,7 +478,8 @@
     "refs": [
       "https://google.github.io/adk-docs/tools/mcp-tools/",
       "https://cloud.google.com/bigquery/docs/reference/mcp"
-    ]
+    ],
+    "hint": "Core Rule (Integrating Structured BigQuery & Unstructured Literature via MCP): Structured numerical filtering/aggregation and unstructured semantic retrieval require distinct, specialized tools."
   },
   {
     "id": "cs-apx-017",
@@ -492,7 +508,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://google.github.io/adk-docs/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Registry for Governance & Discovery): Google Cloud Agent Registry serves as the centralized catalog and governance plane for enterprise agents and MCP servers."
   },
   {
     "id": "cs-apx-018",
@@ -521,7 +538,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
-    ]
+    ],
+    "hint": "Core Rule (Continuous Evaluation with Gen AI Evaluation Service & Autoraters): The Vertex AI Gen AI Evaluation Service supports automated, scalable evaluation against golden datasets using customizable LLM-as-a-judge autoraters."
   },
   {
     "id": "cs-apx-019",
@@ -541,7 +559,7 @@
     "answer": [
       2
     ],
-    "explanation": "For high-stakes clinical safety evaluation, holistic fluency scores mask critical factual errors. Decomposing the LLM-as-a-judge autorater rubric into granular, verifiable criteria\u2014specifically checking numerical dosage fidelity (`mg/kg`), adverse event causality attribution against retrieved ground-truth chunks, and citation accuracy\u2014with a strict zero-tolerance fail condition ensures any hallucinated dosage immediately fails the evaluation gate.",
+    "explanation": "For high-stakes clinical safety evaluation, holistic fluency scores mask critical factual errors. Decomposing the LLM-as-a-judge autorater rubric into granular, verifiable criteria—specifically checking numerical dosage fidelity (`mg/kg`), adverse event causality attribution against retrieved ground-truth chunks, and citation accuracy—with a strict zero-tolerance fail condition ensures any hallucinated dosage immediately fails the evaluation gate.",
     "whyWrong": {
       "0": "Politeness and grammatical fluency do not protect against dangerous medical hallucinations.",
       "1": "Response length has no correlation with factual accuracy or clinical safety.",
@@ -550,7 +568,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-metrics",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Custom Autorater Rubrics for Zero Hallucinated Dosages): For high-stakes clinical safety evaluation, holistic fluency scores mask critical factual errors."
   },
   {
     "id": "cs-apx-020",
@@ -579,7 +598,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy",
       "https://cloud.google.com/vpc-service-controls/docs/supported-products"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Production Workloads on Agent Runtime with VPC-SC): Agent Runtime (Vertex AI Agent Engine) provides a fully managed, autoscaling execution environment specifically engineered for ADK and multi-agent workloads."
   },
   {
     "id": "cs-apx-021",
@@ -608,7 +628,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/overview",
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agents/"
-    ]
+    ],
+    "hint": "Core Rule (Troubleshooting Agent Reasoning Loops & Tool Latency): When multi-agent actor-critic loops encounter genuinely contradictory source evidence in clinical records, infinite reasoning loops can occur."
   },
   {
     "id": "cs-apx-022",
@@ -637,7 +658,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
       "https://cloud.google.com/sensitive-data-protection/docs/concepts-date-shifting"
-    ]
+    ],
+    "hint": "Core Rule (PHI De-identification with Sensitive Data Protection (DLP)): Sensitive Data Protection (Cloud DLP) supports cryptographic deterministic replacement (such as Format-Preserving Encryption or cryptographic surrogate tokens protected by Cloud KMS) and date-shifting."
   },
   {
     "id": "cs-apx-023",
@@ -647,7 +669,7 @@
     "type": "single",
     "caseStudy": "apex",
     "officialSample": false,
-    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth coordinates Phase I\u2013III trials across multiple therapeutic divisions. An oncology researcher authorized by an Institutional Review Board (IRB) solely for Study ONC-402 must never be able to use the Clinical Trial Intelligence agent to retrieve or synthesize patient data from Rare Disease Study RRD-109, even if both datasets reside in the same Google Cloud organization. How should you enforce this cryptographic access boundary?",
+    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth coordinates Phase I–III trials across multiple therapeutic divisions. An oncology researcher authorized by an Institutional Review Board (IRB) solely for Study ONC-402 must never be able to use the Clinical Trial Intelligence agent to retrieve or synthesize patient data from Rare Disease Study RRD-109, even if both datasets reside in the same Google Cloud organization. How should you enforce this cryptographic access boundary?",
     "options": [
       "Include a sentence in the agent's system prompt asking the researcher to voluntarily state their IRB study code.",
       "Create 350 separate copies of the Gemini model and give each hospital a different password written on a sticky note.",
@@ -666,7 +688,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
-    ]
+    ],
+    "hint": "Core Rule (Agent Identity & Principal Access Boundary (PAB) Policies): Enforcing strict IRB study isolation requires cryptographic identity propagation and Principal Access Boundary (PAB) enforcement."
   },
   {
     "id": "cs-apx-024",
@@ -695,7 +718,8 @@
     "refs": [
       "https://cloud.google.com/logging/docs/buckets#lock-bucket",
       "https://cloud.google.com/logging/docs/audit"
-    ]
+    ],
+    "hint": "Core Rule (Immutable Audit Trails for FDA 21 CFR Part 11 Compliance): Cloud Logging log buckets support Customer-Managed Encryption Keys (CMEK) and locked retention policies (Bucket Lock)."
   },
   {
     "id": "cs-apx-025",
@@ -726,6 +750,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
-    ]
+    ],
+    "hint": "Core Rule (Agent Gateway & Model Armor Guardrails): Model Armor integrated with Agent Gateway provides real-time inspection and filtering of both direct user inputs (jailbreaks) and indirect inputs retrieved from external data sources (indirect prompt injection hidden in clinical PDFs)."
   }
 ]

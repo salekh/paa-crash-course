@@ -26,7 +26,8 @@
     "refs": [
       "https://google.github.io/A2A/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent2Agent (A2A) Protocol Fundamentals): MCP (Model Context Protocol) and A2A (Agent2Agent Protocol) are complementary open standards operating at different architectural layers."
   },
   {
     "id": "d3-a2a-002",
@@ -54,7 +55,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-card"
-    ]
+    ],
+    "hint": "Core Rule (Agent Cards & Discovery): The Agent2Agent (A2A) specification standardizes agent capability discovery via RFC 8615 well-known URIs at `/.well-known/agent.json`."
   },
   {
     "id": "d3-a2a-003",
@@ -82,7 +84,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-card"
-    ]
+    ],
+    "hint": "Core Rule (Agent Cards & Discovery): In the A2A Agent Card schema, the `capabilities` object explicitly declares protocol-level features supported by the remote agent server: `streaming` (boolean indicating support for `tasks/sendSubscribe` via Server-Sent Events), `pushNotifications` (boolean indicating support for `tasks/pushNotification/set` webhook notifications), and `stateTransitionHistory` (boolean indicating whether full state history is returned)."
   },
   {
     "id": "d3-a2a-004",
@@ -112,7 +115,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-card"
-    ]
+    ],
+    "hint": "Core Rule (Agent Cards & Discovery): In the A2A Agent Card specification, `defaultInputModes` and `defaultOutputModes` (as well as per-skill overrides `skills[].inputModes` and `skills[].outputModes`) specify arrays of standard MIME types that the agent accepts and produces."
   },
   {
     "id": "d3-a2a-005",
@@ -140,7 +144,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=task-lifecycle"
-    ]
+    ],
+    "hint": "Core Rule (A2A Task Lifecycle & States): The A2A Task lifecycle defines the `input-required` state specifically for multi-turn human-in-the-loop or client clarification pauses."
   },
   {
     "id": "d3-a2a-006",
@@ -168,7 +173,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=task-state"
-    ]
+    ],
+    "hint": "Core Rule (A2A Task Lifecycle & States): The A2A specification defines seven standard states in the `TaskState` enum: `submitted` (task received/queued), `working` (agent actively processing), `input-required` (paused awaiting additional client/user input), `completed` (successfully finished terminal state), `canceled` (terminated by client request terminal state), `failed` (unrecoverable error terminal state), and `unknown` (fallback/indeterminate state)."
   },
   {
     "id": "d3-a2a-007",
@@ -196,7 +202,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=message-and-parts"
-    ]
+    ],
+    "hint": "Core Rule (A2A Message & Part Structure): In the A2A protocol, a `Message` consists of a `role` (`user` or `agent`) and an ordered list of multimodal `parts` (`list[Part]`)."
   },
   {
     "id": "d3-a2a-008",
@@ -224,7 +231,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=filepart"
-    ]
+    ],
+    "hint": "Core Rule (A2A Message & Part Structure): The A2A `FileContent` object inside a `FilePart` supports two mutually exclusive delivery modes: inline base64 content (`bytes`) for small payloads, or out-of-band URI reference (`uri`) for large files."
   },
   {
     "id": "d3-a2a-009",
@@ -252,7 +260,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=cancel-a-task"
-    ]
+    ],
+    "hint": "Core Rule (A2A JSON-RPC Methods & Protocol): The A2A protocol provides the explicit `tasks/cancel` JSON-RPC 2.0 method (`params: {'id': '<task_id>'}`) to request cancellation of an active task (`submitted`, `working`, or `input-required`)."
   },
   {
     "id": "d3-a2a-010",
@@ -280,7 +289,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=artifacts"
-    ]
+    ],
+    "hint": "Core Rule (A2A Artifacts & Output Delivery): The A2A specification cleanly separates conversational interaction (`Task.status.message` and `Task.history`) from formal work products (`Task.artifacts`)."
   },
   {
     "id": "d3-a2a-011",
@@ -308,7 +318,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-skill"
-    ]
+    ],
+    "hint": "Core Rule (Agent Cards & Skill Selection): Each A2A `AgentCard` contains a `skills` array (`list[AgentSkill]`) describing the specific functional capabilities the agent offers."
   },
   {
     "id": "d3-a2a-012",
@@ -336,7 +347,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=send-a-task"
-    ]
+    ],
+    "hint": "Core Rule (A2A Session & Multi-Turn Continuity): The A2A protocol explicitly distinguishes between a `Task` (`id`) and a `Session` (`sessionId`)."
   },
   {
     "id": "d3-a2a-013",
@@ -364,7 +376,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=error-codes"
-    ]
+    ],
+    "hint": "Core Rule (A2A Error Handling & JSON-RPC Codes): A2A builds on JSON-RPC 2.0 error handling conventions, defining domain-specific server error codes in the `-32000` to `-32099` range."
   },
   {
     "id": "d3-a2a-014",
@@ -392,7 +405,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=error-codes"
-    ]
+    ],
+    "hint": "Core Rule (A2A Error Handling & JSON-RPC Codes): When an A2A client invokes a protocol feature that the server explicitly declared as unsupported in its `AgentCard` (such as invoking `tasks/sendSubscribe` when `capabilities.streaming` is `false`, or invoking push notification methods when `capabilities.pushNotifications` is `false`), the server returns a structured JSON-RPC error (`-32004` `UnsupportedOperationError` / `PushNotificationNotSupportedError` or `-32601` `Method not found`)."
   },
   {
     "id": "d3-a2a-015",
@@ -420,7 +434,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=get-a-task"
-    ]
+    ],
+    "hint": "Core Rule (A2A State Transition History): In the A2A specification, servers that support retaining multi-turn task message transcripts advertise `capabilities.stateTransitionHistory: true` in their `AgentCard`."
   },
   {
     "id": "d3-a2a-016",
@@ -449,7 +464,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/multi-agent-systems/",
       "https://google.github.io/A2A/"
-    ]
+    ],
+    "hint": "Core Rule (ADK & A2A Integration Architecture): Google ADK is designed to bridge local multi-agent orchestration and distributed A2A federation transparently."
   },
   {
     "id": "d3-a2a-017",
@@ -477,7 +493,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=send-a-task"
-    ]
+    ],
+    "hint": "Core Rule (A2A Protocol Idempotency & Reliability): In distributed systems and the A2A protocol, client-generated task IDs (`params.id`) serve as idempotency keys for task creation."
   },
   {
     "id": "d3-a2a-018",
@@ -505,7 +522,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-card"
-    ]
+    ],
+    "hint": "Core Rule (Agent Cards & Discovery Caching): Agent Cards (`/.well-known/agent.json`) represent relatively slowly changing metadata (skills, capabilities, authentication schemes)."
   },
   {
     "id": "d3-a2a-019",
@@ -533,7 +551,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=datapart"
-    ]
+    ],
+    "hint": "Core Rule (A2A Structured Data Exchange): While A2A supports natural language interaction via `TextPart`, enterprise multi-agent integration frequently requires exact, deterministic data contracts."
   },
   {
     "id": "d3-a2a-020",
@@ -562,7 +581,8 @@
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=send-a-task",
       "https://cloud.google.com/trace/docs/setup"
-    ]
+    ],
+    "hint": "Core Rule (A2A Protocol & Metadata Propagation): The A2A specification is designed for enterprise observability and governance: (1) Transport-level distributed tracing uses standard HTTP headers (`traceparent`, `tracestate` per W3C Trace Context) so API gateways, Service Mesh, and Cloud Trace automatically link spans across A2A network hops; and (2) Protocol objects (`TaskSendParams`, `Task`, `Message`, `Part`, `Artifact`) include an open `metadata: dict[str, Any]` field specifically designed for propagating out-of-band governance context (like `cost_center_id`, tenant IDs, or security labels) without polluting the LLM's natural language prompt context."
   },
   {
     "id": "d3-a2a-021",
@@ -590,7 +610,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=get-a-task"
-    ]
+    ],
+    "hint": "Core Rule (A2A Task Lifecycle & Polling): When interacting with an A2A server that does not support streaming or push notifications (or when a client prefers polling), the client submits the task via `tasks/send` and subsequently polls `tasks/get` passing the task `id`."
   },
   {
     "id": "d3-a2a-022",
@@ -618,7 +639,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-card"
-    ]
+    ],
+    "hint": "Core Rule (Agent Cards & Authentication): The A2A `AgentCard` schema includes an `authentication` field (`AgentAuthentication`) that declares required authentication `schemes` (e.g., `['Bearer']`, `['OAuth2']`, `['ApiKey']`, `['mTLS']`) and optional credential acquisition metadata."
   },
   {
     "id": "d3-a2a-023",
@@ -649,7 +671,8 @@
     "refs": [
       "https://google.github.io/A2A/",
       "https://cloud.google.com/architecture/ai-ml/generative-ai-multi-agent-systems"
-    ]
+    ],
+    "hint": "Core Rule (A2A Protocol & Multi-Agent Topologies): A2A is specifically engineered for heterogeneous, multi-cloud, cross-framework agent ecosystems: (1) Because A2A standardizes wire-level discovery (`/.well-known/agent.json`) and task messaging (JSON-RPC 2.0 over HTTPS), the internal implementation of each regional agent remains completely opaque and independent (ADK on GCP, LangGraph on AWS, etc.); and (2) Standard asynchronous HTTP/SSE transports allow an orchestrator to execute fan-out scatter-gather patterns concurrently across distributed A2A endpoints."
   },
   {
     "id": "d3-a2a-024",
@@ -677,7 +700,8 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=task-lifecycle"
-    ]
+    ],
+    "hint": "Core Rule (A2A Task Lifecycle & States): When an agent encounters an unrecoverable input error or execution failure, it transitions the task to `failed` (or if recoverable via user re-upload, re-enters `input-required`) and populates `status.message` with a clear diagnostic `Message` explaining the exact failure reason ('Uploaded 1099-DIV PDF is corrupted/unreadable')."
   },
   {
     "id": "d3-a2a-025",
@@ -705,6 +729,7 @@
     },
     "refs": [
       "https://google.github.io/A2A/#/documentation?id=agent-card"
-    ]
+    ],
+    "hint": "Core Rule (Agent Cards & Versioning): Just like REST and gRPC microservices, A2A agents undergoing breaking changes to skill input/output data schemas (`DataPart` contracts) must follow API versioning best practices."
   }
 ]

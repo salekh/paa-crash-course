@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/setup/python-ot",
       "https://google.github.io/adk-docs/observability/"
-    ]
+    ],
+    "hint": "Core Rule (OpenTelemetry Instrumentation & Cloud Trace Waterfall Analysis): Google Cloud Trace paired with OpenTelemetry (`opentelemetry-exporter-gcp-trace` and GenAI semantic conventions) provides hierarchical waterfall visualization of complex agent trajectories."
   },
   {
     "id": "d4-trc-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/logging/docs/structured-logging#special-payload-fields",
       "https://cloud.google.com/trace/docs/trace-log-integration"
-    ]
+    ],
+    "hint": "Core Rule (Correlating Structured Cloud Logging with Cloud Trace Spans): When Cloud Run or GKE containers write structured JSON logs to `stdout`/`stderr`, the Google Cloud Logging agent automatically parses reserved fields."
   },
   {
     "id": "d4-trc-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/setup/python-ot#context-propagation",
       "https://www.w3.org/TR/trace-context/"
-    ]
+    ],
+    "hint": "Core Rule (Distributed Trace Context Propagation Across Remote Subagents): Distributed tracing across microservice boundaries requires propagating trace context headers across network calls."
   },
   {
     "id": "d4-trc-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/",
       "https://cloud.google.com/logging/docs/alerting/log-based-alerts"
-    ]
+    ],
+    "hint": "Core Rule (Real-Time Infinite Loop Detection & Termination in Production): Preventing runaway agent loops in production requires both **active runtime circuit breaking** and **real-time observability alerting**: (1) At runtime, an ADK `before_tool_callback` / `before_model_callback` inspects the current trajectory history for cyclic `(tool_name, hash(sorted_args))` repetitions or hard step ceilings (`max_steps`); when a cycle is detected, it short-circuits the loop by returning a synthetic error message instructing the LLM to gracefully apologize or escalate; (2) It simultaneously emits a structured log event (`event_type='AGENT_LOOP_DETECTED'`), which triggers a Cloud Monitoring log-based metric alert to notify engineers immediately."
   },
   {
     "id": "d4-trc-005",
@@ -142,7 +146,8 @@
     "refs": [
       "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
       "https://cloud.google.com/trace/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (OpenTelemetry Semantic Conventions for GenAI Spans): The OpenTelemetry Semantic Conventions for Generative AI (`gen_ai.*` namespace) define standardized span attribute keys across frameworks: `gen_ai.system` (`vertex_ai` / `google_genai`), `gen_ai.request.model`, `gen_ai.request.temperature`, `gen_ai.usage.input_tokens`, `gen_ai.usage.output_tokens`, and `gen_ai.response.finish_reasons` (e.g., `['STOP']` vs `['MAX_TOKENS']` vs `['SAFETY']`)."
   },
   {
     "id": "d4-trc-006",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/model-monitoring/overview",
       "https://cloud.google.com/logging/docs/export/configure_export_v2"
-    ]
+    ],
+    "hint": "Core Rule (Detecting Semantic Prompt & Intent Distribution Drift in Production): Semantic input drift (covariate shift in natural language user intents) is invisible to traditional HTTP/infrastructure metrics because the agent still returns `HTTP 200 OK` within normal latency—it just gives unhelpful or hallucinated answers to out-of-distribution topics."
   },
   {
     "id": "d4-trc-007",
@@ -200,7 +206,8 @@
     "refs": [
       "https://opentelemetry.io/docs/languages/python/instrumentation/#span-processors",
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data"
-    ]
+    ],
+    "hint": "Core Rule (Privacy-Preserving Observability: Scrubbing PII from Spans & Logs): In OpenTelemetry architectures, a custom **`SpanProcessor`** (registered in the `TracerProvider` pipeline prior to `BatchSpanProcessor` / `CloudTraceSpanExporter`) intercepts every span in memory before it leaves the application container."
   },
   {
     "id": "d4-trc-008",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/logging/docs/export/bigquery",
       "https://cloud.google.com/vertex-ai/generative-ai/pricing"
-    ]
+    ],
+    "hint": "Core Rule (FinOps Token Usage Attribution & Multi-Tenant Cost Chargeback): Because shared agent gateways multiplex traffic through common Vertex AI endpoints, native Cloud Billing SKU reports show project-level totals rather than application-level tenant splits."
   },
   {
     "id": "d4-trc-009",
@@ -258,7 +266,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/trace-span-overview",
       "https://google.github.io/adk-docs/observability/"
-    ]
+    ],
+    "hint": "Core Rule (Diagnosing Tool Execution Timeouts vs LLM Reasoning Latency): A primary benefit of OpenTelemetry span decomposition in agentic workflows is separating **LLM inference latency** (`llm.generate_content`: 850ms + 750ms = 1.6s) from **external tool execution latency** (`tool.execute.search_flights`: 10,400ms = 86.7% of total turn time)."
   },
   {
     "id": "d4-trc-010",
@@ -287,7 +296,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/configure-safety-attributes",
       "https://cloud.google.com/logging/docs/logs-based-metrics"
-    ]
+    ],
+    "hint": "Core Rule (Monitoring Safety Filter Block Rates & Finish Reason Anomalies): When Gemini blocks a response due to safety thresholds, the API still returns an `HTTP 200 OK` response payload, but sets `candidates[0].finish_reason = 'SAFETY'` (and populates `safety_ratings` with `blocked=True` and probability/severity scores)."
   },
   {
     "id": "d4-trc-011",
@@ -316,7 +326,8 @@
     "refs": [
       "https://google.github.io/adk-docs/observability/",
       "https://cloud.google.com/trace/docs/trace-export- overview"
-    ]
+    ],
+    "hint": "Core Rule (Tracking Subagent Delegation Graphs & Multi-Agent Topology): Reconstructing runtime multi-agent execution graphs (directed acyclic graphs or cyclic state machines) requires recording directed edges (`source_agent` -> `target_agent`) linked by shared `trace_id` and `parent_span_id` hierarchy."
   },
   {
     "id": "d4-trc-012",
@@ -345,7 +356,8 @@
     "refs": [
       "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
       "https://cloud.google.com/trace/docs/setup/python-ot"
-    ]
+    ],
+    "hint": "Core Rule (Observability for Streaming Agents: Tracking Time-to-First-Token vs Inter-Token Latency): In streaming LLM applications, total duration conflates two distinct phases: (1) **Time to First Token (TTFT)**, governed by prompt prefill length, context cache hits, and synchronous tool execution before the final response stream begins; and (2) **Time Per Output Token (TPOT / Inter-Token Latency)**, governed by autoregressive decoding speed."
   },
   {
     "id": "d4-trc-013",
@@ -374,7 +386,8 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/",
       "https://docs.pydantic.dev/latest/"
-    ]
+    ],
+    "hint": "Core Rule (Detecting Tool Schema Drift & Silent API Contract Breakage): Silent downstream API contract changes (`200 OK` with renamed or dropped JSON keys) are a major cause of subtle agent hallucinations."
   },
   {
     "id": "d4-trc-014",
@@ -403,7 +416,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
       "https://cloud.google.com/monitoring/custom-metrics"
-    ]
+    ],
+    "hint": "Core Rule (Observability for Context Cache Hit Rates in Production): Monitoring the **Cache Hit Token Ratio** (`cached_content_token_count / prompt_token_count`) as a time-series metric in Cloud Monitoring is essential for FinOps governance."
   },
   {
     "id": "d4-trc-015",
@@ -432,7 +446,8 @@
     "refs": [
       "https://cloud.google.com/monitoring/services/slo-burn-rate-alerting",
       "https://sre.google/workbook/alerting-on-slos/"
-    ]
+    ],
+    "hint": "Core Rule (Alerting on Error Budget Burn Rate & Latency SLOs for Agents): Following Google SRE best practices supported natively in **Cloud Service Monitoring**, **burn-rate alerts** measure how fast the service is consuming its 30-day error budget relative to the sustainable rate (1.0x)."
   },
   {
     "id": "d4-trc-016",
@@ -461,7 +476,8 @@
     "refs": [
       "https://opentelemetry.io/docs/concepts/sampling/#tail-sampling",
       "https://cloud.google.com/trace/docs/trace-sampling"
-    ]
+    ],
+    "hint": "Core Rule (Sampling Strategies for High-Volume OpenTelemetry Traces): **Head-based sampling** makes a random keep/drop decision at the very start of a request—meaning 99% of rare downstream tool exceptions or 12-second latency spikes are permanently discarded."
   },
   {
     "id": "d4-trc-017",
@@ -490,7 +506,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/logging/docs/export/bigquery"
-    ]
+    ],
+    "hint": "Core Rule (Detecting Hallucination & Output Quality Drift via Online Evaluation Sampling): **Continuous Online Evaluation (Asynchronous Production Judge Sampling)** bridges offline pre-deployment testing with live runtime observability."
   },
   {
     "id": "d4-trc-018",
@@ -519,7 +536,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/trace-span-overview",
       "https://docs.python.org/3/library/asyncio-task.html#running-tasks-concurrently"
-    ]
+    ],
+    "hint": "Core Rule (Tracing Parallel Tool Execution & Fan-Out Concurrency): A classic Python async bug visible immediately in Cloud Trace waterfalls is the **'staircase waterfall' inside an intended parallel fan-out**."
   },
   {
     "id": "d4-trc-019",
@@ -548,7 +566,8 @@
     "refs": [
       "https://opentelemetry.io/docs/languages/python/instrumentation/#creating-spans",
       "https://cloud.google.com/trace/docs/setup/python-ot"
-    ]
+    ],
+    "hint": "Core Rule (Observability for Vector Search & RAG Retrieval Latency Spans): Instrumenting complex compound tools (like multi-stage RAG pipelines: Embed -> ANN Vector Search -> Cross-Encoder Rerank) with fine-grained nested child spans (`tracer.start_as_current_span('rag.rerank_passages')`) breaks down the opaque tool duration into its constituent network and compute stages."
   },
   {
     "id": "d4-trc-020",
@@ -577,7 +596,8 @@
     "refs": [
       "https://cloud.google.com/security-command-center/docs/model-armor-overview",
       "https://cloud.google.com/logging/docs/structured-logging"
-    ]
+    ],
+    "hint": "Core Rule (Detecting Prompt Injection & Security Anomalies via Log Analytics): Blocked prompt injection attempts are vital threat-intelligence signals indicating active reconnaissance against your agent's tools and data."
   },
   {
     "id": "d4-trc-021",
@@ -606,7 +626,8 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/",
       "https://google.github.io/adk-docs/observability/"
-    ]
+    ],
+    "hint": "Core Rule (Using ADK Callbacks (`before_model_callback`, `after_model_callback`) for Custom Telemetry): The Google Agent Development Kit (ADK) provides a clean lifecycle callback architecture (`before_agent_callback`, `after_agent_callback`, `before_model_callback`, `after_model_callback`, `before_tool_callback`, `after_tool_callback`)."
   },
   {
     "id": "d4-trc-022",
@@ -635,7 +656,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/state/",
       "https://google.github.io/adk-docs/artifacts/"
-    ]
+    ],
+    "hint": "Core Rule (Diagnosing Session State Serialization & Payload Bloat): A common stateful agent anti-pattern is dumping multi-megabyte tool outputs (full SQL result sets, raw base64 PDFs, large pandas DataFrames) directly into `session.state` or unpruned tool event histories."
   },
   {
     "id": "d4-trc-023",
@@ -668,7 +690,8 @@
     "refs": [
       "https://cloud.google.com/stackdriver/docs",
       "https://google.github.io/adk-docs/observability/"
-    ]
+    ],
+    "hint": "Core Rule (End-to-End Agent Observability Architecture on Google Cloud): The Google Cloud Observability triad for AgentOps consists of: (1) **Cloud Trace (OpenTelemetry)** for fine-grained latency waterfalls and distributed multi-agent span hierarchy; (2) **Cloud Logging + BigQuery Log Sinks** for structured JSON payloads, trace-correlated debugging, FinOps token chargebacks, and offline/online evaluation dataset harvesting; and (3) **Cloud Monitoring** for real-time time-series metrics, custom token/loop counters, and multi-burn-rate SLO alerting."
   },
   {
     "id": "d4-trc-024",
@@ -697,7 +720,8 @@
     "refs": [
       "https://opentelemetry.io/docs/languages/python/instrumentation/#record-exceptions",
       "https://docs.python.org/3/library/asyncio-task.html#timeouts"
-    ]
+    ],
+    "hint": "Core Rule (Detecting Deadlocks & Orphaned Subagent Tasks in Async Workflows): In asynchronous distributed agent workflows, unhandled cancellations (`asyncio.CancelledError`) or timeouts can leave resources leaked and OpenTelemetry spans unclosed ('zombie spans')."
   },
   {
     "id": "d4-trc-025",
@@ -726,6 +750,7 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Debugging Non-Deterministic Routing Flips via Prompt Snapshot Logging): In stateful multi-turn agents with dynamic context assembly (RAG chunks, dynamic few-shot examples, `session.state` variables interpolated into system instructions), the LLM's probability distribution over tool/subagent choices is conditioned on the **entire assembled prompt context**, not just the final user utterance."
   }
 ]

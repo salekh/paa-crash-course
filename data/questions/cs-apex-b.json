@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/few-shot-examples",
       "https://cloud.google.com/dialogflow/cx/docs/concept/generative-agent"
-    ]
+    ],
+    "hint": "Core Rule (Few-Shot Prompt Templates in CX Agent Studio): In CX Agent Studio and Gemini Enterprise Agent Designer, adding curated few-shot examples (input narrative -> clinical reasoning trace -> canonical MedDRA Grade output) anchors the model's classification boundaries."
   },
   {
     "id": "cs-apx-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/parse-chunk-documents",
       "https://cloud.google.com/document-ai/docs/layout-parser-overview"
-    ]
+    ],
+    "hint": "Core Rule (Parsing Complex Clinical PDF Tables in RAG Engine): Document AI Layout Parser identifies structural document boundaries (headings, paragraphs, tables, lists) and converts complex multi-column tables into structured Markdown or HTML blocks while repeating row/column headers across split chunks."
   },
   {
     "id": "cs-apx-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/create-data-store-es",
       "https://cloud.google.com/generative-ai-app-builder/docs/about-blended-search"
-    ]
+    ],
+    "hint": "Core Rule (Connecting Structured BigQuery & Cloud SQL to Gemini Enterprise): Gemini Enterprise (Vertex AI Search) supports blended search applications that combine unstructured document data stores (Cloud Storage) with structured data stores (BigQuery and Cloud SQL connectors)."
   },
   {
     "id": "cs-apx-029",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/handler",
       "https://cloud.google.com/dialogflow/cx/docs/concept/human-handoff"
-    ]
+    ],
+    "hint": "Core Rule (Fallback Event Handlers & Human Escalation in CX Agent Studio): In CX Agent Studio, high-risk medical intents (such as off-label or emergency compassionate use requests) must be intercepted using deterministic intent routes or safety event handlers."
   },
   {
     "id": "cs-apx-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/overview",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Cross-Modal Query Grounding in Gemini Enterprise): Gemini models natively support interleaved multimodal inputs (images, audio, text, PDFs) within a unified representational space."
   },
   {
     "id": "cs-apx-031",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://google.github.io/adk-docs/deploy/"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI for Lifecycle Governance & Promotion): The Agents CLI in Agent Platform enables declarative infrastructure-as-code and agent-as-code lifecycle management."
   },
   {
     "id": "cs-apx-032",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder",
       "https://cloud.google.com/iam/docs/best-practices-service-accounts"
-    ]
+    ],
+    "hint": "Core Rule: Configuring granular human-vs-agent execution modes in Antigravity allows low-risk, reversible engineering tasks (running local unit tests, linters, and synthetic data validations inside sandboxes) to proceed autonomously in `agent mode`, while high-impact security and compliance operations (modifying CMEK keys, IAM bindings, or VPC-SC boundaries) trigger a mandatory `human mode` prompt requiring explicit developer cryptographic sign-off."
   },
   {
     "id": "cs-apx-033",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/sensitive-data-protection/docs/best-practices"
-    ]
+    ],
+    "hint": "Core Rule (Specialized Compliance Subagents via Skill Registry): Packaging a specialized Compliance Auditor Subagent with an Antigravity pre-commit Extension Hook via the enterprise Skill Registry embeds automated semantic security scanning directly into every developer's workflow."
   },
   {
     "id": "cs-apx-034",
@@ -258,7 +266,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/custom-agents/",
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Graph Workflows & Conditional Branching in ADK): ADK enables deterministic graph-style orchestration where shared `Session.state` variables capture structured outputs from upstream subagents (EHR Lab Extractor and Audio Transcription Agent)."
   },
   {
     "id": "cs-apx-035",
@@ -287,7 +296,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/chunking",
       "https://cloud.google.com/generative-ai-app-builder/docs/parse-chunk-documents"
-    ]
+    ],
+    "hint": "Core Rule (Hierarchical Parent-Child Chunking in RAG Engine): Hierarchical parent-child (small-to-big) chunking solves the precision-vs-context trade-off in long clinical documents."
   },
   {
     "id": "cs-apx-036",
@@ -316,7 +326,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/parallel-agents/",
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Parallel Agent Execution in ADK for Cross-Modal Analysis): Because analyzing EHR lab trends, DICOM radiology scans, WAV audio notes, and genomic VCF files involves independent I/O-bound and model-bound operations with no sequential dependencies between them, wrapping them in an ADK `ParallelAgent` executes all four branches concurrently."
   },
   {
     "id": "cs-apx-037",
@@ -345,7 +356,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/sessions"
-    ]
+    ],
+    "hint": "Core Rule (Cryptographic Session Isolation in Managed Sessions): Using a single global Python variable causes immediate cross-user data leakage in multi-threaded/async serving environments."
   },
   {
     "id": "cs-apx-038",
@@ -374,7 +386,8 @@
     "refs": [
       "https://google.github.io/adk-docs/tools/mcp-tools/",
       "https://cloud.google.com/healthcare-api/docs/how-tos/fhir"
-    ]
+    ],
+    "hint": "Core Rule (Custom Integration Layers for Hospital EHRs via MCP): Decoupling complex third-party protocol mechanics (mTLS handshakes, SMART-on-FHIR OAuth 2.0 token lifecycles, and HL7 FHIR schema normalization) into a dedicated MCP server running on Cloud Run follows enterprise agentic design best practices."
   },
   {
     "id": "cs-apx-039",
@@ -387,7 +400,7 @@
     "question": "For this question, refer to the Apex BioHealth case study. A core business requirement is to provide clinical safety officers with transparent explainability into how autonomous agents correlate adverse event signals across patient cohorts. When an agent flags a potential drug-induced liver injury signal, the safety officer must be able to inspect the exact logical steps, intermediate SQL queries, and retrieved literature passages that led to that conclusion. How should you design the ADK agent output?",
     "options": [
       "Return only a binary `TRUE` or `FALSE` label with no text explanation to keep the UI uncluttered.",
-      "Configure the ADK agent to capture and persist structured execution trace artifacts\u2014including intermediate `Thought` steps, exact BigQuery SQL parameters executed, retrieved RAG chunk IDs with similarity scores, and Verification Agent critique logs\u2014and render them in an interactive Explainability Audit Card alongside the clinical summary.",
+      "Configure the ADK agent to capture and persist structured execution trace artifacts—including intermediate `Thought` steps, exact BigQuery SQL parameters executed, retrieved RAG chunk IDs with similarity scores, and Verification Agent critique logs—and render them in an interactive Explainability Audit Card alongside the clinical summary.",
       "Generate a separate fictional story explaining how a hypothetical doctor might have reached the same conclusion.",
       "Encrypt the reasoning trace with a throwaway key so no human can ever read how the decision was made."
     ],
@@ -403,7 +416,8 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Explainability & Reasoning Traces for Safety Officers): Transparent clinical explainability requires surfacing verifiable execution telemetry rather than post-hoc rationalizations."
   },
   {
     "id": "cs-apx-040",
@@ -432,7 +446,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Longitudinal Context Management & Map-Reduce Summarization): A hierarchical map-reduce agent pattern overcomes context window degradation on massive longitudinal records."
   },
   {
     "id": "cs-apx-041",
@@ -463,7 +478,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Curating Golden Evaluation Datasets with ADK Evalset): An effective ADK `evalset` evaluates both final response quality and intermediate agent trajectories (`expected_tool_use`)."
   },
   {
     "id": "cs-apx-042",
@@ -492,7 +508,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/online-evaluation",
       "https://cloud.google.com/monitoring/docs/alerting"
-    ]
+    ],
+    "hint": "Core Rule (Monitoring Production Drift & Citation Accuracy with Observability): Continuous production monitoring combines real-time telemetry (Cloud Logging and Cloud Trace) with asynchronous online LLM-as-a-judge evaluation sampling."
   },
   {
     "id": "cs-apx-043",
@@ -521,7 +538,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/gpus"
-    ]
+    ],
+    "hint": "Core Rule (Optimal Compute Runtime Selection (Agent Runtime vs GKE vs Cloud Run)): Matching each workload to its optimal Google Cloud compute runtime maximizes reliability and cost efficiency: Component A (ADK agent orchestration) belongs on managed Agent Runtime, which provides built-in session state, Memory Bank, and agent lifecycle management."
   },
   {
     "id": "cs-apx-044",
@@ -550,7 +568,8 @@
     "refs": [
       "https://cloud.google.com/build/docs/configuring-builds/create-basic-configuration",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Automated CI/CD Deployment Gates with Evaluation Thresholds): Integrating programmatic evaluation gates directly into Cloud Build CI/CD pipelines ensures continuous quality enforcement."
   },
   {
     "id": "cs-apx-045",
@@ -579,7 +598,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/pricing"
-    ]
+    ],
+    "hint": "Core Rule (Context Caching for Cost & Latency Optimization): Vertex AI Context Caching allows large, frequently reused prompt prefixes (such as a 450-page master clinical trial protocol and regulatory guidelines) to be pre-computed and cached in memory."
   },
   {
     "id": "cs-apx-046",
@@ -608,7 +628,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security",
       "https://cloud.google.com/bigquery/docs/row-level-security-intro"
-    ]
+    ],
+    "hint": "Core Rule (OAuth 2.0 Identity Propagation with Auth Manager): OAuth 2.0 Auth Manager in Agent Platform supports end-user identity propagation (OAuth 2.0 Token Exchange / On-Behalf-Of flows)."
   },
   {
     "id": "cs-apx-047",
@@ -637,7 +658,8 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Safety Guardrails in ADK): High-consequence regulatory actions (such as submitting an expedited FDA SUSAR safety report) require deterministic Human-in-the-Loop (HITL) guardrails."
   },
   {
     "id": "cs-apx-048",
@@ -668,7 +690,8 @@
     "refs": [
       "https://cloud.google.com/vpc-service-controls/docs/overview",
       "https://cloud.google.com/vertex-ai/docs/general/vpc-sc"
-    ]
+    ],
+    "hint": "Core Rule (VPC Service Controls (VPC-SC) Perimeter Design): VPC Service Controls (VPC-SC) establishes a cryptographic service perimeter around Google Cloud managed services (Cloud Storage, BigQuery, Vertex AI/Agent Runtime, Cloud KMS)."
   },
   {
     "id": "cs-apx-049",
@@ -678,7 +701,7 @@
     "type": "single",
     "caseStudy": "apex",
     "officialSample": false,
-    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth's corporate compliance policy mandates that all clinical trial data\u2014including raw source PDFs/DICOMs, extracted text chunks, vector embeddings in RAG Engine / Vector Search, and persisted session histories\u2014must be encrypted at rest using Customer-Managed Encryption Keys (CMEK) managed in Cloud KMS, with the ability to cryptographically revoke access immediately if required by a regulatory order. How should you implement this?",
+    "question": "For this question, refer to the Apex BioHealth case study. Apex BioHealth's corporate compliance policy mandates that all clinical trial data—including raw source PDFs/DICOMs, extracted text chunks, vector embeddings in RAG Engine / Vector Search, and persisted session histories—must be encrypted at rest using Customer-Managed Encryption Keys (CMEK) managed in Cloud KMS, with the ability to cryptographically revoke access immediately if required by a regulatory order. How should you implement this?",
     "options": [
       "Delete the Cloud KMS key immediately after uploading the first document so nobody can ever query the platform.",
       "Encrypt only the original PDF files on a local USB drive and leave BigQuery and Vector Search using default Google-managed keys.",
@@ -697,7 +720,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/general/cmek",
       "https://cloud.google.com/kms/docs/CMEK"
-    ]
+    ],
+    "hint": "Core Rule (End-to-End CMEK Encryption Across Agent Data Stores): Google Cloud supports end-to-end CMEK across Cloud Storage, BigQuery, Vertex AI (RAG Engine, Vector Search, Agent Engine Managed Sessions), and Cloud Logging."
   },
   {
     "id": "cs-apx-050",
@@ -726,6 +750,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/manage-rag-files",
       "https://cloud.google.com/vertex-ai/docs/vector-search/update-rebuild-index"
-    ]
+    ],
+    "hint": "Core Rule (GDPR Right-to-be-Forgotten & Vector Erasure Governance): To comply with GDPR Right to Erasure across RAG and agent memory systems, lineage metadata (`patient_surrogate_id`) must be propagated to every derived artifact during ingestion."
   }
 ]

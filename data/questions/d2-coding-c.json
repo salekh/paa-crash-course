@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines",
       "https://github.com/google-github-actions/auth"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity CLI Keyless Authentication in CI/CD): Workload Identity Federation allows external CI/CD platforms like GitHub Actions or GitLab CI to exchange short-lived OIDC tokens for temporary Google Cloud credentials via Application Default Credentials (ADC), completely eliminating the security risks of storing long-lived service account JSON keys."
   },
   {
     "id": "d2-cod-052",
@@ -55,7 +56,8 @@
     "refs": [
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude"
-    ]
+    ],
+    "hint": "Core Rule (Claude Code Context Compaction & Memory Management): Claude Code's `/compact` command (and automated compaction hooks) condenses lengthy conversation histories—stripping verbose stack traces and intermediate tool outputs while retaining critical architectural context, active file pointers, and pending todo items—dramatically reducing token usage and latency."
   },
   {
     "id": "d2-cod-053",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/column-level-security-intro",
       "https://cloud.google.com/bigquery/docs/dynamic-data-masking-intro"
-    ]
+    ],
+    "hint": "Core Rule (Google Cloud BigQuery MCP Server & Data Governance): BigQuery Column-Level Security using policy tags and dynamic data masking enforces access control directly inside the BigQuery storage and query engine."
   },
   {
     "id": "d2-cod-054",
@@ -115,7 +118,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/gpus-multi",
       "https://cloud.google.com/kubernetes-engine/docs/concepts/confidential-nodes"
-    ]
+    ],
+    "hint": "Core Rule (GPU-Accelerated GKE Sandboxes for AI Coding Agents): NVIDIA Multi-Instance GPU (MIG) partitions physical GPUs into separate hardware-isolated instances with dedicated memory controllers and cache, preventing cross-tenant GPU memory snooping or fault propagation."
   },
   {
     "id": "d2-cod-055",
@@ -144,7 +148,8 @@
     "refs": [
       "https://sre.google/sre-book/postmortem-culture/",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills for SRE Incident Postmortems): A custom `SKILL.md` can define a structured workflow that queries Google Cloud Monitoring alert intervals and Cloud Logging traces via MCP tools, inspects recent Git commits within that time window, and formats the synthesized timeline, root cause, and action items into an organizational SRE postmortem template."
   },
   {
     "id": "d2-cod-056",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks Blocking Dangerous Shell Patterns): Pre-tool extension hooks inspect tool arguments before execution."
   },
   {
     "id": "d2-cod-057",
@@ -202,7 +208,8 @@
     "refs": [
       "https://protobuf.dev/",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Contract-First Full-Stack Coordination): Contract-first orchestration solves multi-agent coordination drift by establishing an immutable shared interface specification (such as a `.proto` or OpenAPI schema) before parallel execution begins."
   },
   {
     "id": "d2-cod-058",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/access-control",
       "https://cloud.google.com/context-aware-access/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Workstations Zero-Trust Context-Aware Access): Google Cloud Access Context Manager (ACM) combined with Endpoint Verification evaluates device posture (OS version, disk encryption, corporate certificate) in real time."
   },
   {
     "id": "d2-cod-059",
@@ -262,7 +270,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/provisioned-throughput/overview",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Scaling & High Availability with Agents CLI): Vertex AI Provisioned Throughput guarantees dedicated model serving capacity and predictable latency for mission-critical enterprise workloads."
   },
   {
     "id": "d2-cod-060",
@@ -291,7 +300,8 @@
     "refs": [
       "https://owasp.org/www-community/vulnerabilities/XML_External_Entity_(XXE)_Processing",
       "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html"
-    ]
+    ],
+    "hint": "Core Rule (Patching XML External Entity (XXE) Vulnerabilities): Disabling DTD declarations entirely (`disallow-doctype-decl = true`) or disabling external general and parameter entities in `DocumentBuilderFactory` is the definitive OWASP-recommended defense against XXE injection in Java."
   },
   {
     "id": "d2-cod-061",
@@ -320,7 +330,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/tips/java",
       "https://docs.spring.io/spring-boot/reference/packaging/native-image/index.html"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Run Cold-Start & Runtime Optimization): Compiling Spring Boot applications to GraalVM Native Images using Spring AOT processing (or using Class Data Sharing / CRaC with Cloud Run startup CPU boost) eliminates heavy JVM startup JIT compilation and classpath scanning, reducing Cloud Run cold starts from >10 seconds to hundreds of milliseconds."
   },
   {
     "id": "d2-cod-062",
@@ -349,7 +360,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/firestore/docs"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity SDK Long-Term Memory Persistence): Integrating the Antigravity SDK with Agent Platform Memory Bank or a managed vector/document store (Firestore/AlloyDB) enables long-term semantic memory persistence."
   },
   {
     "id": "d2-cod-063",
@@ -378,7 +390,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/prompts",
       "https://cloud.google.com/run/docs"
-    ]
+    ],
+    "hint": "Core Rule (MCP Prompts Centralization across Coding Agents): The Model Context Protocol (MCP) specification includes `prompts/list` and `prompts/get` primitives specifically so MCP servers can expose standardized, parameterized prompt templates to any connected client (Antigravity, Claude Code, VS Code)."
   },
   {
     "id": "d2-cod-064",
@@ -409,7 +422,8 @@
     "refs": [
       "https://cloud.google.com/dns/docs/policies",
       "https://cloud.google.com/vpc/docs/configure-private-google-access"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Workstations DNS Exfiltration Prevention): DNS tunneling exfiltration relies on recursive DNS resolvers forwarding queries for attacker-controlled domains across the internet."
   },
   {
     "id": "d2-cod-065",
@@ -438,7 +452,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/sdk/gcloud"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills Human vs Agent Execution Modes): Agents CLI and Antigravity support mode-aware skill execution (`human` vs `agent` mode)."
   },
   {
     "id": "d2-cod-066",
@@ -467,7 +482,8 @@
     "refs": [
       "https://slsa.dev/",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks for AI Code Provenance & Auditing): An extension hook bound to commit creation (`prepare-commit-msg` / post-tool commit hook) runs deterministically outside the LLM's control, reading exact runtime environment variables (model version, session trace ID, agent identity) and appending verified trailers while logging immutable audit events."
   },
   {
     "id": "d2-cod-067",
@@ -496,7 +512,8 @@
     "refs": [
       "https://www.w3.org/WAI/standards-guidelines/wcag/",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Workspace Rules for Accessibility (a11y) & i18n): Combining declarative workspace rules (`.antigravity/rules.md`) that guide the agent's initial code generation with a deterministic post-tool linter (`eslint-plugin-jsx-a11y` and i18n string checks) ensures both proactive adherence and immediate automated feedback if an accessibility attribute or translation key is missed."
   },
   {
     "id": "d2-cod-068",
@@ -525,7 +542,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/docs"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Circuit Breaking & Failure Recovery): Robust multi-agent orchestration requires circuit breakers: capping subagent turn budgets (`maxTurns`), detecting repetitive action/diff cycles, and isolating subagent failures so a single problematic module gracefully degrades to a human-review queue without crashing parallel sibling subagents or burning unlimited tokens."
   },
   {
     "id": "d2-cod-069",
@@ -556,7 +574,8 @@
     "refs": [
       "https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/",
       "https://cloud.google.com/security-command-center/docs"
-    ]
+    ],
+    "hint": "Core Rule (Patching Broken Object Level Authorization (BOLA / IDOR)): Remediating BOLA/IDOR requires enforcing object-level ownership checks at the data access layer using the authenticated principal's cryptographically verified `tenant_id` / `user_id` context (`WHERE id = $1 AND tenant_id = $2`)."
   },
   {
     "id": "d2-cod-070",
@@ -585,7 +604,8 @@
     "refs": [
       "https://docs.astral.sh/uv/",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity Plugin Dependency Isolation): Coding agent plugins and MCP servers must execute in isolated, hermetic environments (e.g., dedicated `uv` / `pipx` virtual environments or container sandboxes) so their internal tooling dependencies never pollute or conflict with the target application repository's language runtime."
   },
   {
     "id": "d2-cod-071",
@@ -614,7 +634,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/tips/general#use_minimal_base_images",
       "https://github.com/GoogleContainerTools/distroless"
-    ]
+    ],
+    "hint": "Core Rule (Container Image Optimization with Coding Agents): Multi-stage builds separate build-time toolchains (Go SDK, compilers, Git) from the runtime image."
   },
   {
     "id": "d2-cod-072",
@@ -643,7 +664,8 @@
     "refs": [
       "https://cloud.google.com/vpc/docs/configure-private-google-access-hybrid",
       "https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules"
-    ]
+    ],
+    "hint": "Core Rule (Claude Code Hybrid Connectivity & VPC-SC): To access VPC-SC protected Google APIs (like Vertex AI Model Garden) from on-premises networks without public internet traversal, traffic must route over Cloud Interconnect to either a Private Service Connect (PSC) consumer endpoint IP or the `restricted.googleapis.com` VIP (`199.36.153.4/30`) advertised via Cloud Router BGP, paired with a VPC-SC ingress policy permitting the authenticated Workforce Identity principals."
   },
   {
     "id": "d2-cod-073",
@@ -672,7 +694,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
       "https://cloud.google.com/logging/docs"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Telemetry Redaction with Sensitive Data Protection): Integrating Google Cloud Sensitive Data Protection (DLP) de-identification templates into the Agent Gateway / Agents CLI telemetry pipeline inspects structured log payloads in flight, deterministically masking or tokenizing sensitive infoTypes (credit cards, SSNs, auth tokens) before logs are persisted to Cloud Logging or BigQuery."
   },
   {
     "id": "d2-cod-074",
@@ -703,7 +726,8 @@
     "refs": [
       "https://cloud.google.com/spanner/docs/schema-updates",
       "https://cloud.google.com/spanner/docs/emulator"
-    ]
+    ],
+    "hint": "Core Rule (Google Cloud Spanner MCP Server & Safe Schema Migrations): Safe agentic schema management on Cloud Spanner requires validating DDL syntax and backfill impact against the Cloud Spanner Emulator or a staging environment first, blocking destructive operations (`DROP COLUMN`/`DROP TABLE`) behind human approval gates, and enforcing expand-and-contract migration patterns to maintain zero-downtime compatibility."
   },
   {
     "id": "d2-cod-075",
@@ -732,6 +756,7 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/network-policy",
       "https://kubernetes.io/docs/concepts/services-networking/network-policies/"
-    ]
+    ],
+    "hint": "Core Rule (GKE Sandbox NetworkPolicy Micro-Segmentation): Kubernetes `NetworkPolicy` resources with explicit `Egress` rules enforce L3/L4 micro-segmentation at the CNI (Dataplane V2 / Cilium) level."
   }
 ]

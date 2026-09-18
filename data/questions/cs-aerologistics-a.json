@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit",
       "https://cloud.google.com/agent-builder/docs/orchestration"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Agent Graph Workflows in ADK): ADK supports composable multi-agent orchestration primitives including ParallelAgent and SequentialAgent within a graph workflow."
   },
   {
     "id": "cs-aer-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-selection"
-    ]
+    ],
+    "hint": "Core Rule (SLM vs. LLM Model Selection & Hybrid Routing): The AeroLogistics technical requirements explicitly call for deploying fine-tuned Small Language Models (SLMs) on GKE with GPUs/TPUs for sub-second (<800ms p99) edge routing decisions, while selectively escalating complex multi-hub cross-modal conflict resolution to Gemini 1.5 Pro."
   },
   {
     "id": "cs-aer-003",
@@ -86,7 +88,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/guardrails",
       "https://cloud.google.com/architecture/ai-ml/agent-design-patterns"
-    ]
+    ],
+    "hint": "Core Rule (Execution Guardrails & Preventing Infinite Reasoning Loops): To prevent unbounded cyclic negotiation loops and 15-second latency spikes, ADK graph workflows must be configured with hard maximum reasoning step budgets (max_steps) and strict tool/agent timeout circuit breakers."
   },
   {
     "id": "cs-aer-004",
@@ -115,7 +118,8 @@
     "refs": [
       "https://cloud.google.com/memorystore/docs/redis/overview",
       "https://cloud.google.com/agent-builder/docs/memory-bank"
-    ]
+    ],
+    "hint": "Core Rule (Session State & Shared Scratchpad Architecture): AeroLogistics requires sub-second (p99 < 800ms) dispatch coordination alongside multi-agent consensus."
   },
   {
     "id": "cs-aer-005",
@@ -144,7 +148,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/setup/opentelemetry",
       "https://cloud.google.com/stackdriver/docs/instrumentation/ai-agent-observability"
-    ]
+    ],
+    "hint": "Core Rule (Distributed Trajectory Tracing & Observability): OpenTelemetry integrated with Cloud Trace and Cloud Logging enables end-to-end distributed trajectory tracking across asynchronous multi-agent workflows."
   },
   {
     "id": "cs-aer-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agent-gateway",
       "https://cloud.google.com/architecture/rate-limiting-strategies-techniques"
-    ]
+    ],
+    "hint": "Core Rule (Global Traffic Management, Load Shedding & Rate Limiting): Agent Gateway provides centralized traffic governance, rate limiting, token quota enforcement, and priority load shedding across multi-region agent deployments."
   },
   {
     "id": "cs-aer-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/model-armor/docs/overview",
       "https://cloud.google.com/agent-builder/docs/agent-registry-governance"
-    ]
+    ],
+    "hint": "Core Rule (Regulatory Compliance & Policy Guardrails): For safety-critical and legally regulated operations like FAA/EASA flight compliance and customs clearance, probabilistic system prompts are insufficient."
   },
   {
     "id": "cs-aer-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/dataflow/docs/guides/streaming-pipelines",
       "https://cloud.google.com/memorystore/docs/redis/real-time-feature-store"
-    ]
+    ],
+    "hint": "Core Rule (Real-Time Telemetry Ingestion & Streaming Context): Feeding 500,000 raw telemetry events per second directly into LLM prompts is impossible due to context window limits, latency, and token cost."
   },
   {
     "id": "cs-aer-009",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/overview",
       "https://cloud.google.com/agent-builder/docs/coding-agents"
-    ]
+    ],
+    "hint": "Core Rule (Modernizing Legacy Heuristics Using Coding Agents): Using Antigravity coding agents inside secure Google Cloud sandboxes (Cloud Workstations or private GKE clusters) with internal Model Context Protocol (MCP) connections allows developers to refactor legacy heuristic code into ADK microservices, generate high-coverage unit tests, and remediate vulnerabilities while keeping proprietary algorithms within VPC Service Controls boundaries."
   },
   {
     "id": "cs-aer-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/a2a-protocol",
       "https://cloud.google.com/iam/docs/agent-identity"
-    ]
+    ],
+    "hint": "Core Rule (Agent-to-Agent (A2A) Cross-Modal Handoff Protocol): The Agent2Agent (A2A) protocol enables interoperable, asynchronous task delegation and negotiation between distinct autonomous agents across organizational boundaries."
   },
   {
     "id": "cs-aer-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/page",
       "https://cloud.google.com/agent-builder/docs/cx-agent-studio"
-    ]
+    ],
+    "hint": "Core Rule (Low-Code Operator Console & HITL Exception Handling): CX Agent Studio allows rapid low-code creation of state-based conversational workflows using Pages, Transition Routes, and Event Handlers."
   },
   {
     "id": "cs-aer-012",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
-    ]
+    ],
+    "hint": "Core Rule (Continuous Pre-Deployment & Production Evaluation): ADK evalset tooling combined with the Agent Platform GenAI Evaluation Service allows engineering teams to run automated replay simulations against a golden dataset of complex historical edge cases."
   },
   {
     "id": "cs-aer-013",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview",
       "https://cloud.google.com/vertex-ai/docs/vector-search/overview"
-    ]
+    ],
+    "hint": "Core Rule (RAG Engine Grounding for Customs & Regulatory Tariffs): Vertex AI RAG Engine paired with Vector Search 1.0 provides sub-second hybrid retrieval (combining dense embeddings for semantic concepts with sparse lexical matching for exact tariff codes and regulatory statutes) plus reranking."
   },
   {
     "id": "cs-aer-014",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/iam/docs/agent-identity"
-    ]
+    ],
+    "hint": "Core Rule (Principal Access Boundary (PAB) & Least Privilege Identity): Principal Access Boundary (PAB) policies combined with Google Cloud Agent Identity enforce cryptographic least-privilege boundaries on autonomous agents."
   },
   {
     "id": "cs-aer-015",
@@ -436,7 +450,8 @@
     "refs": [
       "https://cloud.google.com/architecture/framework/reliability/multi-region-deployment",
       "https://cloud.google.com/memorystore/docs/redis/high-availability"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Region High Availability Deployment Architecture): Achieving 99.99% availability and surviving full regional outages requires both compute redundancy (active-active multi-region GKE/Cloud Run deployments managed by global load balancing and Agent Gateway) and state durability (cross-region replicated Memorystore for Redis and multi-region Memory Bank so surviving regions can immediately resume in-flight agent graph execution)."
   },
   {
     "id": "cs-aer-016",
@@ -465,7 +480,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/mcp-servers",
       "https://modelcontextprotocol.io/introduction"
-    ]
+    ],
+    "hint": "Core Rule (MCP Server Integration for Weather & Port Systems): The Model Context Protocol (MCP) provides a standardized abstraction layer between AI agents and external data sources or tools."
   },
   {
     "id": "cs-aer-017",
@@ -494,7 +510,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/auth-manager",
       "https://cloud.google.com/secret-manager/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Secure Agent-to-Tool Authentication with Auth Manager): Google Cloud Auth Manager (OAuth 2.0) provides centralized lifecycle management for agent-to-tool credentials."
   },
   {
     "id": "cs-aer-018",
@@ -523,7 +540,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agents-cli",
       "https://cloud.google.com/agent-builder/docs/antigravity-customization"
-    ]
+    ],
+    "hint": "Core Rule (Customizing Antigravity with Agents CLI & Rules): Antigravity supports custom workspace rules, plugins, and extension hooks that guide coding agents during code generation to automatically include mandatory enterprise patterns (like OpenTelemetry tracing and step budgets)."
   },
   {
     "id": "cs-aer-019",
@@ -552,7 +570,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/trace-agent-trajectories",
       "https://cloud.google.com/memorystore/docs/redis/caching-patterns"
-    ]
+    ],
+    "hint": "Core Rule (Troubleshooting Latency Spikes & Token Consumption): Cloud Trace trajectory inspection pinpointed redundant identical MCP tool invocations as the root cause of both latency and token bloat."
   },
   {
     "id": "cs-aer-020",
@@ -581,7 +600,8 @@
     "refs": [
       "https://cloud.google.com/architecture/ai-ml/hybrid-llm-routing",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit"
-    ]
+    ],
+    "hint": "Core Rule (Dynamic Escalation Between Edge SLM and Gemini 1.5 Pro): A fast-path confidence router executes the local GPU/TPU-accelerated SLM in ~100-150ms."
   },
   {
     "id": "cs-aer-021",
@@ -610,7 +630,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/overview",
       "https://cloud.google.com/agent-builder/docs/multimodal-ingestion"
-    ]
+    ],
+    "hint": "Core Rule (Ingesting Unstructured Multimodal Port & Weather Feeds): Gemini models natively process multimodal inputs (video, images, audio, and PDF text)."
   },
   {
     "id": "cs-aer-022",
@@ -639,7 +660,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/overview",
       "https://cloud.google.com/model-armor/docs/sensitive-data-filtering"
-    ]
+    ],
+    "hint": "Core Rule (Protecting Sensitive Cargo & Telemetry Data): Sensitive Data Protection (Cloud DLP) integrated at the Agent Gateway and ADK middleware layer automatically inspects, masks, or tokenizes sensitive PII/PHI (such as patient identifiers on medical freight manifests) in real time before data enters LLM context windows, Memory Bank, or Cloud Logging traces."
   },
   {
     "id": "cs-aer-023",
@@ -668,7 +690,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agent-registry",
       "https://cloud.google.com/agent-builder/docs/skill-registry"
-    ]
+    ],
+    "hint": "Core Rule (Agent Registry & Skill Discovery for Cross-Hub Routing): Google Cloud Agent Registry and Skill Registry act as the authoritative catalog of available agents, skills, schemas, and security policies."
   },
   {
     "id": "cs-aer-024",
@@ -697,7 +720,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agent-gateway-monitoring",
       "https://cloud.google.com/billing/docs/how-to/export-data-bigquery"
-    ]
+    ],
+    "hint": "Core Rule (Cost Attribution & Token Budget Governance): By propagating custom metadata headers (`hub_id`, `cargo_class`, `weather_event_id`) through Agent Gateway and OpenTelemetry spans and exporting usage logs to BigQuery, AeroLogistics gains exact real-time token and compute cost attribution per shipment class and storm event, while Agent Gateway can enforce budget caps per category."
   },
   {
     "id": "cs-aer-025",
@@ -728,6 +752,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/workflows",
       "https://cloud.google.com/architecture/ai-ml/deterministic-verification-gates"
-    ]
+    ],
+    "hint": "Core Rule (Deterministic Cold-Chain Safety Verification Gate): Maintaining 99.99% cold-chain integrity requires combining multi-agent proposals with deterministic verification gates."
   }
 ]

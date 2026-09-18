@@ -26,7 +26,8 @@
     "refs": [
       "https://google.github.io/adk-docs/deploy/agent-engine/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Agent Runtime vs Cloud Run vs GKE Trade-offs): Vertex AI Agent Engine (formerly Reasoning Engine) is Google Cloud's purpose-built, fully managed runtime for deploying ADK, LangChain, and custom Python agents."
   },
   {
     "id": "d4-dep-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/cpu-allocation",
       "https://google.github.io/adk-docs/deploy/cloud-run/"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Run CPU Allocation for Background Agent Tasks): By default, Cloud Run uses request-based CPU allocation (`--cpu-throttling`), meaning CPU is strictly allocated only while an active HTTP request is open."
   },
   {
     "id": "d4-dep-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/",
       "https://google.github.io/adk-docs/deploy/cloud-run/"
-    ]
+    ],
+    "hint": "Core Rule (Session State Persistence in Horizontally Scaled Deployments): ADK's `InMemorySessionService` stores conversation history and `session.state` inside the local Python process memory of a single container instance."
   },
   {
     "id": "d4-dep-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/gpus",
       "https://cloud.google.com/run/quotas"
-    ]
+    ],
+    "hint": "Core Rule (When to Choose GKE Over Cloud Run or Agent Engine): While Vertex AI Agent Engine and Cloud Run are ideal for serverless stateless/short-lived HTTP agent workloads calling managed APIs, GKE is required when workloads demand: (1) Co-located self-hosted GPU inference (vLLM on L4/A100/H100 node pools) with ultra-low pod-to-pod latency, (2) Persistent connections exceeding Cloud Run's absolute 60-minute (3600s) request timeout (such as 8-hour WebSockets/gRPC streams), or (3) Node-level kernel customization and privileged DaemonSets (eBPF security agents)."
   },
   {
     "id": "d4-dep-005",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/min-instances",
       "https://cloud.google.com/run/docs/configuring/cpu-allocation#startup-boost"
-    ]
+    ],
+    "hint": "Core Rule (Eliminating Cold Starts for Interactive Voice Agents on Cloud Run): In serverless environments like Cloud Run, scaling to zero instances during idle periods causes cold starts when the next request arrives (container image pull + Python heavy library imports + connection pool initialization)."
   },
   {
     "id": "d4-dep-006",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy",
       "https://google.github.io/adk-docs/deploy/agent-engine/"
-    ]
+    ],
+    "hint": "Core Rule (Packaging Custom Local Modules in Vertex AI Agent Engine): When deploying to Vertex AI Agent Engine (`ReasoningEngine.create()`), the `requirements` parameter installs public or Artifact Registry PyPI packages via `pip`, whereas local custom Python files and packages not published to a package index must be explicitly bundled using the `extra_packages=['./path/to/module']` parameter."
   },
   {
     "id": "d4-dep-007",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/concurrency",
       "https://google.github.io/adk-docs/deploy/cloud-run/"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Run Concurrency Tuning for Async I/O Bound Agents): LLM agent workloads are overwhelmingly network I/O-bound (waiting on remote Gemini token generation and external API tool calls) rather than CPU-bound."
   },
   {
     "id": "d4-dep-008",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/deploying",
       "https://google.github.io/adk-docs/deploy/cloud-run/"
-    ]
+    ],
+    "hint": "Core Rule (Deploying ADK Agents with System Binary Dependencies): OS-level system binaries (`ffmpeg`, `libreoffice`, `poppler-utils`, `tesseract-ocr`) are installed via OS package managers (`apt-get` / `apk`), not Python `pip`."
   },
   {
     "id": "d4-dep-009",
@@ -258,7 +266,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (VertexAiSessionService Architecture & State Durability): `VertexAiSessionService` natively persists ADK `Session` objects, turn-by-turn `Event` logs (including tool calls, thoughts, and state deltas), and key-value `session.state` dictionaries directly within managed Vertex AI infrastructure."
   },
   {
     "id": "d4-dep-010",
@@ -287,7 +296,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/gpus-autopilot"
-    ]
+    ],
+    "hint": "Core Rule (GKE Autopilot vs GKE Standard for Agent Workloads): GKE Autopilot is a fully managed Kubernetes mode where Google Cloud provisions, scales, patches, and hardens the underlying compute nodes automatically based on pod manifests, billing strictly per pod resource requests (`vCPU`, `GiB memory`, and `GPU`)."
   },
   {
     "id": "d4-dep-011",
@@ -316,7 +326,8 @@
     "refs": [
       "https://google.github.io/adk-docs/deploy/cloud-run/",
       "https://google.github.io/adk-docs/get-started/quickstart/"
-    ]
+    ],
+    "hint": "Core Rule (Deploying ADK Agents via CLI (`adk deploy cloud_run`)): The ADK CLI includes native deployment subcommands (`adk deploy cloud_run` and `adk deploy agent_engine`)."
   },
   {
     "id": "d4-dep-012",
@@ -345,7 +356,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/create-jobs",
       "https://cloud.google.com/run/quotas"
-    ]
+    ],
+    "hint": "Core Rule (Handling Long-Running Asynchronous Agent Workflows): Cloud Run *Services* (HTTP request-driven) enforce a hard maximum request timeout of 60 minutes (3,600 seconds), and keeping client HTTP connections open for hours is brittle."
   },
   {
     "id": "d4-dep-013",
@@ -374,7 +386,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/session-affinity",
       "https://google.github.io/adk-docs/deploy/cloud-run/"
-    ]
+    ],
+    "hint": "Core Rule (Session Affinity (Sticky Sessions) in Cloud Run Streaming): Cloud Run Session Affinity (`--session-affinity`) uses a load-balancer cookie (`GAESA`) to route subsequent requests from a given client to the same container instance on a best-effort basis (as long as the instance is healthy and has capacity)."
   },
   {
     "id": "d4-dep-014",
@@ -403,7 +416,8 @@
     "refs": [
       "https://cloud.google.com/load-balancing/docs/https/setting-up-https-serverless",
       "https://cloud.google.com/firestore/docs/locations"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Region High Availability for Mission-Critical Agents): Achieving 99.99% multi-region high availability for stateful agents requires three synchronized multi-region layers: (1) Compute: Active-active Cloud Run or GKE deployments across two or more regions (`us-central1` + `us-east4`) fronted by a Global External Application Load Balancer with health checks and automatic regional failover; (2) State: A strongly consistent multi-region persistence store (Cloud Spanner or Firestore multi-region `nam5`) so sessions started in `us-central1` resume seamlessly in `us-east4`; and (3) Model Inference: Dynamic fallback across regional Vertex AI endpoints."
   },
   {
     "id": "d4-dep-015",
@@ -434,7 +448,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/multi-agents/",
       "https://cloud.google.com/architecture/microservices-architecture-introduction"
-    ]
+    ],
+    "hint": "Core Rule (Deploying Multi-Agent Microservices vs Monolithic Agent Runtime): While in-process subagents (`LlmAgent` subagents within a single ADK process) offer lowest latency for tightly coupled Python teams, distributing subagents as remote services (via Agent-to-Agent [A2A] protocol, gRPC, or OpenAPI) is architecturally required when: (1) Strict security/compliance isolation is needed (PCI-DSS payment environments with dedicated service accounts and VPC perimeters), or (2) Teams use different programming languages (Go/Java vs Python) or asymmetric hardware profiles (GPU-accelerated fraud models vs lightweight CPU search agents)."
   },
   {
     "id": "d4-dep-016",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/memory-limits",
       "https://cloud.google.com/run/docs/troubleshooting#oom"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Run Memory Sizing for Large Document Processing Agents): When a container processes 150MB PDFs in memory with `--concurrency=10`, multiple concurrent requests easily exceed a `512Mi` RAM ceiling once Python object overhead and PDF parsing buffers are accounted for, triggering Linux kernel Out-Of-Memory (`SIGKILL` / exit code 137 / Signal 9) termination."
   },
   {
     "id": "d4-dep-017",
@@ -492,7 +508,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/use",
       "https://google.github.io/adk-docs/deploy/agent-engine/"
-    ]
+    ],
+    "hint": "Core Rule (Querying Deployed Vertex AI Agent Engine Instances): Deployed Vertex AI Agent Engine instances are managed resources identified by their full resource path (`projects/{project}/locations/{location}/reasoningEngines/{id}`)."
   },
   {
     "id": "d4-dep-018",
@@ -521,7 +538,8 @@
     "refs": [
       "https://google.github.io/adk-docs/a2a/",
       "https://google.github.io/A2A/"
-    ]
+    ],
+    "hint": "Core Rule (Agent-to-Agent (A2A) Protocol & Remote Subagent Deployment): The Agent-to-Agent (A2A) protocol standardizes interoperability across heterogeneous agent runtimes."
   },
   {
     "id": "d4-dep-019",
@@ -550,7 +568,8 @@
     "refs": [
       "https://cloud.google.com/sql/docs/postgres/manage-connections",
       "https://cloud.google.com/run/docs/configuring/max-instances"
-    ]
+    ],
+    "hint": "Core Rule (Database Connection Pooling in Serverless Cloud Run Agents): Serverless compute (Cloud Run) scales out horizontally much faster than relational databases can handle raw TCP connections."
   },
   {
     "id": "d4-dep-020",
@@ -579,7 +598,8 @@
     "refs": [
       "https://google.github.io/adk-docs/runtime/",
       "https://cloud.google.com/run/docs/triggering/websockets"
-    ]
+    ],
+    "hint": "Core Rule (Deploying WebSockets & Bi-Directional Streaming Audio Agents): ADK's `run_live` bi-directional audio/video streaming relies on persistent full-duplex WebSockets (or gRPC streaming) connecting the client browser/app to the agent container, which maintains a live session with the Gemini Multimodal Live API."
   },
   {
     "id": "d4-dep-021",
@@ -608,7 +628,8 @@
     "refs": [
       "https://cloud.google.com/artifact-registry/docs/docker/names",
       "https://cloud.google.com/run/docs/deploying#images"
-    ]
+    ],
+    "hint": "Core Rule (Artifact Registry & Immutable Container Digests in Agent Deployment): In enterprise AgentOps, prompt templates, tool definitions, and Python dependencies are packaged inside container images."
   },
   {
     "id": "d4-dep-022",
@@ -637,7 +658,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/deploying#sidecars",
       "https://google.github.io/adk-docs/deploy/cloud-run/"
-    ]
+    ],
+    "hint": "Core Rule (Sidecar Containers in Cloud Run for Agent Guardrails & Proxying): Cloud Run natively supports multi-container deployments (up to 10 containers per instance, sharing the same network namespace / `localhost` loopback interface and optional in-memory volumes)."
   },
   {
     "id": "d4-dep-023",
@@ -666,7 +688,8 @@
     "refs": [
       "https://cloud.google.com/eventarc/docs/run/cloud-storage",
       "https://cloud.google.com/run/docs/configuring/min-instances"
-    ]
+    ],
+    "hint": "Core Rule (Cost-Optimal Deployment for Event-Driven Batch Agents): For sporadic, event-driven workloads (such as processing 500 files uploaded throughout the day), pairing **Eventarc** (listening for `google.cloud.storage.object.v1.finalized` events) with a scale-to-zero **Cloud Run service** (`--min-instances=0`) provides 100% event-driven automation with $0 idle compute cost."
   },
   {
     "id": "d4-dep-024",
@@ -695,7 +718,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/configuring/secrets",
       "https://cloud.google.com/run/docs/configuring/environment-variables"
-    ]
+    ],
+    "hint": "Core Rule (Managing Environment-Specific Agent Configurations (Dev/Staging/Prod)): Following Twelve-Factor App and GitOps best practices, the exact same immutable container image tested in `staging` should be promoted to `prod`."
   },
   {
     "id": "d4-dep-025",
@@ -724,6 +748,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://google.github.io/adk-docs/deploy/"
-    ]
+    ],
+    "hint": "Core Rule (Decision Matrix: Selecting the Right Agent Compute Platform): Google Cloud provides a clear spectrum of agent compute runtimes tailored to operational control vs managed simplicity: (1) **Vertex AI Agent Engine**: highest abstraction—pass an ADK/Python agent object and dependencies, and Google manages containerization, scaling, `VertexAiSessionService` state, and API endpoints; (2) **Cloud Run**: serverless container abstraction—bring any custom Dockerfile, system binaries (`ffmpeg`), sidecars, or FastAPI/WebSocket server with scale-to-zero and zero cluster management (up to 60-min timeout); (3) **GKE**: full Kubernetes control—ideal for co-located GPU model serving (vLLM on L4/H100), unlimited connection durations, and complex service mesh topologies."
   }
 ]

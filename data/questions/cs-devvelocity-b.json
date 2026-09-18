@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/parse-chunk-documents",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/overview"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal Engineering Asset Ingestion in Agent Search): Agent Search and Gemini Enterprise support multimodal enterprise data ingestion."
   },
   {
     "id": "cs-dev-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/webhook",
       "https://cloud.google.com/workstations/docs/reference/rest"
-    ]
+    ],
+    "hint": "Core Rule (CX Agent Studio Webhook Fulfillment for Cloud Workstations Provisioning): CX Agent Studio webhooks allow conversational pages to trigger backend infrastructure automation securely."
   },
   {
     "id": "cs-dev-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder",
       "https://cloud.google.com/workstations/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity Extension Hooks for Pre-Commit & Pre-Edit Verification): Antigravity Extension Hooks allow deterministic shell scripts and verification tools to intercept agent lifecycle events (`post-edit`, `pre-tool-call`, `pre-commit`)."
   },
   {
     "id": "cs-dev-029",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters",
       "https://cloud.google.com/vpc/docs/configure-private-google-access"
-    ]
+    ],
+    "hint": "Core Rule (Network Isolation & Private Artifact Access in GKE Sandboxes): Enabling Private Google Access (`private.googleapis.com` or `restricted.googleapis.com`) on GKE private clusters combined with strict Kubernetes NetworkPolicies allows sandbox pods to pull internal packages and container images from Artifact Registry over Google's private internal network without requiring public IP addresses or outbound internet NAT gateways."
   },
   {
     "id": "cs-dev-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder",
       "https://google.github.io/adk-docs/tools/mcp-tools/"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Hallucinated Imports via Dependency Graph Context): Grounding coding agents on the deterministic dependency manifest (`go.mod`, `pom.xml`, `pyproject.toml`, `package.json`) and exposing an MCP symbol lookup tool that validates whether an import path and function signature actually exist in the internal Artifact Registry eliminates import hallucinations."
   },
   {
     "id": "cs-dev-031",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/build/docs/subscribe-build-notifications",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Building Autonomous CI/CD Failure Triage Agents with Antigravity SDK): Using Pub/Sub notifications from Cloud Build to trigger an autonomous triage agent built with the Antigravity SDK enables closed-loop self-healing CI/CD."
   },
   {
     "id": "cs-dev-032",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/configure-workstation-configs",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming"
-    ]
+    ],
+    "hint": "Core Rule (Pre-Warmed Sandbox Pools for Low-Latency Agent Execution): Combining Cloud Workstations warm pools and GKE image streaming / pre-warmed buffer pods with scheduled autoscaling policies (scaling up ahead of the 9:00 AM ramp-up and scaling down overnight/weekends) reduces sandbox assignment latency from minutes to seconds while avoiding 24/7 idle compute waste."
   },
   {
     "id": "cs-dev-033",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/binary-authorization/docs/overview",
       "https://cloud.google.com/software-delivery-shield/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Cryptographic Governance of Antigravity Plugins in Skill Registry): Enforcing cryptographic signature verification (via Binary Authorization and Cosign attestations stored in Artifact Registry / Skill Registry) ensures software supply-chain integrity for agent tooling."
   },
   {
     "id": "cs-dev-034",
@@ -249,7 +257,7 @@
     "answer": [
       0
     ],
-    "explanation": "Autonomous Test-Driven Development (TDD) requires an iterative feedback loop governed by deterministic exit criteria. In ADK, pairing a `SequentialAgent` (for initial test authoring) with a bounded `LoopAgent` that alternates between code refinement and sandbox test execution\u2014checking `Session.state['test_exit_code'] == 0` to break early\u2014reliably produces verified, passing code while preventing runaway token loops.",
+    "explanation": "Autonomous Test-Driven Development (TDD) requires an iterative feedback loop governed by deterministic exit criteria. In ADK, pairing a `SequentialAgent` (for initial test authoring) with a bounded `LoopAgent` that alternates between code refinement and sandbox test execution—checking `Session.state['test_exit_code'] == 0` to break early—reliably produces verified, passing code while preventing runaway token loops.",
     "whyWrong": {
       "1": "One-shot code generation without execution feedback frequently fails on complex enterprise microservice dependencies.",
       "2": "Infinite loops without a `max_retries` termination guard cause severe budget overruns when encountering unsolvable bugs.",
@@ -258,7 +266,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agents/",
       "https://google.github.io/adk-docs/agents/workflow-agents/sequential-agents/"
-    ]
+    ],
+    "hint": "Core Rule (Cyclic Graph Workflows in ADK for Autonomous TDD): Autonomous Test-Driven Development (TDD) requires an iterative feedback loop governed by deterministic exit criteria."
   },
   {
     "id": "cs-dev-035",
@@ -287,7 +296,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/overview",
       "https://cloud.google.com/generative-ai-app-builder/docs/ranking"
-    ]
+    ],
+    "hint": "Core Rule (Hybrid Search & Symbol Reranking for Code Retrieval): Code search requires both conceptual semantic understanding and exact lexical symbol precision."
   },
   {
     "id": "cs-dev-036",
@@ -316,7 +326,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/parallel-agents/",
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Parallel Agent Execution in ADK for Multi-Faceted PR Audits): Because SAST security analysis, license auditing, performance profiling, and style rule verification inspect the same immutable PR diff independently without mutating state, executing them concurrently inside an ADK `ParallelAgent` cuts total wall-clock latency to the duration of the single slowest check (~45s) while preserving comprehensive governance."
   },
   {
     "id": "cs-dev-037",
@@ -345,7 +356,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/",
       "https://google.github.io/adk-docs/tools/mcp-tools/"
-    ]
+    ],
+    "hint": "Core Rule (Cross-Repository Dependency Graph Orchestration in ADK): Managing breaking contract changes across a distributed 800-microservice architecture requires dependency-aware multi-agent orchestration."
   },
   {
     "id": "cs-dev-038",
@@ -374,7 +386,8 @@
     "refs": [
       "https://google.github.io/adk-docs/tools/mcp-tools/",
       "https://cloud.google.com/logging/docs/reference/v2/rest"
-    ]
+    ],
+    "hint": "Core Rule (Context Pruning & Stack Trace Filtering in Custom Agents): MCP servers should return structured, high-signal context rather than raw multi-megabyte dumps."
   },
   {
     "id": "cs-dev-039",
@@ -403,7 +416,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/determine-eval"
-    ]
+    ],
+    "hint": "Core Rule (Custom LLM-as-a-Judge Autoraters for Code Review Quality): Evaluating natural-language engineering artifacts (such as architectural PR review critiques and security remediation advice) requires semantic rubric evaluation."
   },
   {
     "id": "cs-dev-040",
@@ -432,7 +446,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/overview",
       "https://cloud.google.com/stackdriver/docs/instrumentation/overview"
-    ]
+    ],
+    "hint": "Core Rule (Monitoring MCP Tool Latency & Agent Bottlenecks with Cloud Trace): Distributed tracing via Cloud Trace (using OpenTelemetry W3C `traceparent` propagation across the agent runtime, Agent Gateway, Vertex AI LLM calls, and MCP servers) renders a granular waterfall view of every sub-step."
   },
   {
     "id": "cs-dev-041",
@@ -461,7 +476,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview",
       "https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration"
-    ]
+    ],
+    "hint": "Core Rule (Canary Rollouts & A/B Testing for Coding Agent Upgrades): Controlled canary rollouts and A/B testing via Agent Gateway traffic splitting allow platform engineering to measure real-world engineering telemetry (PR acceptance rate, CI pass rate, token spend per refactored service) on a 5% pilot cohort."
   },
   {
     "id": "cs-dev-042",
@@ -490,7 +506,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/pricing"
-    ]
+    ],
+    "hint": "Core Rule (Context Caching for Enterprise Repository Standards & Headers): Vertex AI Context Caching is specifically designed for scenarios where a large, static prompt prefix (such as organization-wide coding rules, style guides, and common API schemas) is shared across high-frequency requests."
   },
   {
     "id": "cs-dev-043",
@@ -519,7 +536,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/overview",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Detecting & Mitigating Behavioral Drift on New Language Toolchains): When programming language toolchains evolve beyond an LLM's pre-training cutoff, behavioral drift occurs."
   },
   {
     "id": "cs-dev-044",
@@ -548,7 +566,8 @@
     "refs": [
       "https://cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
-    ]
+    ],
+    "hint": "Core Rule (Real-Time Secret & Credential Redaction with Sensitive Data Protection): Integrating Sensitive Data Protection (Cloud DLP) with custom and built-in infoType detectors (`AUTH_TOKEN`, `GCP_CREDENTIALS`, `JSON_WEB_TOKEN`, cryptographic private keys) into Agent Gateway and MCP tool response pipelines guarantees deterministic scrubbing."
   },
   {
     "id": "cs-dev-045",
@@ -577,7 +596,8 @@
     "refs": [
       "https://cloud.google.com/build/docs/deploying-builds/gate-builds-on-approval",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-builder"
-    ]
+    ],
+    "hint": "Core Rule (Mandatory Human-in-the-Loop (HITL) Gates for IAM & Production Merges): Enforcing strict separation between `agent mode` (autonomous drafting, linting, and `terraform plan` validation inside sandboxes) and `human mode` (requiring cryptographic human approval from an authorized Principal Security Engineer before `terraform apply` or production branch merge) fulfills DevVelocity's technical requirements and prevents privilege escalation."
   },
   {
     "id": "cs-dev-046",
@@ -608,7 +628,8 @@
     "refs": [
       "https://cloud.google.com/vpc-service-controls/docs/overview",
       "https://cloud.google.com/access-context-manager/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (VPC Service Controls (VPC-SC) for Zero Source Code Exfiltration): VPC Service Controls (VPC-SC) establishes a hard data-exfiltration barrier around Google Cloud resources."
   },
   {
     "id": "cs-dev-047",
@@ -637,7 +658,8 @@
     "refs": [
       "https://cloud.google.com/logging/docs/buckets#lock-bucket",
       "https://cloud.google.com/logging/docs/audit"
-    ]
+    ],
+    "hint": "Core Rule (Immutable Audit Logging of Autonomous Agent Actions): Streaming structured execution events from Agent Gateway, GKE sandbox audit sinks, and Google Cloud Admin Activity / Data Access logs into a CMEK-encrypted Cloud Logging bucket with Bucket Lock enabled ensures WORM (Write-Once-Read-Many) immutability."
   },
   {
     "id": "cs-dev-048",
@@ -666,7 +688,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/software-delivery-shield/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Automated Quarantine & Guardrails for Vulnerable Agent-Generated Code): Combining real-time Model Armor code-security filters with a deterministic pre-PR Security Auditor Subagent hook running static application security testing (SAST) creates a self-healing security loop."
   },
   {
     "id": "cs-dev-049",
@@ -695,7 +718,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security",
       "https://cloud.google.com/iam/docs/conditions-overview"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Tenant Isolation in Shared Enterprise MCP Servers): In a shared multi-tenant MCP server architecture, security enforcement must occur server-side per request."
   },
   {
     "id": "cs-dev-050",
@@ -724,6 +748,7 @@
     "refs": [
       "https://cloud.google.com/binary-authorization/docs/overview",
       "https://cloud.google.com/software-delivery-shield/docs/supply-chain-security"
-    ]
+    ],
+    "hint": "Core Rule (SLSA Supply-Chain Security & Binary Authorization for Agent Commits): Software Delivery Shield with Cloud Build SLSA Level 3 provenance and Binary Authorization provides cryptographic software supply-chain enforcement."
   }
 ]

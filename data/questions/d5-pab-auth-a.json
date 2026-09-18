@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/iam/docs/policy-evaluation"
-    ]
+    ],
+    "hint": "Core Rule (Principal Access Boundary (PAB) Policy Structure & Binding): Principal Access Boundary (PAB) policies define the universe of eligible resources a principal can access."
   },
   {
     "id": "d5-pab-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/auth-manager",
       "https://datatracker.ietf.org/doc/html/rfc7636"
-    ]
+    ],
+    "hint": "Core Rule (Auth Manager 3-Legged OAuth vs Service Account Auth): Using a 3-legged OAuth 2.0 Authorization Code flow with PKCE managed by Auth Manager ensures that the user explicitly authenticates with Workday and grants user-scoped consent."
   },
   {
     "id": "d5-pab-003",
@@ -84,7 +86,8 @@
     "refs": [
       "https://datatracker.ietf.org/doc/html/rfc8693",
       "https://cloud.google.com/iam/docs/workload-identity-federation"
-    ]
+    ],
+    "hint": "Core Rule (OAuth 2.0 Token Exchange (RFC 8693) in A2A Delegation): RFC 8693 (OAuth 2.0 Token Exchange) explicitly defines the `act` (actor) claim structure for multi-hop delegation chains."
   },
   {
     "id": "d5-pab-004",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/downscoping-short-lived-credentials",
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Confused Deputy in Multi-Tenant BigQuery Agents): Downscoping short-lived credentials with IAM Credential Access Boundaries (or applying a session-scoped Principal Access Boundary) restricts the effective resource scope of the OAuth token passed to the BigQuery client."
   },
   {
     "id": "d5-pab-005",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/auth-manager",
       "https://cloud.google.com/kms/docs/cmek"
-    ]
+    ],
+    "hint": "Core Rule (Auth Manager Refresh Token Security & Lifecycle): Auth Manager manages the full lifecycle of OAuth 2.0 `offline_access` refresh tokens encrypted with CMEK in Cloud KMS/HSM."
   },
   {
     "id": "d5-pab-006",
@@ -173,7 +178,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity",
       "https://cloud.google.com/iam/docs/workload-identity-federation"
-    ]
+    ],
+    "hint": "Core Rule (Workload Identity Federation for Multi-Cloud Agent Tools): Keyless outbound cross-cloud authentication leverages GKE Workload Identity to issue short-lived Google-signed OIDC tokens to the agent pod, which external cloud providers (AWS IAM OIDC and Azure AD Federated Identity Credentials) validate cryptographically to issue temporary session tokens."
   },
   {
     "id": "d5-pab-007",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/policy-evaluation",
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies"
-    ]
+    ],
+    "hint": "Core Rule (Principal Access Boundary (PAB) vs IAM Deny Policies): Google Cloud IAM policy evaluation follows a strict intersection model: effective access requires passing IAM Deny evaluation (not denied), IAM Allow evaluation (explicitly granted), AND Principal Access Boundary evaluation (within the principal's eligible resource boundary)."
   },
   {
     "id": "d5-pab-008",
@@ -231,7 +238,8 @@
     "refs": [
       "https://datatracker.ietf.org/doc/html/rfc7519",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/overview"
-    ]
+    ],
+    "hint": "Core Rule (Identity Context Binding in Multi-Agent A2A Handoffs): Cryptographic context binding links the A2A delegation token to the specific active conversation (`session_id`), the authenticated subject (`sub`), a short lifetime (`exp`), and a unique `jti` checked against a replay cache, making cross-session token substitution or replay mathematically impossible."
   },
   {
     "id": "d5-pab-009",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/workforce-identity-federation",
       "https://cloud.google.com/iam/docs/conditions-overview"
-    ]
+    ],
+    "hint": "Core Rule (Workforce Identity Attribute Mapping for Agent Tool Access): Workforce Identity Federation supports custom attribute mappings (`attribute.*`) directly from IdP SAML/OIDC assertions into Google Cloud IAM."
   },
   {
     "id": "d5-pab-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://datatracker.ietf.org/doc/html/rfc6749#section-10.6",
       "https://cloud.google.com/agent-builder/docs/auth-manager"
-    ]
+    ],
+    "hint": "Core Rule (Securing OAuth Callback Redirect URIs in Auth Manager): Strict exact-match HTTPS redirect URI registration prevents open-redirector attacks where authorization codes are leaked to attacker-controlled subdomains, while PKCE (`S256`) prevents authorization code interception and the `state` parameter prevents Cross-Site Request Forgery (CSRF)."
   },
   {
     "id": "d5-pab-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/downscoping-short-lived-credentials",
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies"
-    ]
+    ],
+    "hint": "Core Rule (Dynamic Session PAB Binding for Autonomous Sub-Agents): Injecting a short-lived token downscoped via an IAM Credential Access Boundary (or dynamic PAB binding) ensures the Forensics Sub-Agent's credential is cryptographically restricted to `project-payments-prod` at the Google Cloud IAM control plane."
   },
   {
     "id": "d5-pab-012",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/setup",
       "https://cloud.google.com/sensitive-data-protection/docs/inspecting-text"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Token Leakage in Agent Execution Logs & Traces): Preventing credential leakage in observability pipelines requires both source-side sanitization (configuring OpenTelemetry / SDK interceptors to redact `Authorization` headers and secrets before trace export) and sink-side defense-in-depth (DLP log inspection/redaction on token patterns like `ya29.*` and JWT prefixes `eyJ*`)."
   },
   {
     "id": "d5-pab-013",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/auth-manager",
       "https://datatracker.ietf.org/doc/html/rfc6749"
-    ]
+    ],
+    "hint": "Core Rule (Auth Manager Token Caching & Concurrency Governance): Caching OAuth access tokens keyed by the strict tuple `(authenticated_user_id, tool_id, scopes)` with proactive pre-expiry refresh and single-flight request coalescing eliminates redundant `/oauth/token` round-trips while preserving strict per-user identity isolation."
   },
   {
     "id": "d5-pab-014",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts",
       "https://cloud.google.com/iam/docs/best-practices-for-securing-service-accounts"
-    ]
+    ],
+    "hint": "Core Rule (Securing Agent Service Accounts Against Key Creation): The Organization Policy constraint `constraints/iam.disableServiceAccountKeyCreation` deterministically blocks the creation of user-managed persistent JSON private keys for service accounts, forcing workloads to rely exclusively on managed short-lived credentials (such as attached service accounts, Workload Identity, or IAM Credentials API)."
   },
   {
     "id": "d5-pab-015",
@@ -434,7 +448,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/iam/docs/conditions-attribute-reference"
-    ]
+    ],
+    "hint": "Core Rule (Principal Access Boundary (PAB) Evaluation with IAM Conditions): Principal Access Boundary (PAB) policies support CEL-based IAM Conditions (such as `request.time`, IP address, or resource attributes)."
   },
   {
     "id": "d5-pab-016",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/identity-platform/docs/verify-token",
       "https://cloud.google.com/dialogflow/cx/docs/concept/webhook"
-    ]
+    ],
+    "hint": "Core Rule (Cross-Domain Identity Propagation Between Dialogflow CX and Vertex AI Agents): Passing the cryptographically signed OIDC ID token issued by Identity Platform in a dedicated authorization header allows the downstream Reasoning Engine sub-agent to independently verify the token signature against Google's public JWKS endpoint, guaranteeing authentic end-to-end user identity propagation."
   },
   {
     "id": "d5-pab-017",
@@ -494,7 +510,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/conditions-Delegating-role-grants",
       "https://cloud.google.com/iam/docs/deny-overview"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Privilege Escalation via Agent Self-Modification): Preventing IAM self-privilege escalation requires (1) blocking the agent from altering its own identity/PAB bindings via IAM Deny / PAB rules, and (2) using IAM Condition attributes (`iam.googleapis.com/modifiedGrantsByRole`) to restrict `setIamPolicy` calls strictly to an allowlist of safe, low-privilege roles (`roles/run.invoker`, etc.)."
   },
   {
     "id": "d5-pab-018",
@@ -523,7 +540,8 @@
     "refs": [
       "https://cloud.google.com/secret-manager/docs/rotation-recommendations",
       "https://cloud.google.com/agent-builder/docs/auth-manager"
-    ]
+    ],
+    "hint": "Core Rule (Auth Manager Integration with Secret Manager & Key Rotation): Referencing Secret Manager's `versions/latest` alias via Auth Manager / Agent Gateway allows seamless zero-downtime secret rotation without redeploying containers or exposing secrets in static environment variables."
   },
   {
     "id": "d5-pab-019",
@@ -552,7 +570,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/resource-manager/docs/cloud-platform-resource-hierarchy"
-    ]
+    ],
+    "hint": "Core Rule (Isolating Multi-Agent Environments with Principal Access Boundaries): Binding an environment-scoped Principal Access Boundary (PAB) policy to all Development principals (`folder-dev`) creates a cryptographic airlock at the IAM layer: no Development service account or workload identity can ever access resources in `folder-staging` or `folder-prod`, regardless of misconfigured IAM Allow policies."
   },
   {
     "id": "d5-pab-020",
@@ -581,7 +600,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/authenticating/service-to-service",
       "https://datatracker.ietf.org/doc/html/rfc8693"
-    ]
+    ],
+    "hint": "Core Rule (Fine-Grained MCP Server Authorization with OBO Tokens): Dual-identity verification separates transport/caller authentication (Cloud Run IAM verifying the calling Agent Identity's OIDC token) from subject authorization (verifying the signed OBO user assertion JWT against the corporate IdP), ensuring both the agent and the human user are cryptographically verified."
   },
   {
     "id": "d5-pab-021",
@@ -610,7 +630,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/session",
       "https://owasp.org/www-community/attacks/Session_fixation"
-    ]
+    ],
+    "hint": "Core Rule (Mitigating Cross-Tenant Session Fixation in Conversational Agents): Preventing session fixation and unauthorized session hijacking requires server-side session ID generation combined with strict ownership binding (`session.owner_sub == request.jwt.sub`) enforced on every read/write operation at the Agent Gateway."
   },
   {
     "id": "d5-pab-022",
@@ -639,7 +660,8 @@
     "refs": [
       "https://cloud.google.com/storage/docs/access-control/signed-urls",
       "https://cloud.google.com/iam/docs/downscoping-short-lived-credentials"
-    ]
+    ],
+    "hint": "Core Rule (Using IAM Access Boundary Policies on Cloud Storage Signed URLs): V4 Cloud Storage Signed URLs cryptographically bind the exact HTTP verb (`GET`), canonical resource path (`/wealth-statements-prod/user_991/statement_2026.pdf`), and expiration timestamp (`X-Goog-Expires=600`) into the HMAC-SHA256 signature, providing time-bounded, single-object read access without exposing bucket permissions."
   },
   {
     "id": "d5-pab-023",
@@ -668,7 +690,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/troubleshoot-access",
       "https://cloud.google.com/logging/docs/audit/understanding-audit-logs"
-    ]
+    ],
+    "hint": "Core Rule (Auditing Principal Access Boundary (PAB) Policy Violations): Cloud Audit Logs record detailed `authorizationInfo` diagnostics for every denied API call, explicitly distinguishing whether access was blocked by missing IAM Allow permissions, an IAM Deny policy, or a Principal Access Boundary (`PRINCIPAL_ACCESS_BOUNDARY`) policy."
   },
   {
     "id": "d5-pab-024",
@@ -699,7 +722,8 @@
     "refs": [
       "https://cloud.google.com/service-mesh/docs/security/authorization-policy-overview",
       "https://cloud.google.com/service-mesh/docs/security/mtls-overview"
-    ]
+    ],
+    "hint": "Core Rule (Zero-Trust Service Mesh Identity for Micro-Agent Clusters): Zero-trust East-West micro-agent security on GKE Enterprise combines `PeerAuthentication` in `STRICT` mTLS mode (cryptographically verifying SPIFFE workload identities via Mesh CA) with granular layer-7 `AuthorizationPolicy` rules restricting specific HTTP paths (`/execute`) to exact calling SPIFFE principals."
   },
   {
     "id": "d5-pab-025",
@@ -728,6 +752,7 @@
     "refs": [
       "https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3",
       "https://cloud.google.com/iam/docs/workload-identity-federation"
-    ]
+    ],
+    "hint": "Core Rule (Preventing Token Confusion in Multi-Audience OAuth Flows): The OIDC `aud` (Audience) claim identifies the intended recipient of a token."
   }
 ]

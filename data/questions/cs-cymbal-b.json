@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/page",
       "https://cloud.google.com/dialogflow/cx/docs/concept/handler"
-    ]
+    ],
+    "hint": "Core Rule (State-Based Pages & Transition Routes for Complex Retail Returns): Cymbal OmniRetail's technical requirements explicitly specify building low-code conversational flows using CX Agent Studio with state-based pages, transition routes, event handlers, and structured few-shot system instructions."
   },
   {
     "id": "cs-cym-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/ranking",
       "https://cloud.google.com/vertex-ai/docs/vector-search/hybrid-search"
-    ]
+    ],
+    "hint": "Core Rule (Cross-Encoder Reranking Latency & Recall Tuning in Vector Search 1.0): In two-stage retrieval architectures (bi-encoder/hybrid ANN search followed by cross-encoder reranking), cross-encoders perform full cross-attention between the query and each candidate document, scaling linearly with candidate count K."
   },
   {
     "id": "cs-cym-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/armor/docs/bot-management",
       "https://cloud.google.com/api-gateway/docs/quotas"
-    ]
+    ],
+    "hint": "Core Rule (Defending Against Competitor Catalog Reconnaissance via Agent Gateway): Cymbal OmniRetail's business requirements mandate preventing competitors or malicious actors from manipulating or scraping pricing/discount logic."
   },
   {
     "id": "cs-cym-029",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/mcp",
       "https://modelcontextprotocol.io/docs/concepts/tools"
-    ]
+    ],
+    "hint": "Core Rule (Building Bounded, Pagination-Enforced MCP Servers with Antigravity): To prevent context window overflow and high token costs, MCP tools interacting with large transactional tables must enforce strict pagination (`limit <= 10` with cursor tokens) and field projection (returning concise summaries first)."
   },
   {
     "id": "cs-cym-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/finding-traces",
       "https://cloud.google.com/memorystore/docs/redis/overview"
-    ]
+    ],
+    "hint": "Core Rule (Troubleshooting External Carrier API Latency Spikes in Cloud Trace): Cymbal OmniRetail's technical requirements specify instrumenting end-to-end distributed tracing using Cloud Trace and Cloud Logging to detect tool invocation latency spikes."
   },
   {
     "id": "cs-cym-031",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/a2a",
       "https://google.github.io/A2A/"
-    ]
+    ],
+    "hint": "Core Rule (Managing Asynchronous Multi-Hour Task States in Agent2Agent (A2A) Protocol): The Agent2Agent (A2A) protocol natively supports long-running, asynchronous multi-agent tasks through well-defined task lifecycle states (`SUBMITTED`, `WORKING`, `INPUT_REQUIRED`, `COMPLETED`, `FAILED`) and webhook push notifications."
   },
   {
     "id": "cs-cym-032",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
-    ]
+    ],
+    "hint": "Core Rule (Role-Based Tool Isolation & Principal Access Boundary for Retail vs. Supply Chain): Zero-trust agent security requires strict privilege separation using distinct Agent Identities and Principal Access Boundary (PAB) policies."
   },
   {
     "id": "cs-cym-033",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/video-understanding",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/audio-understanding"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal Video & Audio Defect Verification in Warranty Claims): Section 1.2 of the PAA exam specifically covers ingesting and processing unstructured multimodal data (videos, audio, and images) into the agentic workflow."
   },
   {
     "id": "cs-cym-034",
@@ -258,7 +266,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluate",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview"
-    ]
+    ],
+    "hint": "Core Rule (Trajectory Evaluation for Multi-Step Supply Chain Tool Execution): Section 4.1 of the PAA exam covers evaluating an agent's tool execution based on established success criteria using ADK evaluation tooling (`evalset`)."
   },
   {
     "id": "cs-cym-035",
@@ -287,7 +296,8 @@
     "refs": [
       "https://cloud.google.com/artifact-registry/docs/analysis",
       "https://cloud.google.com/workstations/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Automated Container & Dependency Vulnerability Patching with Coding Agents): Section 2.1 of the PAA exam explicitly covers using coding agents in secure sandboxes to refactor source code and patch application-layer vulnerabilities."
   },
   {
     "id": "cs-cym-036",
@@ -316,7 +326,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/sessions"
-    ]
+    ],
+    "hint": "Core Rule (Isolating Ephemeral Session State from Long-Term Memory Bank): Agent Platform Memory Bank supports customizable memory extraction prompts and consolidation rules."
   },
   {
     "id": "cs-cym-037",
@@ -345,7 +356,8 @@
     "refs": [
       "https://cloud.google.com/security-command-center/docs/model-armor-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Defending Against Indirect Prompt Injection in Customer Product Reviews): User-generated content (like customer product reviews) retrieved via RAG is a primary vector for indirect prompt injection."
   },
   {
     "id": "cs-cym-038",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/pubsub/docs/overview",
       "https://cloud.google.com/dataflow/docs/guides/streaming-with-cloud-pubsub"
-    ]
+    ],
+    "hint": "Core Rule (Scaling Real-Time Inventory Streams Across 1,200 Stores & 15M SKUs): Cymbal OmniRetail's existing technical environment streams real-time inventory updates through Pub/Sub into BigQuery and Memorystore for Redis."
   },
   {
     "id": "cs-cym-039",
@@ -407,7 +420,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-overview"
-    ]
+    ],
+    "hint": "Core Rule (Diagnosing Context Drift & Retrieval Degradation with RAG Triad Metrics): Decomposing RAG quality using the RAG Triad (Context Relevance, Groundedness/Faithfulness, and Answer Relevance) pinpoints the exact failure stage: low Context Relevance indicates a retrieval/indexing failure in Vector Search (e.g., missing embeddings or poor hybrid weighting for new seasonal SKUs), whereas high Context Relevance paired with low Groundedness indicates an LLM prompt/synthesis failure."
   },
   {
     "id": "cs-cym-040",
@@ -438,7 +452,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/condition",
       "https://cloud.google.com/dialogflow/cx/docs/concept/playbook"
-    ]
+    ],
+    "hint": "Core Rule (Designing Low-Code Upselling Playbooks & Conditional Routes): Section 1.1 of the PAA exam covers configuring state-based workflows (pages, transition routes) alongside system instructions and few-shot prompt templates in CX Agent Studio and Agent Designer."
   },
   {
     "id": "cs-cym-041",
@@ -469,7 +484,8 @@
     "refs": [
       "https://cloud.google.com/security-command-center/docs/model-armor-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/security"
-    ]
+    ],
+    "hint": "Core Rule (Governance & Policy Enforcement for External 3PL Agents): Section 5.1 of the PAA exam covers configuring Agent Gateway to monitor traffic and designing agentic governance using Agent Registry and Model Armor."
   },
   {
     "id": "cs-cym-042",
@@ -498,7 +514,8 @@
     "refs": [
       "https://cloud.google.com/architecture/framework/reliability/idempotency",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/mcp"
-    ]
+    ],
+    "hint": "Core Rule (Enforcing Idempotency Keys in Generated MCP Write Tools with Antigravity): In distributed agentic workflows where tool calls may be retried due to network timeouts or LLM step retries, state-mutating tools must be strictly idempotent."
   },
   {
     "id": "cs-cym-043",
@@ -527,7 +544,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models",
       "https://cloud.google.com/distributed-cloud/edge/latest/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Hybrid Model Architecture: Edge Open-Source SLMs vs. Cloud Frontier LLMs): Section 3.1 of the PAA exam covers selecting and configuring the appropriate language model (LLM vs."
   },
   {
     "id": "cs-cym-044",
@@ -537,7 +555,7 @@
     "type": "single",
     "caseStudy": "cymbal",
     "officialSample": false,
-    "question": "For this question, refer to the Cymbal OmniRetail case study. In production, a shopper asks the CX Agent Studio / ADK assistant to find an outfit matching three mutually contradictory constraints ('100% pure silk shirt, machine-washable at 90\u00b0C heavy duty, under $12'). The agent repeatedly calls the Vector Search tool with slightly tweaked parameters 18 times in a row, burning tokens and stalling the session. How should you prevent this loop?",
+    "question": "For this question, refer to the Cymbal OmniRetail case study. In production, a shopper asks the CX Agent Studio / ADK assistant to find an outfit matching three mutually contradictory constraints ('100% pure silk shirt, machine-washable at 90°C heavy duty, under $12'). The agent repeatedly calls the Vector Search tool with slightly tweaked parameters 18 times in a row, burning tokens and stalling the session. How should you prevent this loop?",
     "options": [
       "Increase the maximum tool calls per turn to 10,000 so the agent can search for hours.",
       "Configure loop-detection guardrails and a maximum consecutive tool invocation limit (e.g., `max_tool_calls_per_turn = 3`) in Agent Runtime / ADK, instrumented with Cloud Trace loop alerts, so the agent halts futile searches and explains to the shopper which constraint must be relaxed.",
@@ -556,7 +574,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview"
-    ]
+    ],
+    "hint": "Core Rule (Detecting & Breaking Reasoning Loops in Production ADK Agents): Cymbal OmniRetail's technical requirements specify instrumenting distributed tracing to detect reasoning loops in production."
   },
   {
     "id": "cs-cym-045",
@@ -585,7 +604,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/human-agent-handoff",
       "https://cloud.google.com/contact-center/ccai-platform/docs/agent-assist"
-    ]
+    ],
+    "hint": "Core Rule (Seamless Human Agent Handoff & Context Summarization in CX Agent Studio): CX Agent Studio integrates natively with Contact Center AI (CCAI) / live agent handoff protocols and generative summarization."
   },
   {
     "id": "cs-cym-046",
@@ -595,7 +615,7 @@
     "type": "single",
     "caseStudy": "cymbal",
     "officialSample": false,
-    "question": "For this question, refer to the Cymbal OmniRetail case study. Cymbal OmniRetail's backend ADK supply chain compliance agent evaluates supplier shipments against a comprehensive 180-page Global Customs & Tariff Master Handbook (approx. 120,000 tokens) on every single international shipment evaluation\u2014thousands of times per hour. Resending the identical 120,000-token handbook in every prompt input is driving up LLM token costs. How should you optimize costs while preserving full document reasoning?",
+    "question": "For this question, refer to the Cymbal OmniRetail case study. Cymbal OmniRetail's backend ADK supply chain compliance agent evaluates supplier shipments against a comprehensive 180-page Global Customs & Tariff Master Handbook (approx. 120,000 tokens) on every single international shipment evaluation—thousands of times per hour. Resending the identical 120,000-token handbook in every prompt input is driving up LLM token costs. How should you optimize costs while preserving full document reasoning?",
     "options": [
       "Switch to a model with a 512-token maximum context limit.",
       "Delete 95% of the pages from the customs handbook randomly so the prompt is shorter.",
@@ -614,7 +634,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/context-cache/context-cache-overview",
       "https://cloud.google.com/vertex-ai/generative-ai/pricing"
-    ]
+    ],
+    "hint": "Core Rule (Optimizing Inference Costs with Vertex AI Context Caching): Vertex AI Context Caching allows developers to cache large, frequently reused input contexts (such as comprehensive regulatory handbooks, product catalogs, or system rubrics exceeding 32k tokens) in Gemini's high-speed memory cache."
   },
   {
     "id": "cs-cym-047",
@@ -643,7 +664,8 @@
     "refs": [
       "https://cloud.google.com/storage/docs/bucket-lock",
       "https://cloud.google.com/logging/docs/audit"
-    ]
+    ],
+    "hint": "Core Rule (Non-Repudiation & Audit Logging for Autonomous B2B Freight Contracts): In autonomous B2B commerce across organizational boundaries (Cymbal vs."
   },
   {
     "id": "cs-cym-048",
@@ -672,7 +694,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/deploy",
       "https://cloud.google.com/sdk/gcloud/reference/alpha/ai"
-    ]
+    ],
+    "hint": "Core Rule (GitOps Lifecycle & Instant Rollback with Agents CLI): Section 2.2 of the PAA exam covers augmenting enterprise workflows with the Agents CLI to build, scale, govern, and optimize deployed agents."
   },
   {
     "id": "cs-cym-049",
@@ -701,7 +724,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/provisioned-throughput/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/quotas"
-    ]
+    ],
+    "hint": "Core Rule (Guaranteed Capacity Planning with Vertex AI Provisioned Throughput): For mission-critical enterprise workloads with predictable high-volume spikes (like Cyber Monday across 80 million active shoppers), Vertex AI Provisioned Throughput reserves dedicated model serving capacity."
   },
   {
     "id": "cs-cym-050",
@@ -730,6 +754,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/overview",
       "https://cloud.google.com/pubsub/docs/overview"
-    ]
+    ],
+    "hint": "Core Rule (Cross-Domain Orchestration Between Customer Support & Supply Chain Agents): In Cymbal OmniRetail's executive statement, Marcus Vance highlights bridging low-code CX Agent Studio experiences at the customer edge with deep ADK and A2A multi-agent orchestration in the supply chain to form an autonomous commerce network."
   }
 ]

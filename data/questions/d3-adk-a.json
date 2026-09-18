@@ -26,7 +26,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/sequential-agent/",
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Development Kit (ADK) Architecture): In Google Cloud ADK, SequentialAgent is a deterministic workflow agent designed specifically to execute a list of sub-agents one after another in the exact order they are defined."
   },
   {
     "id": "d3-adk-002",
@@ -55,7 +56,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/parallel-agent/",
       "https://google.github.io/adk-docs/agents/workflow-agents/sequential-agent/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Development Kit (ADK) Architecture): Combining a SequentialAgent with a nested ParallelAgent is the canonical ADK fan-out/fan-in pattern."
   },
   {
     "id": "d3-adk-003",
@@ -83,7 +85,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Development Kit (ADK) Architecture): ADK's LoopAgent is purpose-built for iterative critique-and-refinement cycles."
   },
   {
     "id": "d3-adk-004",
@@ -112,7 +115,8 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/before-model-callback/",
       "https://google.github.io/adk-docs/callbacks/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Callbacks & Guardrails): In Google Cloud ADK, before_model_callback is invoked immediately prior to calling the LLM."
   },
   {
     "id": "d3-adk-005",
@@ -140,7 +144,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/callbacks/before-tool-callback/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Callbacks & Guardrails): ADK's before_tool_callback executes right before a tool function is executed."
   },
   {
     "id": "d3-adk-006",
@@ -169,7 +174,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/memory/",
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Platform Memory Bank & Sessions): ADK distinguishes between scoped state prefixes in session.state and semantic long-term memory."
   },
   {
     "id": "d3-adk-007",
@@ -198,7 +204,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden & Model Selection): For high-volume (12,000 RPM), low-latency (<350ms p95), structured classification and entity extraction tasks over short texts, Small Language Models (SLMs) like Gemma 3 or high-efficiency proprietary models like Gemini 2.5 Flash are ideal."
   },
   {
     "id": "d3-adk-008",
@@ -227,7 +234,8 @@
     "refs": [
       "https://google.github.io/adk-docs/get-started/quickstart/",
       "https://google.github.io/adk-docs/evaluate/"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI & Deployment Modes): The Google Cloud ADK CLI provides purpose-built commands for the agent lifecycle: `adk web` starts a local FastAPI development server bundled with an interactive web UI that displays agent traces, state diffs, event timelines, and tool calls."
   },
   {
     "id": "d3-adk-009",
@@ -258,7 +266,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/multi-agents/",
       "https://google.github.io/adk-docs/agents/llm-agents/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Development Kit (ADK) Architecture): In ADK multi-agent hierarchies, when a parent LlmAgent delegates dynamically to child sub-agents (via transfer_to_agent), the parent LLM relies heavily on each sub-agent's `name` and `description` fields to understand when and why to hand off control."
   },
   {
     "id": "d3-adk-010",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/general/vpc-sc",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/deploy-models"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden & Privacy Trade-offs): When strict regulatory or defense requirements mandate full control over model weights and dedicated single-tenant infrastructure within a security perimeter, deploying open-weights models (such as Gemma or Llama from Vertex AI Model Garden) onto dedicated Vertex AI endpoints or GKE clusters with GPU nodes inside a VPC Service Controls (VPC-SC) perimeter is the standard pattern."
   },
   {
     "id": "d3-adk-011",
@@ -318,7 +328,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/llm-agents/#instructions",
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Development Kit (ADK) Architecture): Google Cloud ADK supports native state variable interpolation within an LlmAgent's `instruction` string (or dynamic instruction provider function)."
   },
   {
     "id": "d3-adk-012",
@@ -347,7 +358,8 @@
     "refs": [
       "https://google.github.io/adk-docs/tools/function-tools/#tool-context",
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Tool Context & State Mutation): When defining custom function tools in ADK, adding a parameter typed as `ToolContext` (e.g., `tool_context: ToolContext`) instructs the ADK runtime to automatically inject the active execution context when calling the function (while hiding `tool_context` from the LLM's tool schema)."
   },
   {
     "id": "d3-adk-013",
@@ -375,7 +387,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/custom-agents/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Custom BaseAgent): When built-in workflow agents (`SequentialAgent`, `ParallelAgent`, `LoopAgent`) are insufficient for complex, data-dependent imperative control flows, ADK allows you to create a custom agent by inheriting from `BaseAgent` and implementing `_run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]`."
   },
   {
     "id": "d3-adk-014",
@@ -403,7 +416,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/callbacks/after-model-callback/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Callbacks & Output Sanitization): In ADK, `after_model_callback` is triggered immediately after the LLM returns a response (`LlmResponse`) but before the agent processes tool calls or emits the final text event to the caller."
   },
   {
     "id": "d3-adk-015",
@@ -431,7 +445,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/artifacts/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Artifacts Management): ADK provides a dedicated `ArtifactService` abstraction (`InMemoryArtifactService` for local testing and `GcsArtifactService` for production Google Cloud Storage persistence) specifically to handle large files, images, PDFs, and binary blobs outside of `session.state`."
   },
   {
     "id": "d3-adk-016",
@@ -460,7 +475,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/multi-agents/#agent-as-a-tool",
       "https://google.github.io/adk-docs/tools/agent-tools/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Sub-Agent Delegation vs Agent-as-a-Tool): ADK supports two primary ways for an `LlmAgent` to interact with another agent: (1) Sub-agent transfer (`sub_agents` list), where the root agent hands off control (`transfer_to_agent`) and the sub-agent takes over the conversation directly with the user; and (2) Agent-as-a-Tool (`AgentTool`), where the specialist agent is wrapped as a callable tool."
   },
   {
     "id": "d3-adk-017",
@@ -489,7 +505,8 @@
     "refs": [
       "https://google.github.io/adk-docs/evaluate/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-agents"
-    ]
+    ],
+    "hint": "Core Rule (ADK Evaluation & Trajectory Metrics): In agentic evaluation with `adk eval` and Vertex AI Gen AI Evaluation Service, evaluating only the final text response (`response_match_score` or ROUGE/BLEU) is insufficient because an agent might hallucinate success without calling the required tools or call tools in an unsafe order."
   },
   {
     "id": "d3-adk-018",
@@ -517,7 +534,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/llm-agents/#structured-outputs"
-    ]
+    ],
+    "hint": "Core Rule (ADK Structured Outputs & Schemas): ADK `LlmAgent` natively supports constrained decoding / structured outputs via the `output_schema` parameter."
   },
   {
     "id": "d3-adk-019",
@@ -546,7 +564,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/memory/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank"
-    ]
+    ],
+    "hint": "Core Rule (Agent Platform Memory Bank & Sessions): `VertexAiMemoryBankService` integrates ADK with Vertex AI's managed Memory Bank."
   },
   {
     "id": "d3-adk-020",
@@ -575,7 +594,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini-supervised-tuning",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/fine-tuning"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden & Fine-Tuning vs Prompting): When a task requires teaching a model a specialized output format, proprietary domain taxonomy, or complex stylistic behavior supported by thousands of high-quality training pairs, Parameter-Efficient Fine-Tuning (supervised tuning / LoRA adapter tuning) on Vertex AI bakes that domain knowledge directly into the model weights/adapter."
   },
   {
     "id": "d3-adk-021",
@@ -603,7 +623,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/get-started/quickstart/"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI & Headless Execution): `adk run` executes an ADK agent directly in the terminal/console environment using standard input and standard output streams, without spinning up the FastAPI web server or browser UI required by `adk web`."
   },
   {
     "id": "d3-adk-022",
@@ -632,7 +653,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/state/",
       "https://google.github.io/adk-docs/events/"
-    ]
+    ],
+    "hint": "Core Rule (ADK State Management & Event Actions): ADK uses an event-sourced state architecture."
   },
   {
     "id": "d3-adk-023",
@@ -660,7 +682,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/provisioned-throughput/overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Provisioned Throughput vs Pay-As-You-Go): Vertex AI Provisioned Throughput provides reserved, dedicated model processing capacity measured in Generative AI scale units for a specified term (such as 1 week, 1 month, or 1 year)."
   },
   {
     "id": "d3-adk-024",
@@ -690,7 +713,8 @@
     },
     "refs": [
       "https://google.github.io/adk-docs/agents/workflow-agents/loop-agent/"
-    ]
+    ],
+    "hint": "Core Rule (ADK LoopAgent Termination Strategies): In Google Cloud ADK, a `LoopAgent` continues iterating through its `sub_agents` until one of two termination conditions occurs: (1) the number of completed iterations reaches the configured `max_iterations` safety ceiling, or (2) any sub-agent, tool, or callback sets `actions.escalate = True` on an emitted `Event` (often encapsulated in a dedicated exit/completion tool called by the evaluator agent when quality standards are met)."
   },
   {
     "id": "d3-adk-025",
@@ -719,6 +743,7 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/llm-agents/",
       "https://google.github.io/adk-docs/callbacks/before-model-callback/"
-    ]
+    ],
+    "hint": "Core Rule (ADK Multi-Agent Context Isolation): By default, ADK `LlmAgent` constructs the `LlmRequest` by including the conversation history (`contents`) accumulated in the session."
   }
 ]

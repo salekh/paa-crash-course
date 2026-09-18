@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/a2a-protocol",
       "https://cloud.google.com/iam/docs/agent-identity"
-    ]
+    ],
+    "hint": "Core Rule (Agent-to-Agent (A2A) Syndication & Affiliate Broadcast Handoff): The Agent2Agent (A2A) protocol provides standardized, asynchronous cross-organizational agent communication."
   },
   {
     "id": "cs-med-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-autorater",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
-    ]
+    ],
+    "hint": "Core Rule (Automated Autorater Calibration for Brand Tone & Style Alignment): LLM autoraters require domain- and brand-specific rubrics to evaluate subjective qualities like tone alignment accurately."
   },
   {
     "id": "cs-med-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agent-gateway",
       "https://cloud.google.com/architecture/rate-limiting-strategies-techniques"
-    ]
+    ],
+    "hint": "Core Rule (Rate Limiting & Cost Protection Against Viral Traffic Spikes): Agent Gateway provides centralized multi-tenant quota isolation and traffic shaping."
   },
   {
     "id": "cs-med-029",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/security",
       "https://cloud.google.com/agent-builder/docs/coding-agents"
-    ]
+    ],
+    "hint": "Core Rule (Refactoring Legacy CMS Plugins Using Coding Agents in Sandboxes): Cloud Workstations integrated with VPC Service Controls (VPC-SC) and private Antigravity / Claude Code endpoints provide a secure, isolated development sandbox."
   },
   {
     "id": "cs-med-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/multimodal-prompts",
       "https://cloud.google.com/agent-builder/docs/agent-designer"
-    ]
+    ],
+    "hint": "Core Rule (Configuring Few-Shot Multimodal Prompt Templates for Video Tagging): In Gemini Enterprise Agent Designer, combining multimodal few-shot examples (showing sample video frames/audio clips paired with ideal JSON metadata extractions) and explicit schema constraints guides Gemini LLMs to consistently detect visual/audio copyright hazards and entities."
   },
   {
     "id": "cs-med-031",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/chunking-strategies",
       "https://cloud.google.com/generative-ai-app-builder/docs/metadata"
-    ]
+    ],
+    "hint": "Core Rule (Fine-Grained Chunking & Metadata Indexing for Multimodal RAG): Preserving granular provenance in multimodal RAG requires timecode- and speaker-aware chunking at ingestion time."
   },
   {
     "id": "cs-med-032",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/auth-manager",
       "https://cloud.google.com/iam/docs/agent-identity-best-practices"
-    ]
+    ],
+    "hint": "Core Rule (Securing OAuth 2.0 Scopes for Slack & CMS MCP Servers): Least-privilege tool execution requires scoping OAuth 2.0 permissions to the specific role of each agent in the sequential pipeline."
   },
   {
     "id": "cs-med-033",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/trace/docs/setup/opentelemetry",
       "https://www.w3.org/TR/trace-context/"
-    ]
+    ],
+    "hint": "Core Rule (Distributed Trace Correlation Across Multi-Stage Publishing Pipelines): Propagating the W3C `traceparent` context (`trace_id` and `span_id`) across synchronous A2A calls, MCP tool invocations, and asynchronous Pub/Sub headers allows Google Cloud Trace to reconstruct the entire multi-agent execution tree—including all 28 parallel localization branches—into a single waterfall timeline."
   },
   {
     "id": "cs-med-034",
@@ -260,7 +268,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/parallel-workflows",
       "https://cloud.google.com/architecture/ai-ml/fault-tolerant-agent-orchestration"
-    ]
+    ],
+    "hint": "Core Rule (Parallel Fan-Out & Fault Tolerance in 28-Language Localization): To achieve sub-10-minute global publishing across 28 languages with high availability, parallel branches must be decoupled via non-blocking completion semantics (streaming out each completed language to its respective CMS immediately) and per-branch fault isolation (retrying or queuing only the failed locale without rolling back or blocking the other 27 successful locales)."
   },
   {
     "id": "cs-med-035",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/memory-bank-security",
       "https://cloud.google.com/kms/docs/cmek"
-    ]
+    ],
+    "hint": "Core Rule (Protecting Confidential Journalist Sources with Memory Isolation): Protecting confidential journalistic sources requires cryptographic and logical multi-tenancy."
   },
   {
     "id": "cs-med-036",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/antigravity-subagents",
       "https://cloud.google.com/agent-builder/docs/agents-cli"
-    ]
+    ],
+    "hint": "Core Rule (Customizing Antigravity with Editorial Linting & Subagents): Antigravity supports extensible developer workflows through custom subagents, workspace rules, and lifecycle hooks (such as pre-commit / pre-PR hooks)."
   },
   {
     "id": "cs-med-037",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/streaming-updates",
       "https://cloud.google.com/generative-ai-app-builder/docs/refresh-data"
-    ]
+    ],
+    "hint": "Core Rule (Grounded Fact-Checking Against Real-Time Wire Feeds): Real-time breaking news verification requires streaming index updates rather than batch re-indexing."
   },
   {
     "id": "cs-med-038",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/experiments/intro-vertex-ai-experiments",
       "https://cloud.google.com/bigquery/docs/analytics"
-    ]
+    ],
+    "hint": "Core Rule (A/B Testing Localized Headlines & Editorial Engagement ROI): Closing the editorial ROI loop requires connecting production user engagement telemetry back to agent version metadata."
   },
   {
     "id": "cs-med-039",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/multimodal-embeddings",
       "https://cloud.google.com/generative-ai-app-builder/docs/multimodal-search"
-    ]
+    ],
+    "hint": "Core Rule (Connecting Multimodal DAM Archives to Gemini Enterprise): Agent Search integrated with Vertex AI Multimodal Embeddings maps visual video frames, audio tracks, and text descriptions into a shared semantic vector space while indexing structured metadata attributes (like `license_scope='global_streaming'` and `year=2022`) from Firestore/BigQuery."
   },
   {
     "id": "cs-med-040",
@@ -434,7 +448,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-selection",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection for High-Volume vs. Deep Investigative Tasks): Cost and performance optimization across 10,000 daily assets requires right-sizing models to task complexity."
   },
   {
     "id": "cs-med-041",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/architecture/ai-ml/data-lineage-for-generative-ai",
       "https://cloud.google.com/agent-builder/docs/governance-policies"
-    ]
+    ],
+    "hint": "Core Rule (Automated Quarantine & Incident Response for Compromised Sources): Data lineage and automated incident response are critical for autonomous media governance."
   },
   {
     "id": "cs-med-042",
@@ -492,7 +508,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/multimodal-embeddings",
       "https://cloud.google.com/agent-builder/docs/mcp-servers"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Multimodal Copyright Compliance Before Publication): Guaranteeing zero copyright infringement in video broadcasts requires frame-level visual and audio fingerprint/embedding verification."
   },
   {
     "id": "cs-med-043",
@@ -521,7 +538,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/skill-registry",
       "https://cloud.google.com/agent-builder/docs/agents-cli"
-    ]
+    ],
+    "hint": "Core Rule (Scaling Agent Skill Development Across 28 Regional Tech Teams): Google Cloud Skill Registry combined with Agents CLI provides a centralized, governed marketplace for internal agent skills and plugins."
   },
   {
     "id": "cs-med-044",
@@ -550,7 +568,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output",
       "https://cloud.google.com/generative-ai-app-builder/docs/grounding-overview"
-    ]
+    ],
+    "hint": "Core Rule (Structured Citation Enforcement in Journalistic Drafting): Enforcing a strict Pydantic / OpenAPI `response_schema` via Controlled Generation forces the Drafting Agent to pair every factual statement with its exact `source_document_id` and evidentiary span retrieved from Agent Search."
   },
   {
     "id": "cs-med-045",
@@ -579,7 +598,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/page",
       "https://cloud.google.com/agent-builder/docs/cx-agent-studio"
-    ]
+    ],
+    "hint": "Core Rule (State-Based Editorial Escalation Flows in CX Agent Studio): CX Agent Studio excels at structured, stateful human-in-the-loop interaction flows."
   },
   {
     "id": "cs-med-046",
@@ -608,7 +628,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/model-monitoring/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
-    ]
+    ],
+    "hint": "Core Rule (Continuous Drift Monitoring for 28-Language Localization Quality): Human-in-the-Loop post-edits are the highest-signal ground truth for detecting linguistic and domain drift."
   },
   {
     "id": "cs-med-047",
@@ -637,7 +658,8 @@
     "refs": [
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies",
       "https://cloud.google.com/iap/docs/concepts-overview"
-    ]
+    ],
+    "hint": "Core Rule (Enforcing Zero-Trust Data Access for External Freelance Journalists): Combining Identity-Aware Proxy (IAP), Auth Manager, and Principal Access Boundary (PAB) policies with attribute-based conditions (`story_id` matching) guarantees zero-trust isolation at the IAM level."
   },
   {
     "id": "cs-med-048",
@@ -666,7 +688,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/memory-bank",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/video-understanding"
-    ]
+    ],
+    "hint": "Core Rule (Handling Multimodal Token Limits for Live 8-Hour Legislative Broadcasts): For continuous long-duration live broadcasts, a sliding-window multimodal architecture combined with episodic memory (Agent Platform Memory Bank and RAG Engine) keeps per-turn context windows bounded and fast."
   },
   {
     "id": "cs-med-049",
@@ -695,7 +718,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-trajectory"
-    ]
+    ],
+    "hint": "Core Rule (Validating MCP Tool Execution Success in Pre-Production CI/CD): Evaluating autonomous agents requires validating not just the final text output, but the intermediate execution trajectory (tool selection, argument accuracy, and causal ordering)."
   },
   {
     "id": "cs-med-050",
@@ -729,6 +753,7 @@
       "https://cloud.google.com/agent-builder/docs/mcp-servers",
       "https://cloud.google.com/model-armor/docs/overview",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
-    ]
+    ],
+    "hint": "Core Rule (Comprehensive Editorial Integrity & Governance Architecture): David K. Sterling's executive statement directly highlights three foundational pillars of the MediaPulse architecture: (1) standardized MCP integrations with OAuth 2.0 connecting agents to SaaS editorial/rights tools; (2) strict Model Armor and Agent Registry guardrails protecting copyright and safety; and (3) continuous automated fact-checking and autorater evaluation grounded in verified Agent Search archives."
   }
 ]

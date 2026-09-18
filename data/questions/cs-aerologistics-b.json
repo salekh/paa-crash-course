@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/graph-workflows",
       "https://cloud.google.com/architecture/ai-ml/multi-agent-cyclic-patterns"
-    ]
+    ],
+    "hint": "Core Rule (Graph State Convergence & Cyclic Renegotiation): ADK cyclic graph workflows allow structured iterative negotiation between specialized agents (e.g., proposing alternate time slots or deck clearance windows) while enforcing strict termination conditions (`max_iterations=3` or step timeout budget)."
   },
   {
     "id": "cs-aer-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference-autoscaling",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming"
-    ]
+    ],
+    "hint": "Core Rule (GKE GPU/TPU Autoscaling for Edge SLM Inference): Autoscaling LLM/SLM inference workloads effectively requires metrics that reflect inference saturation—specifically request queue depth, KV-cache utilization, and Time-To-First-Token (TTFT)—rather than generic CPU usage."
   },
   {
     "id": "cs-aer-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/model-armor/docs/prompt-injection-protection",
       "https://cloud.google.com/agent-builder/docs/security-best-practices"
-    ]
+    ],
+    "hint": "Core Rule (Model Armor Prompt Injection & Telemetry Sanitization): Indirect prompt injection via untrusted external data feeds (like unauthenticated VHF text advisories or external partner payloads) is a major threat to autonomous systems."
   },
   {
     "id": "cs-aer-029",
@@ -113,7 +116,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/coding-agents-security-patching",
       "https://cloud.google.com/workstations/docs/security"
-    ]
+    ],
+    "hint": "Core Rule (Automated Vulnerability Remediation with Coding Agents): Coding agents like Antigravity and Claude Code on Google Cloud can be automated via Agents CLI inside secure Cloud Workstations pipelines to ingest CVE reports, update dependency manifests, refactor breaking API changes, and execute automated test suites across dozens of microservices simultaneously."
   },
   {
     "id": "cs-aer-030",
@@ -142,7 +146,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/few-shot-examples",
       "https://cloud.google.com/agent-builder/docs/agent-designer-prompts"
-    ]
+    ],
+    "hint": "Core Rule (Prompt Templates & Few-Shot Examples in Agent Designer): In Gemini Enterprise Agent Designer, combining clear system instructions, explicit JSON schema definitions, structured chain-of-thought directives, and high-quality few-shot examples ensures deterministic output formatting and grounded legal citations for human supervisors."
   },
   {
     "id": "cs-aer-031",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/vector-search/filtering",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/retrieval-tuning"
-    ]
+    ],
+    "hint": "Core Rule (Vector Search 1.0 Filtering for Geospatial Airspace Rules): Vector Search 1.0 supports high-performance pre-filtering using boolean restricts and numerical metadata attributes (such as `country_code`, altitude bands, and active timestamps)."
   },
   {
     "id": "cs-aer-032",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/docs/model-monitoring/overview",
       "https://cloud.google.com/agent-builder/docs/production-monitoring"
-    ]
+    ],
+    "hint": "Core Rule (Detecting Model & Environment Drift in Autonomous Routing): Continuous production evaluation requires comparing agent predictions against ground-truth outcomes."
   },
   {
     "id": "cs-aer-033",
@@ -229,7 +236,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/identity-propagation",
       "https://datatracker.ietf.org/doc/html/rfc8693"
-    ]
+    ],
+    "hint": "Core Rule (Cross-Organizational Identity Propagation with Agent Gateway): OAuth 2.0 Token Exchange (RFC 8693) supported by Agent Gateway and Agent Identity enables secure identity propagation across multi-agent chains."
   },
   {
     "id": "cs-aer-034",
@@ -258,7 +266,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/memory-lifecycle",
       "https://cloud.google.com/memorystore/docs/redis/expiration"
-    ]
+    ],
+    "hint": "Core Rule (Managing Agent Session Lifecycles & Memory TTLs): Tiered memory lifecycle management separates high-velocity operational scratchpads from long-term compliance archives."
   },
   {
     "id": "cs-aer-035",
@@ -289,7 +298,8 @@
     "refs": [
       "https://cloud.google.com/service-mesh/docs/fault-injection",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/testing"
-    ]
+    ],
+    "hint": "Core Rule (Chaos Engineering & Fault Injection for Multi-Agent Workflows): Validating resilient agentic systems requires testing both infrastructure faults and semantic/protocol faults."
   },
   {
     "id": "cs-aer-036",
@@ -318,7 +328,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs/agents-cli-skills",
       "https://cloud.google.com/agent-builder/docs/skill-registry"
-    ]
+    ],
+    "hint": "Core Rule (Building Custom ADK Skills & Plugins with Agents CLI): Agents CLI provides tooling to scaffold, package, test, and publish custom deterministic skills and plugins (including high-performance native C/C++ aerodynamic libraries wrapped in Python) to Google Cloud Skill Registry."
   },
   {
     "id": "cs-aer-037",
@@ -347,7 +358,8 @@
     "refs": [
       "https://cloud.google.com/eventarc/docs/overview",
       "https://cloud.google.com/run/docs/about-instance-autoscaling"
-    ]
+    ],
+    "hint": "Core Rule (Asynchronous Event-Driven Graph Awakening): Event-driven state hydration combines serverless scale-to-zero efficiency with rapid reactive wakeup."
   },
   {
     "id": "cs-aer-038",
@@ -376,7 +388,8 @@
     "refs": [
       "https://cloud.google.com/storage/docs/bucket-lock",
       "https://cloud.google.com/agent-builder/docs/audit-logging"
-    ]
+    ],
+    "hint": "Core Rule (Auditing & Non-Repudiation for Autonomous Aviation Decisions): Regulatory investigations by FAA/EASA require verifiable non-repudiation and immutability."
   },
   {
     "id": "cs-aer-039",
@@ -405,7 +418,8 @@
     "refs": [
       "https://cloud.google.com/generative-ai-app-builder/docs/enterprise-search",
       "https://cloud.google.com/bigquery/docs/federated-queries-intro"
-    ]
+    ],
+    "hint": "Core Rule (Connecting Enterprise Operational Data to Gemini Enterprise): Gemini Enterprise and Agent Search support enterprise data connectors that federate queries across structured BigQuery operational tables and indexed document stores while honoring user-level IAM and Access Context Manager permissions."
   },
   {
     "id": "cs-aer-040",
@@ -434,7 +448,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/performance",
       "https://cloud.google.com/architecture/ai-ml/low-latency-agent-orchestration"
-    ]
+    ],
+    "hint": "Core Rule (Parallel Fan-Out & Aggregation Latency Optimization): In a parallel fan-out graph, total wall-clock latency equals `max(branch_latencies)`."
   },
   {
     "id": "cs-aer-041",
@@ -463,7 +478,8 @@
     "refs": [
       "https://cloud.google.com/run/docs/rollouts-rollbacks-traffic-migration",
       "https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning"
-    ]
+    ],
+    "hint": "Core Rule (Canary Deployments & Shadow Traffic Testing for Dispatch Agents): Shadow (dark traffic) mirroring via Agent Gateway / Cloud Run allows the new SLM v2.1 to process 100% of real-time production storm telemetry asynchronously in parallel with the trusted v2.0 production model."
   },
   {
     "id": "cs-aer-042",
@@ -494,7 +510,8 @@
     "refs": [
       "https://cloud.google.com/vpc-service-controls/docs/overview",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters"
-    ]
+    ],
+    "hint": "Core Rule (VPC Service Controls & Data Exfiltration Prevention): VPC Service Controls (VPC-SC) establish a cryptographic data perimeter around Google Cloud managed services (BigQuery, Vertex AI, Cloud Storage, GKE), preventing data exfiltration even if credentials are stolen."
   },
   {
     "id": "cs-aer-043",
@@ -523,7 +540,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/structured-outputs"
-    ]
+    ],
+    "hint": "Core Rule (Structured Output Enforcement for Aviation Command Payloads): Vertex AI Controlled Generation (`response_schema` + `response_mime_type='application/json'`) constrains token decoding at the inference layer using a finite-state machine derived from the Pydantic/OpenAPI schema."
   },
   {
     "id": "cs-aer-044",
@@ -552,7 +570,8 @@
     "refs": [
       "https://cloud.google.com/profiler/docs/overview",
       "https://cloud.google.com/agent-builder/docs/coding-agents-optimization"
-    ]
+    ],
+    "hint": "Core Rule (Using Coding Agents to Optimize Execution Runtimes): Coding agents excel at targeted performance optimization when guided by profiling data (such as Cloud Trace / Cloud Profiler flamegraphs)."
   },
   {
     "id": "cs-aer-045",
@@ -581,7 +600,8 @@
     "refs": [
       "https://cloud.google.com/dialogflow/cx/docs/concept/parameter",
       "https://cloud.google.com/dialogflow/cx/docs/concept/handler#cond"
-    ]
+    ],
+    "hint": "Core Rule (Multi-Turn State Management in CX Agent Studio): CX Agent Studio manages multi-turn slot filling and state persistence using Session Parameters (`$session.params`)."
   },
   {
     "id": "cs-aer-046",
@@ -610,7 +630,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/evaluation-rag",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/evaluation"
-    ]
+    ],
+    "hint": "Core Rule (Evaluating Retrieval Quality for Aviation & Customs RAG): To diagnose RAG pipelines accurately, architects must decouple retrieval quality from generation quality."
   },
   {
     "id": "cs-aer-047",
@@ -639,7 +660,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit/human-in-the-loop",
       "https://cloud.google.com/agent-builder/docs/governance-policies"
-    ]
+    ],
+    "hint": "Core Rule (Human-in-the-Loop (HITL) Escalation Governance): For high-consequence geopolitical or high-value asset decisions, ADK supports stateful Human-in-the-Loop (HITL) interrupt checkpoints."
   },
   {
     "id": "cs-aer-048",
@@ -668,7 +690,8 @@
     "refs": [
       "https://cloud.google.com/architecture/ai-ml/multi-agent-arbitration",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit"
-    ]
+    ],
+    "hint": "Core Rule (Managing Multi-Agent Consensus Conflicts): In multi-agent consensus systems, conflicting objectives must be resolved through an explicit constraint hierarchy (Lexicographic / Pareto arbitration)."
   },
   {
     "id": "cs-aer-049",
@@ -697,7 +720,8 @@
     "refs": [
       "https://opentelemetry.io/docs/specs/semconv/gen-ai/",
       "https://cloud.google.com/trace/docs/trace-agent-trajectories"
-    ]
+    ],
+    "hint": "Core Rule (OpenTelemetry Span Attributes for Multi-Agent Debugging): Adhering to OpenTelemetry GenAI semantic conventions (`gen_ai.agent.id`, `gen_ai.model.name`, token counts, step counts, tool execution latency, and custom fallback flags) allows Cloud Trace and BigQuery analytics to immediately isolate whether an 800ms breach was caused by LLM token generation latency, excessive cyclic reasoning steps, or a slow external MCP tool call."
   },
   {
     "id": "cs-aer-050",
@@ -730,6 +754,7 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development-kit",
       "https://cloud.google.com/trace/docs/setup/opentelemetry"
-    ]
+    ],
+    "hint": "Core Rule (End-to-End Fleet Resilience & Governance Architecture): Captain Sofia Lindqvist's executive mandate explicitly highlights three core architectural pillars: (1) strict step budgets and deterministic fallbacks in ADK to prevent infinite agent reasoning loops; (2) hybrid SLM/LLM routing (fine-tuned SLMs on GKE GPUs/TPUs for sub-800ms edge decisions, escalating to Gemini 1.5 Pro only for complex multi-hub conflicts); and (3) deep OpenTelemetry and Cloud Trace trajectory tracking across all agent handoffs."
   }
 ]

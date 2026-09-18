@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/build/docs",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity CLI Batch Execution & Guardrails): When running Antigravity CLI in automated batch pipelines, passing `--prompt-file` ensures consistent task instructions while `--max-turns` and `--max-tokens` enforce hard upper bounds on agentic iterations and LLM token spend, preventing runaway loops on broken repositories."
   },
   {
     "id": "d2-cod-027",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude",
       "https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching"
-    ]
+    ],
+    "hint": "Core Rule (Claude Code on Google Cloud & Prompt Caching): Vertex AI Model Garden supports prompt caching (`cache_control`) for Claude models."
   },
   {
     "id": "d2-cod-028",
@@ -84,7 +86,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/resources",
       "https://modelcontextprotocol.io/docs/concepts/tools"
-    ]
+    ],
+    "hint": "Core Rule (MCP Resources vs Tools Architecture): In MCP architecture, Resources represent read-only, URI-addressable data entities (like documentation, schemas, or logs) that clients/agents can read into context without side effects, whereas Tools represent executable functions (`tools/call`) that perform computations or side-effecting operations like triggering deployments."
   },
   {
     "id": "d2-cod-029",
@@ -115,7 +118,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster",
       "https://kubernetes.io/docs/concepts/security/pod-security-standards/"
-    ]
+    ],
+    "hint": "Core Rule (Hardening GKE Sandboxes for Coding Agents): Enforcing `readOnlyRootFilesystem: true`, `allowPrivilegeEscalation: false`, and dropping all Linux capabilities prevents malicious code from modifying system binaries or exploiting kernel privilege escalation paths."
   },
   {
     "id": "d2-cod-030",
@@ -144,7 +148,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills Tool Scoping (SKILL.md)): Defining `allowed-tools` in the `SKILL.md` YAML frontmatter instructs the Antigravity runtime to enforce a hard capability boundary for the duration of that skill's execution, restricting the agent exclusively to the declared read-only and verification tools."
   },
   {
     "id": "d2-cod-031",
@@ -173,7 +178,8 @@
     "refs": [
       "https://google.github.io/osv-scanner/",
       "https://cloud.google.com/artifact-analysis/docs"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks for Dependency & Supply-Chain Security): Intercepting package installation commands and manifest edits via a pre-tool extension hook allows deterministic verification against Google Cloud Artifact Analysis or OSV-Scanner databases before dependencies are downloaded or committed, immediately feeding CVE details back to the agent to select a patched version."
   },
   {
     "id": "d2-cod-032",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Delegation for Test-Driven Development (TDD)): Separating test authoring and feature implementation across two distinct subagents with isolated context windows and disjoint file-system write permissions (`tests/` vs `src/`) structurally eliminates confirmation bias."
   },
   {
     "id": "d2-cod-033",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/configure-workstations",
       "https://cloud.google.com/workstations/docs/architecture"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Workstations Cost Optimization & Persistence): Cloud Workstations supports configurable `idleTimeout` policies that automatically stop underlying Compute Engine instances when no active connections or CPU activity are detected."
   },
   {
     "id": "d2-cod-034",
@@ -262,7 +270,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://cloud.google.com/iam/docs/principal-access-boundary-policies"
-    ]
+    ],
+    "hint": "Core Rule (Enterprise Governance with Agents CLI & Model Armor): Model Armor scans untrusted inputs and tool outputs (such as external log files fetched via MCP) for indirect prompt injection, PII, and malicious URLs before the LLM processes them."
   },
   {
     "id": "d2-cod-035",
@@ -291,7 +300,8 @@
     "refs": [
       "https://owasp.org/www-community/vulnerabilities/Deserialization_of_untrusted_data",
       "https://semgrep.dev/docs/"
-    ]
+    ],
+    "hint": "Core Rule (Patching Insecure Deserialization Vulnerabilities): Python's `pickle` module executes arbitrary bytecode instructions (`__reduce__`) during deserialization and should never parse untrusted input."
   },
   {
     "id": "d2-cod-036",
@@ -320,7 +330,8 @@
     "refs": [
       "https://cloud.google.com/sql/docs/postgres/query-insights",
       "https://www.postgresql.org/docs/current/sql-createindex.html"
-    ]
+    ],
+    "hint": "Core Rule (Database Query & Runtime Optimization with MCP): Providing access to `pg_stat_statements` and `EXPLAIN (ANALYZE, BUFFERS)` on a staging replica allows the coding agent to inspect actual query execution costs, sequential scans, and buffer reads."
   },
   {
     "id": "d2-cod-037",
@@ -349,7 +360,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity Workspace Checkpoints & Rollbacks): Antigravity automatically captures granular workspace snapshots (checkpoints) before each tool execution turn."
   },
   {
     "id": "d2-cod-038",
@@ -378,7 +390,8 @@
     "refs": [
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/tutorials#create-custom-slash-commands",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude"
-    ]
+    ],
+    "hint": "Core Rule (Claude Code Custom Slash Commands): Claude Code supports custom slash commands defined as markdown files inside `.claude/commands/` (for repo-shared commands) or `~/.claude/commands/` (for personal commands)."
   },
   {
     "id": "d2-cod-039",
@@ -409,7 +422,8 @@
     "refs": [
       "https://cloud.google.com/secure-web-proxy/docs/overview",
       "https://cloud.google.com/vpc-service-controls/docs"
-    ]
+    ],
+    "hint": "Core Rule (Third-Party SaaS MCP Servers & VPC-SC Egress): Hosting the MCP server on Cloud Run inside the VPC-SC perimeter keeps agent communication internal and centralizes API key management in Secret Manager."
   },
   {
     "id": "d2-cod-040",
@@ -438,7 +452,8 @@
     "refs": [
       "https://cloud.google.com/binary-authorization/docs",
       "https://cloud.google.com/artifact-registry/docs"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity Plugin Supply-Chain Governance): Signing plugin OCI packages with Cloud KMS keys via Binary Authorization / Cosign and enforcing cryptographic signature plus SHA-256 digest verification in the Antigravity client policy guarantees supply-chain integrity and ensures only CI/CD-verified plugins execute on developer machines."
   },
   {
     "id": "d2-cod-041",
@@ -467,7 +482,8 @@
     "refs": [
       "https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks for Pre-Push Build & Size Gates): A pre-tool extension hook on Git commit/push operations deterministically inspects staged file sizes and MIME types before they enter the Git object database, immediately returning an error message to the coding agent so it removes the binary and adds the path to `.gitignore`."
   },
   {
     "id": "d2-cod-042",
@@ -496,7 +512,8 @@
     "refs": [
       "https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/memory",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Workspace Rules Hierarchy & Precedence): Antigravity and modern coding agents support hierarchical rule resolution: global rules apply across the workspace, while subdirectory rule files (`services/genai-worker/.antigravity/rules.md` or nested `CLAUDE.md` files) override or specialize instructions when the agent operates on files within that specific directory subtree."
   },
   {
     "id": "d2-cod-043",
@@ -525,7 +542,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Map-Reduce Pattern for API Governance): The Map-Reduce subagent pattern excels at high-fanout analytical tasks: parallel worker subagents independently execute deterministic diff tools (`oasdiff`) on individual microservice specs within isolated contexts (Map), returning compact structured JSON findings that the parent orchestrator synthesizes into a unified report (Reduce)."
   },
   {
     "id": "d2-cod-044",
@@ -556,7 +574,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/access-control",
       "https://cloud.google.com/iam/docs/workforce-identity-federation"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Workstations Multi-Tenant Contractor Isolation): Isolating contractors requires both network/compute isolation and identity-level access control: binding separate Workstation Configurations to isolated subnets with east-west firewall blocks prevents network lateral movement, while Workforce Identity Federation with resource-scoped `roles/workstations.user` and conditional `roles/run.invoker` policies restricts each vendor strictly to their assigned workstations and MCP servers."
   },
   {
     "id": "d2-cod-045",
@@ -585,7 +604,8 @@
     "refs": [
       "https://cloud.google.com/security-command-center/docs",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Configuration Drift Detection): Using the Agents CLI in a scheduled GitOps reconciliation loop (`diff` followed by `apply --reconcile`) continuously compares live cloud state against version-controlled declarative manifests, automatically reverting unauthorized manual console edits and alerting Security Command Center."
   },
   {
     "id": "d2-cod-046",
@@ -614,7 +634,8 @@
     "refs": [
       "https://pkg.go.dev/os#Root",
       "https://owasp.org/www-community/attacks/Path_Traversal"
-    ]
+    ],
+    "hint": "Core Rule (Patching Path Traversal Vulnerabilities (CWE-22)): In Go, `filepath.Join` cleans paths lexically but does not prevent escaping a base directory if relative segments (`..`) or symlinks resolve outside the root."
   },
   {
     "id": "d2-cod-047",
@@ -643,7 +664,8 @@
     "refs": [
       "https://nodejs.org/en/learn/diagnostics/memory/using-heap-snapshot",
       "https://cloud.google.com/profiler/docs"
-    ]
+    ],
+    "hint": "Core Rule (Memory Leak & GC Optimization with Coding Agents): Diffing two V8 heap snapshots taken over time isolates objects allocated between snapshots that were never garbage-collected, exposing exact retaining paths (such as unbounded caches or detached `EventEmitter` closures)."
   },
   {
     "id": "d2-cod-048",
@@ -672,7 +694,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://developers.google.com/workspace/chat/Overview"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity SDK Custom HITL Approval Webhooks): The Antigravity SDK supports asynchronous pre-execution interceptors (`onBeforeToolCall`) that can pause agent execution, persist session state, emit interactive webhook notifications to collaboration platforms like Google Chat or Slack, and resume tool execution only when a verified cryptographic approval token is returned."
   },
   {
     "id": "d2-cod-049",
@@ -703,7 +726,8 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/enforce-policy",
       "https://open-policy-agent.github.io/gatekeeper/website/docs/gator/"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills for Multi-Step Kubernetes Migrations): Embedding `kubeconform` / `kubectl apply --dry-run=server` validates that the upgraded manifests match exact GKE API server schemas, while running `gator test` (OPA Gatekeeper CLI) locally verifies that all corporate security constraints (e.g., non-root users, required labels) pass before opening a pull request."
   },
   {
     "id": "d2-cod-050",
@@ -732,6 +756,7 @@
     "refs": [
       "https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/",
       "https://cloud.google.com/kubernetes-engine/docs"
-    ]
+    ],
+    "hint": "Core Rule (GKE Ephemeral Agent Sandbox Lifecycle Management): The Kubernetes `ttlSecondsAfterFinished` field on Job specs instructs the built-in TTL controller to automatically garbage-collect finished Jobs and their associated Pods after the specified retention window, reclaiming IP addresses and etcd capacity while allowing time for Cloud Logging agents to flush container logs."
   }
 ]

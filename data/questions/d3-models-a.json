@@ -26,7 +26,8 @@
     "refs": [
       "https://google.github.io/adk-docs/models/#using-litellm",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden OSS Integration with ADK via LiteLlm): Google Cloud ADK is designed to be model-agnostic through its `BaseLlm` abstraction."
   },
   {
     "id": "d3-mod-002",
@@ -54,7 +55,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection: Gemini 2.5 Pro vs Flash vs Flash-Lite): The Gemini 2.5 model family offers distinct Pareto-optimal operating points: `gemini-2.5-flash-lite` is engineered for massive-scale, ultra-low-cost classification, spam filtering, and simple routing at minimal latency (Tier 1)."
   },
   {
     "id": "d3-mod-003",
@@ -83,7 +85,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/deploy-models",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden GPU VRAM & Quantization Sizing): Quantization is the standard technique for fitting large open-weights LLMs onto single-GPU memory footprints."
   },
   {
     "id": "d3-mod-004",
@@ -112,7 +115,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/long-context",
       "https://google.github.io/adk-docs/sessions/memory/"
-    ]
+    ],
+    "hint": "Core Rule (Long Context Window vs Memory Bank vs RAG): Modern agentic architectures combine three complementary memory tiers: (1) `VertexAiMemoryBankService` is purpose-built for extracting, consolidating, and retrieving compact, personalized user facts across multi-year sessions; (2) Enterprise RAG (Vertex AI Search / RAG Engine) handles massive corpora (hundreds of millions or billions of tokens) that far exceed any context window by retrieving only relevant chunks; and (3) Gemini 2.5's 1M-2M long context window excels at in-context holistic reasoning over a specific multi-hundred-page document or video uploaded in the active session."
   },
   {
     "id": "d3-mod-005",
@@ -142,7 +146,8 @@
     },
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden vLLM Serving Optimizations on GKE): High-performance LLM serving engines like vLLM (used in Vertex AI Model Garden containers and GKE deployments) achieve 10-24x higher throughput than naive HuggingFace pipelines through two core innovations: (1) PagedAttention allocates KV-cache memory in fixed-size non-contiguous blocks, reducing KV memory waste from ~60% to under 4% and enabling larger batch sizes without OOMs; (2) Continuous Batching schedules execution at the token/iteration level, immediately freeing GPU slots when a sequence emits `<eos>` and slotting in new waiting requests."
   },
   {
     "id": "d3-mod-006",
@@ -171,7 +176,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/fine-tuning",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Fine-Tuning: LoRA Adapter Hot-Swapping): Because LoRA (Low-Rank Adaptation) freezes the base model weights (which consume >95% of VRAM) and trains only tiny low-rank adapter matrices (typically 10-100 MB each), modern inference engines like vLLM on Vertex AI / GKE support dynamic Multi-LoRA serving."
   },
   {
     "id": "d3-mod-007",
@@ -200,7 +206,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/audio-understanding",
       "https://cloud.google.com/speech-to-text/docs/chirp-2-model"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Audio & Speech Models (Chirp vs Gemini Multimodal)): Google Cloud offers specialized audio capabilities: `Chirp 2` (Universal Speech Model) in Cloud Speech-to-Text is specifically optimized for high-accuracy verbatim transcription, word-level timestamps, and speaker diarization across 100+ languages."
   },
   {
     "id": "d3-mod-008",
@@ -228,7 +235,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/document-understanding"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Document AI vs Gemini Native PDF Understanding): Gemini 2.5 Pro and Flash natively process PDF documents (`application/pdf`) up to thousands of pages by rendering each page visually alongside its text tokens."
   },
   {
     "id": "d3-mod-009",
@@ -256,7 +264,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/control-generated-output"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Controlled Generation & Response Schema): Vertex AI Controlled Generation (`response_schema` with `response_mime_type='application/json'`) compiles the provided OpenAPI/Pydantic JSON schema into a context-free grammar / finite state machine during decoding."
   },
   {
     "id": "d3-mod-010",
@@ -285,7 +294,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models",
       "https://ai.google.dev/gemma"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Open-Weights Licensing & Commercial Governance): Gemma 3 is Google's state-of-the-art family of open-weights models built from the same research and technology as Gemini."
   },
   {
     "id": "d3-mod-011",
@@ -313,7 +323,8 @@
     },
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Speculative Decoding Latency Optimization): Speculative decoding is a mathematically lossless inference acceleration technique."
   },
   {
     "id": "d3-mod-012",
@@ -342,7 +353,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/data-governance",
       "https://cloud.google.com/vertex-ai/docs/general/locations"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection: Data Residency & Zero Data Retention): Vertex AI provides enterprise-grade data residency and privacy guarantees: by specifying a regional endpoint (`location='europe-west6'`) and enforcing `constraints/gcp.resourceLocations`, all inference compute runs strictly in Zurich."
   },
   {
     "id": "d3-mod-013",
@@ -371,7 +383,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/memory/",
       "https://google.github.io/adk-docs/sessions/state/"
-    ]
+    ],
+    "hint": "Core Rule (Agent Platform Memory Bank vs Session State Lifespan): In ADK, `session.state` is a deterministic key-value dictionary used for programmatic control flow, state templating (`{key}`), and passing structured data between sub-agents and tools within or across sessions via explicit keys."
   },
   {
     "id": "d3-mod-014",
@@ -399,7 +412,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/batch-prediction-gemini"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Batch Prediction vs Online Inference for Agents): Vertex AI Batch Prediction for Gemini models is specifically engineered for high-volume, non-interactive asynchronous workloads (such as overnight document summarization, backfilling, or large-scale dataset labeling)."
   },
   {
     "id": "d3-mod-015",
@@ -428,7 +442,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection: Specialized Code Generation & Reasoning): Complex software engineering tasks—such as cross-file static analysis, C++/Rust memory safety reasoning, and generating valid multi-hunk git diffs across 50,000-line repositories—require frontier-class reasoning models with large context windows and explicit thinking/chain-of-thought capabilities."
   },
   {
     "id": "d3-mod-016",
@@ -458,7 +473,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-claude"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Partner Models (Anthropic Claude on Vertex AI)): Vertex AI Model Garden offers first-party managed access to leading partner models (including Anthropic Claude 3.5/3.7 Sonnet and Haiku)."
   },
   {
     "id": "d3-mod-017",
@@ -487,7 +503,8 @@
     "refs": [
       "https://google.github.io/adk-docs/agents/llm-agents/#structured-outputs",
       "https://google.github.io/adk-docs/runtime/"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Structured JSON Output Mode in Automation): For headless automation pipelines where downstream tools (`jq`, Python scripts, or pub/sub consumers) expect machine-readable JSON, configuring `output_schema=ThreatAssessmentSchema` on the root `LlmAgent` enforces Vertex AI Controlled Generation (`application/json`)."
   },
   {
     "id": "d3-mod-018",
@@ -516,7 +533,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini-distillation",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/models/gemini-supervised-tuning"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Distillation: Frontier Teacher to SLM Student): Model Distillation (Teacher-Student distillation) is a core enterprise pattern on Vertex AI: a large frontier reasoning model (`Gemini 2.5 Pro`) acts as the Teacher to label a golden dataset of domain examples along with step-by-step reasoning traces."
   },
   {
     "id": "d3-mod-019",
@@ -545,7 +563,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/deploy-models",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Tensor Parallelism across Multi-GPU Nodes): When a model's parameter memory exceeds a single GPU's VRAM, Tensor Parallelism (`tensor_parallel_size=8` in vLLM) shards each transformer layer's attention and MLP weight matrices column-wise/row-wise across all 8 GPUs within the node."
   },
   {
     "id": "d3-mod-020",
@@ -574,7 +593,8 @@
     "refs": [
       "https://google.github.io/adk-docs/sessions/memory/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/memory-bank"
-    ]
+    ],
+    "hint": "Core Rule (Agent Platform Memory Bank Scoped Access Control): In ADK, every `Session` is cryptographically and logically bound to an `(app_name, user_id, session_id)` tuple."
   },
   {
     "id": "d3-mod-021",
@@ -602,7 +622,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/grounding/grounding-with-google-search#dynamic-retrieval"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Grounding & Dynamic Retrieval Thresholds): Vertex AI Grounding with Google Search supports Dynamic Retrieval (`DynamicRetrievalConfig`)."
   },
   {
     "id": "d3-mod-022",
@@ -630,7 +651,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/video/overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Selection: Multimodal Video Generation with Veo): `Veo` is Google's flagship generative video model available in Vertex AI Model Garden."
   },
   {
     "id": "d3-mod-023",
@@ -658,7 +680,8 @@
     },
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/embeddings/get-text-embeddings#output-dimensionality"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden Embeddings Selection & Matryoshka Representation): Google's `text-embedding-005` and `gemini-embedding-001` models are trained using Matryoshka Representation Learning (MRL)."
   },
   {
     "id": "d3-mod-024",
@@ -689,7 +712,8 @@
     "refs": [
       "https://google.github.io/adk-docs/callbacks/before-model-callback/",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/quotas"
-    ]
+    ],
+    "hint": "Core Rule (ADK & Model Garden Cost Control: Token Budgeting & Safety Limits): Protecting public-facing agentic applications from Denial-of-Wallet (DoW) attacks requires defense-in-depth: (1) Capping input payload length in `before_model_callback` and setting a reasonable `max_output_tokens` ceiling bounds the cost of any single LLM call; (2) Tracking cumulative per-user token/turn quotas in persistent state (`user:daily_token_usage`) and setting strict `max_iterations` bounds on `LoopAgent` prevents runaway recursive tool loops."
   },
   {
     "id": "d3-mod-025",
@@ -718,6 +742,7 @@
     "refs": [
       "https://cloud.google.com/kubernetes-engine/docs/how-to/machine-learning/inference/vllm",
       "https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview"
-    ]
+    ],
+    "hint": "Core Rule (Model Garden OSS Deployment: GKE Autopilot vs Standard GPU Scaling): GKE Autopilot (or Standard with Node Auto-Provisioning) natively manages GPU node lifecycles and driver installation."
   }
 ]

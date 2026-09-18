@@ -26,7 +26,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity SDK Sliding Window & Context Pruning): A hierarchical sliding-window strategy preserves goal stability by pinning immutable system instructions, workspace rules, and task goals at the context prefix, maintaining recent turns verbatim for immediate working memory, and summarizing/pruning stale intermediate tool outputs (like verbose file reads from 20 turns ago) to keep total token count bounded."
   },
   {
     "id": "d2-cod-102",
@@ -55,7 +56,8 @@
     "refs": [
       "https://cloud.google.com/vpc-service-controls/docs/troubleshoot",
       "https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules"
-    ]
+    ],
+    "hint": "Core Rule (Claude Code VPC Service Controls Troubleshooting): Every VPC Service Controls denial emits a structured audit log entry in `cloudaudit.googleapis.com/policy` indexed by its `vpcServiceControlsUniqueIdentifier`."
   },
   {
     "id": "d2-cod-103",
@@ -84,7 +86,8 @@
     "refs": [
       "https://cloud.google.com/artifact-analysis/docs/ vulnerability-scanning",
       "https://cloud.google.com/eventarc/docs"
-    ]
+    ],
+    "hint": "Core Rule (Artifact Analysis MCP Server & Container Patching): Artifact Analysis publishes real-time vulnerability occurrences to Pub/Sub."
   },
   {
     "id": "d2-cod-104",
@@ -115,7 +118,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/open-models/use-gemma",
       "https://cloud.google.com/artifact-registry/docs/repositories/remote-repo"
-    ]
+    ],
+    "hint": "Core Rule (Air-Gapped Sandboxes & Open-Weights Coding Models): In air-gapped/classified environments, self-hosting open-weights coding models (Gemma/CodeGemma/Llama) on local GPU infrastructure (via vLLM or Vertex AI on GDC) provides low-latency LLM inference with 100% data sovereignty."
   },
   {
     "id": "d2-cod-105",
@@ -144,7 +148,8 @@
     "refs": [
       "https://www.apollographql.com/docs/rover/commands/subgraphs/#checking-subgraph-changes",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills for GraphQL Federation Governance): Integrating `rover subgraph check` inside a custom skill and pre-commit hook validates both federated supergraph composition and backward compatibility against historical production client query traffic before a pull request can be opened."
   },
   {
     "id": "d2-cod-106",
@@ -173,7 +178,8 @@
     "refs": [
       "https://docs.sigstore.dev/signing/gitsign/",
       "https://cloud.google.com/iam/docs/workload-identity-federation"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks for Cryptographic Commit Signing (Sigstore)): Sigstore `gitsign` enables keyless cryptographic commit signing by using the workload's ephemeral OIDC identity token (from Google Cloud Workload Identity Federation) to obtain a short-lived code-signing certificate from Fulcio and recording the signature transparency log in Rekor."
   },
   {
     "id": "d2-cod-107",
@@ -202,7 +208,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Delegation for Dynamic Tool Synthesis): LLMs excel at writing deterministic code tools rather than acting as high-volume byte processors."
   },
   {
     "id": "d2-cod-108",
@@ -231,7 +238,8 @@
     "refs": [
       "https://cloud.google.com/beyondcorp-enterprise/docs/securing-web-apps-with-dlp",
       "https://cloud.google.com/workstations/docs/security"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Workstations Browser DLP & Exfiltration Controls): While VPC Service Controls secure backend cloud API and network boundaries, Chrome Enterprise Premium (BeyondCorp) extends zero-trust DLP controls directly into the browser rendering layer—deterministically blocking clipboard copy/paste, file downloads, and printing from protected web applications like Cloud Workstations."
   },
   {
     "id": "d2-cod-109",
@@ -262,7 +270,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/logging/docs"
-    ]
+    ],
+    "hint": "Core Rule (Agents CLI Canary Rollouts & A/B Evaluation): Treating agent skills and prompts as production software artifacts requires progressive delivery: using the Agents CLI to perform a 10%/90% canary split and tracking empirical telemetry metrics (diff acceptance rate, build pass rate, checkpoint reverts) in BigQuery enables data-driven promotion or rollback."
   },
   {
     "id": "d2-cod-110",
@@ -291,7 +300,8 @@
     "refs": [
       "https://owasp.org/www-community/vulnerabilities/Time_of_check_to_time_of_use",
       "https://www.postgresql.org/docs/current/explicit-locking.html"
-    ]
+    ],
+    "hint": "Core Rule (Patching Race Conditions & TOCTOU Vulnerabilities (CWE-367)): TOCTOU race conditions occur when state checked in a read query changes before a subsequent write query executes."
   },
   {
     "id": "d2-cod-111",
@@ -320,7 +330,8 @@
     "refs": [
       "https://go.dev/doc/diagnostics",
       "https://pkg.go.dev/sync#Pool"
-    ]
+    ],
+    "hint": "Core Rule (Go Garbage Collection & Allocation Optimization): Using Go compiler escape analysis (`-gcflags=\"-m\"`) and `-benchmem` allocation profiling identifies exact variables escaping to the heap."
   },
   {
     "id": "d2-cod-112",
@@ -349,7 +360,8 @@
     "refs": [
       "https://playwright.dev/docs/screenshots",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Multimodal UI Debugging with Antigravity & Playwright): Integrating a headless browser MCP tool (Playwright/Puppeteer) that captures viewport screenshots and DOM element bounding rects allows Antigravity's multimodal vision model to visually see layout collisions/z-index overlaps and verify that the patched CSS makes the button genuinely clickable."
   },
   {
     "id": "d2-cod-113",
@@ -378,7 +390,8 @@
     "refs": [
       "https://modelcontextprotocol.io/docs/concepts/roots",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (MCP Roots Capability & Workspace Isolation): In the Model Context Protocol specification, `roots/list` allows the client (Antigravity / IDE) to communicate the exact workspace URI boundaries (`file:///...`) within which the server is authorized to operate."
   },
   {
     "id": "d2-cod-114",
@@ -409,7 +422,8 @@
     "refs": [
       "https://cloud.google.com/workstations/docs/access-control",
       "https://cloud.google.com/iam/docs/understanding-roles#workstations-roles"
-    ]
+    ],
+    "hint": "Core Rule (Cloud Workstations IAM Privilege Separation): Cloud Workstations IAM roles are designed for separation of duties: `roles/workstations.admin` controls cluster and configuration policies (networking, machine types, CMEK, container images), while `roles/workstations.user` grants developers the ability to start, stop, and connect via HTTPS/SSH to their individual workstation instances without modifying security boundaries."
   },
   {
     "id": "d2-cod-115",
@@ -438,7 +452,8 @@
     "refs": [
       "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Custom Skills for Terraform Drift Remediation): A safe drift-remediation skill inspects the refresh plan (`terraform plan -refresh-only`), checks audit logs to distinguish legitimate emergency hotfixes from unauthorized changes, updates the declarative `.tf` HCL source code to codify the live state, and verifies a clean zero-diff `terraform plan`."
   },
   {
     "id": "d2-cod-116",
@@ -467,7 +482,8 @@
     "refs": [
       "https://cloud.google.com/bigquery/docs/best-practices-costs#use_the_maximum_bytes_billed_setting",
       "https://cloud.google.com/bigquery/docs/dry-run-queries"
-    ]
+    ],
+    "hint": "Core Rule (Extension Hooks Blocking Unbounded BigQuery Scans): In BigQuery, `LIMIT` without a partition filter still scans all columns across unpartitioned/unclustered blocks."
   },
   {
     "id": "d2-cod-117",
@@ -496,7 +512,8 @@
     "refs": [
       "https://sre.google/sre-book/addressing-cascading-failures/",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Workspace Rules for Distributed Systems Resiliency): Declaring architectural resiliency patterns in `.antigravity/rules.md` (mandatory context timeouts, exponential backoff with jitter, and circuit breakers) combined with static analysis (`noctx` / custom linter rules) ensures coding agents never emit un-timed `http.DefaultClient` calls or thundering-herd retry loops."
   },
   {
     "id": "d2-cod-118",
@@ -525,7 +542,8 @@
     "refs": [
       "https://cloud.google.com/agent-builder/docs",
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/prompt-design-strategies"
-    ]
+    ],
+    "hint": "Core Rule (Subagent Specialized Code Review Council): Decomposing complex code reviews across specialized parallel subagents allows each subagent to dedicate its full attention mechanism and domain-specific rubric (Security vs Performance vs Architecture) to the diff."
   },
   {
     "id": "d2-cod-119",
@@ -556,7 +574,8 @@
     "refs": [
       "https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens",
       "https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/"
-    ]
+    ],
+    "hint": "Core Rule (Patching JWT Authentication Vulnerabilities): JWT Algorithm Confusion (`RS256` -> `HS256`) and `alg: none` attacks occur when verification libraries trust the `alg` header supplied in the untrusted token."
   },
   {
     "id": "d2-cod-120",
@@ -585,7 +604,8 @@
     "refs": [
       "https://cloud.google.com/artifact-registry/docs",
       "https://cloud.google.com/agent-builder/docs"
-    ]
+    ],
+    "hint": "Core Rule (Antigravity Plugin Version Pinning in Regulated Enterprises): In regulated environments, disabling client auto-updates and pinning immutable OCI SHA-256 digests in the centralized Agents CLI policy manifest guarantees deterministic, CAB-approved software versions across all developer workstations."
   },
   {
     "id": "d2-cod-121",
@@ -614,7 +634,8 @@
     "refs": [
       "https://grpc.io/docs/what-is-grpc/core-concepts/#server-streaming-rpc",
       "https://grpc.io/docs/guides/performance/"
-    ]
+    ],
+    "hint": "Core Rule (gRPC Streaming & Serialization Optimization): Unary gRPC calls buffer the entire serialized message in memory before transmission."
   },
   {
     "id": "d2-cod-122",
@@ -643,7 +664,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/learn/billing",
       "https://cloud.google.com/billing/docs/how-to/export-data-bigquery"
-    ]
+    ],
+    "hint": "Core Rule (Claude Code Chargeback & Billing Attribution on Vertex AI): Passing `X-Goog-User-Project` (service usage consumer project override) or attaching structured key-value `labels` (`business_unit: bu-retail`) to Vertex AI API requests propagates directly into Google Cloud Billing BigQuery export tables, enabling exact per-business-unit chargeback and FinOps reporting."
   },
   {
     "id": "d2-cod-123",
@@ -672,7 +694,8 @@
     "refs": [
       "https://cloud.google.com/vertex-ai/generative-ai/docs/model-armor/overview",
       "https://owasp.org/www-project-top-10-for-large-language-model-applications/"
-    ]
+    ],
+    "hint": "Core Rule (Defending Autonomous PR Bots Against Indirect Prompt Injection): When processing untrusted external inputs (like public GitHub PR descriptions), defense-in-depth requires scanning inputs with Model Armor for prompt-injection payloads AND applying strict least-privilege capability confinement: stripping `bash` and network egress tools so even if the LLM is tricked, it physically lacks the tools or credentials to exfiltrate data or execute commands."
   },
   {
     "id": "d2-cod-124",
@@ -703,7 +726,8 @@
     "refs": [
       "https://cloud.google.com/memorystore/docs/redis/best-practices",
       "https://redis.io/docs/latest/commands/scan/"
-    ]
+    ],
+    "hint": "Core Rule (Memorystore for Redis / Valkey MCP Server & Hot-Key Optimization): In Redis/Valkey, running `KEYS *` on millions of keys blocks the single-threaded main loop and causes production outages."
   },
   {
     "id": "d2-cod-125",
@@ -732,6 +756,7 @@
     "refs": [
       "https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/",
       "https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-autoscaler"
-    ]
+    ],
+    "hint": "Core Rule (GKE Sandbox Pod Priority, Preemption & Autoscaling): Kubernetes `PriorityClass` and Pod Preemption allow the scheduler to immediately schedule high-priority interactive developer agent pods by preempting (gracefully evicting) lower-priority batch refactoring pods when cluster capacity is full, while Cluster Autoscaler spins up replacement nodes for the preempted batch jobs in the background."
   }
 ]
