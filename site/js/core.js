@@ -175,7 +175,7 @@ export const fmtTime = (s) => { s = Math.max(0, Math.round(s)); const m = Math.f
 export const fmtClock = (s) => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60; return h ? `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}` : `${m}:${String(r).padStart(2, '0')}`; };
 export const fmtDate = (t) => new Date(t).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-export const sameSet = (a, b) => a.length === b.length && a.every(x => b.includes(x));
+export const sameSet = (a, b) => { const sa = new Set(a || []), sb = new Set(b || []); return sa.size === sb.size && [...sa].every(x => sb.has(x)); };
 
 // ---------- sampling ----------
 export function filterBank(all, f = {}) {

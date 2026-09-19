@@ -337,7 +337,7 @@
     "type": "single",
     "caseStudy": null,
     "officialSample": false,
-    "question": "You operate a real-time streaming customer chat agent using ADK's `Runner.run_async` generator (`stream=True`). Users complain that the chat interface feels 'laggy and frozen for 5 seconds before text suddenly bursts onto the screen all at once'. To distinguish whether the delay is caused by slow prefill/tool execution prior to the first token or slow token generation throughput after streaming starts, which two distinct OpenTelemetry span events/metrics should your streaming wrapper record?",
+    "question": "You operate a real-time streaming customer chat agent using ADK's `Runner.run_async` generator (`stream=True`). Users complain that the chat interface feels 'laggy and frozen for 5 seconds before text suddenly bursts onto the screen all at once'. To distinguish whether the delay is caused by slow prefill/tool execution prior to the first token or slow token generation throughput after streaming starts, which OpenTelemetry instrumentation strategy should your streaming wrapper implement?",
     "options": [
       "Count how many vowels are in the final paragraph.",
       "Record only the total HTTP socket close timestamp.",

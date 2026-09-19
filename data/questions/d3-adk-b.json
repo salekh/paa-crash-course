@@ -65,7 +65,7 @@
     "type": "single",
     "caseStudy": null,
     "officialSample": false,
-    "question": "A SaaS enterprise uses Google Cloud ADK with a persistent `DatabaseSessionService` to power its multi-tenant customer portal. An agent needs to read a global feature flag (`enable_beta_discount`) that applies to all users across the entire application, read the authenticated user's preferred currency (`preferred_currency`) that persists across all of that user's sessions, and write a scratchpad calculation (`raw_tax_math`) that must be automatically purged as soon as the current turn finishes. Which three state key prefixes in `session.state` correspond to these three scopes?",
+    "question": "A SaaS enterprise uses Google Cloud ADK with a persistent `DatabaseSessionService` to power its multi-tenant customer portal. An agent needs to read a global feature flag (`enable_beta_discount`) that applies to all users across the entire application, read the authenticated user's preferred currency (`preferred_currency`) that persists across all of that user's sessions, and write a scratchpad calculation (`raw_tax_math`) that must be automatically purged as soon as the current turn finishes. Which set of state key prefixes in `session.state` corresponds to these three scopes?",
     "options": [
       "`global:enable_beta_discount`, `session:preferred_currency`, and `delete:raw_tax_math`.",
       "`root:enable_beta_discount`, `client:preferred_currency`, and `ephemeral:raw_tax_math`.",

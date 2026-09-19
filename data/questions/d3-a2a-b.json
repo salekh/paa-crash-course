@@ -7,7 +7,7 @@
     "type": "single",
     "caseStudy": null,
     "officialSample": false,
-    "question": "An A2A client orchestrator on Vertex AI Agent Engine invokes `tasks/sendSubscribe` on a remote Code Generation Agent (`capabilities.streaming: true`). Over the established Server-Sent Events (SSE) stream, the remote agent streams real-time updates as it progresses through planning, code drafting, and unit testing. According to the A2A specification, which two distinct event payload types are emitted over the SSE `data:` stream to distinguish task state changes from incremental deliverable chunks?",
+    "question": "An A2A client orchestrator on Vertex AI Agent Engine invokes `tasks/sendSubscribe` on a remote Code Generation Agent (`capabilities.streaming: true`). Over the established Server-Sent Events (SSE) stream, the remote agent streams real-time updates as it progresses through planning, code drafting, and unit testing. According to the A2A specification, which pair of event payload types is emitted over the SSE `data:` stream to distinguish task state changes from incremental deliverable chunks?",
     "options": [
       "TaskStatusUpdateEvent (carrying `status` state changes and `final` boolean flag) and TaskArtifactUpdateEvent (carrying `artifact` chunks with `index`, `append`, and `lastChunk` flags).",
       "HttpGetEvent and HttpPostEvent.",

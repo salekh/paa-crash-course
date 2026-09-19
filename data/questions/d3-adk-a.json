@@ -215,7 +215,7 @@
     "type": "single",
     "caseStudy": null,
     "officialSample": true,
-    "question": "Your development team has built a multi-agent customer support system using Google Cloud ADK. During local development, engineers need an interactive browser-based UI that visualizes the multi-agent execution graph, inspects step-by-step tool calls, displays session.state mutations in real time, and lets developers replay turns. Later, in your automated GitHub Actions CI/CD pipeline, you need to execute a batch of 200 golden evaluation test cases against the agent in headless mode and fail the build if the trajectory accuracy drops below 90%. Which two ADK CLI commands should you use for these respective workflows?",
+    "question": "Your development team has built a multi-agent customer support system using Google Cloud ADK. During local development, engineers need an interactive browser-based UI that visualizes the multi-agent execution graph, inspects step-by-step tool calls, displays session.state mutations in real time, and lets developers replay turns. Later, in your automated GitHub Actions CI/CD pipeline, you need to execute a batch of 200 golden evaluation test cases against the agent in headless mode and fail the build if the trajectory accuracy drops below 90%. Which pair of ADK CLI commands should you use for these respective workflows?",
     "options": [
       "Use `adk deploy` for local browser debugging, and use `adk run --interactive` inside the GitHub Actions runner.",
       "Use `gcloud compute ssh` to inspect agent state locally, and use `gsutil rsync` to run evaluations in CI/CD.",

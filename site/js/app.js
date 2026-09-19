@@ -1,8 +1,8 @@
 // Router + page views.
-import { DOMAINS, CASES, AREA_MODULES, EXAM, getBank, getStudyIndex, getMeta, loadText, q, store, save, resetStore, filterBank, sampleExam, analyze, shuffle, pct, fmtTime, fmtClock, fmtDate, isBookmarked, toggleBookmark } from './core.js?v=20260919b';
-import { html, esc, ICON, toast, ring, bars, sparkline, tone, toneColor, letter, $, $$ } from './ui.js?v=20260919b';
-import { render as md } from './md.js?v=20260919b';
-import { startSession, hasSession, abandonSession, renderSession, explain, caseHtml } from './quiz.js?v=20260919b';
+import { DOMAINS, CASES, AREA_MODULES, EXAM, getBank, getStudyIndex, getMeta, loadText, q, store, save, resetStore, filterBank, sampleExam, analyze, shuffle, pct, fmtTime, fmtClock, fmtDate, isBookmarked, toggleBookmark } from './core.js?v=20260919c';
+import { html, esc, ICON, toast, ring, bars, sparkline, tone, toneColor, letter, $, $$ } from './ui.js?v=20260919c';
+import { render as md } from './md.js?v=20260919c';
+import { startSession, hasSession, abandonSession, stopTimer, renderSession, explain, caseHtml } from './quiz.js?v=20260919c';
 
 const app = $('#app');
 const routes = [];
@@ -16,6 +16,7 @@ function setActiveNav(hash) {
 
 async function router() {
   const hash = location.hash || '#/';
+  if (!/\/run$/.test(hash)) stopTimer();
   setActiveNav(hash);
   for (const r of routes) {
     const m = hash.match(r.re);
@@ -423,7 +424,7 @@ route(/^#\/results\/(\w+)$/, async (id) => {
     <div class="row" style="margin:32px 0 72px"><a class="btn primary" href="${a.mode === 'exam' ? '#/exam' : '#/practice'}">${a.mode === 'exam' ? 'Take another mock exam' : 'New practice set'}</a>${r.wrong.length ? `<button class="btn secondary" id="retryWrong">Retry the ${r.wrong.length} you missed</button>` : ''}<a class="btn ghost" href="#/progress">View progress</a></div>
   </div>`);
   $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; filter = b.dataset.f; $$('#tabs button').forEach(x => x.classList.toggle('on', x === b)); $('#review').innerHTML = reviewList(); });
-  app.addEventListener('click', (e) => { const b = e.target.closest('[data-bm]'); if (!b) return; const on = toggleBookmark(b.dataset.bm); b.innerHTML = `${on ? ICON.bookmark : ICON.bookmarkOutline} ${on ? 'Bookmarked' : 'Bookmark'}`; });
+  $('#review').addEventListener('click', (e) => { const b = e.target.closest('[data-bm]'); if (!b) return; const on = toggleBookmark(b.dataset.bm); b.innerHTML = `${on ? ICON.bookmark : ICON.bookmarkOutline} ${on ? 'Bookmarked' : 'Bookmark'}`; });
   const rw = $('#retryWrong'); rw && rw.addEventListener('click', () => startSession({ mode: 'practice', questions: shuffle(r.wrong.map(w => w.q)), tutor: true, config: { retryOf: a.id } }));
 });
 
@@ -469,7 +470,8 @@ route(/^#\/bank(\?.*)?$/, async () => {
   let pageN = 0; const PER = 25;
   const bankAns = {}; // qid -> { chosen: number[], revealed: boolean }
   const offN = filterBank(bank, { source: 'official' }).length;
-  const paint = () => {
+  const paint = ({ preserveScroll = false } = {}) => {
+    const prevY = window.scrollY;
     const list = filterBank(orderedBank, f);
     const slice = list.slice(pageN * PER, pageN * PER + PER);
     page(html`<div class="wrap" style="max-width:980px">
@@ -493,11 +495,12 @@ route(/^#\/bank(\?.*)?$/, async () => {
             else if (sel) cls += ' sel';
             return `<li><button class="opt ${cls}" data-bopt="${i}" data-qid="${qq.id}" ${rev ? 'disabled' : ''}><span class="k">${letter(i)}</span><span>${esc(o)}</span></button></li>`;
           }).join('')}</ul>
-          ${rev ? `<div style="margin-top:14px">${explain(qq, st.chosen)}<div class="row" style="margin-top:10px"><button class="btn ghost sm" data-breset="${qq.id}">Reset answer</button></div></div>` : `<div class="muted small" style="margin-top:10px">Select ${qq.type === 'multi' ? `${qq.answer.length} options` : 'an option'} above to reveal the hint & explanation.</div>`}
+          ${rev ? `<div style="margin-top:14px">${explain(qq, st.chosen)}<div class="row" style="margin-top:10px"><button class="btn ghost sm" data-breset="${qq.id}">Reset answer</button></div></div>` : `<div class="muted small" style="margin-top:10px">Select ${qq.type === 'multi' ? `${qq.answer.length} options (${st.chosen.length}/${qq.answer.length} selected)` : 'an option'} above to reveal the hint & explanation.</div>`}
         </div>`;
       }).join('')}
       <div class="row between" style="margin:24px 0 72px"><button class="btn secondary sm" id="prev" ${pageN === 0 ? 'disabled' : ''}>Previous</button><button class="btn secondary sm" id="next" ${(pageN + 1) * PER >= list.length ? 'disabled' : ''}>Next</button></div>
     </div>`);
+    if (preserveScroll) window.scrollTo({ top: prevY });
     const inp = $('#q'); let t; inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => { f.search = inp.value; pageN = 0; const pos = inp.selectionStart; paint(); const n = $('#q'); n.focus(); n.setSelectionRange(pos, pos); }, 250); });
     $('#src').addEventListener('change', e => { f.source = e.target.value; pageN = 0; paint(); });
     $('#d').addEventListener('change', e => { f.domains = e.target.value ? [+e.target.value] : []; pageN = 0; paint(); });
@@ -519,11 +522,11 @@ route(/^#\/bank(\?.*)?$/, async () => {
         st.chosen = [opt];
         st.revealed = true;
       }
-      paint();
+      paint({ preserveScroll: true });
     }));
     $$('[data-breset]').forEach(b => b.addEventListener('click', () => {
       delete bankAns[b.dataset.breset];
-      paint();
+      paint({ preserveScroll: true });
     }));
   };
   paint();
