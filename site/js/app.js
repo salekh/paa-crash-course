@@ -1,8 +1,8 @@
 // Router + page views.
-import { DOMAINS, CASES, AREA_MODULES, EXAM, getBank, getStudyIndex, getMeta, loadText, q, store, save, resetStore, filterBank, sampleExam, analyze, shuffle, pct, fmtTime, fmtClock, fmtDate, isBookmarked, toggleBookmark } from './core.js';
-import { html, esc, ICON, toast, ring, bars, sparkline, tone, toneColor, letter, $, $$ } from './ui.js';
-import { render as md } from './md.js';
-import { startSession, hasSession, abandonSession, renderSession, explain, caseHtml } from './quiz.js';
+import { DOMAINS, CASES, AREA_MODULES, EXAM, getBank, getStudyIndex, getMeta, loadText, q, store, save, resetStore, filterBank, sampleExam, analyze, shuffle, pct, fmtTime, fmtClock, fmtDate, isBookmarked, toggleBookmark } from './core.js?v=20260919b';
+import { html, esc, ICON, toast, ring, bars, sparkline, tone, toneColor, letter, $, $$ } from './ui.js?v=20260919b';
+import { render as md } from './md.js?v=20260919b';
+import { startSession, hasSession, abandonSession, renderSession, explain, caseHtml } from './quiz.js?v=20260919b';
 
 const app = $('#app');
 const routes = [];
@@ -463,22 +463,23 @@ route(/^#\/progress$/, async () => {
 // ------------------------------------------------------------------ QUESTION BANK BROWSER
 route(/^#\/bank(\?.*)?$/, async () => {
   const bank = await getBank();
+  let orderedBank = shuffle([...bank]);
   const qs = parseQuery(location.hash);
   const f = { search: qs.get('q') || '', domains: [], caseStudy: 'all', difficulty: 'all', source: qs.get('source') || 'all' };
   let pageN = 0; const PER = 25;
   const bankAns = {}; // qid -> { chosen: number[], revealed: boolean }
   const offN = filterBank(bank, { source: 'official' }).length;
   const paint = () => {
-    const list = filterBank(bank, f);
+    const list = filterBank(orderedBank, f);
     const slice = list.slice(pageN * PER, pageN * PER + PER);
     page(html`<div class="wrap" style="max-width:980px">
-      <div class="module-head"><span class="eyebrow">Question bank</span><h1>Browse & answer all ${bank.length.toLocaleString()} questions</h1><p class="muted" style="font-size:17px">Search stems and options by keyword. Select an option on any question to check your answer and unlock its post-answer architectural hint, full explanation, and distractor analysis. Includes ${offN} official sample questions.</p></div>
+      <div class="module-head"><span class="eyebrow">Question bank</span><h1>Browse & answer all ${bank.length.toLocaleString()} questions</h1><p class="muted" style="font-size:17px">Questions are randomized automatically so you never see the same order twice. Select an option on any question to check your answer and reveal its post-answer architectural hint, full explanation, and distractor analysis. Includes ${offN} official sample questions.</p></div>
       <div class="card flat" style="margin-bottom:20px"><div class="grid c4"><div style="grid-column:span 4"><input type="search" id="q" placeholder="Search e.g. “Agent Development Kit”, “Principal Access Boundary”, “Model Armor”, “A2A”…" value="${esc(f.search)}"></div>
         <select id="src"><option value="all" ${f.source === 'all' ? 'selected' : ''}>All sources (${bank.length.toLocaleString()})</option><option value="official" ${f.source === 'official' ? 'selected' : ''}>Official sample questions (${offN})</option></select>
         <select id="d"><option value="">All domains</option>${[1, 2, 3, 4, 5].map(d => `<option value="${d}" ${f.domains[0] === d ? 'selected' : ''}>0${d} ${esc(DOMAINS[d].short)}</option>`).join('')}</select>
         <select id="c"><option value="all">Any case study</option><option value="none" ${f.caseStudy === 'none' ? 'selected' : ''}>None</option>${Object.entries(CASES).map(([k, c]) => `<option value="${k}" ${f.caseStudy === k ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
         <select id="df"><option value="all">Any difficulty</option>${['easy', 'medium', 'hard'].map(d => `<option value="${d}" ${f.difficulty === d ? 'selected' : ''}>${d}</option>`).join('')}</select></div></div>
-      <p class="muted small"><b class="tnum">${list.length.toLocaleString()}</b> questions · page ${pageN + 1} of ${Math.max(1, Math.ceil(list.length / PER))}</p>
+      <div class="row between" style="margin-bottom:14px"><p class="muted small" style="margin:0"><b class="tnum">${list.length.toLocaleString()}</b> questions · page ${pageN + 1} of ${Math.max(1, Math.ceil(list.length / PER))} · randomized order</p><button class="btn secondary sm" id="shuffleBank">Shuffle order</button></div>
       ${slice.map(qq => {
         const st = bankAns[qq.id] || { chosen: [], revealed: false };
         const rev = st.revealed;
@@ -504,6 +505,7 @@ route(/^#\/bank(\?.*)?$/, async () => {
     $('#df').addEventListener('change', e => { f.difficulty = e.target.value; pageN = 0; paint(); });
     $('#prev').addEventListener('click', () => { pageN--; paint(); });
     $('#next').addEventListener('click', () => { pageN++; paint(); });
+    $('#shuffleBank').addEventListener('click', () => { orderedBank = shuffle([...bank]); pageN = 0; toast('Questions shuffled'); paint(); });
     $$('[data-bopt]').forEach(b => b.addEventListener('click', () => {
       const qid = b.dataset.qid, opt = +b.dataset.bopt;
       const qq = bank.find(x => x.id === qid);

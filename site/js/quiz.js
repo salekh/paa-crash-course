@@ -1,6 +1,6 @@
 // Quiz session runner shared by Practice (tutor / quiz mode) and the Exam simulator.
-import { q, store, save, recordAnswer, isCorrect, toggleBookmark, isBookmarked, fmtClock, uid, DOMAINS, CASES, loadText, EXAM } from './core.js';
-import { html, esc, ICON, toast, letter, $, $$ } from './ui.js';
+import { q, store, save, recordAnswer, isCorrect, toggleBookmark, isBookmarked, fmtClock, uid, DOMAINS, CASES, loadText, EXAM } from './core.js?v=20260919b';
+import { html, esc, ICON, toast, letter, $, $$ } from './ui.js?v=20260919b';
 
 let tick = null;
 let keyHandler = null;
